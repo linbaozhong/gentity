@@ -15,29 +15,32 @@
 package cmd
 
 import (
-	"github.com/mitchellh/go-homedir"
-	"log"
-
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
-	home   string
+	path   string
 	launch = &cobra.Command{
 		Use:   "Gentity",
 		Short: "DAL代码生成工具",
 		Run: func(cmd *cobra.Command, args []string) {
-
+			dirs, err := os.ReadDir(path)
+			if err != nil {
+				panic(err)
+			}
 		},
 	}
 )
 
-func initConfig() {
-	if home == "" {
-		var err error
-		home, err = homedir.Dir()
-		if err != nil {
-			log.Fatal(err)
-		}
+func Init() {
+	launch.PersistentFlags().StringVarP(&path, "path", "p", "./model", "model路径")
+
+}
+
+func Execute() {
+	err := launch.Execute()
+	if err != nil {
+		panic(err)
 	}
 }
