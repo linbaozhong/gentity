@@ -51,28 +51,6 @@ func (*{{.StructName}}) TableName() string {
 	return "{{.TableName}}"
 }
 
-// //ToMap struct转map
-// func (p *{{.StructName}}) ToMap(cols...table.TableField) map[string]interface{} {
-// 	l := len(cols)
-// 	if l == 0 {
-// 		return map[string]interface{}{
-// 			{{range $key, $value := .Columns}}table.{{$.StructName}}.{{$key}}.Name:p.{{$key}},
-// 			{{end}}
-// 		}
-// 	}
-//
-// 	m := make(map[string]interface{},l)
-// 	for i := 0; i < l; i++ {
-// 		col := cols[i]
-// 		switch col.Name {
-// 		{{range $key, $value := .Columns}}case table.{{$.StructName}}.{{$key}}.Name:
-// 			m[col.Name] = p.{{$key}}
-// 		{{end}}
-// 		}
-// 	}
-// 	return m
-// }
-
 func (p *{{.StructName}})scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
@@ -96,7 +74,7 @@ func (p *{{.StructName}})assignValues(columns []string, values []any) error {
 		{{range $key, $value := .Columns}}case "{{index $value 0}}":
 			value,ok := values[i].({{getSqlValue $value}})
 			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+				return fmt.Errorf("unexpected type %T for field {{index $value 0}}", value)
 			}
 			{{- $v := index $value 2}}
 			{{- if or (eq $v "string") (eq $v "int64") (eq $v "bool") (eq $v "float64") (eq $v "time.Time")}}
