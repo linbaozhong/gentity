@@ -98,7 +98,12 @@ func (p *{{.StructName}})assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
+			{{- $v := index $value 2}}
+			{{- if or (eq $v "string") (eq $v "int64") (eq $v "bool") (eq $v "float64") (eq $v "time.Time")}}
+			p.{{$key}} = value.{{getSqlType $value}}
+			{{else}}
 			p.{{$key}} = {{index $value 2}}(value.{{getSqlType $value}})
+			{{- end}}
 		{{end}}
 		}
 	}
