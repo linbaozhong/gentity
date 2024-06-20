@@ -14,7 +14,7 @@
 
 package main
 
-import "gentity/cmd"
+import "github.com/linbaozhong/gentity/cmd"
 
 func main() {
 	cmd.Execute()

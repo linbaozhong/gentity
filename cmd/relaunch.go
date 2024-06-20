@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"fmt"
-	"gentity/internal/base"
+	"github.com/linbaozhong/gentity/internal/base"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
