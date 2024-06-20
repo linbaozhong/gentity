@@ -3,9 +3,8 @@ package orm
 import (
 	"database/sql"
 	"errors"
-	"ganji/pkg/lib/conv"
-	"ganji/pkg/log"
 	"github.com/jmoiron/sqlx"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"reflect"
 	"strconv"
 	"strings"
