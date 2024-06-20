@@ -23,6 +23,7 @@ import (
 	"database/sql"
 	{{if .HasTime}}"time"{{end}}
 	"{{.ModulePath}}/table/{{.TableName}}"
+	"github.com/linbaozhong/gentity/pkg/orm/sql"
 )
 
 var (
@@ -97,6 +98,10 @@ var (
 	//
 	tableTpl = `
 package {{ .TableName }}
+
+import (
+	"github.com/linbaozhong/gentity/pkg/orm"
+)
 
 const (
 {{- range $key, $value := .Columns}}
