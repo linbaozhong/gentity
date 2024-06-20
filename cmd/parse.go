@@ -19,13 +19,13 @@ import (
 	"github.com/vetcher/go-astra"
 	"go/parser"
 	"go/token"
-	"os"
 	"path/filepath"
 	"strings"
 )
 
-func parseFile(parent, filename string) error {
+func parseFile(parent, filename, pkgPath string) error {
 	tempData := new(TempData)
+	tempData.ModulePath = pkgPath
 
 	fset := token.NewFileSet()
 	var src interface{}
@@ -140,12 +140,7 @@ func parseFile(parent, filename string) error {
 		}
 
 		// 写table文件
-		parent = filepath.Join(parent, tempData.StructName)
-		err = os.MkdirAll(parent, os.ModePerm)
-		if err != nil {
-			showError(err)
-		}
-
+		parent = filepath.Join(parent, "table", tempData.TableName)
 		err := tempData.writeToTable(parent)
 		if err != nil {
 			showError(err.Error())

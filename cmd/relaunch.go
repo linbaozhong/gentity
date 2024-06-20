@@ -16,8 +16,8 @@ package cmd
 
 import (
 	"fmt"
+	"gentity/internal/base"
 	"github.com/spf13/cobra"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -30,26 +30,24 @@ var (
 		Use:   "Gentity",
 		Short: "DAL代码生成工具",
 		Run: func(cmd *cobra.Command, args []string) {
-			log.Printf("path:%s\n", path)
-
 			fullpath, err := filepath.Abs(path)
 			if err != nil {
 				showError(err)
 			}
-			log.Printf("fullpath:%s\n", fullpath)
 
-			parent := fullpath
+			parent := filepath.Dir(fullpath)
 			pos := strings.LastIndex(fullpath, string(os.PathSeparator))
 			if pos > 0 {
 				parent = fullpath[:pos]
 			}
-			log.Printf("parent:%s\n", parent)
 
-			// 创建目录
-			parent = filepath.Join(parent, "table")
-			err = os.MkdirAll(parent, os.ModePerm)
+			pkgPath, err := base.PkgPath(nil, path)
 			if err != nil {
 				showError(err)
+			}
+			pos = strings.LastIndex(pkgPath, "/")
+			if pos > 0 {
+				pkgPath = pkgPath[:pos]
 			}
 
 			dirs, err := os.ReadDir(path)
@@ -65,7 +63,7 @@ var (
 					continue
 				}
 
-				err = parseFile(parent, filepath.Join(fullpath, filename))
+				err = parseFile(parent, filepath.Join(fullpath, filename), pkgPath)
 				if err != nil {
 					showError(err)
 				}

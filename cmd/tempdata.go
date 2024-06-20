@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"go/format"
 	"io"
 	"os"
@@ -47,10 +46,6 @@ type TempData struct {
 	HasConvert     bool
 }
 
-func getFilepath(filename string) string {
-	absPath, _ := filepath.Abs(filename)
-	return filepath.Join(filepath.Dir(absPath), "table")
-}
 func getBaseFilename(filename string) string {
 	f := filepath.Base(filename)
 	pos := strings.LastIndex(f, ".")
@@ -61,7 +56,7 @@ func getBaseFilename(filename string) string {
 }
 
 func (d *TempData) tableFilename(parent string) string {
-	return filepath.Join(parent, getFilepath(d.FileName), getBaseFilename(d.FileName)+"_"+d.StructName+"_table.go")
+	return filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_table.go")
 }
 
 func (d *TempData) writeToModel(fileName string) error {
@@ -129,7 +124,7 @@ func (d *TempData) writeToModel(fileName string) error {
 	}
 
 	// absPath, _ := filepath.Abs(fileName)
-	fileName = fileName[:len(fileName)-3] + "_" + d.StructName + "_pool.go"
+	fileName = fileName[:len(fileName)-3] + "_" + d.StructName + "_define.go"
 	if fi, err := os.Stat(fileName); err == nil {
 		if !fi.IsDir() {
 			if err := os.Remove(fileName); err != nil {
@@ -163,11 +158,24 @@ func (d *TempData) writeTo(w io.Writer) error {
 
 // writeToTable 将生成好的模块文件写到本地
 func (d *TempData) writeToTable(parent string) error {
-	tableFilename := d.tableFilename(parent)
-	fmt.Println(tableFilename)
-	return nil
+	err := os.MkdirAll(parent, os.ModePerm)
+	if err != nil {
+		showError(err)
+		return err
+	}
 
-	f, e := os.OpenFile(tableFilename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+	fileName := d.tableFilename(parent)
+
+	if fi, err := os.Stat(fileName); err == nil {
+		if !fi.IsDir() {
+			if err := os.Remove(fileName); err != nil {
+				showError(err.Error())
+				return err
+			}
+		}
+	}
+
+	f, e := os.OpenFile(fileName, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 	if e != nil {
 		showError(e.Error())
 		return e

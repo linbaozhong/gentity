@@ -1,0 +1,1 @@
+go build -o d:\gopath\bin
