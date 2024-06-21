@@ -160,22 +160,22 @@ type ISqlBuilder interface {
 }
 
 // Insert
-func I(t interface{}) ISqlBuilder {
+func Create(t interface{}) ISqlBuilder {
 	return get(t, command_insert)
 }
 
 // Update
-func U(t interface{}) ISqlBuilder {
+func Update(t interface{}) ISqlBuilder {
 	return get(t, command_update)
 }
 
 // Delete
-func D(t interface{}) ISqlBuilder {
+func Delete(t interface{}) ISqlBuilder {
 	return get(t, command_delete)
 }
 
 // Select
-func S(t interface{}) ISqlBuilder {
+func Query(t interface{}) ISqlBuilder {
 	return get(t, command_select)
 }
 

@@ -20,7 +20,6 @@ package {{.PackageName}}
 import (
 	"fmt"
 	"sync"
-	"database/sql"
 	{{if .HasTime}}"time"{{end}}
 	"{{.ModulePath}}/table/{{.TableName}}"
 	"github.com/linbaozhong/gentity/pkg/orm/sql"
