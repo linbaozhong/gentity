@@ -14,10 +14,10 @@
 
 package sql
 
-import "strings"
-
-type JoinType string
-type command string
+import (
+	"strings"
+	"sync"
+)
 
 const (
 	Inner_Join JoinType = " INNER"
@@ -34,49 +34,140 @@ const (
 	command_delete command = "DELETE FROM "
 )
 
-// Expr represents an SQL express
-type Expr struct {
-	ColName string
-	Arg     interface{}
+type (
+	JoinType string
+	command  string
+	// Expr represents an SQL express
+	Expr struct {
+		ColName string
+		Arg     interface{}
+	}
+	common struct {
+		Command command
+		Table   string
+	}
+	Create struct {
+		common
+		Cols   []string
+		Params []interface{}
+	}
+	Select struct {
+		common
+		Join        [][3]string
+		Distinct    bool
+		Cols        []string
+		Omit        []interface{}
+		Where       strings.Builder
+		WhereParams []interface{}
+		GroupBy     strings.Builder
+		Having      strings.Builder
+		OrderBy     strings.Builder
+		Limit       string
+		LimitSize   int
+		LimitStart  int
+
+		AndOr bool
+	}
+	Update struct {
+		common
+		Cols []string
+
+		Params   []interface{}
+		IncrCols []Expr
+		DecrCols []Expr
+		ExprCols []Expr
+	}
+	Delete struct {
+		common
+	}
+)
+
+var (
+	createPool = sync.Pool{
+		New: func() interface{} {
+			return &Create{
+				common: common{
+					Command: command_insert,
+				},
+			}
+		},
+	}
+	selectPool = sync.Pool{
+		New: func() interface{} {
+			return &Select{
+				common: common{
+					Command: command_select,
+				},
+			}
+		},
+	}
+	updatePool = sync.Pool{
+		New: func() interface{} {
+			return &Update{
+				common: common{
+					Command: command_update,
+				},
+			}
+		},
+	}
+	deletePool = sync.Pool{
+		New: func() interface{} {
+			return &Delete{
+				common: common{
+					Command: command_delete,
+				},
+			}
+		},
+	}
+)
+
+func NewCreate() *Create {
+	return createPool.Get().(*Create)
 }
 
-type common struct {
-	Command command
-	Table   string
-	Cols    []string
+func NewSelect() *Select {
+	return selectPool.Get().(*Select)
 }
 
-type Select struct {
-	common
-	Join        [][3]string
-	Distinct    bool
-	Omit        []interface{}
-	Where       strings.Builder
-	WhereParams []interface{}
-	GroupBy     strings.Builder
-	Having      strings.Builder
-	OrderBy     strings.Builder
-	Limit       string
-	LimitSize   int
-	LimitStart  int
-
-	AndOr bool
+func NewUpdate() *Update {
+	return updatePool.Get().(*Update)
 }
 
-type Update struct {
-	common
-
-	Params   []interface{}
-	IncrCols []Expr
-	DecrCols []Expr
-	ExprCols []Expr
+func NewDelete() *Delete {
+	return deletePool.Get().(*Delete)
 }
 
-type Delete struct {
-	common
+func (c *Create) Free() {
+	c.Cols = c.Cols[:]
+	c.Params = c.Params[:]
+	createPool.Put(c)
 }
 
-type Create struct {
-	common
-	Params []interface{}
+func (c *Select) Free() {
+	c.Cols = c.Cols[:]
+	c.Distinct = false
+	c.Join = c.Join[:]
+	c.Omit = c.Omit[:]
+	c.Where.Reset()
+	c.WhereParams = c.WhereParams[:]
+	c.GroupBy.Reset()
+	c.Having.Reset()
+	c.OrderBy.Reset()
+	c.Limit = ""
+	c.LimitSize = 0
+	c.LimitStart = 0
+	selectPool.Put(c)
+}
+
+func (u *Update) Free() {
+	u.Cols = u.Cols[:]
+	u.Params = u.Params[:]
+	u.IncrCols = u.IncrCols[:]
+	u.DecrCols = u.DecrCols[:]
+	u.ExprCols = u.ExprCols[:]
+	updatePool.Put(u)
+}
+
+func (d *Delete) Free() {
+	deletePool.Put(d)
 }
