@@ -1,4 +1,4 @@
-module github.com/linbaozhong/gentity
+module gentity
 
 go 1.21.0
 
