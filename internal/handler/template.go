@@ -98,15 +98,23 @@ var (
 	tableTpl = `
 package {{ .TableName }}
 
-import (
-	"github.com/linbaozhong/gentity/pkg/orm"
-)
+// import (
+// 	"github.com/linbaozhong/gentity/pkg/orm"
+// )
 
 const (
 {{- range $key, $value := .Columns}}
 	{{ $key }} = "{{index $value 0}}"
 {{- end}}
 )
+
+{{- range $key, $value := .Columns}}
+	// Set{{ $key }}
+	func Set{{ $key }}() {
+		// "{{index $value 0}}"
+	}
+
+{{- end}}
 
 // Create 新增 {{ .TableName }}
 func Create() {

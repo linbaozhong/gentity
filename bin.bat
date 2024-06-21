@@ -1,1 +1,1 @@
-go build -o d:\gopath\bin .\cmd\main.go
+go build -o d:\gopath\bin\gentity.exe .\cmd\main.go
