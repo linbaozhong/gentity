@@ -6,7 +6,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/linbaozhong/gentity/pkgs/log"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"time"
 )
 
