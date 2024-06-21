@@ -14,8 +14,10 @@
 
 package main
 
-import "github.com/linbaozhong/gentity/cmd"
+import (
+	"github.com/linbaozhong/gentity/internal/handler"
+)
 
 func main() {
-	cmd.Execute()
+	handler.Execute()
 }

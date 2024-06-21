@@ -1,1 +1,1 @@
-go build -o d:\gopath\bin
+go build -o d:\gopath\bin .\cmd\main.go
