@@ -56,7 +56,7 @@ func getBaseFilename(filename string) string {
 }
 
 func (d *TempData) tableFilename(parent string) string {
-	return filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_table.go")
+	return filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".go")
 }
 
 func (d *TempData) writeToModel(fileName string) error {
@@ -156,8 +156,8 @@ func (d *TempData) writeTo(w io.Writer) error {
 	return template.Must(template.New("tableTpl").Funcs(funcMap).Parse(tableTpl)).Execute(w, d)
 }
 
-// writeToTable 将生成好的模块文件写到本地
-func (d *TempData) writeToTable(parent string) error {
+// writeTable 将生成好的模块文件写到本地
+func (d *TempData) writeTable(parent string) error {
 	err := os.MkdirAll(parent, os.ModePerm)
 	if err != nil {
 		showError(err)
@@ -184,6 +184,58 @@ func (d *TempData) writeToTable(parent string) error {
 
 	var buf bytes.Buffer
 	e = d.writeTo(&buf)
+	if e != nil {
+		showError(e.Error())
+		return e
+	}
+
+	formatted, e := format.Source(buf.Bytes())
+	if e != nil {
+		showError(e.Error())
+		return e
+	}
+	_, e = f.Write(formatted)
+	if e != nil {
+		showError(e.Error())
+		return e
+	}
+	return e
+}
+
+func (d *TempData) writeToBuild(w io.Writer) error {
+	funcMap := template.FuncMap{
+		"lower": strings.ToLower,
+	}
+	return template.Must(template.New("buildTpl").Funcs(funcMap).Parse(buildTpl)).Execute(w, d)
+}
+
+func (d *TempData) writeBuild(parent string) error {
+	err := os.MkdirAll(parent, os.ModePerm)
+	if err != nil {
+		showError(err)
+		return err
+	}
+
+	fileName := d.tableFilename(parent)
+
+	if fi, err := os.Stat(fileName); err == nil {
+		if !fi.IsDir() {
+			if err := os.Remove(fileName); err != nil {
+				showError(err.Error())
+				return err
+			}
+		}
+	}
+
+	f, e := os.OpenFile(fileName, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+	if e != nil {
+		showError(e.Error())
+		return e
+	}
+	defer f.Close()
+
+	var buf bytes.Buffer
+	e = d.writeToBuild(&buf)
 	if e != nil {
 		showError(e.Error())
 		return e

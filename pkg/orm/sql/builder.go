@@ -42,6 +42,12 @@ type (
 		ColName string
 		Arg     interface{}
 	}
+	condition struct {
+		Where       strings.Builder
+		WhereParams []interface{}
+		AndOr       bool
+	}
+
 	Creator struct {
 		Command command
 		Table   string
@@ -49,32 +55,33 @@ type (
 		Params  []interface{}
 	}
 	Selector struct {
-		Command     command
-		Table       string
-		Join        [][3]string
-		Distinct    bool
-		Cols        []string
-		Omit        []interface{}
-		Where       strings.Builder
-		WhereParams []interface{}
-		GroupBy     strings.Builder
-		Having      strings.Builder
-		OrderBy     strings.Builder
-		Limit       string
-		LimitSize   int
-		LimitStart  int
+		Command  command
+		Table    string
+		Join     [][3]string
+		Distinct bool
+		Cols     []string
+		Omit     []interface{}
+		// Where       strings.Builder
+		// WhereParams []interface{}
+		GroupBy    strings.Builder
+		Having     strings.Builder
+		OrderBy    strings.Builder
+		Limit      string
+		LimitSize  int
+		LimitStart int
 
-		AndOr bool
+		condition
 	}
 	Updater struct {
-		Command command
-		Table   string
-		Cols    []string
-
+		Command  command
+		Table    string
+		Cols     []string
 		Params   []interface{}
 		IncrCols []expr
 		DecrCols []expr
 		ExprCols []expr
+
+		condition
 	}
 	Deleter struct {
 		Command command
@@ -144,6 +151,7 @@ func (s *Selector) Free() {
 	s.Omit = s.Omit[:]
 	s.Where.Reset()
 	s.WhereParams = s.WhereParams[:]
+	s.AndOr = false
 	s.GroupBy.Reset()
 	s.Having.Reset()
 	s.OrderBy.Reset()
@@ -160,6 +168,9 @@ func (u *Updater) Free() {
 	u.IncrCols = u.IncrCols[:]
 	u.DecrCols = u.DecrCols[:]
 	u.ExprCols = u.ExprCols[:]
+	u.Where.Reset()
+	u.WhereParams = u.WhereParams[:]
+	u.AndOr = false
 	updatePool.Put(u)
 }
 

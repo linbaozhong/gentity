@@ -140,8 +140,13 @@ func parseFile(parent, filename, pkgPath string) error {
 		}
 
 		// 写table文件
-		parent = filepath.Join(parent, "table", tempData.TableName)
-		err := tempData.writeToTable(parent)
+		err = tempData.writeBuild(filepath.Join(parent, "table"))
+		if err != nil {
+			showError(err.Error())
+			return err
+		}
+
+		err = tempData.writeTable(filepath.Join(parent, "table", tempData.TableName))
 		if err != nil {
 			showError(err.Error())
 			return err

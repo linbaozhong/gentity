@@ -62,7 +62,7 @@ func (p *{{.StructName}})scanValues(columns []string) ([]any, error) {
 			values[i] = new({{getSqlValue $value}})
 		{{- end}}
 		default:
-			values[i] = new(any)
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -98,42 +98,98 @@ var (
 	tableTpl = `
 package {{ .TableName }}
 
-// import (
-// 	"github.com/linbaozhong/gentity/pkg/orm"
-// )
-
 const (
+	TableName = "{{ .TableName }}"
 {{- range $key, $value := .Columns}}
 	{{ $key }} = "{{index $value 0}}"
 {{- end}}
 )
+`
+	buildTpl = `
+package table
+
+import (
+	{{if .HasTime}}"time"{{end}}
+	"{{.ModulePath}}/table/{{.TableName}}"
+	"github.com/linbaozhong/gentity/pkg/orm/sql"
+)
+
+{{- $tablename := .TableName}}
+type {{.TableName}}Create struct {
+	*sql.Creator
+}
+
+// {{.StructName}}Create 新增 {{ .TableName }}
+func {{.StructName}}Create() *{{.TableName}}Create {
+	c := sql.NewCreate()
+	c.Table = {{ .TableName }}.TableName
+	c.Cols = make([]string, 0, {{len .Columns}})
+	c.Params = make([]any, 0, {{len .Columns}})
+	return &{{ .TableName }}Create{
+		c,
+	}
+}
 
 {{- range $key, $value := .Columns}}
 	// Set{{ $key }}
-	func Set{{ $key }}() {
-		// "{{index $value 0}}"
+	func (c *{{$tablename}}Create) Set{{ $key }}(val {{index $value 2}}) *{{$tablename}}Create{
+		c.Cols = append(c.Cols, event.{{ $key }})
+		c.Params = append(c.Params, val)
+		return c
 	}
 
 {{- end}}
 
-// Create 新增 {{ .TableName }}
-func Create() {
 
+type {{.TableName}}Update struct {
+	*sql.Updater
 }
 
-// Update 修改 {{ .TableName }}
-func Update() {
-
+// {{.StructName}}Update 修改 {{ .TableName }}
+func {{.StructName}}Update() *{{.TableName}}Update{
+	c := sql.NewUpdate()
+	c.Table = {{ .TableName }}.TableName
+	return &{{ .TableName }}Update{
+		c,
+	}
 }
 
-// Delete 删除 {{ .TableName }}
-func Delete() {
+{{- range $key, $value := .Columns}}
+	// Set{{ $key }}
+	func (c *{{$tablename}}Update) Set{{ $key }}(val {{index $value 2}}) *{{$tablename}}Update{
+		c.Cols = append(c.Cols, event.{{ $key }} + " = ?")
+		c.Params = append(c.Params, val)
+		return c
+	}
 
+{{- end}}
+
+type {{.TableName}}Delete struct {
+	*sql.Deleter
 }
 
-// Query 查询 {{ .TableName }}，返回 []{{.StructName}}
-func Query() {
-
+// {{.StructName}}Delete 删除 {{ .TableName }}
+func {{.StructName}}Delete() *{{.TableName}}Delete{
+	c := sql.NewDelete()
+	c.Table = {{ .TableName }}.TableName
+	return &{{ .TableName }}Delete{
+		c,
+	}
 }
+
+
+type {{.TableName}}Query struct {
+	*sql.Selector
+}
+
+// {{.StructName}}Query 查询 {{ .TableName }}，返回 []{{.StructName}}
+func {{.StructName}}Query() *{{.TableName}}Query{
+	c := sql.NewSelect()
+	c.Table = {{ .TableName }}.TableName
+	return &{{ .TableName }}Query{
+		c,
+	}
+}
+
 `
 )
