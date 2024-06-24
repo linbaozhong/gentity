@@ -149,6 +149,8 @@ type {{.TableName}}Update struct {
 func {{.StructName}}Update() *{{.TableName}}Update{
 	c := sql.NewUpdate()
 	c.Table = {{ .TableName }}.TableName
+	c.Cols = make([]string, 0, {{len .Columns}})
+	c.Params = make([]any, 0, {{len .Columns}})
 	return &{{ .TableName }}Update{
 		c,
 	}
@@ -161,7 +163,20 @@ func {{.StructName}}Update() *{{.TableName}}Update{
 		c.Params = append(c.Params, val)
 		return c
 	}
+{{- end}}
 
+{{- range $key, $value := .Columns}}
+case {{$tablename}}.{{ $key }}:
+	value,ok := values[i].({{getSqlValue $value}})
+	if !ok {
+		return fmt.Errorf("unexpected type %T for field {{index $value 0}}", value)
+	}
+	{{- $v := index $value 2}}
+	{{- if or (eq $v "string") (eq $v "int64") (eq $v "bool") (eq $v "float64") (eq $v "time.Time")}}
+	p.{{$key}} = value.{{getSqlType $value}}
+	{{- else}}
+	p.{{$key}} = {{index $value 2}}(value.{{getSqlType $value}})
+	{{- end}}
 {{- end}}
 
 type {{.TableName}}Delete struct {
