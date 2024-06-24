@@ -37,22 +37,20 @@ const (
 type (
 	JoinType string
 	command  string
-	// Expr represents an SQL express
-	Expr struct {
+	// expr represents an SQL express
+	expr struct {
 		ColName string
 		Arg     interface{}
 	}
-	common struct {
+	Creator struct {
 		Command command
 		Table   string
+		Cols    []string
+		Params  []interface{}
 	}
-	Create struct {
-		common
-		Cols   []string
-		Params []interface{}
-	}
-	Select struct {
-		common
+	Selector struct {
+		Command     command
+		Table       string
 		Join        [][3]string
 		Distinct    bool
 		Cols        []string
@@ -68,98 +66,95 @@ type (
 
 		AndOr bool
 	}
-	Update struct {
-		common
-		Cols []string
+	Updater struct {
+		Command command
+		Table   string
+		Cols    []string
 
 		Params   []interface{}
-		IncrCols []Expr
-		DecrCols []Expr
-		ExprCols []Expr
+		IncrCols []expr
+		DecrCols []expr
+		ExprCols []expr
 	}
-	Delete struct {
-		common
+	Deleter struct {
+		Command command
+		Table   string
 	}
 )
 
 var (
 	createPool = sync.Pool{
 		New: func() interface{} {
-			return &Create{
-				common: common{
-					Command: command_insert,
-				},
+			return &Creator{
+				Command: command_insert,
 			}
 		},
 	}
 	selectPool = sync.Pool{
 		New: func() interface{} {
-			return &Select{
-				common: common{
-					Command: command_select,
-				},
+			return &Selector{
+				Command: command_select,
 			}
 		},
 	}
 	updatePool = sync.Pool{
 		New: func() interface{} {
-			return &Update{
-				common: common{
-					Command: command_update,
-				},
+			return &Updater{
+				Command: command_update,
 			}
 		},
 	}
 	deletePool = sync.Pool{
 		New: func() interface{} {
-			return &Delete{
-				common: common{
-					Command: command_delete,
-				},
+			return &Deleter{
+				Command: command_delete,
 			}
 		},
 	}
 )
 
-func NewCreate() *Create {
-	return createPool.Get().(*Create)
+func NewCreate() *Creator {
+	return createPool.Get().(*Creator)
 }
 
-func NewSelect() *Select {
-	return selectPool.Get().(*Select)
+func NewSelect() *Selector {
+	return selectPool.Get().(*Selector)
 }
 
-func NewUpdate() *Update {
-	return updatePool.Get().(*Update)
+func NewUpdate() *Updater {
+	return updatePool.Get().(*Updater)
 }
 
-func NewDelete() *Delete {
-	return deletePool.Get().(*Delete)
+func NewDelete() *Deleter {
+	return deletePool.Get().(*Deleter)
 }
 
-func (c *Create) Free() {
+func (c *Creator) Free() {
+	c.Table = ""
 	c.Cols = c.Cols[:]
 	c.Params = c.Params[:]
 	createPool.Put(c)
 }
 
-func (c *Select) Free() {
-	c.Cols = c.Cols[:]
-	c.Distinct = false
-	c.Join = c.Join[:]
-	c.Omit = c.Omit[:]
-	c.Where.Reset()
-	c.WhereParams = c.WhereParams[:]
-	c.GroupBy.Reset()
-	c.Having.Reset()
-	c.OrderBy.Reset()
-	c.Limit = ""
-	c.LimitSize = 0
-	c.LimitStart = 0
-	selectPool.Put(c)
+func (s *Selector) Free() {
+	s.Table = ""
+	s.Cols = s.Cols[:]
+	s.Distinct = false
+	s.Join = s.Join[:]
+	s.Omit = s.Omit[:]
+	s.Where.Reset()
+	s.WhereParams = s.WhereParams[:]
+	s.GroupBy.Reset()
+	s.Having.Reset()
+	s.OrderBy.Reset()
+	s.Limit = ""
+	s.LimitSize = 0
+	s.LimitStart = 0
+	selectPool.Put(s)
 }
 
-func (u *Update) Free() {
+func (u *Updater) Free() {
+	u.Table = ""
 	u.Cols = u.Cols[:]
 	u.Params = u.Params[:]
 	u.IncrCols = u.IncrCols[:]
@@ -168,6 +163,6 @@ func (u *Update) Free() {
 	updatePool.Put(u)
 }
 
-func (d *Delete) Free() {
+func (d *Deleter) Free() {
 	deletePool.Put(d)
 }
