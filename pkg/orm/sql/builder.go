@@ -45,7 +45,6 @@ type (
 	condition struct {
 		Where       strings.Builder
 		WhereParams []interface{}
-		AndOr       bool
 	}
 
 	Creator struct {
@@ -86,6 +85,8 @@ type (
 	Deleter struct {
 		Command command
 		Table   string
+
+		condition
 	}
 )
 
@@ -151,7 +152,7 @@ func (s *Selector) Free() {
 	s.Omit = s.Omit[:]
 	s.Where.Reset()
 	s.WhereParams = s.WhereParams[:]
-	s.AndOr = false
+	// s.AndOr = false
 	s.GroupBy.Reset()
 	s.Having.Reset()
 	s.OrderBy.Reset()
@@ -170,10 +171,17 @@ func (u *Updater) Free() {
 	u.ExprCols = u.ExprCols[:]
 	u.Where.Reset()
 	u.WhereParams = u.WhereParams[:]
-	u.AndOr = false
+	// u.AndOr = false
 	updatePool.Put(u)
 }
 
 func (d *Deleter) Free() {
 	deletePool.Put(d)
+}
+
+func (c condition) Not() {
+
+}
+func (c condition) Or() {
+
 }

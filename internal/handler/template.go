@@ -58,7 +58,7 @@ func (p *{{.StructName}})scanValues(columns []string) ([]any, error) {
 	for i,column := range columns {
 		switch column {
 		{{- range $key, $value := .Columns}}
-		case {{$tablename}}.{{ $key }}:
+		case {{$tablename}}.{{ $key }}.String():
 			values[i] = new({{getSqlValue $value}})
 		{{- end}}
 		default:
@@ -76,7 +76,7 @@ func (p *{{.StructName}})assignValues(columns []string, values []any) error {
 	for i,column := range columns {
 		switch column {
 		{{- range $key, $value := .Columns}}
-		case {{$tablename}}.{{ $key }}:
+		case {{$tablename}}.{{ $key }}.String():
 			value,ok := values[i].({{getSqlValue $value}})
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field {{index $value 0}}", value)
@@ -98,10 +98,14 @@ var (
 	tableTpl = `
 package {{ .TableName }}
 
+import (
+	"github.com/linbaozhong/gentity/pkg/orm/sql"
+)
+
 const (
 	TableName = "{{ .TableName }}"
 {{- range $key, $value := .Columns}}
-	{{ $key }} = "{{index $value 0}}"
+	{{ $key }} sql.Field = "{{index $value 0}}"
 {{- end}}
 )
 `
@@ -166,17 +170,15 @@ func {{.StructName}}Update() *{{.TableName}}Update{
 {{- end}}
 
 {{- range $key, $value := .Columns}}
-case {{$tablename}}.{{ $key }}:
-	value,ok := values[i].({{getSqlValue $value}})
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field {{index $value 0}}", value)
+{{- $v := index $value 2}}
+{{- if or (eq $v "string") (eq $v "int64") (eq $v "bool") (eq $v "float64") (eq $v "time.Time")}}
+	func (c *{{$tablename}}Update) {{ $key }}Eq(val {{index $value 2}}) *{{$tablename}}Update{
+		return c
 	}
-	{{- $v := index $value 2}}
-	{{- if or (eq $v "string") (eq $v "int64") (eq $v "bool") (eq $v "float64") (eq $v "time.Time")}}
-	p.{{$key}} = value.{{getSqlType $value}}
-	{{- else}}
-	p.{{$key}} = {{index $value 2}}(value.{{getSqlType $value}})
-	{{- end}}
+{{- else}}
+	func (c *{{$tablename}}Update) {{ $key }}In(vals ...{{index $value 2}}) *{{$tablename}}Update{
+		return c
+	}
 {{- end}}
 
 type {{.TableName}}Delete struct {

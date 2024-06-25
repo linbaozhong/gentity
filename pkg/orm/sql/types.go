@@ -18,7 +18,14 @@ import (
 	"database/sql"
 )
 
+const (
+	Quote_Char = "`"
+)
+
 type (
+	Field string
+	Cond  func() (string, any)
+
 	// NullBool is an alias to sql.NullBool.
 	NullBool = sql.NullBool
 	// NullInt64 is an alias to sql.NullInt64.
@@ -39,3 +46,17 @@ type (
 	// needs to be extracted from the underlying rows.
 	UnknownType any
 )
+
+func (f Field) quote() string {
+	return Quote_Char + string(f) + Quote_Char
+}
+
+func (f Field) String() string {
+	return string(f)
+}
+
+func (f Field) Eq(val any) Cond {
+	return func() (string, any) {
+		return f.quote() + " = ?", val
+	}
+}
