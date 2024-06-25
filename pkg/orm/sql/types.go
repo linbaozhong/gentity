@@ -23,8 +23,9 @@ const (
 )
 
 type (
-	Field string
-	Cond  func() (string, any)
+	Field     string
+	Condition func() (string, any)
+	Setter    func() (string, any)
 
 	// NullBool is an alias to sql.NullBool.
 	NullBool = sql.NullBool
@@ -55,7 +56,13 @@ func (f Field) String() string {
 	return string(f)
 }
 
-func (f Field) Eq(val any) Cond {
+func (f Field) Set(val any) Setter {
+	return func() (string, any) {
+		return f.quote() + " = ?", val
+	}
+}
+
+func (f Field) Eq(val any) Condition {
 	return func() (string, any) {
 		return f.quote() + " = ?", val
 	}

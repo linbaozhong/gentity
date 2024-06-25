@@ -137,11 +137,10 @@ func {{.StructName}}Create() *{{.TableName}}Create {
 {{- range $key, $value := .Columns}}
 	// Set{{ $key }}
 	func (c *{{$tablename}}Create) Set{{ $key }}(val {{index $value 2}}) *{{$tablename}}Create{
-		c.Cols = append(c.Cols, event.{{ $key }})
+		c.Cols = append(c.Cols, event.{{ $key }}.String())
 		c.Params = append(c.Params, val)
 		return c
 	}
-
 {{- end}}
 
 
@@ -163,22 +162,23 @@ func {{.StructName}}Update() *{{.TableName}}Update{
 {{- range $key, $value := .Columns}}
 	// Set{{ $key }}
 	func (c *{{$tablename}}Update) Set{{ $key }}(val {{index $value 2}}) *{{$tablename}}Update{
-		c.Cols = append(c.Cols, event.{{ $key }} + " = ?")
+		c.Cols = append(c.Cols, event.{{ $key }}.String() + " = ?")
 		c.Params = append(c.Params, val)
 		return c
 	}
 {{- end}}
 
 {{- range $key, $value := .Columns}}
-{{- $v := index $value 2}}
-{{- if or (eq $v "string") (eq $v "int64") (eq $v "bool") (eq $v "float64") (eq $v "time.Time")}}
-	func (c *{{$tablename}}Update) {{ $key }}Eq(val {{index $value 2}}) *{{$tablename}}Update{
-		return c
-	}
-{{- else}}
-	func (c *{{$tablename}}Update) {{ $key }}In(vals ...{{index $value 2}}) *{{$tablename}}Update{
-		return c
-	}
+	{{- $v := index $value 2}}
+	{{- if or (eq $v "string") (eq $v "int64") (eq $v "bool") (eq $v "float64") (eq $v "time.Time")}}
+		func (c *{{$tablename}}Update) {{ $key }}Eq(val {{index $value 2}}) *{{$tablename}}Update{
+			return c
+		}
+	{{- else}}
+		func (c *{{$tablename}}Update) {{ $key }}In(vals ...{{index $value 2}}) *{{$tablename}}Update{
+			return c
+		}
+	{{- end}}
 {{- end}}
 
 type {{.TableName}}Delete struct {
@@ -207,6 +207,5 @@ func {{.StructName}}Query() *{{.TableName}}Query{
 		c,
 	}
 }
-
 `
 )
