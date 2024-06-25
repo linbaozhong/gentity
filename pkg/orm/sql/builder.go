@@ -15,6 +15,8 @@
 package sql
 
 import (
+	"context"
+	"database/sql"
 	"strings"
 	"sync"
 )
@@ -121,20 +123,10 @@ var (
 	}
 )
 
+// ////////////////////////////////////////
+// Creator
 func NewCreate() *Creator {
 	return createPool.Get().(*Creator)
-}
-
-func NewSelect() *Selector {
-	return selectPool.Get().(*Selector)
-}
-
-func NewUpdate() *Updater {
-	return updatePool.Get().(*Updater)
-}
-
-func NewDelete() *Deleter {
-	return deletePool.Get().(*Deleter)
 }
 
 func (c *Creator) Free() {
@@ -142,6 +134,35 @@ func (c *Creator) Free() {
 	c.Cols = c.Cols[:]
 	c.Params = c.Params[:]
 	createPool.Put(c)
+}
+
+// Set
+func (c *Creator) Set(fn Setter) *Creator {
+	s, val := fn()
+	c.Cols = append(c.Cols, s)
+	c.Params = append(c.Params, val)
+	return c
+}
+
+// Sets
+func (c *Creator) Sets(fns ...Setter) *Creator {
+	for _, fn := range fns {
+		s, val := fn()
+		c.Cols = append(c.Cols, s)
+		c.Params = append(c.Params, val)
+	}
+	return c
+}
+
+// Do
+func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
+	return nil, nil
+}
+
+// ///////////////////////////////////////////////
+// Selector
+func NewSelect() *Selector {
+	return selectPool.Get().(*Selector)
 }
 
 func (s *Selector) Free() {
@@ -162,6 +183,17 @@ func (s *Selector) Free() {
 	selectPool.Put(s)
 }
 
+// Do
+func (s *Selector) Do(ctx context.Context) (sql.Result, error) {
+	return nil, nil
+}
+
+// /////////////////////////////////////////////////
+// Updater
+func NewUpdate() *Updater {
+	return updatePool.Get().(*Updater)
+}
+
 func (u *Updater) Free() {
 	u.Table = ""
 	u.Cols = u.Cols[:]
@@ -169,19 +201,93 @@ func (u *Updater) Free() {
 	u.IncrCols = u.IncrCols[:]
 	u.DecrCols = u.DecrCols[:]
 	u.ExprCols = u.ExprCols[:]
-	u.Where.Reset()
-	u.WhereParams = u.WhereParams[:]
+	u.condition.Where.Reset()
+	u.condition.WhereParams = u.condition.WhereParams[:]
 	// u.AndOr = false
 	updatePool.Put(u)
+}
+
+// Set
+func (c *Updater) Set(fns ...Setter) *Updater {
+	for _, fn := range fns {
+		s, val := fn()
+		c.Cols = append(c.Cols, s)
+		c.Params = append(c.Params, val)
+	}
+	return c
+}
+
+// Where
+func (c *Updater) Where(fns ...Condition) *Updater {
+	if len(fns) == 0 {
+		return c
+	}
+	c.condition.Where.WriteString("(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.condition.Where.WriteString(operator_and)
+		}
+		cond, val := fn()
+		c.condition.Where.WriteString(cond)
+		c.condition.WhereParams = append(c.condition.WhereParams, val)
+	}
+	c.condition.Where.WriteString(")")
+
+	return c
+}
+
+// And
+func (c *Updater) AndOr(fns ...Condition) *Updater {
+	if len(fns) == 0 {
+		return c
+	}
+	c.condition.Where.WriteString(operator_and + "(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.condition.Where.WriteString(operator_or)
+		}
+		cond, val := fn()
+		c.condition.Where.WriteString(cond)
+		c.condition.WhereParams = append(c.condition.WhereParams, val)
+	}
+	c.condition.Where.WriteString(")")
+	return c
+}
+
+// Or
+func (c *Updater) OrAnd(fns ...Condition) *Updater {
+	if len(fns) == 0 {
+		return c
+	}
+	c.condition.Where.WriteString(operator_or + "(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.condition.Where.WriteString(operator_and)
+		}
+		cond, val := fn()
+		c.condition.Where.WriteString(cond)
+		c.condition.WhereParams = append(c.condition.WhereParams, val)
+	}
+	c.condition.Where.WriteString(")")
+	return c
+}
+
+// Do
+func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
+	return nil, nil
+}
+
+// //////////////////////////////////////////////////
+// Deleter
+func NewDelete() *Deleter {
+	return deletePool.Get().(*Deleter)
 }
 
 func (d *Deleter) Free() {
 	deletePool.Put(d)
 }
 
-func (c condition) Not() {
-
-}
-func (c condition) Or() {
-
+// Do
+func (c *Deleter) Do(ctx context.Context) (sql.Result, error) {
+	return nil, nil
 }
