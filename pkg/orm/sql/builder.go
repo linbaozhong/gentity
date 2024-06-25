@@ -29,6 +29,7 @@ const (
 	operator_and = " AND "
 	operator_or  = " OR "
 	placeholder  = "?"
+	Quote_Char   = "`"
 
 	command_insert command = "INSERT INTO "
 	command_select command = "SELECT "
@@ -229,7 +230,11 @@ func (c *Updater) Where(fns ...Condition) *Updater {
 		}
 		cond, val := fn()
 		c.condition.Where.WriteString(cond)
-		c.condition.WhereParams = append(c.condition.WhereParams, val)
+		if vals, ok := val.([]any); ok {
+			c.condition.WhereParams = append(c.condition.WhereParams, vals...)
+		} else {
+			c.condition.WhereParams = append(c.condition.WhereParams, val)
+		}
 	}
 	c.condition.Where.WriteString(")")
 
@@ -248,7 +253,11 @@ func (c *Updater) AndOr(fns ...Condition) *Updater {
 		}
 		cond, val := fn()
 		c.condition.Where.WriteString(cond)
-		c.condition.WhereParams = append(c.condition.WhereParams, val)
+		if vals, ok := val.([]any); ok {
+			c.condition.WhereParams = append(c.condition.WhereParams, vals...)
+		} else {
+			c.condition.WhereParams = append(c.condition.WhereParams, val)
+		}
 	}
 	c.condition.Where.WriteString(")")
 	return c
@@ -266,7 +275,11 @@ func (c *Updater) OrAnd(fns ...Condition) *Updater {
 		}
 		cond, val := fn()
 		c.condition.Where.WriteString(cond)
-		c.condition.WhereParams = append(c.condition.WhereParams, val)
+		if vals, ok := val.([]any); ok {
+			c.condition.WhereParams = append(c.condition.WhereParams, vals...)
+		} else {
+			c.condition.WhereParams = append(c.condition.WhereParams, val)
+		}
 	}
 	c.condition.Where.WriteString(")")
 	return c

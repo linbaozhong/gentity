@@ -16,10 +16,7 @@ package sql
 
 import (
 	"database/sql"
-)
-
-const (
-	Quote_Char = "`"
+	"strings"
 )
 
 type (
@@ -58,12 +55,92 @@ func (f Field) String() string {
 
 func (f Field) Set(val any) Setter {
 	return func() (string, any) {
-		return f.quote() + " = ?", val
+		return f.quote(), val
 	}
 }
 
 func (f Field) Eq(val any) Condition {
 	return func() (string, any) {
-		return f.quote() + " = ?", val
+		return f.quote() + " = " + placeholder, val
+	}
+}
+
+func (f Field) NotEq(val any) Condition {
+	return func() (string, any) {
+		return f.quote() + " != " + placeholder, val
+	}
+}
+
+func (f Field) Gt(val any) Condition {
+	return func() (string, any) {
+		return f.quote() + " >  " + placeholder, val
+	}
+}
+
+func (f Field) Gte(val any) Condition {
+	return func() (string, any) {
+		return f.quote() + " >=  " + placeholder, val
+	}
+}
+
+func (f Field) Lt(val any) Condition {
+	return func() (string, any) {
+		return f.quote() + " <  " + placeholder, val
+	}
+}
+
+func (f Field) Lte(val any) Condition {
+	return func() (string, any) {
+		return f.quote() + " <=  " + placeholder, val
+	}
+}
+
+func (f Field) In(vals ...any) Condition {
+	return func() (string, any) {
+		l := len(vals)
+		return f.quote() + " In (" + strings.Repeat(placeholder+",", l)[:2*l-1] + ") ", vals
+	}
+}
+
+func (f Field) NotIn(vals ...any) Condition {
+	return func() (string, any) {
+		l := len(vals)
+		return f.quote() + " Not In (" + strings.Repeat(placeholder+",", l)[:2*l-1] + ") ", vals
+	}
+}
+
+func (f Field) Between(vals ...any) Condition {
+	return func() (string, any) {
+		return f.quote() + " BETWEEN " + placeholder + " AND " + placeholder, vals
+	}
+}
+
+func (f Field) Like(val any) Condition {
+	return func() (string, any) {
+		return "(" + f.quote() + " LIKE CONCAT('%'," + placeholder + ",'%'))", val
+	}
+}
+
+func (f Field) Llike(val any) Condition {
+	return func() (string, any) {
+		return "(" + f.quote() + " LIKE CONCAT('%'," + placeholder + "))", val
+	}
+}
+
+func (f Field) Rlike(val any) Condition {
+	return func() (string, any) {
+		return "(" + f.quote() + " LIKE CONCAT(" + placeholder + ",'%'))", val
+	}
+}
+
+func (f Field) Null(val any) Condition {
+	return func() (string, any) {
+		return " ISNULL(" + placeholder + ")", val
+	}
+}
+
+func (f Field) NotNull(val any) Condition {
+	return func() (string, any) {
+		return " NOT ISNULL(" + placeholder + ")", val
 	}
 }
