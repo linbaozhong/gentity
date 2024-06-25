@@ -17,6 +17,7 @@ package sql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 	"sync"
 )
@@ -35,6 +36,10 @@ const (
 	command_select command = "SELECT "
 	command_update command = "UPDATE "
 	command_delete command = "DELETE FROM "
+)
+
+var (
+	ErrCreateEmpty = fmt.Errorf("")
 )
 
 type (
@@ -157,35 +162,10 @@ func (c *Creator) Sets(fns ...Setter) *Creator {
 
 // Do
 func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
-	return nil, nil
-}
-
-// ///////////////////////////////////////////////
-// Selector
-func NewSelect() *Selector {
-	return selectPool.Get().(*Selector)
-}
-
-func (s *Selector) Free() {
-	s.Table = ""
-	s.Cols = s.Cols[:]
-	s.Distinct = false
-	s.Join = s.Join[:]
-	s.Omit = s.Omit[:]
-	s.Where.Reset()
-	s.WhereParams = s.WhereParams[:]
-	// s.AndOr = false
-	s.GroupBy.Reset()
-	s.Having.Reset()
-	s.OrderBy.Reset()
-	s.Limit = ""
-	s.LimitSize = 0
-	s.LimitStart = 0
-	selectPool.Put(s)
-}
-
-// Do
-func (s *Selector) Do(ctx context.Context) (sql.Result, error) {
+	if len(c.Cols) == 0 {
+		return nil, ErrCreateEmpty
+	}
+	fmt.Println(c.Command, c.Table, c.Cols, c.Params)
 	return nil, nil
 }
 
@@ -302,5 +282,34 @@ func (d *Deleter) Free() {
 
 // Do
 func (c *Deleter) Do(ctx context.Context) (sql.Result, error) {
+	return nil, nil
+}
+
+// ///////////////////////////////////////////////
+// Selector
+func NewSelect() *Selector {
+	return selectPool.Get().(*Selector)
+}
+
+func (s *Selector) Free() {
+	s.Table = ""
+	s.Cols = s.Cols[:]
+	s.Distinct = false
+	s.Join = s.Join[:]
+	s.Omit = s.Omit[:]
+	s.Where.Reset()
+	s.WhereParams = s.WhereParams[:]
+	// s.AndOr = false
+	s.GroupBy.Reset()
+	s.Having.Reset()
+	s.OrderBy.Reset()
+	s.Limit = ""
+	s.LimitSize = 0
+	s.LimitStart = 0
+	selectPool.Put(s)
+}
+
+// Do
+func (s *Selector) Do(ctx context.Context) (sql.Result, error) {
 	return nil, nil
 }
