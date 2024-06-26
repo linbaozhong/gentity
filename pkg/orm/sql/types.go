@@ -20,7 +20,10 @@ import (
 )
 
 type (
-	Field     string
+	Field struct {
+		Name  string
+		Table string
+	}
 	Condition func() (string, any)
 	Setter    func() (string, any)
 
@@ -46,11 +49,14 @@ type (
 )
 
 func (f Field) quote() string {
-	return Quote_Char + string(f) + Quote_Char
+	return f.TableName() + "." + f.FieldName()
 }
 
-func (f Field) String() string {
-	return string(f)
+func (f Field) TableName() string {
+	return Quote_Char + f.Table + Quote_Char
+}
+func (f Field) FieldName() string {
+	return Quote_Char + f.Name + Quote_Char
 }
 
 func (f Field) Set(val any) Setter {
@@ -73,25 +79,25 @@ func (f Field) NotEq(val any) Condition {
 
 func (f Field) Gt(val any) Condition {
 	return func() (string, any) {
-		return f.quote() + " >  " + placeholder, val
+		return f.quote() + " > " + placeholder, val
 	}
 }
 
 func (f Field) Gte(val any) Condition {
 	return func() (string, any) {
-		return f.quote() + " >=  " + placeholder, val
+		return f.quote() + " >= " + placeholder, val
 	}
 }
 
 func (f Field) Lt(val any) Condition {
 	return func() (string, any) {
-		return f.quote() + " <  " + placeholder, val
+		return f.quote() + " < " + placeholder, val
 	}
 }
 
 func (f Field) Lte(val any) Condition {
 	return func() (string, any) {
-		return f.quote() + " <=  " + placeholder, val
+		return f.quote() + " <= " + placeholder, val
 	}
 }
 

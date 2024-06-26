@@ -47,52 +47,50 @@ type (
 	command  string
 	// expr represents an SQL express
 	expr struct {
-		ColName string
-		Arg     interface{}
+		colName string
+		arg     interface{}
 	}
 	condition struct {
-		Where       strings.Builder
-		WhereParams []interface{}
+		where       strings.Builder
+		whereParams []interface{}
 	}
 
 	Creator struct {
-		Command command
-		Table   string
-		Cols    []string
-		Params  []interface{}
+		command command
+		table   string
+		cols    []string
+		params  []interface{}
 	}
 	Selector struct {
-		Command  command
-		Table    string
-		Join     [][3]string
-		Distinct bool
-		Cols     []string
-		Omit     []interface{}
-		// Where       strings.Builder
-		// WhereParams []interface{}
-		GroupBy    strings.Builder
-		Having     strings.Builder
-		OrderBy    strings.Builder
-		Limit      string
-		LimitSize  int
-		LimitStart int
+		command    command
+		table      string
+		join       [][3]string
+		distinct   bool
+		cols       []string
+		omit       []interface{}
+		groupBy    strings.Builder
+		having     strings.Builder
+		orderBy    strings.Builder
+		limit      string
+		limitSize  int
+		limitStart int
 
 		condition
 	}
 	Updater struct {
-		Command  command
-		Table    string
-		Cols     []string
-		Params   []interface{}
-		IncrCols []expr
-		DecrCols []expr
-		ExprCols []expr
+		command  command
+		table    string
+		cols     []string
+		params   []interface{}
+		incrCols []expr
+		decrCols []expr
+		exprCols []expr
 
 		condition
 	}
 	Deleter struct {
-		Command command
-		Table   string
+		command command
+		table   string
 
 		condition
 	}
@@ -102,28 +100,28 @@ var (
 	createPool = sync.Pool{
 		New: func() interface{} {
 			return &Creator{
-				Command: command_insert,
+				command: command_insert,
 			}
 		},
 	}
 	selectPool = sync.Pool{
 		New: func() interface{} {
 			return &Selector{
-				Command: command_select,
+				command: command_select,
 			}
 		},
 	}
 	updatePool = sync.Pool{
 		New: func() interface{} {
 			return &Updater{
-				Command: command_update,
+				command: command_update,
 			}
 		},
 	}
 	deletePool = sync.Pool{
 		New: func() interface{} {
 			return &Deleter{
-				Command: command_delete,
+				command: command_delete,
 			}
 		},
 	}
@@ -131,22 +129,24 @@ var (
 
 // ////////////////////////////////////////
 // Creator
-func NewCreate() *Creator {
-	return createPool.Get().(*Creator)
+func NewCreate(table string) *Creator {
+	obj := createPool.Get().(*Creator)
+	obj.table = table
+	return obj
 }
 
 func (c *Creator) Free() {
-	c.Table = ""
-	c.Cols = c.Cols[:]
-	c.Params = c.Params[:]
+	c.table = ""
+	c.cols = c.cols[:]
+	c.params = c.params[:]
 	createPool.Put(c)
 }
 
 // Set
 func (c *Creator) Set(fn Setter) *Creator {
 	s, val := fn()
-	c.Cols = append(c.Cols, s)
-	c.Params = append(c.Params, val)
+	c.cols = append(c.cols, s)
+	c.params = append(c.params, val)
 	return c
 }
 
@@ -154,36 +154,39 @@ func (c *Creator) Set(fn Setter) *Creator {
 func (c *Creator) Sets(fns ...Setter) *Creator {
 	for _, fn := range fns {
 		s, val := fn()
-		c.Cols = append(c.Cols, s)
-		c.Params = append(c.Params, val)
+		c.cols = append(c.cols, s)
+		c.params = append(c.params, val)
 	}
 	return c
 }
 
 // Do
 func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
-	if len(c.Cols) == 0 {
+	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
-	fmt.Println(c.Command, c.Table, c.Cols, c.Params)
+	fmt.Println(c.command, c.table, c.cols, c.params)
 	return nil, nil
 }
 
 // /////////////////////////////////////////////////
 // Updater
-func NewUpdate() *Updater {
-	return updatePool.Get().(*Updater)
+func NewUpdate(table string) *Updater {
+	obj := updatePool.Get().(*Updater)
+	obj.table = table
+	return obj
+
 }
 
 func (u *Updater) Free() {
-	u.Table = ""
-	u.Cols = u.Cols[:]
-	u.Params = u.Params[:]
-	u.IncrCols = u.IncrCols[:]
-	u.DecrCols = u.DecrCols[:]
-	u.ExprCols = u.ExprCols[:]
-	u.condition.Where.Reset()
-	u.condition.WhereParams = u.condition.WhereParams[:]
+	u.table = ""
+	u.cols = u.cols[:]
+	u.params = u.params[:]
+	u.incrCols = u.incrCols[:]
+	u.decrCols = u.decrCols[:]
+	u.exprCols = u.exprCols[:]
+	u.condition.where.Reset()
+	u.condition.whereParams = u.condition.whereParams[:]
 	// u.AndOr = false
 	updatePool.Put(u)
 }
@@ -192,8 +195,8 @@ func (u *Updater) Free() {
 func (c *Updater) Set(fns ...Setter) *Updater {
 	for _, fn := range fns {
 		s, val := fn()
-		c.Cols = append(c.Cols, s)
-		c.Params = append(c.Params, val)
+		c.cols = append(c.cols, s)
+		c.params = append(c.params, val)
 	}
 	return c
 }
@@ -203,20 +206,20 @@ func (c *Updater) Where(fns ...Condition) *Updater {
 	if len(fns) == 0 {
 		return c
 	}
-	c.condition.Where.WriteString("(")
+	c.condition.where.WriteString("(")
 	for i, fn := range fns {
 		if i > 0 {
-			c.condition.Where.WriteString(operator_and)
+			c.condition.where.WriteString(operator_and)
 		}
 		cond, val := fn()
-		c.condition.Where.WriteString(cond)
+		c.condition.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			c.condition.WhereParams = append(c.condition.WhereParams, vals...)
+			c.condition.whereParams = append(c.condition.whereParams, vals...)
 		} else {
-			c.condition.WhereParams = append(c.condition.WhereParams, val)
+			c.condition.whereParams = append(c.condition.whereParams, val)
 		}
 	}
-	c.condition.Where.WriteString(")")
+	c.condition.where.WriteString(")")
 
 	return c
 }
@@ -226,20 +229,20 @@ func (c *Updater) AndOr(fns ...Condition) *Updater {
 	if len(fns) == 0 {
 		return c
 	}
-	c.condition.Where.WriteString(operator_and + "(")
+	c.condition.where.WriteString(operator_and + "(")
 	for i, fn := range fns {
 		if i > 0 {
-			c.condition.Where.WriteString(operator_or)
+			c.condition.where.WriteString(operator_or)
 		}
 		cond, val := fn()
-		c.condition.Where.WriteString(cond)
+		c.condition.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			c.condition.WhereParams = append(c.condition.WhereParams, vals...)
+			c.condition.whereParams = append(c.condition.whereParams, vals...)
 		} else {
-			c.condition.WhereParams = append(c.condition.WhereParams, val)
+			c.condition.whereParams = append(c.condition.whereParams, val)
 		}
 	}
-	c.condition.Where.WriteString(")")
+	c.condition.where.WriteString(")")
 	return c
 }
 
@@ -248,20 +251,20 @@ func (c *Updater) OrAnd(fns ...Condition) *Updater {
 	if len(fns) == 0 {
 		return c
 	}
-	c.condition.Where.WriteString(operator_or + "(")
+	c.condition.where.WriteString(operator_or + "(")
 	for i, fn := range fns {
 		if i > 0 {
-			c.condition.Where.WriteString(operator_and)
+			c.condition.where.WriteString(operator_and)
 		}
 		cond, val := fn()
-		c.condition.Where.WriteString(cond)
+		c.condition.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			c.condition.WhereParams = append(c.condition.WhereParams, vals...)
+			c.condition.whereParams = append(c.condition.whereParams, vals...)
 		} else {
-			c.condition.WhereParams = append(c.condition.WhereParams, val)
+			c.condition.whereParams = append(c.condition.whereParams, val)
 		}
 	}
-	c.condition.Where.WriteString(")")
+	c.condition.where.WriteString(")")
 	return c
 }
 
@@ -272,8 +275,11 @@ func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
 
 // //////////////////////////////////////////////////
 // Deleter
-func NewDelete() *Deleter {
-	return deletePool.Get().(*Deleter)
+func NewDelete(table string) *Deleter {
+	obj := deletePool.Get().(*Deleter)
+	obj.table = table
+	return obj
+
 }
 
 func (d *Deleter) Free() {
@@ -287,26 +293,136 @@ func (c *Deleter) Do(ctx context.Context) (sql.Result, error) {
 
 // ///////////////////////////////////////////////
 // Selector
-func NewSelect() *Selector {
-	return selectPool.Get().(*Selector)
+func NewSelect(table string) *Selector {
+	obj := selectPool.Get().(*Selector)
+	obj.table = table
+	return obj
+
 }
 
 func (s *Selector) Free() {
-	s.Table = ""
-	s.Cols = s.Cols[:]
-	s.Distinct = false
-	s.Join = s.Join[:]
-	s.Omit = s.Omit[:]
-	s.Where.Reset()
-	s.WhereParams = s.WhereParams[:]
+	s.table = ""
+	s.cols = s.cols[:]
+	s.distinct = false
+	s.join = s.join[:]
+	s.omit = s.omit[:]
+	s.condition.where.Reset()
+	s.condition.whereParams = s.condition.whereParams[:]
 	// s.AndOr = false
-	s.GroupBy.Reset()
-	s.Having.Reset()
-	s.OrderBy.Reset()
-	s.Limit = ""
-	s.LimitSize = 0
-	s.LimitStart = 0
+	s.groupBy.Reset()
+	s.having.Reset()
+	s.orderBy.Reset()
+	s.limit = ""
+	s.limitSize = 0
+	s.limitStart = 0
 	selectPool.Put(s)
+}
+
+// distinct
+func (c *Selector) Distinct(cols ...string) *Selector {
+	c.distinct = true
+	return c
+}
+
+// cols
+func (c *Selector) Cols(cols ...string) *Selector {
+	c.cols = append(c.cols, cols...)
+	return c
+}
+
+// join
+func (c *Selector) Join(joinType JoinType, left, right Field, fns ...Condition) *Selector {
+	var on strings.Builder
+	for _, fn := range fns {
+		on.WriteString(operator_and)
+		cond, val := fn()
+		on.WriteString(cond)
+		if vals, ok := val.([]any); ok {
+			c.whereParams = append(c.whereParams, vals...)
+		} else {
+			c.whereParams = append(c.whereParams, val)
+		}
+	}
+	c.join = append(c.join, [3]string{
+		string(joinType),
+		right.TableName(),
+		left.FieldName() + "=" + right.FieldName() + on.String(),
+	})
+	return c
+}
+
+func (c *Selector) LeftJoin(left, right Field, fns ...Condition) *Selector {
+	return c.Join(Left_Join, left, right, fns...)
+}
+func (c *Selector) RightJoin(left, right Field, fns ...Condition) *Selector {
+	return c.Join(Right_Join, left, right, fns...)
+}
+
+// Where
+func (c *Selector) Where(fns ...Condition) *Selector {
+	if len(fns) == 0 {
+		return c
+	}
+	c.condition.where.WriteString("(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.condition.where.WriteString(operator_and)
+		}
+		cond, val := fn()
+		c.condition.where.WriteString(cond)
+		if vals, ok := val.([]any); ok {
+			c.condition.whereParams = append(c.condition.whereParams, vals...)
+		} else {
+			c.condition.whereParams = append(c.condition.whereParams, val)
+		}
+	}
+	c.condition.where.WriteString(")")
+
+	return c
+}
+
+// And
+func (c *Selector) AndOr(fns ...Condition) *Selector {
+	if len(fns) == 0 {
+		return c
+	}
+	c.condition.where.WriteString(operator_and + "(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.condition.where.WriteString(operator_or)
+		}
+		cond, val := fn()
+		c.condition.where.WriteString(cond)
+		if vals, ok := val.([]any); ok {
+			c.condition.whereParams = append(c.condition.whereParams, vals...)
+		} else {
+			c.condition.whereParams = append(c.condition.whereParams, val)
+		}
+	}
+	c.condition.where.WriteString(")")
+	return c
+}
+
+// Or
+func (c *Selector) OrAnd(fns ...Condition) *Selector {
+	if len(fns) == 0 {
+		return c
+	}
+	c.condition.where.WriteString(operator_or + "(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.condition.where.WriteString(operator_and)
+		}
+		cond, val := fn()
+		c.condition.where.WriteString(cond)
+		if vals, ok := val.([]any); ok {
+			c.condition.whereParams = append(c.condition.whereParams, vals...)
+		} else {
+			c.condition.whereParams = append(c.condition.whereParams, val)
+		}
+	}
+	c.condition.where.WriteString(")")
+	return c
 }
 
 // Do

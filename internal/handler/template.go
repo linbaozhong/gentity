@@ -58,7 +58,7 @@ func (p *{{.StructName}})scanValues(columns []string) ([]any, error) {
 	for i,column := range columns {
 		switch column {
 		{{- range $key, $value := .Columns}}
-		case {{$tablename}}.{{ $key }}.String():
+		case {{$tablename}}.{{ $key }}.Name:
 			values[i] = new({{getSqlValue $value}})
 		{{- end}}
 		default:
@@ -76,7 +76,7 @@ func (p *{{.StructName}})assignValues(columns []string, values []any) error {
 	for i,column := range columns {
 		switch column {
 		{{- range $key, $value := .Columns}}
-		case {{$tablename}}.{{ $key }}.String():
+		case {{$tablename}}.{{ $key }}.Name:
 			value,ok := values[i].({{getSqlValue $value}})
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field {{index $value 0}}", value)
@@ -101,11 +101,14 @@ package {{ .TableName }}
 import (
 	"github.com/linbaozhong/gentity/pkg/orm/sql"
 )
-
+{{- $tablename := .TableName}}
 const (
 	TableName = "{{ .TableName }}"
+)
+
+var (
 {{- range $key, $value := .Columns}}
-	{{ $key }} sql.Field = "{{index $value 0}}"
+	{{ $key }} = sql.Field{Name: "{{index $value 0}}",table: "{{ $tablename }}"}
 {{- end}}
 )
 `
@@ -120,36 +123,24 @@ import (
 
 // {{.StructName}}Create 新增 {{ .TableName }}
 func {{.StructName}}Create() *sql.Creator {
-	c := sql.NewCreate()
-	c.Table = {{ .TableName }}.TableName
-	c.Cols = make([]string, 0, {{len .Columns}})
-	c.Params = make([]any, 0, {{len .Columns}})
-	return c
+	return sql.NewCreate({{ .TableName }}.TableName)
 }
 
 // {{.StructName}}Update 修改 {{ .TableName }}
 func {{.StructName}}Update() *sql.Updater{
-	c := sql.NewUpdate()
-	c.Table = {{ .TableName }}.TableName
-	c.Cols = make([]string, 0, {{len .Columns}})
-	c.Params = make([]any, 0, {{len .Columns}})
-	return c
+	return sql.NewUpdate({{ .TableName }}.TableName)
 }
 
 
 // {{.StructName}}Delete 删除 {{ .TableName }}
 func {{.StructName}}Delete() *sql.Deleter{
-	c := sql.NewDelete()
-	c.Table = {{ .TableName }}.TableName
-	return c
+	return sql.NewDelete({{ .TableName }}.TableName)
 }
 
 
 // {{.StructName}}Query 查询 {{ .TableName }}，返回 []{{.StructName}}
 func {{.StructName}}Query() *sql.Selector{
-	c := sql.NewSelect()
-	c.Table = {{ .TableName }}.TableName
-	return c
+	return sql.NewSelect({{ .TableName }}.TableName)
 }
 `
 )
