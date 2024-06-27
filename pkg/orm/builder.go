@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sql
+package orm
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"strings"
 	"sync"
 )
@@ -161,12 +162,12 @@ func (c *Creator) Sets(fns ...Setter) *Creator {
 }
 
 // Do
-func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
+func (c *Creator) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
 	fmt.Println(c.command, c.table, c.cols, c.params)
-	return nil, nil
+	return db.ExecContext(ctx, string(c.command)+c.table, c.params...)
 }
 
 // /////////////////////////////////////////////////
@@ -269,8 +270,12 @@ func (c *Updater) OrAnd(fns ...Condition) *Updater {
 }
 
 // Do
-func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
-	return nil, nil
+func (c *Updater) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error) {
+	if len(c.cols) == 0 {
+		return nil, ErrCreateEmpty
+	}
+	fmt.Println(c.command, c.table, c.cols, c.params)
+	return db.ExecContext(ctx, string(c.command)+c.table, c.params...)
 }
 
 // //////////////////////////////////////////////////
@@ -287,8 +292,8 @@ func (d *Deleter) Free() {
 }
 
 // Do
-func (c *Deleter) Do(ctx context.Context) (sql.Result, error) {
-	return nil, nil
+func (c *Deleter) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error) {
+	return db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
 }
 
 // ///////////////////////////////////////////////
@@ -426,6 +431,11 @@ func (c *Selector) OrAnd(fns ...Condition) *Selector {
 }
 
 // Do
-func (s *Selector) Do(ctx context.Context) (sql.Result, error) {
-	return nil, nil
+func (c *Selector) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error) {
+	if len(c.cols) == 0 {
+		return nil, ErrCreateEmpty
+	}
+	fmt.Println(c.command, c.table, c.cols, c.whereParams)
+	return db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
+
 }

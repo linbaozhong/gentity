@@ -22,7 +22,7 @@ import (
 	"sync"
 	{{if .HasTime}}"time"{{end}}
 	"{{.ModulePath}}/table/{{.TableName}}"
-	"github.com/linbaozhong/gentity/pkg/orm/sql"
+	"github.com/linbaozhong/gentity/pkg/orm"
 )
 
 var (
@@ -47,11 +47,6 @@ func (p *{{.StructName}}) Free() {
 	{{lower .StructName}}Pool.Put(p)
 }
 
-//TableName
-func (*{{.StructName}}) TableName() string {
-	return "{{.TableName}}"
-}
-
 func (p *{{.StructName}})scanValues(columns []string) ([]any, error) {
 	{{- $tablename := .TableName}}
 	values := make([]any, len(columns))
@@ -62,7 +57,7 @@ func (p *{{.StructName}})scanValues(columns []string) ([]any, error) {
 			values[i] = new({{getSqlValue $value}})
 		{{- end}}
 		default:
-			values[i] = new(sql.UnknownType)
+			values[i] = new(orm.UnknownType)
 		}
 	}
 	return values, nil
@@ -99,7 +94,7 @@ var (
 package {{ .TableName }}
 
 import (
-	"github.com/linbaozhong/gentity/pkg/orm/sql"
+	"github.com/linbaozhong/gentity/pkg/orm"
 )
 {{- $tablename := .TableName}}
 const (
@@ -108,7 +103,7 @@ const (
 
 var (
 {{- range $key, $value := .Columns}}
-	{{ $key }} = sql.Field{Name: "{{index $value 0}}",table: "{{ $tablename }}"}
+	{{ $key }} = orm.Field{Name: "{{index $value 0}}",Table: "{{ $tablename }}"}
 {{- end}}
 )
 `
@@ -116,31 +111,30 @@ var (
 package table
 
 import (
-	{{if .HasTime}}"time"{{end}}
 	"{{.ModulePath}}/table/{{.TableName}}"
 	"github.com/linbaozhong/gentity/pkg/orm/sql"
 )
 
 // {{.StructName}}Create 新增 {{ .TableName }}
-func {{.StructName}}Create() *sql.Creator {
-	return sql.NewCreate({{ .TableName }}.TableName)
+func {{.StructName}}Create() *orm.Creator {
+	return orm.NewCreate({{ .TableName }}.TableName)
 }
 
 // {{.StructName}}Update 修改 {{ .TableName }}
-func {{.StructName}}Update() *sql.Updater{
-	return sql.NewUpdate({{ .TableName }}.TableName)
+func {{.StructName}}Update() *orm.Updater{
+	return orm.NewUpdate({{ .TableName }}.TableName)
 }
 
 
 // {{.StructName}}Delete 删除 {{ .TableName }}
-func {{.StructName}}Delete() *sql.Deleter{
-	return sql.NewDelete({{ .TableName }}.TableName)
+func {{.StructName}}Delete() *orm.Deleter{
+	return orm.NewDelete({{ .TableName }}.TableName)
 }
 
 
 // {{.StructName}}Query 查询 {{ .TableName }}，返回 []{{.StructName}}
-func {{.StructName}}Query() *sql.Selector{
-	return sql.NewSelect({{ .TableName }}.TableName)
+func {{.StructName}}Query() *orm.Selector{
+	return orm.NewSelect({{ .TableName }}.TableName)
 }
 `
 )

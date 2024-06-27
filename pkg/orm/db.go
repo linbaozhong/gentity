@@ -3,11 +3,9 @@ package orm
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"time"
 )
 
 type (
@@ -15,34 +13,22 @@ type (
 )
 
 var (
-	db         *sqlx.DB
+	xdb        *sqlx.DB
 	Err_NoRows = sql.ErrNoRows
 )
 
-func Db() *sqlx.DB {
-	if db == nil {
-		var e error
-		db, e = sqlx.Connect("mysql",
-			fmt.Sprintf("%s:%s@tcp(%s)/%s?%s",
-				"lbz",
-				"p@ssw0rd",
-				"127.0.0.1:33061",
-				"6lime",
-				"charset=utf8mb4&parseTime=true&loc=Local&readTimeout=30s",
-			))
-		if e != nil {
-			log.Panic(e)
-		}
-		db.SetMaxOpenConns(25)
-		db.SetMaxIdleConns(5)
-		db.SetConnMaxLifetime(time.Second * 60)
+func Connect(driverName, dns string) (*sqlx.DB, error) {
+	var e error
+	xdb, e = sqlx.Connect(driverName, dns)
+	if e != nil {
+		log.Panic(e)
 	}
-	return db
+	return xdb, e
 }
 
 func Close() bool {
-	if db != nil {
-		if e := db.Close(); e != nil {
+	if xdb != nil {
+		if e := xdb.Close(); e != nil {
 			log.Error(e)
 			return false
 		}
@@ -51,8 +37,8 @@ func Close() bool {
 }
 
 // Transaction 事务处理
-func Transaction(f func(tx *sqlx.Tx) (interface{}, error)) (interface{}, error) {
-	tx, e := Db().BeginTxx(context.Background(), nil)
+func Transaction(ctx context.Context, f func(tx *sqlx.Tx) (interface{}, error)) (interface{}, error) {
+	tx, e := xdb.BeginTxx(ctx, nil)
 	if e != nil {
 		return nil, e
 	}
