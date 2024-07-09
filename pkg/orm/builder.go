@@ -18,7 +18,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"strings"
 	"sync"
 )
@@ -53,14 +52,14 @@ type (
 	}
 
 	Creator struct {
-		db      sqlx.ExtContext
+		db      ExtContext
 		command command
 		table   string
 		cols    []string
 		params  []interface{}
 	}
 	Selector struct {
-		db          sqlx.ExtContext
+		db          ExtContext
 		command     command
 		table       string
 		join        [][3]string
@@ -77,7 +76,7 @@ type (
 		whereParams []interface{}
 	}
 	Updater struct {
-		db          sqlx.ExtContext
+		db          ExtContext
 		command     command
 		table       string
 		cols        []string
@@ -89,7 +88,7 @@ type (
 		whereParams []interface{}
 	}
 	Deleter struct {
-		db          sqlx.ExtContext
+		db          ExtContext
 		command     command
 		table       string
 		where       strings.Builder
@@ -130,7 +129,7 @@ var (
 
 // ////////////////////////////////////////
 // Creator
-func NewCreate(db sqlx.ExtContext, table string) *Creator {
+func NewCreate(db ExtContext, table string) *Creator {
 	obj := createPool.Get().(*Creator)
 	obj.db = db
 	obj.table = table
@@ -155,7 +154,7 @@ func (c *Creator) Set(fns ...Setter) *Creator {
 }
 
 // Do
-func (c *Creator) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error) {
+func (c *Creator) Do(ctx context.Context, db ExtContext) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
@@ -165,7 +164,7 @@ func (c *Creator) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error
 
 // /////////////////////////////////////////////////
 // Updater
-func NewUpdate(db sqlx.ExtContext, table string) *Updater {
+func NewUpdate(db ExtContext, table string) *Updater {
 	obj := updatePool.Get().(*Updater)
 	obj.db = db
 	obj.table = table
@@ -264,7 +263,7 @@ func (c *Updater) OrAnd(fns ...Condition) *Updater {
 }
 
 // Do
-func (c *Updater) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error) {
+func (c *Updater) Do(ctx context.Context, db ExtContext) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
@@ -274,7 +273,7 @@ func (c *Updater) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error
 
 // //////////////////////////////////////////////////
 // Deleter
-func NewDelete(db sqlx.ExtContext, table string) *Deleter {
+func NewDelete(db ExtContext, table string) *Deleter {
 	obj := deletePool.Get().(*Deleter)
 	obj.db = db
 	obj.table = table
@@ -354,13 +353,13 @@ func (c *Deleter) OrAnd(fns ...Condition) *Deleter {
 }
 
 // Do
-func (c *Deleter) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error) {
+func (c *Deleter) Do(ctx context.Context, db ExtContext) (sql.Result, error) {
 	return db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
 }
 
 // ///////////////////////////////////////////////
 // Selector
-func NewSelect(db sqlx.ExtContext, table string) *Selector {
+func NewSelect(db ExtContext, table string) *Selector {
 	obj := selectPool.Get().(*Selector)
 	obj.db = db
 	obj.table = table
@@ -493,7 +492,7 @@ func (c *Selector) OrAnd(fns ...Condition) *Selector {
 }
 
 // Do
-func (c *Selector) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error) {
+func (c *Selector) Do(ctx context.Context, db ExtContext) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
