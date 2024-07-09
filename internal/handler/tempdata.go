@@ -30,6 +30,7 @@ type TempData struct {
 	ModulePath     string
 	FileName       string
 	PackageName    string
+	Imports        []string
 	StructName     string
 	TableName      string
 	CacheData      string // 数据缓存时长

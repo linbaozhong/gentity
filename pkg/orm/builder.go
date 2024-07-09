@@ -51,49 +51,49 @@ type (
 		colName string
 		arg     interface{}
 	}
-	condition struct {
-		where       strings.Builder
-		whereParams []interface{}
-	}
 
 	Creator struct {
+		db      sqlx.ExtContext
 		command command
 		table   string
 		cols    []string
 		params  []interface{}
 	}
 	Selector struct {
-		command    command
-		table      string
-		join       [][3]string
-		distinct   bool
-		cols       []string
-		omit       []interface{}
-		groupBy    strings.Builder
-		having     strings.Builder
-		orderBy    strings.Builder
-		limit      string
-		limitSize  int
-		limitStart int
-
-		condition
+		db          sqlx.ExtContext
+		command     command
+		table       string
+		join        [][3]string
+		distinct    bool
+		cols        []string
+		omit        []interface{}
+		groupBy     strings.Builder
+		having      strings.Builder
+		orderBy     strings.Builder
+		limit       string
+		limitSize   int
+		limitStart  int
+		where       strings.Builder
+		whereParams []interface{}
 	}
 	Updater struct {
-		command  command
-		table    string
-		cols     []string
-		params   []interface{}
-		incrCols []expr
-		decrCols []expr
-		exprCols []expr
-
-		condition
+		db          sqlx.ExtContext
+		command     command
+		table       string
+		cols        []string
+		params      []interface{}
+		incrCols    []expr
+		decrCols    []expr
+		exprCols    []expr
+		where       strings.Builder
+		whereParams []interface{}
 	}
 	Deleter struct {
-		command command
-		table   string
-
-		condition
+		db          sqlx.ExtContext
+		command     command
+		table       string
+		where       strings.Builder
+		whereParams []interface{}
 	}
 )
 
@@ -130,8 +130,9 @@ var (
 
 // ////////////////////////////////////////
 // Creator
-func NewCreate(table string) *Creator {
+func NewCreate(db sqlx.ExtContext, table string) *Creator {
 	obj := createPool.Get().(*Creator)
+	obj.db = db
 	obj.table = table
 	return obj
 }
@@ -143,16 +144,8 @@ func (c *Creator) Free() {
 	createPool.Put(c)
 }
 
-// Set
-func (c *Creator) Set(fn Setter) *Creator {
-	s, val := fn()
-	c.cols = append(c.cols, s)
-	c.params = append(c.params, val)
-	return c
-}
-
 // Sets
-func (c *Creator) Sets(fns ...Setter) *Creator {
+func (c *Creator) Set(fns ...Setter) *Creator {
 	for _, fn := range fns {
 		s, val := fn()
 		c.cols = append(c.cols, s)
@@ -172,8 +165,9 @@ func (c *Creator) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error
 
 // /////////////////////////////////////////////////
 // Updater
-func NewUpdate(table string) *Updater {
+func NewUpdate(db sqlx.ExtContext, table string) *Updater {
 	obj := updatePool.Get().(*Updater)
+	obj.db = db
 	obj.table = table
 	return obj
 
@@ -186,8 +180,8 @@ func (u *Updater) Free() {
 	u.incrCols = u.incrCols[:]
 	u.decrCols = u.decrCols[:]
 	u.exprCols = u.exprCols[:]
-	u.condition.where.Reset()
-	u.condition.whereParams = u.condition.whereParams[:]
+	u.where.Reset()
+	u.whereParams = u.whereParams[:]
 	// u.AndOr = false
 	updatePool.Put(u)
 }
@@ -207,20 +201,20 @@ func (c *Updater) Where(fns ...Condition) *Updater {
 	if len(fns) == 0 {
 		return c
 	}
-	c.condition.where.WriteString("(")
+	c.where.WriteString("(")
 	for i, fn := range fns {
 		if i > 0 {
-			c.condition.where.WriteString(operator_and)
+			c.where.WriteString(operator_and)
 		}
 		cond, val := fn()
-		c.condition.where.WriteString(cond)
+		c.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			c.condition.whereParams = append(c.condition.whereParams, vals...)
+			c.whereParams = append(c.whereParams, vals...)
 		} else {
-			c.condition.whereParams = append(c.condition.whereParams, val)
+			c.whereParams = append(c.whereParams, val)
 		}
 	}
-	c.condition.where.WriteString(")")
+	c.where.WriteString(")")
 
 	return c
 }
@@ -230,20 +224,20 @@ func (c *Updater) AndOr(fns ...Condition) *Updater {
 	if len(fns) == 0 {
 		return c
 	}
-	c.condition.where.WriteString(operator_and + "(")
+	c.where.WriteString(operator_and + "(")
 	for i, fn := range fns {
 		if i > 0 {
-			c.condition.where.WriteString(operator_or)
+			c.where.WriteString(operator_or)
 		}
 		cond, val := fn()
-		c.condition.where.WriteString(cond)
+		c.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			c.condition.whereParams = append(c.condition.whereParams, vals...)
+			c.whereParams = append(c.whereParams, vals...)
 		} else {
-			c.condition.whereParams = append(c.condition.whereParams, val)
+			c.whereParams = append(c.whereParams, val)
 		}
 	}
-	c.condition.where.WriteString(")")
+	c.where.WriteString(")")
 	return c
 }
 
@@ -252,20 +246,20 @@ func (c *Updater) OrAnd(fns ...Condition) *Updater {
 	if len(fns) == 0 {
 		return c
 	}
-	c.condition.where.WriteString(operator_or + "(")
+	c.where.WriteString(operator_or + "(")
 	for i, fn := range fns {
 		if i > 0 {
-			c.condition.where.WriteString(operator_and)
+			c.where.WriteString(operator_and)
 		}
 		cond, val := fn()
-		c.condition.where.WriteString(cond)
+		c.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			c.condition.whereParams = append(c.condition.whereParams, vals...)
+			c.whereParams = append(c.whereParams, vals...)
 		} else {
-			c.condition.whereParams = append(c.condition.whereParams, val)
+			c.whereParams = append(c.whereParams, val)
 		}
 	}
-	c.condition.where.WriteString(")")
+	c.where.WriteString(")")
 	return c
 }
 
@@ -280,8 +274,9 @@ func (c *Updater) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error
 
 // //////////////////////////////////////////////////
 // Deleter
-func NewDelete(table string) *Deleter {
+func NewDelete(db sqlx.ExtContext, table string) *Deleter {
 	obj := deletePool.Get().(*Deleter)
+	obj.db = db
 	obj.table = table
 	return obj
 
@@ -291,6 +286,73 @@ func (d *Deleter) Free() {
 	deletePool.Put(d)
 }
 
+// Where
+func (c *Deleter) Where(fns ...Condition) *Deleter {
+	if len(fns) == 0 {
+		return c
+	}
+	c.where.WriteString("(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.where.WriteString(operator_and)
+		}
+		cond, val := fn()
+		c.where.WriteString(cond)
+		if vals, ok := val.([]any); ok {
+			c.whereParams = append(c.whereParams, vals...)
+		} else {
+			c.whereParams = append(c.whereParams, val)
+		}
+	}
+	c.where.WriteString(")")
+
+	return c
+}
+
+// And
+func (c *Deleter) AndOr(fns ...Condition) *Deleter {
+	if len(fns) == 0 {
+		return c
+	}
+	c.where.WriteString(operator_and + "(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.where.WriteString(operator_or)
+		}
+		cond, val := fn()
+		c.where.WriteString(cond)
+		if vals, ok := val.([]any); ok {
+			c.whereParams = append(c.whereParams, vals...)
+		} else {
+			c.whereParams = append(c.whereParams, val)
+		}
+	}
+	c.where.WriteString(")")
+	return c
+}
+
+// Or
+func (c *Deleter) OrAnd(fns ...Condition) *Deleter {
+	if len(fns) == 0 {
+		return c
+	}
+	c.where.WriteString(operator_or + "(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.where.WriteString(operator_and)
+		}
+		cond, val := fn()
+		c.where.WriteString(cond)
+		if vals, ok := val.([]any); ok {
+			c.whereParams = append(c.whereParams, vals...)
+		} else {
+			c.whereParams = append(c.whereParams, val)
+		}
+	}
+	c.where.WriteString(")")
+	return c
+}
+
 // Do
 func (c *Deleter) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error) {
 	return db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
@@ -298,11 +360,11 @@ func (c *Deleter) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, error
 
 // ///////////////////////////////////////////////
 // Selector
-func NewSelect(table string) *Selector {
+func NewSelect(db sqlx.ExtContext, table string) *Selector {
 	obj := selectPool.Get().(*Selector)
+	obj.db = db
 	obj.table = table
 	return obj
-
 }
 
 func (s *Selector) Free() {
@@ -311,8 +373,8 @@ func (s *Selector) Free() {
 	s.distinct = false
 	s.join = s.join[:]
 	s.omit = s.omit[:]
-	s.condition.where.Reset()
-	s.condition.whereParams = s.condition.whereParams[:]
+	s.where.Reset()
+	s.whereParams = s.whereParams[:]
 	// s.AndOr = false
 	s.groupBy.Reset()
 	s.having.Reset()
@@ -368,20 +430,20 @@ func (c *Selector) Where(fns ...Condition) *Selector {
 	if len(fns) == 0 {
 		return c
 	}
-	c.condition.where.WriteString("(")
+	c.where.WriteString("(")
 	for i, fn := range fns {
 		if i > 0 {
-			c.condition.where.WriteString(operator_and)
+			c.where.WriteString(operator_and)
 		}
 		cond, val := fn()
-		c.condition.where.WriteString(cond)
+		c.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			c.condition.whereParams = append(c.condition.whereParams, vals...)
+			c.whereParams = append(c.whereParams, vals...)
 		} else {
-			c.condition.whereParams = append(c.condition.whereParams, val)
+			c.whereParams = append(c.whereParams, val)
 		}
 	}
-	c.condition.where.WriteString(")")
+	c.where.WriteString(")")
 
 	return c
 }
@@ -391,20 +453,20 @@ func (c *Selector) AndOr(fns ...Condition) *Selector {
 	if len(fns) == 0 {
 		return c
 	}
-	c.condition.where.WriteString(operator_and + "(")
+	c.where.WriteString(operator_and + "(")
 	for i, fn := range fns {
 		if i > 0 {
-			c.condition.where.WriteString(operator_or)
+			c.where.WriteString(operator_or)
 		}
 		cond, val := fn()
-		c.condition.where.WriteString(cond)
+		c.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			c.condition.whereParams = append(c.condition.whereParams, vals...)
+			c.whereParams = append(c.whereParams, vals...)
 		} else {
-			c.condition.whereParams = append(c.condition.whereParams, val)
+			c.whereParams = append(c.whereParams, val)
 		}
 	}
-	c.condition.where.WriteString(")")
+	c.where.WriteString(")")
 	return c
 }
 
@@ -413,20 +475,20 @@ func (c *Selector) OrAnd(fns ...Condition) *Selector {
 	if len(fns) == 0 {
 		return c
 	}
-	c.condition.where.WriteString(operator_or + "(")
+	c.where.WriteString(operator_or + "(")
 	for i, fn := range fns {
 		if i > 0 {
-			c.condition.where.WriteString(operator_and)
+			c.where.WriteString(operator_and)
 		}
 		cond, val := fn()
-		c.condition.where.WriteString(cond)
+		c.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			c.condition.whereParams = append(c.condition.whereParams, vals...)
+			c.whereParams = append(c.whereParams, vals...)
 		} else {
-			c.condition.whereParams = append(c.condition.whereParams, val)
+			c.whereParams = append(c.whereParams, val)
 		}
 	}
-	c.condition.where.WriteString(")")
+	c.where.WriteString(")")
 	return c
 }
 
@@ -437,5 +499,4 @@ func (c *Selector) Do(ctx context.Context, db sqlx.ExtContext) (sql.Result, erro
 	}
 	fmt.Println(c.command, c.table, c.cols, c.whereParams)
 	return db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
-
 }

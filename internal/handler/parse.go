@@ -44,6 +44,11 @@ func parseFile(parent, filename, pkgPath string) error {
 		showError(err)
 		return err
 	}
+
+	for _, im := range file.Imports {
+		tempData.Imports = append(tempData.Imports, im.Package)
+	}
+
 	for _, stru := range file.Structures {
 		tempData.TableName = ""
 		tempData.HasTime = false
@@ -140,11 +145,11 @@ func parseFile(parent, filename, pkgPath string) error {
 		}
 
 		// 写table文件
-		err = tempData.writeBuild(filepath.Join(parent, "table"))
-		if err != nil {
-			showError(err.Error())
-			return err
-		}
+		// err = tempData.writeBuild(filepath.Join(parent, "table"))
+		// if err != nil {
+		// 	showError(err.Error())
+		// 	return err
+		// }
 
 		err = tempData.writeTable(filepath.Join(parent, "table", tempData.TableName))
 		if err != nil {

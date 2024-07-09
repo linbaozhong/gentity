@@ -2,33 +2,31 @@ package orm
 
 import (
 	"context"
-	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/linbaozhong/gentity/pkg/log"
 )
 
 type (
-	Session *sqlx.Tx
+	session struct {
+		*sqlx.DB
+	}
+	ExtContext sqlx.ExtContext
 )
 
-var (
-	xdb        *sqlx.DB
-	Err_NoRows = sql.ErrNoRows
-)
-
-func Connect(driverName, dns string) (*sqlx.DB, error) {
-	var e error
-	xdb, e = sqlx.Connect(driverName, dns)
+func Connect(driverName, dns string) (session, error) {
+	xdb, e := sqlx.Connect(driverName, dns)
 	if e != nil {
 		log.Panic(e)
 	}
-	return xdb, e
+	return session{
+		xdb,
+	}, e
 }
 
-func Close() bool {
-	if xdb != nil {
-		if e := xdb.Close(); e != nil {
+func (s session) Close() bool {
+	if s.DB != nil {
+		if e := s.DB.Close(); e != nil {
 			log.Error(e)
 			return false
 		}
@@ -37,8 +35,8 @@ func Close() bool {
 }
 
 // Transaction 事务处理
-func Transaction(ctx context.Context, f func(tx *sqlx.Tx) (interface{}, error)) (interface{}, error) {
-	tx, e := xdb.BeginTxx(ctx, nil)
+func (s session) Transaction(ctx context.Context, f func(tx *sqlx.Tx) (interface{}, error)) (interface{}, error) {
+	tx, e := s.BeginTxx(ctx, nil)
 	if e != nil {
 		return nil, e
 	}

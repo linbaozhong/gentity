@@ -18,9 +18,12 @@ var model_str = `
 package {{.PackageName}}
 
 import (
+	"database/sql"
 	"fmt"
 	"sync"
-	{{if .HasTime}}"time"{{end}}
+	{{- range $key,$value := .Imports}}
+	"{{ $value }}"
+	{{- end}}
 	"{{.ModulePath}}/table/{{.TableName}}"
 	"github.com/linbaozhong/gentity/pkg/orm"
 )
@@ -47,7 +50,7 @@ func (p *{{.StructName}}) Free() {
 	{{lower .StructName}}Pool.Put(p)
 }
 
-func (p *{{.StructName}})scanValues(columns []string) ([]any, error) {
+func (p *{{.StructName}})ScanValues(columns []string) ([]any, error) {
 	{{- $tablename := .TableName}}
 	values := make([]any, len(columns))
 	for i,column := range columns {
@@ -63,7 +66,7 @@ func (p *{{.StructName}})scanValues(columns []string) ([]any, error) {
 	return values, nil
 }
 
-func (p *{{.StructName}})assignValues(columns []string, values []any) error {
+func (p *{{.StructName}})AssignValues(columns []string, values []any) error {
 	{{- $tablename := .TableName}}
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
@@ -106,9 +109,33 @@ var (
 	{{ $key }} = orm.Field{Name: "{{index $value 0}}",Table: "{{ $tablename }}"}
 {{- end}}
 )
+
+
+// Create 新增 {{ .TableName }}
+func Create(db sqlx.ExtContext) *orm.Creator {
+	return orm.NewCreate(db, TableName)
+}
+
+// Update 修改 {{ .TableName }}
+func Update(db sqlx.ExtContext) *orm.Updater{
+	return orm.NewUpdate(db, TableName)
+}
+
+
+// Delete 删除 {{ .TableName }}
+func Delete(db sqlx.ExtContext) *orm.Deleter{
+	return orm.NewDelete(db, TableName)
+}
+
+
+// Query 查询 {{ .TableName }}，返回 []{{.StructName}}
+func Query(db sqlx.ExtContext) *orm.Selector{
+	return orm.NewSelect(db, TableName)
+}
+
 `
 	buildTpl = `
-package table
+package {{ .TableName }}
 
 import (
 	"{{.ModulePath}}/table/{{.TableName}}"
