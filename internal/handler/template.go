@@ -112,24 +112,24 @@ var (
 
 
 // Create 新增 {{ .TableName }}
-func Create(db sqlx.ExtContext) *orm.Creator {
+func Create(db orm.ExtContext) *orm.Creator {
 	return orm.NewCreate(db, TableName)
 }
 
 // Update 修改 {{ .TableName }}
-func Update(db sqlx.ExtContext) *orm.Updater{
+func Update(db orm.ExtContext) *orm.Updater{
 	return orm.NewUpdate(db, TableName)
 }
 
 
 // Delete 删除 {{ .TableName }}
-func Delete(db sqlx.ExtContext) *orm.Deleter{
+func Delete(db orm.ExtContext) *orm.Deleter{
 	return orm.NewDelete(db, TableName)
 }
 
 
 // Query 查询 {{ .TableName }}，返回 []{{.StructName}}
-func Query(db sqlx.ExtContext) *orm.Selector{
+func Query(db orm.ExtContext) *orm.Selector{
 	return orm.NewSelect(db, TableName)
 }
 
