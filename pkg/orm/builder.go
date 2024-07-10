@@ -202,20 +202,7 @@ func (c *Updater) Set(fns ...Setter) *Updater {
 	}
 	return c
 }
-func (c *Updater) Incr(fns ...ExprSetter) *Updater {
-	for _, fn := range fns {
-		s, val := fn()
-		c.incrCols = append(c.incrCols, expr{colName: s, arg: val})
-	}
-	return c
-}
-func (c *Updater) Decr(fns ...ExprSetter) *Updater {
-	for _, fn := range fns {
-		s, val := fn()
-		c.decrCols = append(c.decrCols, expr{colName: s, arg: val})
-	}
-	return c
-}
+
 func (c *Updater) SetExpr(fns ...ExprSetter) *Updater {
 	for _, fn := range fns {
 		s, val := fn()
