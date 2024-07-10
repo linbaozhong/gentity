@@ -299,24 +299,24 @@ func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
 		len(c.exprCols) == 0 {
 		return nil, ErrCreateEmpty
 	}
-	cols := make([]string, 0, 5)
+	_cols := make([]string, 0, 5)
 	for _, col := range c.cols {
-		cols = append(cols, col+" = ?")
+		_cols = append(_cols, col+" = ?")
 	}
 	for _, col := range c.incrCols {
-		cols = append(cols, col.colName)
+		_cols = append(_cols, col.colName)
 		c.params = append(c.params, col.arg)
 	}
 	for _, col := range c.decrCols {
-		cols = append(cols, col.colName)
+		_cols = append(_cols, col.colName)
 		c.params = append(c.params, col.arg)
 	}
 
 	for _, col := range c.exprCols {
-		cols = append(cols, col.colName)
+		_cols = append(_cols, col.colName)
 	}
 	c.command.WriteString("UPDATE " + c.table + " SET ")
-	c.command.WriteString(strings.Join(c.cols, ","))
+	c.command.WriteString(strings.Join(_cols, ","))
 	// WHERE
 	if c.where.Len() > 0 {
 		c.command.WriteString(" WHERE " + c.where.String())
