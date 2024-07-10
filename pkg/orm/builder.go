@@ -130,6 +130,10 @@ var (
 // ////////////////////////////////////////
 // Creator
 func NewCreate(db ExtContext, table string) *Creator {
+	if db == nil || table == "" {
+		panic("db or table is nil")
+		return nil
+	}
 	obj := createPool.Get().(*Creator)
 	obj.db = db
 	obj.table = table
@@ -154,17 +158,21 @@ func (c *Creator) Set(fns ...Setter) *Creator {
 }
 
 // Do
-func (c *Creator) Do(ctx context.Context, db ExtContext) (sql.Result, error) {
+func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
 	fmt.Println(c.command, c.table, c.cols, c.params)
-	return db.ExecContext(ctx, string(c.command)+c.table, c.params...)
+	return c.db.ExecContext(ctx, string(c.command)+c.table, c.params...)
 }
 
 // /////////////////////////////////////////////////
 // Updater
 func NewUpdate(db ExtContext, table string) *Updater {
+	if db == nil || table == "" {
+		panic("db or table is nil")
+		return nil
+	}
 	obj := updatePool.Get().(*Updater)
 	obj.db = db
 	obj.table = table
@@ -263,17 +271,21 @@ func (c *Updater) OrAnd(fns ...Condition) *Updater {
 }
 
 // Do
-func (c *Updater) Do(ctx context.Context, db ExtContext) (sql.Result, error) {
+func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
 	fmt.Println(c.command, c.table, c.cols, c.params)
-	return db.ExecContext(ctx, string(c.command)+c.table, c.params...)
+	return c.db.ExecContext(ctx, string(c.command)+c.table, c.params...)
 }
 
 // //////////////////////////////////////////////////
 // Deleter
 func NewDelete(db ExtContext, table string) *Deleter {
+	if db == nil || table == "" {
+		panic("db or table is nil")
+		return nil
+	}
 	obj := deletePool.Get().(*Deleter)
 	obj.db = db
 	obj.table = table
@@ -353,13 +365,17 @@ func (c *Deleter) OrAnd(fns ...Condition) *Deleter {
 }
 
 // Do
-func (c *Deleter) Do(ctx context.Context, db ExtContext) (sql.Result, error) {
-	return db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
+func (c *Deleter) Do(ctx context.Context) (sql.Result, error) {
+	return c.db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
 }
 
 // ///////////////////////////////////////////////
 // Selector
 func NewSelect(db ExtContext, table string) *Selector {
+	if db == nil || table == "" {
+		panic("db or table is nil")
+		return nil
+	}
 	obj := selectPool.Get().(*Selector)
 	obj.db = db
 	obj.table = table
@@ -492,10 +508,10 @@ func (c *Selector) OrAnd(fns ...Condition) *Selector {
 }
 
 // Do
-func (c *Selector) Do(ctx context.Context, db ExtContext) (sql.Result, error) {
+func (c *Selector) Do(ctx context.Context) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
 	fmt.Println(c.command, c.table, c.cols, c.whereParams)
-	return db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
+	return c.db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
 }
