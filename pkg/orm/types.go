@@ -24,8 +24,9 @@ type (
 		Name  string
 		Table string
 	}
-	Condition func() (string, any)
-	Setter    func() (string, any)
+	Condition  func() (string, any)
+	Setter     func() (string, any)
+	ExprSetter func() (string, any)
 
 	// NullBool is an alias to sql.NullBool.
 	NullBool = sql.NullBool
@@ -62,6 +63,34 @@ func (f Field) FieldName() string {
 func (f Field) Set(val any) Setter {
 	return func() (string, any) {
 		return f.quote(), val
+	}
+}
+
+func (f Field) Incr(val ...any) ExprSetter {
+	var v any
+	if len(val) > 0 {
+		v = val[0]
+	} else {
+		v = 1
+	}
+	return func() (string, any) {
+		return f.quote() + " = " + f.quote() + " + " + placeholder, v
+	}
+}
+func (f Field) Decr(val ...any) ExprSetter {
+	var v any
+	if len(val) > 0 {
+		v = val[0]
+	} else {
+		v = 1
+	}
+	return func() (string, any) {
+		return f.quote() + " = " + f.quote() + " - " + placeholder, v
+	}
+}
+func (f Field) Expr(expr string) ExprSetter {
+	return func() (string, any) {
+		return f.quote() + " = " + expr, nil
 	}
 }
 

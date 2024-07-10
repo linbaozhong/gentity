@@ -31,11 +31,6 @@ const (
 	operator_or  = " OR "
 	placeholder  = "?"
 	Quote_Char   = "`"
-
-	command_insert command = "INSERT INTO "
-	command_select command = "SELECT "
-	command_update command = "UPDATE "
-	command_delete command = "DELETE FROM "
 )
 
 var (
@@ -53,14 +48,13 @@ type (
 
 	Creator struct {
 		db      ExtContext
-		command command
 		table   string
 		cols    []string
 		params  []interface{}
+		command strings.Builder
 	}
 	Selector struct {
 		db          ExtContext
-		command     command
 		table       string
 		join        [][3]string
 		distinct    bool
@@ -74,10 +68,10 @@ type (
 		limitStart  int
 		where       strings.Builder
 		whereParams []interface{}
+		command     strings.Builder
 	}
 	Updater struct {
 		db          ExtContext
-		command     command
 		table       string
 		cols        []string
 		params      []interface{}
@@ -86,43 +80,40 @@ type (
 		exprCols    []expr
 		where       strings.Builder
 		whereParams []interface{}
+		command     strings.Builder
 	}
 	Deleter struct {
 		db          ExtContext
-		command     command
 		table       string
 		where       strings.Builder
 		whereParams []interface{}
+		command     strings.Builder
 	}
 )
 
 var (
 	createPool = sync.Pool{
-		New: func() interface{} {
-			return &Creator{
-				command: command_insert,
-			}
+		New: func() any {
+			obj := &Creator{}
+			return obj
 		},
 	}
 	selectPool = sync.Pool{
-		New: func() interface{} {
-			return &Selector{
-				command: command_select,
-			}
+		New: func() any {
+			obj := &Selector{}
+			return obj
 		},
 	}
 	updatePool = sync.Pool{
-		New: func() interface{} {
-			return &Updater{
-				command: command_update,
-			}
+		New: func() any {
+			obj := &Updater{}
+			return obj
 		},
 	}
 	deletePool = sync.Pool{
 		New: func() interface{} {
-			return &Deleter{
-				command: command_delete,
-			}
+			obj := &Deleter{}
+			return obj
 		},
 	}
 )
@@ -137,6 +128,7 @@ func NewCreate(db ExtContext, table string) *Creator {
 	obj := createPool.Get().(*Creator)
 	obj.db = db
 	obj.table = table
+	obj.command.Reset()
 	return obj
 }
 
@@ -162,8 +154,14 @@ func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
-	fmt.Println(c.command, c.table, c.cols, c.params)
-	return c.db.ExecContext(ctx, string(c.command)+c.table, c.params...)
+	c.command.WriteString("INSERT INTO " + c.table + " (")
+	c.command.WriteString(strings.Join(c.cols, ",") + ") VALUES (")
+	c.command.WriteString(strings.Repeat("?,", len(c.cols))[:len(c.cols)*2-1])
+	c.command.WriteString(")")
+	fmt.Println(c.command.String(), c.params)
+	return nil, nil
+
+	return c.db.ExecContext(ctx, c.command.String(), c.params...)
 }
 
 // /////////////////////////////////////////////////
@@ -176,6 +174,8 @@ func NewUpdate(db ExtContext, table string) *Updater {
 	obj := updatePool.Get().(*Updater)
 	obj.db = db
 	obj.table = table
+	obj.command.Reset()
+
 	return obj
 
 }
@@ -199,6 +199,27 @@ func (c *Updater) Set(fns ...Setter) *Updater {
 		s, val := fn()
 		c.cols = append(c.cols, s)
 		c.params = append(c.params, val)
+	}
+	return c
+}
+func (c *Updater) Incr(fns ...ExprSetter) *Updater {
+	for _, fn := range fns {
+		s, val := fn()
+		c.incrCols = append(c.incrCols, expr{colName: s, arg: val})
+	}
+	return c
+}
+func (c *Updater) Decr(fns ...ExprSetter) *Updater {
+	for _, fn := range fns {
+		s, val := fn()
+		c.decrCols = append(c.decrCols, expr{colName: s, arg: val})
+	}
+	return c
+}
+func (c *Updater) SetExpr(fns ...ExprSetter) *Updater {
+	for _, fn := range fns {
+		s, val := fn()
+		c.exprCols = append(c.exprCols, expr{colName: s, arg: val})
 	}
 	return c
 }
@@ -272,11 +293,39 @@ func (c *Updater) OrAnd(fns ...Condition) *Updater {
 
 // Do
 func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
-	if len(c.cols) == 0 {
+	if len(c.cols) == 0 &&
+		len(c.incrCols) == 0 &&
+		len(c.decrCols) == 0 &&
+		len(c.exprCols) == 0 {
 		return nil, ErrCreateEmpty
 	}
-	fmt.Println(c.command, c.table, c.cols, c.params)
-	return c.db.ExecContext(ctx, string(c.command)+c.table, c.params...)
+	cols := make([]string, 0, 5)
+	for _, col := range c.cols {
+		cols = append(cols, col+" = ?")
+	}
+	for _, col := range c.incrCols {
+		cols = append(cols, col.colName)
+		c.params = append(c.params, col.arg)
+	}
+	for _, col := range c.decrCols {
+		cols = append(cols, col.colName)
+		c.params = append(c.params, col.arg)
+	}
+
+	for _, col := range c.exprCols {
+		cols = append(cols, col.colName)
+	}
+	c.command.WriteString("UPDATE " + c.table + " SET ")
+	c.command.WriteString(strings.Join(c.cols, ","))
+	// WHERE
+	if c.where.Len() > 0 {
+		c.command.WriteString(" WHERE " + c.where.String())
+	}
+
+	c.params = append(c.params, c.whereParams...)
+	fmt.Println(c.command.String(), c.params)
+	return nil, nil
+	return c.db.ExecContext(ctx, c.command.String(), c.params...)
 }
 
 // //////////////////////////////////////////////////
@@ -289,6 +338,7 @@ func NewDelete(db ExtContext, table string) *Deleter {
 	obj := deletePool.Get().(*Deleter)
 	obj.db = db
 	obj.table = table
+	obj.command.Reset()
 	return obj
 
 }
@@ -366,7 +416,8 @@ func (c *Deleter) OrAnd(fns ...Condition) *Deleter {
 
 // Do
 func (c *Deleter) Do(ctx context.Context) (sql.Result, error) {
-	return c.db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
+	c.command.WriteString("DELETE FROM " + c.table)
+	return c.db.ExecContext(ctx, c.command.String(), c.whereParams...)
 }
 
 // ///////////////////////////////////////////////
@@ -379,6 +430,7 @@ func NewSelect(db ExtContext, table string) *Selector {
 	obj := selectPool.Get().(*Selector)
 	obj.db = db
 	obj.table = table
+	obj.command.Reset()
 	return obj
 }
 
@@ -512,6 +564,7 @@ func (c *Selector) Do(ctx context.Context) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
+	c.command.WriteString("SELECT ")
 	fmt.Println(c.command, c.table, c.cols, c.whereParams)
-	return c.db.ExecContext(ctx, string(c.command)+c.table, c.whereParams...)
+	return c.db.ExecContext(ctx, c.command.String(), c.whereParams...)
 }
