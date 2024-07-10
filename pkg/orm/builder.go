@@ -71,12 +71,12 @@ type (
 		command     strings.Builder
 	}
 	Updater struct {
-		db          ExtContext
-		table       string
-		cols        []string
-		params      []interface{}
-		incrCols    []expr
-		decrCols    []expr
+		db     ExtContext
+		table  string
+		cols   []string
+		params []interface{}
+		// incrCols    []expr
+		// decrCols    []expr
 		exprCols    []expr
 		where       strings.Builder
 		whereParams []interface{}
@@ -184,8 +184,8 @@ func (u *Updater) Free() {
 	u.table = ""
 	u.cols = u.cols[:]
 	u.params = u.params[:]
-	u.incrCols = u.incrCols[:]
-	u.decrCols = u.decrCols[:]
+	// u.incrCols = u.incrCols[:]
+	// u.decrCols = u.decrCols[:]
 	u.exprCols = u.exprCols[:]
 	u.where.Reset()
 	u.whereParams = u.whereParams[:]
@@ -281,8 +281,8 @@ func (c *Updater) OrAnd(fns ...Condition) *Updater {
 // Do
 func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
 	if len(c.cols) == 0 &&
-		len(c.incrCols) == 0 &&
-		len(c.decrCols) == 0 &&
+		// len(c.incrCols) == 0 &&
+		// len(c.decrCols) == 0 &&
 		len(c.exprCols) == 0 {
 		return nil, ErrCreateEmpty
 	}
@@ -290,7 +290,7 @@ func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
 	for _, col := range c.cols {
 		_cols = append(_cols, col+" = ?")
 	}
-	for _, col := range c.incrCols {
+	for _, col := range c.exprCols {
 		_cols = append(_cols, col.colName)
 		if col.arg != nil {
 			c.params = append(c.params, col.arg)
