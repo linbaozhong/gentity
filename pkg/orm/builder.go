@@ -305,16 +305,18 @@ func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
 	}
 	for _, col := range c.incrCols {
 		_cols = append(_cols, col.colName)
-		c.params = append(c.params, col.arg)
+		if col.arg != nil {
+			c.params = append(c.params, col.arg)
+		}
 	}
-	for _, col := range c.decrCols {
-		_cols = append(_cols, col.colName)
-		c.params = append(c.params, col.arg)
-	}
-
-	for _, col := range c.exprCols {
-		_cols = append(_cols, col.colName)
-	}
+	// for _, col := range c.decrCols {
+	// 	_cols = append(_cols, col.colName)
+	// 	c.params = append(c.params, col.arg)
+	// }
+	//
+	// for _, col := range c.exprCols {
+	// 	_cols = append(_cols, col.colName)
+	// }
 	c.command.WriteString("UPDATE " + c.table + " SET ")
 	c.command.WriteString(strings.Join(_cols, ","))
 	// WHERE
