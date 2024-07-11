@@ -235,11 +235,17 @@ func (c *Updater) Where(fns ...Condition) *Updater {
 }
 
 // And
-func (c *Updater) AndOr(fns ...Condition) *Updater {
+func (c *Updater) And(fns ...Condition) *Updater {
 	if len(fns) == 0 {
 		return c
 	}
-	c.where.WriteString(operator_and + "(")
+
+	if c.where.Len() == 0 {
+		c.where.WriteString("(")
+	} else {
+		c.where.WriteString(operator_and + "(")
+	}
+
 	for i, fn := range fns {
 		if i > 0 {
 			c.where.WriteString(operator_or)
@@ -257,11 +263,17 @@ func (c *Updater) AndOr(fns ...Condition) *Updater {
 }
 
 // Or
-func (c *Updater) OrAnd(fns ...Condition) *Updater {
+func (c *Updater) Or(fns ...Condition) *Updater {
 	if len(fns) == 0 {
 		return c
 	}
-	c.where.WriteString(operator_or + "(")
+
+	if c.where.Len() == 0 {
+		c.where.WriteString("(")
+	} else {
+		c.where.WriteString(operator_or + "(")
+	}
+
 	for i, fn := range fns {
 		if i > 0 {
 			c.where.WriteString(operator_and)
@@ -360,11 +372,17 @@ func (c *Deleter) Where(fns ...Condition) *Deleter {
 }
 
 // And
-func (c *Deleter) AndOr(fns ...Condition) *Deleter {
+func (c *Deleter) And(fns ...Condition) *Deleter {
 	if len(fns) == 0 {
 		return c
 	}
-	c.where.WriteString(operator_and + "(")
+
+	if c.where.Len() == 0 {
+		c.where.WriteString("(")
+	} else {
+		c.where.WriteString(operator_and + "(")
+	}
+
 	for i, fn := range fns {
 		if i > 0 {
 			c.where.WriteString(operator_or)
@@ -382,11 +400,17 @@ func (c *Deleter) AndOr(fns ...Condition) *Deleter {
 }
 
 // Or
-func (c *Deleter) OrAnd(fns ...Condition) *Deleter {
+func (c *Deleter) Or(fns ...Condition) *Deleter {
 	if len(fns) == 0 {
 		return c
 	}
-	c.where.WriteString(operator_or + "(")
+
+	if c.where.Len() == 0 {
+		c.where.WriteString("(")
+	} else {
+		c.where.WriteString(operator_or + "(")
+	}
+
 	for i, fn := range fns {
 		if i > 0 {
 			c.where.WriteString(operator_and)
@@ -505,11 +529,17 @@ func (c *Selector) Where(fns ...Condition) *Selector {
 }
 
 // And
-func (c *Selector) AndOr(fns ...Condition) *Selector {
+func (c *Selector) And(fns ...Condition) *Selector {
 	if len(fns) == 0 {
 		return c
 	}
-	c.where.WriteString(operator_and + "(")
+
+	if c.where.Len() == 0 {
+		c.where.WriteString("(")
+	} else {
+		c.where.WriteString(operator_and + "(")
+	}
+
 	for i, fn := range fns {
 		if i > 0 {
 			c.where.WriteString(operator_or)
@@ -527,11 +557,17 @@ func (c *Selector) AndOr(fns ...Condition) *Selector {
 }
 
 // Or
-func (c *Selector) OrAnd(fns ...Condition) *Selector {
+func (c *Selector) Or(fns ...Condition) *Selector {
 	if len(fns) == 0 {
 		return c
 	}
-	c.where.WriteString(operator_or + "(")
+
+	if c.where.Len() == 0 {
+		c.where.WriteString("(")
+	} else {
+		c.where.WriteString(operator_or + "(")
+	}
+
 	for i, fn := range fns {
 		if i > 0 {
 			c.where.WriteString(operator_and)
