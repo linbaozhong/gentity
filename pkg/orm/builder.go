@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -35,6 +36,7 @@ const (
 
 var (
 	ErrCreateEmpty = fmt.Errorf("")
+	ErrNotFound    = fmt.Errorf("")
 )
 
 type (
@@ -54,21 +56,22 @@ type (
 		command strings.Builder
 	}
 	Selector struct {
-		db          ExtContext
-		table       string
-		join        [][3]string
-		distinct    bool
-		cols        []string
-		omit        []interface{}
-		groupBy     strings.Builder
-		having      strings.Builder
-		orderBy     strings.Builder
-		limit       string
-		limitSize   int
-		limitStart  int
-		where       strings.Builder
-		whereParams []interface{}
-		command     strings.Builder
+		db           ExtContext
+		table        string
+		join         [][3]string
+		distinct     bool
+		cols         []string
+		omit         []interface{}
+		groupBy      strings.Builder
+		having       strings.Builder
+		havingParams []interface{}
+		orderBy      strings.Builder
+		limit        string
+		limitSize    int
+		limitStart   int
+		where        strings.Builder
+		whereParams  []interface{}
+		command      strings.Builder
 	}
 	Updater struct {
 		db     ExtContext
@@ -458,6 +461,7 @@ func (s *Selector) Free() {
 	// s.AndOr = false
 	s.groupBy.Reset()
 	s.having.Reset()
+	s.havingParams = s.havingParams[:]
 	s.orderBy.Reset()
 	s.limit = ""
 	s.limitSize = 0
@@ -466,14 +470,20 @@ func (s *Selector) Free() {
 }
 
 // distinct
-func (c *Selector) Distinct(cols ...string) *Selector {
+func (c *Selector) Distinct(cols ...Field) *Selector {
 	c.distinct = true
+	for _, col := range cols {
+		c.cols = append(c.cols, col.quote())
+	}
+
 	return c
 }
 
 // cols
-func (c *Selector) Cols(cols ...string) *Selector {
-	c.cols = append(c.cols, cols...)
+func (c *Selector) Cols(cols ...Field) *Selector {
+	for _, col := range cols {
+		c.cols = append(c.cols, col.quote())
+	}
 	return c
 }
 
@@ -493,7 +503,7 @@ func (c *Selector) Join(joinType JoinType, left, right Field, fns ...Condition) 
 	c.join = append(c.join, [3]string{
 		string(joinType),
 		right.TableName(),
-		left.FieldName() + "=" + right.FieldName() + on.String(),
+		left.quote() + "=" + right.quote() + on.String(),
 	})
 	return c
 }
@@ -584,12 +594,194 @@ func (c *Selector) Or(fns ...Condition) *Selector {
 	return c
 }
 
-// Do
-func (c *Selector) Do(ctx context.Context) (sql.Result, error) {
-	if len(c.cols) == 0 {
-		return nil, ErrCreateEmpty
+// Order
+func (c *Selector) Order(cols ...Field) *Selector {
+	return c.Asc(cols...)
+}
+
+// Order Asc
+func (c *Selector) Asc(cols ...Field) *Selector {
+	if len(cols) == 0 {
+		return c
 	}
+	for _, col := range cols {
+		if c.orderBy.Len() > 0 {
+			c.orderBy.WriteByte(',')
+		}
+		c.orderBy.WriteString(col.quote())
+	}
+	return c
+}
+
+// Order Desc
+func (c *Selector) Desc(cols ...Field) *Selector {
+	if len(cols) == 0 {
+		return c
+	}
+	for _, col := range cols {
+		if c.orderBy.Len() > 0 {
+			c.orderBy.WriteByte(',')
+		}
+		c.orderBy.WriteString(col.quote() + " DESC")
+	}
+	return c
+}
+
+// Group
+func (c *Selector) Group(cols ...Field) *Selector {
+	if len(cols) == 0 {
+		return c
+	}
+	for _, col := range cols {
+		if c.groupBy.Len() > 0 {
+			c.groupBy.WriteByte(',')
+		}
+		c.groupBy.WriteString(col.quote())
+	}
+	return c
+}
+
+// Group Having
+func (c *Selector) Having(fns ...Condition) *Selector {
+	if len(fns) == 0 {
+		return c
+	}
+	c.having.WriteString("(")
+	for i, fn := range fns {
+		if i > 0 {
+			c.having.WriteString(operator_and)
+		}
+		cond, val := fn()
+		c.having.WriteString(cond)
+		if vals, ok := val.([]any); ok {
+			c.havingParams = append(c.havingParams, vals...)
+		}
+	}
+	return c
+}
+func (c *Selector) Limit(size int, start ...int) *Selector {
+	c.limitSize = size
+	if len(start) > 0 {
+		c.limitStart = start[0]
+	}
+	c.limit = " LIMIT " + strconv.Itoa(c.limitSize) + " OFFSET " + strconv.Itoa(c.limitStart)
+
+	return c
+}
+
+func (c *Selector) stmt() {
 	c.command.WriteString("SELECT ")
-	fmt.Println(c.command, c.table, c.cols, c.whereParams)
-	return c.db.ExecContext(ctx, c.command.String(), c.whereParams...)
+	if len(c.cols) == 0 {
+		c.command.WriteString("*")
+	} else {
+		if c.distinct {
+			c.command.WriteString("DISTINCT ")
+		}
+		c.command.WriteString(strings.Join(c.cols, ","))
+	}
+	// FROM TABLE
+	c.command.WriteString(" FROM " + Quote_Char + c.table + Quote_Char)
+	for _, j := range c.join {
+		c.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	}
+	// WHERE
+	if c.where.Len() > 0 {
+		c.command.WriteString(" WHERE " + c.where.String())
+	}
+	// GROUP BY
+	if c.groupBy.Len() > 0 {
+		c.command.WriteString(" GROUP BY " + c.groupBy.String())
+		// HAVING
+		if c.having.Len() > 0 {
+			c.command.WriteString(" HAVING " + c.having.String())
+		}
+	}
+	// ORDER BY
+	if c.orderBy.Len() > 0 {
+		c.command.WriteString(" ORDER BY " + c.orderBy.String())
+	}
+
+	// LIMIT
+	if c.limit != "" {
+		c.command.WriteString(c.limit)
+	}
+}
+
+// // Query
+// func (c *Selector) QueryRow(ctx context.Context) *sql.Row {
+// 	c.Limit(1)
+// 	c.stmt()
+// 	return c.db.QueryRowContext(ctx, c.command.String(), c.whereParams...)
+// }
+
+// Query
+func (c *Selector) Query(ctx context.Context) (*sql.Rows, error) {
+	c.stmt()
+	return c.db.QueryContext(ctx, c.command.String(), c.whereParams...)
+}
+
+func (c *Selector) Get(ctx context.Context, dest Modeler) error {
+	rows, err := c.Query(ctx)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return ErrNotFound
+	}
+
+	cols, err := rows.Columns()
+	if err != nil {
+		return err
+	}
+
+	vals, err := dest.ScanValues(cols)
+	if err != nil {
+		return err
+	}
+	err = rows.Scan(vals...)
+	if err != nil {
+		return err
+	}
+
+	err = dest.AssignValues(cols, vals)
+
+	return err
+}
+
+func (c *Selector) Gets(ctx context.Context, dests []Modeler) error {
+	rows, err := c.Query(ctx)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	if err != nil {
+		return err
+	}
+
+	dest := dests[0]
+	vals, err := dest.ScanValues(cols)
+	if err != nil {
+		return err
+	}
+
+	i := 0
+	for rows.Next() {
+		err = rows.Scan(vals...)
+		if err != nil {
+			return err
+		}
+
+		dest := dests[i]
+		err = dest.AssignValues(cols, vals)
+		if err != nil {
+			return err
+		}
+		i++
+	}
+
+	return err
 }

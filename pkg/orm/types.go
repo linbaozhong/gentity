@@ -47,6 +47,11 @@ type (
 	// UnknownType is a named type to any indicates the info
 	// needs to be extracted from the underlying rows.
 	UnknownType any
+
+	Modeler interface {
+		AssignValues(columns []string, values []any) error
+		ScanValues(columns []string) ([]any, error)
+	}
 )
 
 func (f Field) quote() string {

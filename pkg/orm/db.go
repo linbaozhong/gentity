@@ -2,6 +2,7 @@ package orm
 
 import (
 	"context"
+	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/linbaozhong/gentity/pkg/log"
@@ -11,7 +12,11 @@ type (
 	session struct {
 		*sqlx.DB
 	}
-	ExtContext sqlx.ExtContext
+	ExtContext interface {
+		QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
+		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+	} // sqlx.ExtContext
 )
 
 func Connect(driverName, dns string) (session, error) {
