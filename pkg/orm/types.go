@@ -49,6 +49,8 @@ type (
 	UnknownType any
 
 	Modeler interface {
+		New() Modeler
+		TableName() string
 		AssignValues(columns []string, values []any) error
 		ScanValues(columns []string) ([]any, error)
 	}

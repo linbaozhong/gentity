@@ -50,14 +50,14 @@ type (
 
 	Creator struct {
 		db      ExtContext
-		table   string
+		object  Modeler
 		cols    []string
 		params  []interface{}
 		command strings.Builder
 	}
 	Selector struct {
 		db           ExtContext
-		table        string
+		object       Modeler
 		join         [][3]string
 		distinct     bool
 		cols         []string
@@ -75,7 +75,7 @@ type (
 	}
 	Updater struct {
 		db     ExtContext
-		table  string
+		object Modeler
 		cols   []string
 		params []interface{}
 		// incrCols    []expr
@@ -87,7 +87,7 @@ type (
 	}
 	Deleter struct {
 		db          ExtContext
-		table       string
+		object      Modeler
 		where       strings.Builder
 		whereParams []interface{}
 		command     strings.Builder
@@ -123,20 +123,20 @@ var (
 
 // ////////////////////////////////////////
 // Creator
-func NewCreate(db ExtContext, table string) *Creator {
-	if db == nil || table == "" {
+func NewCreate(db ExtContext, mod Modeler) *Creator {
+	if db == nil || mod == nil {
 		panic("db or table is nil")
 		return nil
 	}
 	obj := createPool.Get().(*Creator)
 	obj.db = db
-	obj.table = table
+	obj.object = mod
 	obj.command.Reset()
 	return obj
 }
 
 func (c *Creator) Free() {
-	c.table = ""
+	c.object = nil
 	c.cols = c.cols[:]
 	c.params = c.params[:]
 	createPool.Put(c)
@@ -157,7 +157,7 @@ func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 	if len(c.cols) == 0 {
 		return nil, ErrCreateEmpty
 	}
-	c.command.WriteString("INSERT INTO " + c.table + " (")
+	c.command.WriteString("INSERT INTO " + c.object.TableName() + " (")
 	c.command.WriteString(strings.Join(c.cols, ",") + ") VALUES (")
 	c.command.WriteString(strings.Repeat("?,", len(c.cols))[:len(c.cols)*2-1])
 	c.command.WriteString(")")
@@ -169,14 +169,14 @@ func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 
 // /////////////////////////////////////////////////
 // Updater
-func NewUpdate(db ExtContext, table string) *Updater {
-	if db == nil || table == "" {
+func NewUpdate(db ExtContext, mod Modeler) *Updater {
+	if db == nil || mod == nil {
 		panic("db or table is nil")
 		return nil
 	}
 	obj := updatePool.Get().(*Updater)
 	obj.db = db
-	obj.table = table
+	obj.object = mod
 	obj.command.Reset()
 
 	return obj
@@ -184,7 +184,7 @@ func NewUpdate(db ExtContext, table string) *Updater {
 }
 
 func (u *Updater) Free() {
-	u.table = ""
+	u.object = nil
 	u.cols = u.cols[:]
 	u.params = u.params[:]
 	// u.incrCols = u.incrCols[:]
@@ -319,7 +319,7 @@ func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
 	// for _, col := range c.exprCols {
 	// 	_cols = append(_cols, col.colName)
 	// }
-	c.command.WriteString("UPDATE " + c.table + " SET ")
+	c.command.WriteString("UPDATE " + c.object.TableName() + " SET ")
 	c.command.WriteString(strings.Join(_cols, ","))
 	// WHERE
 	if c.where.Len() > 0 {
@@ -334,14 +334,14 @@ func (c *Updater) Do(ctx context.Context) (sql.Result, error) {
 
 // //////////////////////////////////////////////////
 // Deleter
-func NewDelete(db ExtContext, table string) *Deleter {
-	if db == nil || table == "" {
+func NewDelete(db ExtContext, mod Modeler) *Deleter {
+	if db == nil || mod == nil {
 		panic("db or table is nil")
 		return nil
 	}
 	obj := deletePool.Get().(*Deleter)
 	obj.db = db
-	obj.table = table
+	obj.object = mod
 	obj.command.Reset()
 	return obj
 
@@ -432,26 +432,26 @@ func (c *Deleter) Or(fns ...Condition) *Deleter {
 
 // Do
 func (c *Deleter) Do(ctx context.Context) (sql.Result, error) {
-	c.command.WriteString("DELETE FROM " + c.table)
+	c.command.WriteString("DELETE FROM " + c.object.TableName())
 	return c.db.ExecContext(ctx, c.command.String(), c.whereParams...)
 }
 
 // ///////////////////////////////////////////////
 // Selector
-func NewSelect(db ExtContext, table string) *Selector {
-	if db == nil || table == "" {
+func NewSelect(db ExtContext, mod Modeler) *Selector {
+	if db == nil || mod == nil {
 		panic("db or table is nil")
 		return nil
 	}
 	obj := selectPool.Get().(*Selector)
 	obj.db = db
-	obj.table = table
+	obj.object = mod
 	obj.command.Reset()
 	return obj
 }
 
 func (s *Selector) Free() {
-	s.table = ""
+	s.object = nil
 	s.cols = s.cols[:]
 	s.distinct = false
 	s.join = s.join[:]
@@ -680,7 +680,7 @@ func (c *Selector) stmt() {
 		c.command.WriteString(strings.Join(c.cols, ","))
 	}
 	// FROM TABLE
-	c.command.WriteString(" FROM " + Quote_Char + c.table + Quote_Char)
+	c.command.WriteString(" FROM " + Quote_Char + c.object.TableName() + Quote_Char)
 	for _, j := range c.join {
 		c.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	}
@@ -720,68 +720,72 @@ func (c *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 	return c.db.QueryContext(ctx, c.command.String(), c.whereParams...)
 }
 
-func (c *Selector) Get(ctx context.Context, dest Modeler) error {
+func (c *Selector) Get(ctx context.Context) (Modeler, error) {
 	rows, err := c.Query(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
 
 	if !rows.Next() {
-		return ErrNotFound
+		return nil, ErrNotFound
 	}
 
 	cols, err := rows.Columns()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	vals, err := dest.ScanValues(cols)
+	vals, err := c.object.ScanValues(cols)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = rows.Scan(vals...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = dest.AssignValues(cols, vals)
+	err = c.object.AssignValues(cols, vals)
 
-	return err
+	return c.object, err
 }
 
-func (c *Selector) Gets(ctx context.Context, dests []Modeler) error {
+func (c *Selector) Gets(ctx context.Context) ([]Modeler, error) {
 	rows, err := c.Query(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
 
 	cols, err := rows.Columns()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	dest := dests[0]
-	vals, err := dest.ScanValues(cols)
+	vals, err := c.object.ScanValues(cols)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	dests := make([]Modeler, 0, 1)
 	i := 0
 	for rows.Next() {
-		err = rows.Scan(vals...)
+		_vals := make([]any, 0, len(vals))
+		copy(_vals, vals)
+
+		err = rows.Scan(_vals...)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		dest := dests[i]
-		err = dest.AssignValues(cols, vals)
+		dest := c.object.New()
+		err = dest.AssignValues(cols, _vals)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		dests = append(dests, dest)
 		i++
 	}
 
-	return err
+	return dests, nil
 }
