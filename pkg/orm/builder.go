@@ -751,6 +751,10 @@ func (c *Selector) Get(ctx context.Context, dest Modeler) error {
 }
 
 func (c *Selector) Gets(ctx context.Context, dests []Modeler) error {
+	if dests == nil {
+		return ErrNotFound
+	}
+
 	rows, err := c.Query(ctx)
 	if err != nil {
 		return err
@@ -762,7 +766,6 @@ func (c *Selector) Gets(ctx context.Context, dests []Modeler) error {
 		return err
 	}
 
-	dest := dests[0]
 	vals, err := dest.ScanValues(cols)
 	if err != nil {
 		return err
@@ -770,13 +773,16 @@ func (c *Selector) Gets(ctx context.Context, dests []Modeler) error {
 
 	i := 0
 	for rows.Next() {
-		err = rows.Scan(vals...)
+		_vals := make([]any, len(vals))
+		copy(_vals, vals)
+
+		err = rows.Scan(_vals...)
 		if err != nil {
 			return err
 		}
 
 		dest := dests[i]
-		err = dest.AssignValues(cols, vals)
+		err = dest.AssignValues(cols, _vals)
 		if err != nil {
 			return err
 		}
