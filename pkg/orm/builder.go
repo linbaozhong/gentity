@@ -469,7 +469,7 @@ func (s *Selector) Free() {
 	selectPool.Put(s)
 }
 
-// distinct
+// Distinct
 func (c *Selector) Distinct(cols ...Field) *Selector {
 	c.distinct = true
 	for _, col := range cols {
@@ -508,9 +508,12 @@ func (c *Selector) Join(joinType JoinType, left, right Field, fns ...Condition) 
 	return c
 }
 
+// LeftJoin
 func (c *Selector) LeftJoin(left, right Field, fns ...Condition) *Selector {
 	return c.Join(Left_Join, left, right, fns...)
 }
+
+// RightJoin
 func (c *Selector) RightJoin(left, right Field, fns ...Condition) *Selector {
 	return c.Join(Right_Join, left, right, fns...)
 }
