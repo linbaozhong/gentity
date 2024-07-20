@@ -176,14 +176,14 @@ func CreateX(exec ace.Executer) *ace.Creator {
 	return ace.NewCreate(exec, &db.{{.StructName}}{})
 }
 
-// Update 修改 {{ .TableName }}
-func Update(exec ace.Executer) *ace.Updater{
+// UpdateX 修改 {{ .TableName }}
+func UpdateX(exec ace.Executer) *ace.Updater{
 	return ace.NewUpdate(exec, &db.{{.StructName}}{})
 }
 
 
-// Delete 删除 {{ .TableName }}
-func Delete(exec ace.Executer) *ace.Deleter{
+// DeleteX 删除 {{ .TableName }}
+func DeleteX(exec ace.Executer) *ace.Deleter{
 	return ace.NewDelete(exec, &db.{{.StructName}}{})
 }
 
