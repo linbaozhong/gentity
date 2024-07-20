@@ -21,7 +21,6 @@ package {{.PackageName}}
 
 import (
 	"database/sql"
-	"fmt"
 	"sync"
 	{{- range $key,$value := .Imports}}
 	"{{ $value }}"
@@ -155,69 +154,43 @@ import (
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
-const (
-	TableName = "{{ .TableName }}"
-)
-
 var (
-	PrimaryKey = atype.Field{Name: "{{.PrimaryKeyName}}",Table: "{{ $tablename }}"}
+	PrimaryKey = atype.Field{Name: "{{index .PrimaryKey 0}}",Table: "{{ $tablename }}"}
 {{- range $key, $value := .Columns}}
 	{{ $key }} = atype.Field{Name: "{{index $value 0}}",Table: "{{ $tablename }}"}
 {{- end}}
 )
-
-//
-//// Create 新增 {{ .TableName }}
-//func Create(db ace.ExtContext) *ace.Creator {
-//	return ace.NewCreate(db, TableName)
-//}
-//
-//// Update 修改 {{ .TableName }}
-//func Update(db ace.ExtContext) *ace.Updater{
-//	return ace.NewUpdate(db, TableName)
-//}
-//
-//
-//// Delete 删除 {{ .TableName }}
-//func Delete(db ace.ExtContext) *ace.Deleter{
-//	return ace.NewDelete(db, TableName)
-//}
-//
-//
-//// Query 查询 {{ .TableName }}，返回 []{{.StructName}}
-//func Query(db ace.ExtContext) *ace.Selector{
-//	return ace.NewSelect(db, TableName)
-//}
 
 `
 	buildTpl = `
 package {{ .TableName }}
 
 import (
+	"{{.ModulePath}}/db"
 	"{{.ModulePath}}/table/{{.TableName}}"
-	"github.com/linbaozhong/gentity/pkg/ace/sql"
+	"github.com/linbaozhong/gentity/pkg/ace"
 )
 
-// {{.StructName}}Create 新增 {{ .TableName }}
-func {{.StructName}}Create() *ace.Creator {
-	return ace.NewCreate({{ .TableName }}.TableName)
+// CreateX 新增 {{ .TableName }}
+func CreateX(exec ace.Executer) *ace.Creator {
+	return ace.NewCreate(exec, &db.{{.StructName}}{})
 }
 
-// {{.StructName}}Update 修改 {{ .TableName }}
-func {{.StructName}}Update() *ace.Updater{
-	return ace.NewUpdate({{ .TableName }}.TableName)
-}
-
-
-// {{.StructName}}Delete 删除 {{ .TableName }}
-func {{.StructName}}Delete() *ace.Deleter{
-	return ace.NewDelete({{ .TableName }}.TableName)
+// Update 修改 {{ .TableName }}
+func Update(exec ace.Executer) *ace.Updater{
+	return ace.NewUpdate(exec, &db.{{.StructName}}{})
 }
 
 
-// {{.StructName}}Query 查询 {{ .TableName }}，返回 []{{.StructName}}
-func {{.StructName}}Query() *ace.Selector{
-	return ace.NewSelect({{ .TableName }}.TableName)
+// Delete 删除 {{ .TableName }}
+func Delete(exec ace.Executer) *ace.Deleter{
+	return ace.NewDelete(exec, &db.{{.StructName}}{})
+}
+
+
+// SelectX 查询 {{ .TableName }}
+func SelectX(exec ace.Executer) *ace.Selector{
+	return ace.NewSelect(exec, &db.{{.StructName}}{})
 }
 `
 )
