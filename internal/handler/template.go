@@ -162,6 +162,7 @@ var (
 
 `
 	buildTpl = `
+{{- $tablename := .TableName}}
 package {{ .TableName }}
 
 import (
@@ -226,7 +227,7 @@ func UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.Struct
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
-	result, err := UpdateX(exec).Where(test.ID.Eq(1)).Do(ctx, args...)
+	result, err := UpdateX(exec).Do(ctx, args...)
 	if err != nil {
 		return 0, err
 	}
