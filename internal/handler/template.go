@@ -150,7 +150,6 @@ var (
 package {{ .TableName }}
 
 import (
-	"github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
@@ -166,9 +165,11 @@ var (
 package {{ .TableName }}
 
 import (
+	"context"
 	"{{.ModulePath}}/db"
 	"{{.ModulePath}}/table/{{.TableName}}"
 	"github.com/linbaozhong/gentity/pkg/ace"
+	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
 // CreateX 新增 {{ .TableName }}
@@ -181,16 +182,57 @@ func UpdateX(exec ace.Executer) *ace.Updater{
 	return ace.NewUpdate(exec, &db.{{.StructName}}{})
 }
 
-
 // DeleteX 删除 {{ .TableName }}
 func DeleteX(exec ace.Executer) *ace.Deleter{
 	return ace.NewDelete(exec, &db.{{.StructName}}{})
 }
 
-
 // SelectX 查询 {{ .TableName }}
 func SelectX(exec ace.Executer) *ace.Selector{
 	return ace.NewSelect(exec, &db.{{.StructName}}{})
 }
+
+
+// InsertStruct 批量插入,返回 LastInsertId
+func InsertStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
+	lens := len(beans)
+	args := make([]atype.Modeler, 0, lens)
+	for _, bean := range beans {
+		args = append(args, bean)
+	}
+	result, err := CreateX(exec).Do(ctx, args...)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+// Insert
+func Insert(ctx context.Context, exec ace.Executer, args ...atype.Setter) (int64, error) {
+	if len(args) == 0 {
+		return 0, atype.ErrSetterEmpty
+	}
+	result, err := CreateX(exec).Set(args...).Do(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+// UpdateStruct
+func UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
+	lens := len(beans)
+	args := make([]atype.Modeler, 0, lens)
+	for _, bean := range beans {
+		args = append(args, bean)
+	}
+	result, err := UpdateX(exec).Where(test.ID.Eq(1)).Do(ctx, args...)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+
+}
+
 `
 )
