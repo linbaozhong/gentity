@@ -14,61 +14,22 @@ type (
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 	}
-	dbContext struct {
-		context.Context
+	session struct {
 		*sqlx.DB
 	}
 )
 
-var (
-	db *sqlx.DB
-)
-
-func Db() *sqlx.DB {
-	if db == nil {
-		log.Panic("db is nil")
-	}
-	return db
-}
-
-func Context(ctx ...context.Context) *dbContext {
-	if db == nil {
-		log.Panic("db is nil")
-	}
-	var c context.Context
-	if len(ctx) > 0 {
-		c = ctx[0]
-	} else {
-		c = context.Background()
-	}
-	return &dbContext{
-		Context: c,
-		DB:      db,
-	}
-}
-
-func Connect(driverName, dns string) (*sqlx.DB, error) {
-	var e error
-	db, e = sqlx.Connect(driverName, dns)
+func Connect(driverName, dns string) (*session, error) {
+	db, e := sqlx.Connect(driverName, dns)
 	if e != nil {
 		log.Panic(e)
 	}
-	return db, e
-}
-
-func Close() bool {
-	if db != nil {
-		if e := db.Close(); e != nil {
-			log.Error(e)
-			return false
-		}
-	}
-	return true
+	return &session{db}, e
 }
 
 // Transaction 事务处理
-func Transaction(ctx context.Context, f func(tx *sqlx.Tx) (interface{}, error)) (interface{}, error) {
-	tx, e := db.BeginTxx(ctx, nil)
+func (s *session) Transaction(ctx context.Context, f func(tx *sqlx.Tx) (interface{}, error)) (interface{}, error) {
+	tx, e := s.BeginTxx(ctx, nil)
 	if e != nil {
 		return nil, e
 	}
