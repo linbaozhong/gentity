@@ -188,10 +188,9 @@ func (u *Updater) Cols(cols ...types.Field) *Updater {
 func (u *Updater) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, error) {
 	defer u.Free()
 
-	u.command.WriteString("UPDATE " + types.Quote_Char + u.object.TableName() + types.Quote_Char + " SET ")
-
 	lens := len(u.cols) + len(u.exprCols)
 	if lens > 0 {
+		u.command.WriteString("UPDATE " + types.Quote_Char + u.object.TableName() + types.Quote_Char + " SET ")
 		_cols := make([]string, 0, lens)
 		for _, col := range u.cols {
 			_cols = append(_cols, col.Quote()+" = ?")
@@ -203,9 +202,20 @@ func (u *Updater) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, e
 			}
 		}
 		u.command.WriteString(strings.Join(_cols, ","))
+		// WHERE
+		if u.where.Len() > 0 {
+			u.command.WriteString(" WHERE " + u.where.String())
+		}
 	} else {
 		if len(beans) == 0 {
 			return nil, types.ErrCreateEmpty
+		}
+		for _, bean := range beans {
+			if bean == nil {
+				return nil, types.ErrCreateEmpty
+			}
+			u.command.WriteString("UPDATE " + types.Quote_Char + bean.TableName() + types.Quote_Char + " SET ")
+
 		}
 		_cols := beans[0].AssignColumns(u.affect...)
 		u.params = beans[0].AssignValues(u.affect...)
@@ -215,10 +225,10 @@ func (u *Updater) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, e
 			}
 			u.command.WriteString(col + " = ?")
 		}
-	}
-	// WHERE
-	if u.where.Len() > 0 {
-		u.command.WriteString(" WHERE " + u.where.String())
+		// WHERE
+		if u.where.Len() > 0 {
+			u.command.WriteString(" WHERE " + u.where.String())
+		}
 	}
 
 	u.params = append(u.params, u.whereParams...)
