@@ -185,7 +185,7 @@ func (u *Updater) Cols(cols ...types.Field) *Updater {
 }
 
 // Do
-func (u *Updater) Do(ctx context.Context, bean ...types.Modeler) (sql.Result, error) {
+func (u *Updater) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, error) {
 	defer u.Free()
 
 	u.command.WriteString("UPDATE " + types.Quote_Char + u.object.TableName() + types.Quote_Char + " SET ")
@@ -204,11 +204,11 @@ func (u *Updater) Do(ctx context.Context, bean ...types.Modeler) (sql.Result, er
 		}
 		u.command.WriteString(strings.Join(_cols, ","))
 	} else {
-		if len(bean) == 0 {
+		if len(beans) == 0 {
 			return nil, types.ErrCreateEmpty
 		}
-		_cols := bean[0].AssignColumns(u.affect...)
-		u.params = bean[0].AssignValues(u.affect...)
+		_cols := beans[0].AssignColumns(u.affect...)
+		u.params = beans[0].AssignValues(u.affect...)
 		for i, col := range _cols {
 			if i > 0 {
 				u.command.WriteString(",")

@@ -113,6 +113,7 @@ func (c *Creator) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, e
 		lens = len(_cols)
 		c.command.WriteString(strings.Join(_cols, ","))
 		c.command.WriteString(") VALUES ")
+		_vals := "(" + strings.Repeat("?,", lens)[:lens*2-1] + ")"
 
 		for i, bean := range beans {
 			if bean == nil {
@@ -122,10 +123,10 @@ func (c *Creator) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, e
 			if i > 0 {
 				c.command.WriteString(",")
 			}
+			c.command.WriteString(_vals)
 			c.params = append(c.params, bean.AssignValues(c.affect...)...)
-			c.command.WriteString("(" + strings.Repeat("?,", lens)[:lens*2-1] + ")")
 		}
 	}
-	fmt.Println(c.command.String(), c.params)
+	// fmt.Println(c.command.String(), c.params)
 	return c.db.ExecContext(ctx, c.command.String(), c.params...)
 }

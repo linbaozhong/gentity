@@ -154,7 +154,9 @@ import (
 )
 
 var (
+{{- if .HasPrimaryKey}}
 	PrimaryKey = atype.Field{Name: "{{index .PrimaryKey 0}}",Table: "{{ $tablename }}"}
+{{- end}}
 {{- range $key, $value := .Columns}}
 	{{ $key }} = atype.Field{Name: "{{index $value 0}}",Table: "{{ $tablename }}"}
 {{- end}}

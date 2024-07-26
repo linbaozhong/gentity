@@ -14,9 +14,15 @@ type (
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 	}
+	dbContext struct {
+		context.Context
+		*sqlx.DB
+	}
 )
 
-var db *sqlx.DB
+var (
+	db *sqlx.DB
+)
 
 func Db() *sqlx.DB {
 	if db == nil {
@@ -24,6 +30,23 @@ func Db() *sqlx.DB {
 	}
 	return db
 }
+
+func Context(ctx ...context.Context) *dbContext {
+	if db == nil {
+		log.Panic("db is nil")
+	}
+	var c context.Context
+	if len(ctx) > 0 {
+		c = ctx[0]
+	} else {
+		c = context.Background()
+	}
+	return &dbContext{
+		Context: c,
+		DB:      db,
+	}
+}
+
 func Connect(driverName, dns string) (*sqlx.DB, error) {
 	var e error
 	db, e = sqlx.Connect(driverName, dns)
