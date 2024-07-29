@@ -142,6 +142,8 @@ func (p *{{.StructName}})AssignValues(args ...atype.Field) []any {
 	}
 	return vals
 }
+
+
 `
 var (
 	//
@@ -160,6 +162,23 @@ var (
 {{- range $key, $value := .Columns}}
 	{{ $key }} = atype.Field{Name: "{{index $value 0}}",Table: "{{ $tablename }}"}
 {{- end}}
+	// 可写列
+	WritableFields = []atype.Field {
+{{- range $key, $value := .Columns}}
+	{{- if or (eq (index $value 4) "->") (eq (index $value 4) "")}}
+	{{$key}},
+	{{- end}}
+{{- end}}
+	}
+	// 可读列
+	ReadableFields = []atype.Field {
+{{- range $key, $value := .Columns}}
+	{{- if or (eq (index $value 4) "<-") (eq (index $value 4) "")}}
+	{{$key}},
+	{{- end}}
+{{- end}}
+	}
+
 )
 
 `

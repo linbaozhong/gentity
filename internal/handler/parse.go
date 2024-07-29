@@ -144,14 +144,14 @@ func parseFile(parent, filename, pkgPath string) error {
 			return err
 		}
 
-		//写dal文件
+		// 写dal文件
 		err = tempData.writeBuild(filepath.Join(parent, "dal", tempData.TableName))
 		if err != nil {
 			showError(err.Error())
 			return err
 		}
 
-		//写table文件
+		// 写table文件
 		err = tempData.writeTable(filepath.Join(parent, "table", tempData.TableName))
 		if err != nil {
 			showError(err.Error())
@@ -173,7 +173,7 @@ func parseDocs(tmp *TempData, docs []string) {
 }
 
 func parseTagsForDB(matchs []string) (columnName string, key string, rw string) {
-	s := strings.Split(matchs[0], " ")
+	s := strings.Split(strings.ToLower(matchs[0]), " ")
 	if len(s) == 1 {
 		if s[0] == "-" || s[0] == "->" || s[0] == "<-" {
 			rw = s[0]
@@ -192,12 +192,16 @@ func parseTagsForDB(matchs []string) (columnName string, key string, rw string) 
 			*col = strings.Replace(v, "'", "", -1)
 			continue
 		}
-		if strings.ToLower(v) == "pk" {
+		if v == "pk" {
 			k = col
 			continue
 		}
 		if v == "-" || v == "->" || v == "<-" {
 			rw = v
+		}
+
+		if v == "auto" {
+			rw = "<-"
 		}
 	}
 	key = *k
