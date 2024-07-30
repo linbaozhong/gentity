@@ -72,7 +72,11 @@ func (d *Deleter) Where(fns ...types.Condition) *Deleter {
 	if len(fns) == 0 {
 		return d
 	}
-	d.where.WriteString("(")
+	if d.where.Len() == 0 {
+		d.where.WriteString("(")
+	} else {
+		d.where.WriteString(types.Operator_and + "(")
+	}
 	for i, fn := range fns {
 		if i > 0 {
 			d.where.WriteString(types.Operator_and)

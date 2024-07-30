@@ -146,7 +146,11 @@ func (c *Selector) Where(fns ...types.Condition) *Selector {
 	if len(fns) == 0 {
 		return c
 	}
-	c.where.WriteString("(")
+	if c.where.Len() == 0 {
+		c.where.WriteString("(")
+	} else {
+		c.where.WriteString(types.Operator_and + "(")
+	}
 	for i, fn := range fns {
 		if i > 0 {
 			c.where.WriteString(types.Operator_and)

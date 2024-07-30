@@ -16,7 +16,7 @@ package handler
 
 var model_str = `
 {{- $tablename := .TableName}}
-{{- $primary := .PrimaryKeyName}}
+{{- $keys := .Keys}}
 package {{.PackageName}}
 
 import (
@@ -60,22 +60,11 @@ func (p *{{.StructName}}) TableName() string {
 func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]atype.Modeler, error) {
 	defer rows.Close()
 	{{.TableName}}s := make([]atype.Modeler, 0)
-	lens := len(args)
-	if lens == 0 {
-		for rows.Next() {
-			p := New{{.StructName}}()
-			err := rows.Scan(
-				{{- range $key, $value := .Columns}}
-				&p.{{$key}},
-				{{- end}}
-			)
-			if err != nil {
-				return nil, err
-			}
-			{{.TableName}}s = append({{.TableName}}s, p)
-		}
-		return {{.TableName}}s, nil
+
+	if len(args) == 0 {
+		args = {{$tablename}}.ReadableFields
 	}
+
 	for rows.Next() {
 		p := New{{.StructName}}()
 		vals := make([]any, 0, len(args))
@@ -99,39 +88,32 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]atype.Mod
 
 func (p *{{.StructName}})AssignColumns(args ...atype.Field) []string {
 	var lens = len(args)
-	if lens == 0 {
-		return []string{
-		{{- range $key, $value := .Columns}}
-		{{- if eq $primary $key}} {{continue}} {{end}}
-			{{$tablename}}.{{ $key }}.Quote(),
-		{{- end}}
+	if lens > 0 {
+		cols := make([]string, 0, lens)
+		for _, arg := range args {
+			switch arg {
+			{{- range $key, $value := .Columns}}
+			case {{$tablename}}.{{ $key }}:
+				cols = append(cols, {{$tablename}}.{{ $key }}.Quote())
+			{{- end}}
+			}
 		}
+		return cols
 	}
-	var (
-		cols = make([]string, 0, lens)
-	)
-	for _, arg := range args {
-		switch arg {
-		{{- range $key, $value := .Columns}}
-		{{- if eq $primary $key}} {{continue}} {{end}}
-		case {{$tablename}}.{{ $key }}:
-			cols = append(cols, {{$tablename}}.{{ $key }}.Quote())
-		{{- end}}
-		}
+
+	cols := make([]string, 0, len({{$tablename}}.WritableFields))
+	for _, col := range {{$tablename}}.WritableFields {
+		cols = append(cols, col.Quote())
 	}
 	return cols
 }
 
 func (p *{{.StructName}})AssignValues(args ...atype.Field) []any {
-	var lens = len(args)
-	if lens == 0 {
-		return []any{
-		{{- range $key, $value := .Columns}}
-			p.{{ $key }},
-		{{- end}}
-		}
+	if len(args) == 0 {
+		args = {{$tablename}}.WritableFields
 	}
-	var vals = make([]any, 0, lens)
+	
+	var vals = make([]any, 0, len(args))
 	for _, arg := range args {
 		switch arg {
 		{{- range $key, $value := .Columns}}
@@ -141,6 +123,15 @@ func (p *{{.StructName}})AssignValues(args ...atype.Field) []any {
 		}
 	}
 	return vals
+}
+
+//
+func (p *{{.StructName}}) AssignKeys() ([]atype.Field, []any) {
+	return {{$tablename}}.PrimaryKeys, []any{
+	{{- range $key,$value := .Keys}}
+		p.{{$value}},
+	{{- end}}
+	}
 }
 
 
@@ -156,12 +147,19 @@ import (
 )
 
 var (
-{{- if .HasPrimaryKey}}
-	PrimaryKey = atype.Field{Name: "{{index .PrimaryKey 0}}",Table: "{{ $tablename }}"}
-{{- end}}
 {{- range $key, $value := .Columns}}
 	{{ $key }} = atype.Field{Name: "{{index $value 0}}",Table: "{{ $tablename }}"}
 {{- end}}
+
+{{- if .HasPrimaryKey}}
+	// 主键
+	PrimaryKeys = []atype.Field{
+	{{- range $key,$value := .Keys}}
+		{{$value}},
+	{{- end}}
+	}
+{{- end}}
+
 	// 可写列
 	WritableFields = []atype.Field {
 {{- range $key, $value := .Columns}}
@@ -248,7 +246,7 @@ func UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.Struct
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
-	result, err := UpdateX(exec).Do(ctx, args...)
+	result, err := UpdateX(exec).Struct(ctx, args...)
 	if err != nil {
 		return 0, err
 	}

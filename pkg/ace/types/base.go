@@ -66,6 +66,7 @@ type (
 		AssignColumns(args ...Field) []string
 		AssignValues(args ...Field) []any
 		Scan(rows *sql.Rows, args ...Field) ([]Modeler, error)
+		AssignKeys() ([]Field, []any)
 		// AssignValues(columns []string, values []any) error
 		// ScanValues(columns []string) ([]any, error)
 	}

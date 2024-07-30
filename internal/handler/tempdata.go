@@ -26,25 +26,26 @@ import (
 
 // TempData 表示生成template所需要的数据结构
 type TempData struct {
-	Module         string
-	ModulePath     string
-	FileName       string
-	PackageName    string
-	Imports        []string
-	StructName     string
-	TableName      string
-	CacheData      string // 数据缓存时长
-	CacheList      string // list缓存时长
-	CacheLimit     string // list缓存长度
-	Columns        map[string][]string
-	PrimaryKey     []string
-	PrimaryKeyName string // struct pk属性名
-	HasPrimaryKey  bool
-	HasState       bool
-	HasCache       bool
-	HasTime        bool
-	HasString      bool
-	HasConvert     bool
+	Module      string
+	ModulePath  string
+	FileName    string
+	PackageName string
+	Imports     []string
+	StructName  string
+	TableName   string
+	CacheData   string // 数据缓存时长
+	CacheList   string // list缓存时长
+	CacheLimit  string // list缓存长度
+	Columns     map[string][]string
+	Keys        []string
+	//PrimaryKey     []string
+	//PrimaryKeyName string // struct pk属性名
+	HasPrimaryKey bool
+	HasState      bool
+	HasCache      bool
+	HasTime       bool
+	HasString     bool
+	HasConvert    bool
 }
 
 func getBaseFilename(filename string) string {

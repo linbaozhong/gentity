@@ -103,7 +103,11 @@ func (u *Updater) Where(fns ...types.Condition) *Updater {
 	if len(fns) == 0 {
 		return u
 	}
-	u.where.WriteString("(")
+	if u.where.Len() == 0 {
+		u.where.WriteString("(")
+	} else {
+		u.where.WriteString(types.Operator_and + "(")
+	}
 	for i, fn := range fns {
 		if i > 0 {
 			u.where.WriteString(types.Operator_and)
@@ -224,22 +228,30 @@ func (u *Updater) Struct(ctx context.Context, beans ...types.Modeler) (sql.Resul
 		return nil, types.ErrCreateEmpty
 	}
 
-	var sqls strings.Builder
+	//var sqls strings.Builder
 	for n, bean := range beans {
 		if n > 0 {
-			sqls.WriteString(";")
+			u.command.WriteString(";")
 		}
-		sqls.WriteString("UPDATE " + types.Quote_Char + bean.TableName() + types.Quote_Char + " SET ")
+		u.command.WriteString("UPDATE " + types.Quote_Char + bean.TableName() + types.Quote_Char + " SET ")
 		cols := bean.AssignColumns(u.affect...)
 		params := bean.AssignValues(u.affect...)
 		u.params = append(u.params, params...)
+		keys, values := bean.AssignKeys()
+		for i := 0; i < len(keys); i++ {
+			u.Where(keys[i].Eq(values[i]))
+		}
 		for i, col := range cols {
 			if i > 0 {
-				sqls.WriteString(",")
+				u.command.WriteString(",")
 			}
-			sqls.WriteString(col + " = ?")
+			u.command.WriteString(col + " = ?")
 		}
-
+		// WHERE
+		if u.where.Len() > 0 {
+			u.command.WriteString(" WHERE " + u.where.String())
+		}
+		u.params = append(u.params, u.whereParams...)
 	}
 	return u.db.ExecContext(ctx, u.command.String(), u.params...)
 }
