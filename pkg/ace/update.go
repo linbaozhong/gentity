@@ -185,53 +185,61 @@ func (u *Updater) Cols(cols ...types.Field) *Updater {
 }
 
 // Do
-func (u *Updater) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, error) {
+func (u *Updater) Do(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
 
 	lens := len(u.cols) + len(u.exprCols)
-	if lens > 0 {
-		u.command.WriteString("UPDATE " + types.Quote_Char + u.object.TableName() + types.Quote_Char + " SET ")
-		_cols := make([]string, 0, lens)
-		for _, col := range u.cols {
-			_cols = append(_cols, col.Quote()+" = ?")
-		}
-		for _, col := range u.exprCols {
-			_cols = append(_cols, col.colName)
-			if col.arg != nil {
-				u.params = append(u.params, col.arg)
-			}
-		}
-		u.command.WriteString(strings.Join(_cols, ","))
-		// WHERE
-		if u.where.Len() > 0 {
-			u.command.WriteString(" WHERE " + u.where.String())
-		}
-	} else {
-		if len(beans) == 0 {
-			return nil, types.ErrCreateEmpty
-		}
-		for _, bean := range beans {
-			if bean == nil {
-				return nil, types.ErrCreateEmpty
-			}
-			u.command.WriteString("UPDATE " + types.Quote_Char + bean.TableName() + types.Quote_Char + " SET ")
+	if lens == 0 {
+		return nil, types.ErrCreateEmpty
+	}
 
+	u.command.WriteString("UPDATE " + types.Quote_Char + u.object.TableName() + types.Quote_Char + " SET ")
+	_cols := make([]string, 0, lens)
+	for _, col := range u.cols {
+		_cols = append(_cols, col.Quote()+" = ?")
+	}
+	for _, col := range u.exprCols {
+		_cols = append(_cols, col.colName)
+		if col.arg != nil {
+			u.params = append(u.params, col.arg)
 		}
-		_cols := beans[0].AssignColumns(u.affect...)
-		u.params = beans[0].AssignValues(u.affect...)
-		for i, col := range _cols {
-			if i > 0 {
-				u.command.WriteString(",")
-			}
-			u.command.WriteString(col + " = ?")
-		}
-		// WHERE
-		if u.where.Len() > 0 {
-			u.command.WriteString(" WHERE " + u.where.String())
-		}
+	}
+	u.command.WriteString(strings.Join(_cols, ","))
+	// WHERE
+	if u.where.Len() > 0 {
+		u.command.WriteString(" WHERE " + u.where.String())
 	}
 
 	u.params = append(u.params, u.whereParams...)
 
+	return u.db.ExecContext(ctx, u.command.String(), u.params...)
+}
+
+// Struct
+func (u *Updater) Struct(ctx context.Context, beans ...types.Modeler) (sql.Result, error) {
+	defer u.Free()
+
+	lens := len(beans)
+	if lens == 0 {
+		return nil, types.ErrCreateEmpty
+	}
+
+	var sqls strings.Builder
+	for n, bean := range beans {
+		if n > 0 {
+			sqls.WriteString(";")
+		}
+		sqls.WriteString("UPDATE " + types.Quote_Char + bean.TableName() + types.Quote_Char + " SET ")
+		cols := bean.AssignColumns(u.affect...)
+		params := bean.AssignValues(u.affect...)
+		u.params = append(u.params, params...)
+		for i, col := range cols {
+			if i > 0 {
+				sqls.WriteString(",")
+			}
+			sqls.WriteString(col + " = ?")
+		}
+
+	}
 	return u.db.ExecContext(ctx, u.command.String(), u.params...)
 }
