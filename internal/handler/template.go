@@ -254,5 +254,35 @@ func UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.Struct
 
 }
 
+// Delete
+func Delete(ctx context.Context, exec ace.Executer) (bool, error) {
+
+}
+
+// Exists
+func Exists(ctx context.Context, exec ace.Executer) (bool, error) {
+
+}
+
+// Get
+func Get(ctx context.Context, exec ace.Executer) (bool, error) {
+
+}
+
+// Gets
+func Gets(ctx context.Context, exec ace.Executer) (bool, error) {
+
+}
+
+// Find
+func Find(ctx context.Context, exec ace.Executer) (bool, error) {
+
+}
+
+// Count
+func Count(ctx context.Context, exec ace.Executer) (bool, error) {
+
+}
+
 `
 )
