@@ -63,7 +63,7 @@ type (
 		// New() Modeler
 		TableName() string
 		// Set(args ...Field) ([]string, []any)
-		AssignColumns(args ...Field) []string
+		// AssignColumns(args ...Field) []string
 		AssignValues(args ...Field) ([]string, []any)
 		Scan(rows *sql.Rows, args ...Field) ([]Modeler, error)
 		AssignKeys() ([]Field, []any)

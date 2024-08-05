@@ -84,29 +84,28 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]atype.Mod
 	}
 	return {{.TableName}}s, nil
 }
-
-
-func (p *{{.StructName}})AssignColumns(args ...atype.Field) []string {
-	var lens = len(args)
-	if lens > 0 {
-		cols := make([]string, 0, lens)
-		for _, arg := range args {
-			switch arg {
-			{{- range $key, $value := .Columns}}
-			case {{$tablename}}.{{ $key }}:
-				cols = append(cols, {{$tablename}}.{{ $key }}.Quote())
-			{{- end}}
-			}
-		}
-		return cols
-	}
-
-	cols := make([]string, 0, len({{$tablename}}.WritableFields))
-	for _, col := range {{$tablename}}.WritableFields {
-		cols = append(cols, col.Quote())
-	}
-	return cols
-}
+//
+// func (p *{{.StructName}})AssignColumns(args ...atype.Field) []string {
+// 	var lens = len(args)
+// 	if lens > 0 {
+// 		cols := make([]string, 0, lens)
+// 		for _, arg := range args {
+// 			switch arg {
+// 			{{- range $key, $value := .Columns}}
+// 			case {{$tablename}}.{{ $key }}:
+// 				cols = append(cols, {{$tablename}}.{{ $key }}.Quote())
+// 			{{- end}}
+// 			}
+// 		}
+// 		return cols
+// 	}
+//
+// 	cols := make([]string, 0, len({{$tablename}}.WritableFields))
+// 	for _, col := range {{$tablename}}.WritableFields {
+// 		cols = append(cols, col.Quote())
+// 	}
+// 	return cols
+// }
 
 func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
 	if len(args) == 0 {
