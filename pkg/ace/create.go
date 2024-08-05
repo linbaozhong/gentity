@@ -94,8 +94,8 @@ func (c *Creator) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, e
 
 	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.object.TableName() + types.Quote_Char + " (")
 
-	lens := len(c.cols)
-	if lens > 0 {
+	_colLens := len(c.cols)
+	if _colLens > 0 {
 		for i, col := range c.cols {
 			if i > 0 {
 				c.command.WriteString(",")
@@ -103,28 +103,28 @@ func (c *Creator) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, e
 			c.command.WriteString(col.Quote())
 		}
 		c.command.WriteString(") VALUES ")
-		c.command.WriteString("(" + strings.Repeat("?,", lens)[:lens*2-1] + ")")
+		c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 	} else {
-		_lens := len(beans)
-		if _lens == 0 || _lens > 100 || beans[0] == nil {
+		_beanLens := len(beans)
+		if _beanLens == 0 || _beanLens > 100 || beans[0] == nil {
 			return nil, types.ErrBeanEmpty
 		}
-		_cols := beans[0].AssignColumns(c.affect...)
-		lens = len(_cols)
+		_cols, _vals := beans[0].AssignValues(c.affect...)
+		_colLens = len(_cols)
 		c.command.WriteString(strings.Join(_cols, ","))
 		c.command.WriteString(") VALUES ")
+		c.params = append(c.params, _vals...)
+		c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 
-		for i, bean := range beans {
+		for i := 1; i < _beanLens; i++ {
+			bean := beans[i]
 			if bean == nil {
 				return nil, types.ErrBeanEmpty
 			}
-
-			if i > 0 {
-				c.command.WriteString(",")
-			}
-			_, _vals := bean.AssignValues(c.affect...)
+			c.command.WriteString(",")
+			_, _vals = bean.AssignValues(c.affect...)
 			c.params = append(c.params, _vals...)
-			c.command.WriteString("(" + strings.Repeat("?,", lens)[:lens*2-1] + ")")
+			c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 		}
 	}
 	// fmt.Println(c.command.String(), c.params)
