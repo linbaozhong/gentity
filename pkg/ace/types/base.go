@@ -64,7 +64,7 @@ type (
 		TableName() string
 		// Set(args ...Field) ([]string, []any)
 		AssignColumns(args ...Field) []string
-		AssignValues(args ...Field) []any
+		AssignValues(args ...Field) ([]string, []any)
 		Scan(rows *sql.Rows, args ...Field) ([]Modeler, error)
 		AssignKeys() ([]Field, []any)
 		// AssignValues(columns []string, values []any) error

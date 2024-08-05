@@ -108,21 +108,26 @@ func (p *{{.StructName}})AssignColumns(args ...atype.Field) []string {
 	return cols
 }
 
-func (p *{{.StructName}})AssignValues(args ...atype.Field) []any {
+func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
 	if len(args) == 0 {
 		args = {{$tablename}}.WritableFields
 	}
 	
-	var vals = make([]any, 0, len(args))
+	var (
+		lens = len(args)
+		cols = make([]string, 0, lens)
+		vals = make([]any, 0, lens)
+	)
 	for _, arg := range args {
 		switch arg {
 		{{- range $key, $value := .Columns}}
 		case {{$tablename}}.{{ $key }}:
+			cols = append(cols, {{$tablename}}.{{ $key }}.Quote())
 			vals = append(vals, p.{{ $key }})
 		{{- end}}
 		}
 	}
-	return vals
+	return cols, vals
 }
 
 //
