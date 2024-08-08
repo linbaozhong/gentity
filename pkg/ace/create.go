@@ -89,43 +89,58 @@ func (c *Creator) Cols(cols ...types.Field) *Creator {
 }
 
 // Do
-func (c *Creator) Do(ctx context.Context, beans ...types.Modeler) (sql.Result, error) {
+func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 	defer c.Free()
+	lens := len(c.cols)
+	if lens == 0 {
+		return nil, types.ErrCreateEmpty
+	}
+
+	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.object.TableName() + types.Quote_Char + " (")
+	for i, col := range c.cols {
+		if i > 0 {
+			c.command.WriteString(",")
+		}
+		c.command.WriteString(col.Quote())
+	}
+	c.command.WriteString(") VALUES ")
+	c.command.WriteString("(" + strings.Repeat("?,", lens)[:lens*2-1] + ")")
+
+	// fmt.Println(c.command.String(), c.params)
+	return c.db.ExecContext(ctx, c.command.String(), c.params...)
+}
+
+// Struct
+func (c *Creator) Struct(ctx context.Context, beans ...types.Modeler) (sql.Result, error) {
+	defer c.Free()
+
+	lens := len(beans)
+	if lens == 0 {
+		return nil, types.ErrCreateEmpty
+	}
 
 	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.object.TableName() + types.Quote_Char + " (")
 
-	_colLens := len(c.cols)
-	if _colLens > 0 {
-		for i, col := range c.cols {
-			if i > 0 {
-				c.command.WriteString(",")
-			}
-			c.command.WriteString(col.Quote())
-		}
-		c.command.WriteString(") VALUES ")
-		c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
-	} else {
-		_beanLens := len(beans)
-		if _beanLens == 0 || _beanLens > 100 || beans[0] == nil {
+	if lens == 0 || lens > 100 || beans[0] == nil {
+		return nil, types.ErrBeanEmpty
+	}
+
+	_cols, _vals := beans[0].AssignValues(c.affect...)
+	_colLens := len(_cols)
+	c.command.WriteString(strings.Join(_cols, ","))
+	c.command.WriteString(") VALUES ")
+	c.params = append(c.params, _vals...)
+	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
+
+	for i := 1; i < lens; i++ {
+		bean := beans[i]
+		if bean == nil {
 			return nil, types.ErrBeanEmpty
 		}
-		_cols, _vals := beans[0].AssignValues(c.affect...)
-		_colLens = len(_cols)
-		c.command.WriteString(strings.Join(_cols, ","))
-		c.command.WriteString(") VALUES ")
+		c.command.WriteString(",")
+		_, _vals = bean.AssignValues(c.affect...)
 		c.params = append(c.params, _vals...)
 		c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
-
-		for i := 1; i < _beanLens; i++ {
-			bean := beans[i]
-			if bean == nil {
-				return nil, types.ErrBeanEmpty
-			}
-			c.command.WriteString(",")
-			_, _vals = bean.AssignValues(c.affect...)
-			c.params = append(c.params, _vals...)
-			c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
-		}
 	}
 	// fmt.Println(c.command.String(), c.params)
 	return c.db.ExecContext(ctx, c.command.String(), c.params...)
