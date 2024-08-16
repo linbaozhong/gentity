@@ -38,8 +38,8 @@ type TempData struct {
 	CacheLimit  string // list缓存长度
 	Columns     map[string][]string
 	Keys        []string
-	//PrimaryKey     []string
-	//PrimaryKeyName string // struct pk属性名
+	// PrimaryKey     []string
+	// PrimaryKeyName string // struct pk属性名
 	HasPrimaryKey bool
 	HasState      bool
 	HasCache      bool
@@ -81,6 +81,27 @@ func (d *TempData) writeToModel(fileName string) error {
 				ret = `false`
 			default:
 				ret = 0
+			}
+			return ret
+		},
+		"getZeroValue": func(t []string) interface{} {
+			if len(t) < 3 {
+				return `""`
+			}
+			var ret interface{}
+			switch t[2] {
+			case "string":
+				ret = ` == ""`
+			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":
+				ret = ` == 0`
+			case "float32", "float64":
+				ret = ` == 0.0`
+			case "time.Time":
+				ret = `.IsZero()`
+			case "bool":
+				ret = ` == false`
+			default:
+				ret = ` == 0`
 			}
 			return ret
 		},

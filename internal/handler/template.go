@@ -111,15 +111,34 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]atype.Mod
 // }
 
 func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
+	var (
+		lens = len(args)
+		cols []string
+		vals []any
+	)
+
 	if len(args) == 0 {
 		args = {{$tablename}}.WritableFields
-	}
-	
-	var (
 		lens = len(args)
 		cols = make([]string, 0, lens)
 		vals = make([]any, 0, lens)
-	)
+		for _, arg := range args {
+			switch arg {
+			{{- range $key, $value := .Columns}}
+			case {{$tablename}}.{{ $key }}:
+				if p.{{ $key }}{{getZeroValue $value}} {
+					continue
+				}
+				cols = append(cols, {{$tablename}}.{{ $key }}.Quote())
+				vals = append(vals, p.{{ $key }})
+			{{- end}}
+			}
+		}
+		return cols, vals
+	}
+	
+	cols = make([]string, 0, lens)
+	vals = make([]any, 0, lens)
 	for _, arg := range args {
 		switch arg {
 		{{- range $key, $value := .Columns}}

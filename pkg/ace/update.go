@@ -236,6 +236,7 @@ func (u *Updater) Struct(ctx context.Context, beans ...types.Modeler) (sql.Resul
 		u.command.WriteString("UPDATE " + types.Quote_Char + bean.TableName() + types.Quote_Char + " SET ")
 		cols, params := bean.AssignValues(u.affect...)
 		u.params = append(u.params, params...)
+		//
 		keys, values := bean.AssignKeys()
 		for i := 0; i < len(keys); i++ {
 			u.Where(keys[i].Eq(values[i]))
