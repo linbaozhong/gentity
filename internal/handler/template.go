@@ -258,9 +258,27 @@ func SelectX(exec ace.Executer) *ace.Selector{
 //
 // }
 //
+
+// // Update
+// func Update(ctx context.Context, exec ace.Executer, cond []atype.Condition, args ...atype.Setter) (int64, error) {
+// 	if len(args) == 0 {
+// 		return 0, atype.ErrSetterEmpty
+// 	}
+// 	result, err := UpdateX(exec).Where(cond...).Set(args...).Do(ctx)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	return result.RowsAffected()
+// }
+
 // // Delete
-// func Delete(ctx context.Context, exec ace.Executer) (bool, error) {
-//
+// func Delete(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (bool, error) {
+// 	result, err := DeleteX(exec).Where(cond...).Do(ctx)
+// 	if err != nil {
+// 		return false, err
+// 	}
+// 	n, err := result.RowsAffected()
+// 	return n > 0, err
 // }
 //
 // // Exists
