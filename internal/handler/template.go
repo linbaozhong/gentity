@@ -22,11 +22,14 @@ package {{.PackageName}}
 import (
 	"database/sql"
 	"sync"
-	{{- range $key,$value := .Imports}}
-	"{{ $value }}"
+	// {{- range $key,$value := .Imports}}
+	// "{{ $value }}"
+	// {{- end}}
+	{{- if .HasTime }}
+	"time"
 	{{- end}}
 	"{{.ModulePath}}/table/{{.TableName}}"
-	"github.com/linbaozhong/gentity/pkg/ace"
+	// "github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
@@ -191,7 +194,7 @@ package {{ .TableName }}
 import (
 	"context"
 	"{{.ModulePath}}/db"
-	"{{.ModulePath}}/table/{{.TableName}}"
+	// "{{.ModulePath}}/table/{{.TableName}}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
@@ -232,11 +235,11 @@ func InsertStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.Struct
 }
 
 // Insert
-func Insert(ctx context.Context, exec ace.Executer, args ...atype.Setter) (int64, error) {
-	if len(args) == 0 {
+func Insert(ctx context.Context, exec ace.Executer, sets []atype.Setter) (int64, error) {
+	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
-	result, err := CreateX(exec).Set(args...).Do(ctx)
+	result, err := CreateX(exec).Set(sets...).Do(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -260,11 +263,11 @@ func UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.Struct
 
 
 // Update
-func Update(ctx context.Context, exec ace.Executer, cond []atype.Condition, args ...atype.Setter) (int64, error) {
-	if len(args) == 0 {
+func Update(ctx context.Context, exec ace.Executer, sets []atype.Setter, cond ...atype.Condition) (int64, error) {
+	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
-	result, err := UpdateX(exec).Where(cond...).Set(args...).Do(ctx)
+	result, err := UpdateX(exec).Where(cond...).Set(sets...).Do(ctx)
 	if err != nil {
 		return 0, err
 	}
