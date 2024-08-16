@@ -216,77 +216,77 @@ func SelectX(exec ace.Executer) *ace.Selector{
 	return ace.NewSelect(exec, &db.{{.StructName}}{})
 }
 
-
-// InsertStruct 批量插入,返回 LastInsertId
-func InsertStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
-	lens := len(beans)
-	args := make([]atype.Modeler, 0, lens)
-	for _, bean := range beans {
-		args = append(args, bean)
-	}
-	result, err := CreateX(exec).Do(ctx, args...)
-	if err != nil {
-		return 0, err
-	}
-	return result.LastInsertId()
-}
-
-// Insert
-func Insert(ctx context.Context, exec ace.Executer, args ...atype.Setter) (int64, error) {
-	if len(args) == 0 {
-		return 0, atype.ErrSetterEmpty
-	}
-	result, err := CreateX(exec).Set(args...).Do(ctx)
-	if err != nil {
-		return 0, err
-	}
-	return result.LastInsertId()
-}
-
-// UpdateStruct
-func UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
-	lens := len(beans)
-	args := make([]atype.Modeler, 0, lens)
-	for _, bean := range beans {
-		args = append(args, bean)
-	}
-	result, err := UpdateX(exec).Struct(ctx, args...)
-	if err != nil {
-		return 0, err
-	}
-	return result.LastInsertId()
-
-}
-
-// Delete
-func Delete(ctx context.Context, exec ace.Executer) (bool, error) {
-
-}
-
-// Exists
-func Exists(ctx context.Context, exec ace.Executer) (bool, error) {
-
-}
-
-// Get
-func Get(ctx context.Context, exec ace.Executer) (bool, error) {
-
-}
-
-// Gets
-func Gets(ctx context.Context, exec ace.Executer) (bool, error) {
-
-}
-
-// Find
-func Find(ctx context.Context, exec ace.Executer) (bool, error) {
-
-}
-
-// Count
-func Count(ctx context.Context, exec ace.Executer) (bool, error) {
-
-}
+//
+// // InsertStruct 批量插入,返回 LastInsertId
+// func InsertStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
+// 	lens := len(beans)
+// 	args := make([]atype.Modeler, 0, lens)
+// 	for _, bean := range beans {
+// 		args = append(args, bean)
+// 	}
+// 	result, err := CreateX(exec).Do(ctx, args...)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	return result.LastInsertId()
+// }
+//
+// // Insert
+// func Insert(ctx context.Context, exec ace.Executer, args ...atype.Setter) (int64, error) {
+// 	if len(args) == 0 {
+// 		return 0, atype.ErrSetterEmpty
+// 	}
+// 	result, err := CreateX(exec).Set(args...).Do(ctx)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	return result.LastInsertId()
+// }
+//
+// // UpdateStruct
+// func UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
+// 	lens := len(beans)
+// 	args := make([]atype.Modeler, 0, lens)
+// 	for _, bean := range beans {
+// 		args = append(args, bean)
+// 	}
+// 	result, err := UpdateX(exec).Struct(ctx, args...)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	return result.LastInsertId()
+//
+// }
+//
+// // Delete
+// func Delete(ctx context.Context, exec ace.Executer) (bool, error) {
+//
+// }
+//
+// // Exists
+// func Exists(ctx context.Context, exec ace.Executer) (bool, error) {
+//
+// }
+//
+// // Get
+// func Get(ctx context.Context, exec ace.Executer) (bool, error) {
+//
+// }
+//
+// // Gets
+// func Gets(ctx context.Context, exec ace.Executer) (bool, error) {
+//
+// }
+//
+// // Find
+// func Find(ctx context.Context, exec ace.Executer) (bool, error) {
+//
+// }
+//
+// // Count
+// func Count(ctx context.Context, exec ace.Executer) (bool, error) {
+//
+// }
 
 `
 )
