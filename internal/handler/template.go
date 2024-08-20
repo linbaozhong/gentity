@@ -60,9 +60,9 @@ func (p *{{.StructName}}) TableName() string {
 	return "{{.TableName}}"
 }
 
-func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]atype.Modeler, error) {
+func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.StructName}}, error) {
 	defer rows.Close()
-	{{.TableName}}s := make([]atype.Modeler, 0)
+	{{.TableName}}s := make([]*{{.StructName}}, 0)
 
 	if len(args) == 0 {
 		args = {{$tablename}}.ReadableFields
@@ -308,15 +308,40 @@ func Delete(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (bo
 //
 // }
 //
-// // Get
-// func Get(ctx context.Context, exec ace.Executer) (bool, error) {
+// Get
+func Get(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (*db.{{.StructName}}, error) {
+	c := SelectX(exec).Where(cond...).Limit(1)
+	rows, err := c.Query(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	objs, err := db.New{{.StructName}}().Scan(rows)
+	if err != nil {
+		return nil, err
+	}
+	if len(objs) == 0 {
+		return nil, atype.ErrNotFound
+	}
+	return objs[0], nil
+}
 //
-// }
-//
-// // Gets
-// func Gets(ctx context.Context, exec ace.Executer) (bool, error) {
-//
-// }
+// Gets
+func Gets(ctx context.Context, exec ace.Executer, cond ...atype.Condition) ([]*db.{{.StructName}}, error) {
+	c := SelectX(exec).Where(cond...).Limit(1000)
+	rows, err := c.Query(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	objs, err := db.New{{.StructName}}().Scan(rows)
+	if err != nil {
+		return nil, err
+	}
+	return objs, nil
+}
 //
 // // Find
 // func Find(ctx context.Context, exec ace.Executer) (bool, error) {

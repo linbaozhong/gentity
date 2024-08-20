@@ -26,7 +26,7 @@ import (
 type (
 	Creator struct {
 		db      Executer
-		object  types.Modeler
+		table   string
 		affect  []types.Field
 		cols    []types.Field
 		params  []any
@@ -44,20 +44,20 @@ var (
 )
 
 // Creator
-func NewCreate(db Executer, mod types.Modeler) *Creator {
-	if db == nil || mod == nil {
+func NewCreate(db Executer, tableName string) *Creator {
+	if db == nil || tableName == "" {
 		panic("db or table is nil")
 		return nil
 	}
 	obj := createPool.Get().(*Creator)
 	obj.db = db
-	obj.object = mod
+	obj.table = tableName
 	obj.command.Reset()
 	return obj
 }
 
 func (c *Creator) Free() {
-	c.object = nil
+	c.table = ""
 	c.affect = c.affect[:]
 	c.cols = c.cols[:]
 	c.params = c.params[:]
@@ -96,7 +96,7 @@ func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 		return nil, types.ErrCreateEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.object.TableName() + types.Quote_Char + " (")
+	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.table + types.Quote_Char + " (")
 	for i, col := range c.cols {
 		if i > 0 {
 			c.command.WriteString(",")
@@ -119,7 +119,7 @@ func (c *Creator) Struct(ctx context.Context, beans ...types.Modeler) (sql.Resul
 		return nil, types.ErrCreateEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.object.TableName() + types.Quote_Char + " (")
+	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.table + types.Quote_Char + " (")
 
 	if lens == 0 || lens > 100 || beans[0] == nil {
 		return nil, types.ErrBeanEmpty

@@ -27,7 +27,7 @@ import (
 type (
 	Selector struct {
 		db           Executer
-		object       types.Modeler
+		table        string
 		join         [][3]string
 		distinct     bool
 		cols         []types.Field
@@ -54,20 +54,20 @@ var (
 )
 
 // Selector
-func NewSelect(db Executer, mod types.Modeler) *Selector {
-	if db == nil || mod == nil {
+func NewSelect(db Executer, tableName string) *Selector {
+	if db == nil || tableName == "" {
 		panic("db or table is nil")
 		return nil
 	}
 	obj := selectPool.Get().(*Selector)
 	obj.db = db
-	obj.object = mod
+	obj.table = tableName
 	obj.command.Reset()
 	return obj
 }
 
 func (s *Selector) Free() {
-	s.object = nil
+	s.table = ""
 	s.cols = s.cols[:]
 	s.funcs = s.funcs[:]
 	s.distinct = false
@@ -321,7 +321,7 @@ func (c *Selector) stmt() {
 		c.command.WriteString(strings.Join(c.funcs, ","))
 	}
 	// FROM TABLE
-	c.command.WriteString(" FROM " + types.Quote_Char + c.object.TableName() + types.Quote_Char)
+	c.command.WriteString(" FROM " + types.Quote_Char + c.table + types.Quote_Char)
 	for _, j := range c.join {
 		c.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	}
@@ -354,36 +354,63 @@ func (c *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 	return c.db.QueryContext(ctx, c.command.String(), c.whereParams...)
 }
 
-func (c *Selector) Get(ctx context.Context) (types.Modeler, error) {
-	if c.limit == "" {
-		c.Limit(1)
+// Count
+func (c *Selector) Count(ctx context.Context) (int64, error) {
+	c.command.WriteString("COUNT(*)")
+	// FROM TABLE
+	c.command.WriteString(" FROM " + types.Quote_Char + c.table + types.Quote_Char)
+	// WHERE
+	if c.where.Len() > 0 {
+		c.command.WriteString(" WHERE " + c.where.String())
 	}
-	rows, err := c.Query(ctx)
+
+	rows, err := c.db.QueryContext(ctx, c.command.String(), c.whereParams...)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	defer rows.Close()
-
-	modelers, err := c.object.Scan(rows, c.cols...)
-	if err != nil {
-		return nil, err
+	if rows.Next() {
+		var count int64
+		err := rows.Scan(&count)
+		if err != nil {
+			return 0, err
+		}
+		return count, nil
 	}
-	if len(modelers) == 0 {
-		return nil, types.ErrNotFound
-	}
-	return modelers[0], nil
+	return 0, nil
 }
 
-func (c *Selector) Gets(ctx context.Context) ([]types.Modeler, error) {
-	rows, err := c.Query(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	modelers, err := c.object.Scan(rows, c.cols...)
-	if err != nil {
-		return nil, err
-	}
-	return modelers, nil
-}
+//
+// func (c *Selector) Single(ctx context.Context) (types.Modeler, error) {
+// 	if c.limit == "" {
+// 		c.Limit(1)
+// 	}
+// 	rows, err := c.Query(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+//
+// 	modelers, err := c.object.Scan(rows, c.cols...)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if len(modelers) == 0 {
+// 		return nil, types.ErrNotFound
+// 	}
+// 	return modelers[0], nil
+// }
+//
+// func (c *Selector) More(ctx context.Context) ([]types.Modeler, error) {
+// 	rows, err := c.Query(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+//
+// 	modelers, err := c.object.Scan(rows, c.cols...)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return modelers, nil
+// }

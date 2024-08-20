@@ -26,7 +26,7 @@ import (
 type (
 	Deleter struct {
 		db          Executer
-		object      types.Modeler
+		table       string
 		where       strings.Builder
 		whereParams []interface{}
 		command     strings.Builder
@@ -43,21 +43,21 @@ var (
 )
 
 // Deleter
-func NewDelete(db Executer, mod types.Modeler) *Deleter {
-	if db == nil || mod == nil {
+func NewDelete(db Executer, tableName string) *Deleter {
+	if db == nil || tableName == "" {
 		panic("db or table is nil")
 		return nil
 	}
 	obj := deletePool.Get().(*Deleter)
 	obj.db = db
-	obj.object = mod
+	obj.table = tableName
 	obj.command.Reset()
 	return obj
 
 }
 
 func (d *Deleter) Free() {
-	d.object = nil
+	d.table = ""
 	d.where.Reset()
 	d.whereParams = d.whereParams[:]
 	deletePool.Put(d)
@@ -154,7 +154,7 @@ func (d *Deleter) Or(fns ...types.Condition) *Deleter {
 func (d *Deleter) Do(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
 
-	d.command.WriteString("DELETE FROM " + types.Quote_Char + d.object.TableName() + types.Quote_Char)
+	d.command.WriteString("DELETE FROM " + types.Quote_Char + d.table + types.Quote_Char)
 	// WHERE
 	if d.where.Len() > 0 {
 		d.command.WriteString(" WHERE " + d.where.String())

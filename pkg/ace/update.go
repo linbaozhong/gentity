@@ -26,7 +26,7 @@ import (
 type (
 	Updater struct {
 		db          Executer
-		object      types.Modeler
+		table       string
 		affect      []types.Field
 		cols        []types.Field
 		params      []any
@@ -51,14 +51,14 @@ var (
 )
 
 // Updater
-func NewUpdate(db Executer, mod types.Modeler) *Updater {
-	if db == nil || mod == nil {
+func NewUpdate(db Executer, tableName string) *Updater {
+	if db == nil || tableName == "" {
 		panic("db or table is nil")
 		return nil
 	}
 	obj := updatePool.Get().(*Updater)
 	obj.db = db
-	obj.object = mod
+	obj.table = tableName
 	obj.command.Reset()
 
 	return obj
@@ -66,7 +66,7 @@ func NewUpdate(db Executer, mod types.Modeler) *Updater {
 }
 
 func (u *Updater) Free() {
-	u.object = nil
+	u.table = ""
 	u.affect = u.affect[:]
 	u.cols = u.cols[:]
 	u.params = u.params[:]
@@ -197,7 +197,7 @@ func (u *Updater) Do(ctx context.Context) (sql.Result, error) {
 		return nil, types.ErrCreateEmpty
 	}
 
-	u.command.WriteString("UPDATE " + types.Quote_Char + u.object.TableName() + types.Quote_Char + " SET ")
+	u.command.WriteString("UPDATE " + types.Quote_Char + u.table + types.Quote_Char + " SET ")
 	_cols := make([]string, 0, lens)
 	for _, col := range u.cols {
 		_cols = append(_cols, col.Quote()+" = ?")
