@@ -312,9 +312,9 @@ func (p {{.TableName}}) Delete(ctx context.Context, exec ace.Executer, cond ...a
 //
 // }
 //
-// Get
-func (p {{.TableName}}) Get(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (*db.{{.StructName}}, error) {
-	c := p.SelectX(exec).Where(cond...).Limit(1)
+// Single4Cols
+func (p {{.TableName}}) Single4Cols(ctx context.Context, exec ace.Executer, cols []atype.Field, cond ...atype.Condition) (*db.{{.StructName}}, error) {
+	c := p.SelectX(exec).Cols(cols...).Where(cond...).Limit(1)
 	rows, err := c.Query(ctx)
 	if err != nil {
 		return nil, err
@@ -331,9 +331,9 @@ func (p {{.TableName}}) Get(ctx context.Context, exec ace.Executer, cond ...atyp
 	return objs[0], nil
 }
 //
-// Gets
-func (p {{.TableName}}) Gets(ctx context.Context, exec ace.Executer, cond ...atype.Condition) ([]*db.{{.StructName}}, error) {
-	c := p.SelectX(exec).Where(cond...).Limit(1000)
+// Multi4Cols
+func (p {{.TableName}}) Multi4Cols(ctx context.Context, exec ace.Executer, cols []atype.Field, cond ...atype.Condition) ([]*db.{{.StructName}}, error) {
+	c := p.SelectX(exec).Cols(cols...).Where(cond...).Limit(1000)
 	rows, err := c.Query(ctx)
 	if err != nil {
 		return nil, err
@@ -346,6 +346,18 @@ func (p {{.TableName}}) Gets(ctx context.Context, exec ace.Executer, cond ...aty
 	}
 	return objs, nil
 }
+
+// Single
+func (p {{.TableName}}) Single(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (*db.Test, error) {
+	return p.Single4Cols(ctx, exec, []atype.Field{}, cond...)
+}
+
+// Multi
+func (p {{.TableName}}) Multi(ctx context.Context, exec ace.Executer, cond ...atype.Condition) ([]*db.Test, error) {
+	return p.Multi4Cols(ctx, exec, []atype.Field{}, cond...)
+}
+
+
 //
 // // Find
 // func (p {{.TableName}}) Find(ctx context.Context, exec ace.Executer) (bool, error) {
