@@ -244,7 +244,7 @@ func (p {{.TableName}}) SelectX(exec ace.Executer) *ace.Selector{
 
 
 // InsertStruct 批量插入,返回 LastInsertId
-func (p {{.TableName}}) InsertStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
+func (p {{.TableName}}) InsertStruct(ctx context.Context, exec ace.Executer, beans ...*{{.PackageName}}.{{.StructName}}) (int64, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -270,7 +270,7 @@ func (p {{.TableName}}) Insert(ctx context.Context, exec ace.Executer, sets []at
 }
 
 // UpdateStruct
-func (p {{.TableName}}) UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
+func (p {{.TableName}}) UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*{{.PackageName}}.{{.StructName}}) (int64, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -306,14 +306,16 @@ func (p {{.TableName}}) Delete(ctx context.Context, exec ace.Executer, cond ...a
 	n, err := result.RowsAffected()
 	return n > 0, err
 }
-//
-// // Exists
-// func (p {{.TableName}}) Exists(ctx context.Context, exec ace.Executer) (bool, error) {
-//
-// }
-//
+
+// Exists
+func (p {{.TableName}}) Exists(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (bool, error) {
+	c := p.SelectX(exec).Where(cond...)
+	n, err := c.Count(ctx)
+	return n > 0, err
+}
+
 // Single4Cols
-func (p {{.TableName}}) Single4Cols(ctx context.Context, exec ace.Executer, cols []atype.Field, cond ...atype.Condition) (*db.{{.StructName}}, error) {
+func (p {{.TableName}}) Single4Cols(ctx context.Context, exec ace.Executer, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
 	c := p.SelectX(exec).Cols(cols...).Where(cond...).Limit(1)
 	rows, err := c.Query(ctx)
 	if err != nil {
@@ -321,7 +323,10 @@ func (p {{.TableName}}) Single4Cols(ctx context.Context, exec ace.Executer, cols
 	}
 	defer rows.Close()
 
-	objs, err := db.New{{.StructName}}().Scan(rows)
+	obj := {{.PackageName}}.New{{.StructName}}()
+	defer obj.Free()
+
+	objs, err := obj.Scan(rows, cols...)
 	if err != nil {
 		return nil, err
 	}
@@ -332,7 +337,7 @@ func (p {{.TableName}}) Single4Cols(ctx context.Context, exec ace.Executer, cols
 }
 //
 // Multi4Cols
-func (p {{.TableName}}) Multi4Cols(ctx context.Context, exec ace.Executer, cols []atype.Field, cond ...atype.Condition) ([]*db.{{.StructName}}, error) {
+func (p {{.TableName}}) Multi4Cols(ctx context.Context, exec ace.Executer, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
 	c := p.SelectX(exec).Cols(cols...).Where(cond...).Limit(1000)
 	rows, err := c.Query(ctx)
 	if err != nil {
@@ -340,7 +345,10 @@ func (p {{.TableName}}) Multi4Cols(ctx context.Context, exec ace.Executer, cols 
 	}
 	defer rows.Close()
 
-	objs, err := db.New{{.StructName}}().Scan(rows)
+	obj := {{.PackageName}}.New{{.StructName}}()
+	defer obj.Free()
+
+	objs, err := obj.Scan(rows, cols...)
 	if err != nil {
 		return nil, err
 	}
@@ -348,12 +356,12 @@ func (p {{.TableName}}) Multi4Cols(ctx context.Context, exec ace.Executer, cols 
 }
 
 // Single
-func (p {{.TableName}}) Single(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (*db.Test, error) {
+func (p {{.TableName}}) Single(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
 	return p.Single4Cols(ctx, exec, []atype.Field{}, cond...)
 }
 
 // Multi
-func (p {{.TableName}}) Multi(ctx context.Context, exec ace.Executer, cond ...atype.Condition) ([]*db.Test, error) {
+func (p {{.TableName}}) Multi(ctx context.Context, exec ace.Executer, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
 	return p.Multi4Cols(ctx, exec, []atype.Field{}, cond...)
 }
 
@@ -364,10 +372,12 @@ func (p {{.TableName}}) Multi(ctx context.Context, exec ace.Executer, cond ...at
 //
 // }
 //
-// // Count
-// func (p {{.TableName}}) Count(ctx context.Context, exec ace.Executer) (bool, error) {
-//
-// }
+// Count
+func (p {{.TableName}}) Count(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (int64, error) {
+	c := p.SelectX(exec).Where(cond...)
+	return c.Count(ctx)
+}
+
 
 `
 )
