@@ -208,7 +208,7 @@ var (
 `
 	buildTpl = `
 {{- $tablename := .TableName}}
-package {{ .TableName }}
+package dal
 
 import (
 	"context"
@@ -218,35 +218,39 @@ import (
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
+type {{.TableName}} struct {}
+
+var {{.StructName}} {{.TableName}}
+
 // CreateX 新增 {{ .TableName }}
-func CreateX(exec ace.Executer) *ace.Creator {
-	return ace.NewCreate(exec, &db.{{.StructName}}{})
+func (p {{.TableName}}) CreateX(exec ace.Executer) *ace.Creator {
+	return ace.NewCreate(exec, "{{ .TableName }}")
 }
 
 // UpdateX 修改 {{ .TableName }}
-func UpdateX(exec ace.Executer) *ace.Updater{
-	return ace.NewUpdate(exec, &db.{{.StructName}}{})
+func (p {{.TableName}}) UpdateX(exec ace.Executer) *ace.Updater{
+	return ace.NewUpdate(exec, "{{ .TableName }}")
 }
 
 // DeleteX 删除 {{ .TableName }}
-func DeleteX(exec ace.Executer) *ace.Deleter{
-	return ace.NewDelete(exec, &db.{{.StructName}}{})
+func (p {{.TableName}}) DeleteX(exec ace.Executer) *ace.Deleter{
+	return ace.NewDelete(exec, "{{ .TableName }}")
 }
 
 // SelectX 查询 {{ .TableName }}
-func SelectX(exec ace.Executer) *ace.Selector{
-	return ace.NewSelect(exec, &db.{{.StructName}}{})
+func (p {{.TableName}}) SelectX(exec ace.Executer) *ace.Selector{
+	return ace.NewSelect(exec, "{{ .TableName }}")
 }
 
 
 // InsertStruct 批量插入,返回 LastInsertId
-func InsertStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
+func (p {{.TableName}}) InsertStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
-	result, err := CreateX(exec).Struct(ctx, args...)
+	result, err := p.CreateX(exec).Struct(ctx, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -254,11 +258,11 @@ func InsertStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.Struct
 }
 
 // Insert
-func Insert(ctx context.Context, exec ace.Executer, sets []atype.Setter) (int64, error) {
+func (p {{.TableName}}) Insert(ctx context.Context, exec ace.Executer, sets []atype.Setter) (int64, error) {
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
-	result, err := CreateX(exec).Set(sets...).Do(ctx)
+	result, err := p.CreateX(exec).Set(sets...).Do(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -266,13 +270,13 @@ func Insert(ctx context.Context, exec ace.Executer, sets []atype.Setter) (int64,
 }
 
 // UpdateStruct
-func UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
+func (p {{.TableName}}) UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.StructName}}) (int64, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
-	result, err := UpdateX(exec).Struct(ctx, args...)
+	result, err := p.UpdateX(exec).Struct(ctx, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -282,11 +286,11 @@ func UpdateStruct(ctx context.Context, exec ace.Executer, beans ...*db.{{.Struct
 
 
 // Update
-func Update(ctx context.Context, exec ace.Executer, sets []atype.Setter, cond ...atype.Condition) (int64, error) {
+func (p {{.TableName}}) Update(ctx context.Context, exec ace.Executer, sets []atype.Setter, cond ...atype.Condition) (int64, error) {
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
-	result, err := UpdateX(exec).Where(cond...).Set(sets...).Do(ctx)
+	result, err := p.UpdateX(exec).Where(cond...).Set(sets...).Do(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -294,8 +298,8 @@ func Update(ctx context.Context, exec ace.Executer, sets []atype.Setter, cond ..
 }
 
 // Delete
-func Delete(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (bool, error) {
-	result, err := DeleteX(exec).Where(cond...).Do(ctx)
+func (p {{.TableName}}) Delete(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (bool, error) {
+	result, err := p.DeleteX(exec).Where(cond...).Do(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -304,13 +308,13 @@ func Delete(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (bo
 }
 //
 // // Exists
-// func Exists(ctx context.Context, exec ace.Executer) (bool, error) {
+// func (p {{.TableName}}) Exists(ctx context.Context, exec ace.Executer) (bool, error) {
 //
 // }
 //
 // Get
-func Get(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (*db.{{.StructName}}, error) {
-	c := SelectX(exec).Where(cond...).Limit(1)
+func (p {{.TableName}}) Get(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (*db.{{.StructName}}, error) {
+	c := p.SelectX(exec).Where(cond...).Limit(1)
 	rows, err := c.Query(ctx)
 	if err != nil {
 		return nil, err
@@ -328,8 +332,8 @@ func Get(ctx context.Context, exec ace.Executer, cond ...atype.Condition) (*db.{
 }
 //
 // Gets
-func Gets(ctx context.Context, exec ace.Executer, cond ...atype.Condition) ([]*db.{{.StructName}}, error) {
-	c := SelectX(exec).Where(cond...).Limit(1000)
+func (p {{.TableName}}) Gets(ctx context.Context, exec ace.Executer, cond ...atype.Condition) ([]*db.{{.StructName}}, error) {
+	c := p.SelectX(exec).Where(cond...).Limit(1000)
 	rows, err := c.Query(ctx)
 	if err != nil {
 		return nil, err
@@ -344,12 +348,12 @@ func Gets(ctx context.Context, exec ace.Executer, cond ...atype.Condition) ([]*d
 }
 //
 // // Find
-// func Find(ctx context.Context, exec ace.Executer) (bool, error) {
+// func (p {{.TableName}}) Find(ctx context.Context, exec ace.Executer) (bool, error) {
 //
 // }
 //
 // // Count
-// func Count(ctx context.Context, exec ace.Executer) (bool, error) {
+// func (p {{.TableName}}) Count(ctx context.Context, exec ace.Executer) (bool, error) {
 //
 // }
 

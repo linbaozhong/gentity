@@ -57,9 +57,9 @@ func getBaseFilename(filename string) string {
 	return f[:pos]
 }
 
-func (d *TempData) tableFilename(parent string) string {
-	return filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".go")
-}
+// func (d *TempData) tableFilename(parent string) string {
+// 	return filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".go")
+// }
 
 func (d *TempData) writeToModel(fileName string) error {
 	var buf bytes.Buffer
@@ -187,7 +187,7 @@ func (d *TempData) writeTable(parent string) error {
 		return err
 	}
 
-	fileName := d.tableFilename(parent)
+	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_table.go") // d.tableFilename(parent)
 
 	if fi, err := os.Stat(fileName); err == nil {
 		if !fi.IsDir() {
@@ -239,7 +239,7 @@ func (d *TempData) writeBuild(parent string) error {
 		return err
 	}
 
-	fileName := d.tableFilename(parent)
+	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_dal.go") // d.tableFilename(parent)
 
 	if fi, err := os.Stat(fileName); err == nil {
 		if !fi.IsDir() {

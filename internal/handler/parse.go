@@ -60,8 +60,8 @@ func parseFile(parent, filename, pkgPath string) error {
 		tempData.CacheData = ""
 		tempData.CacheList = ""
 		tempData.CacheLimit = ""
-		//tempData.PrimaryKey = nil
-		//tempData.PrimaryKeyName = ""
+		// tempData.PrimaryKey = nil
+		// tempData.PrimaryKeyName = ""
 		tempData.Keys = make([]string, 0, 1)
 		tempData.Columns = make(map[string][]string)
 		tempData.FileName = filename
@@ -123,9 +123,9 @@ func parseFile(parent, filename, pkgPath string) error {
 
 			tempData.Columns[field.Name] = _namejson
 			if pk != "" {
-				//tempData.PrimaryKey = _namejson
+				// tempData.PrimaryKey = _namejson
 				tempData.HasPrimaryKey = true
-				//tempData.PrimaryKeyName = field.Name
+				// tempData.PrimaryKeyName = field.Name
 				tempData.Keys = append(tempData.Keys, field.Name)
 			}
 			if _namejson[0] == "state" {
@@ -147,7 +147,7 @@ func parseFile(parent, filename, pkgPath string) error {
 		}
 
 		// 写dal文件
-		err = tempData.writeBuild(filepath.Join(parent, "dal", tempData.TableName))
+		err = tempData.writeBuild(filepath.Join(parent, "dal"))
 		if err != nil {
 			showError(err.Error())
 			return err
