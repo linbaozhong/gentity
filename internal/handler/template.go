@@ -213,43 +213,43 @@ package dal
 import (
 	"context"
 	"{{.ModulePath}}/db"
-	// "{{.ModulePath}}/table/{{.TableName}}"
+	"{{.ModulePath}}/table/{{.TableName}}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
-type {{.TableName}} struct {
+type {{.TableName}}Dal struct {
 	db    ace.Executer
 	table string
 }
 
-func {{.StructName}}(exec ace.Executer) *{{.TableName}} {
-	return &{{.TableName}}{db: exec, table: "{{.TableName}}"}
+func {{.StructName}}(exec ace.Executer) *{{.TableName}}Dal {
+	return &{{.TableName}}Dal{db: exec, table: "{{.TableName}}"}
 }
 
 // C Create {{ .TableName }}
-func (p *{{.TableName}}) C() *ace.Creator {
+func (p *{{.TableName}}Dal) C() *ace.Creator {
 	return ace.NewCreate(p.db, p.table)
 }
 
 // U Update {{ .TableName }}
-func (p *{{.TableName}}) U() *ace.Updater{
+func (p *{{.TableName}}Dal) U() *ace.Updater{
 	return ace.NewUpdate(p.db, p.table)
 }
 
 // D Delete {{ .TableName }}
-func (p *{{.TableName}}) D() *ace.Deleter{
+func (p *{{.TableName}}Dal) D() *ace.Deleter{
 	return ace.NewDelete(p.db, p.table)
 }
 
 // R Read {{ .TableName }}
-func (p *{{.TableName}}) R() *ace.Selector{
+func (p *{{.TableName}}Dal) R() *ace.Selector{
 	return ace.NewSelect(p.db, p.table)
 }
 
 
 // InsertStruct 批量插入,返回 LastInsertId
-func (p *{{.TableName}}) InsertStruct(ctx context.Context, beans ...*{{.PackageName}}.{{.StructName}}) (int64, error) {
+func (p *{{.TableName}}Dal) InsertStruct(ctx context.Context, beans ...*{{.PackageName}}.{{.StructName}}) (int64, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -263,7 +263,7 @@ func (p *{{.TableName}}) InsertStruct(ctx context.Context, beans ...*{{.PackageN
 }
 
 // Insert
-func (p *{{.TableName}}) Insert(ctx context.Context, sets []atype.Setter) (int64, error) {
+func (p *{{.TableName}}Dal) Insert(ctx context.Context, sets []atype.Setter) (int64, error) {
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
@@ -275,7 +275,7 @@ func (p *{{.TableName}}) Insert(ctx context.Context, sets []atype.Setter) (int64
 }
 
 // UpdateStruct
-func (p *{{.TableName}}) UpdateStruct(ctx context.Context, beans ...*{{.PackageName}}.{{.StructName}}) (int64, error) {
+func (p *{{.TableName}}Dal) UpdateStruct(ctx context.Context, beans ...*{{.PackageName}}.{{.StructName}}) (int64, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -291,7 +291,7 @@ func (p *{{.TableName}}) UpdateStruct(ctx context.Context, beans ...*{{.PackageN
 
 
 // Update
-func (p *{{.TableName}}) Update(ctx context.Context, sets []atype.Setter, cond ...atype.Condition) (int64, error) {
+func (p *{{.TableName}}Dal) Update(ctx context.Context, sets []atype.Setter, cond ...atype.Condition) (int64, error) {
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
@@ -303,7 +303,7 @@ func (p *{{.TableName}}) Update(ctx context.Context, sets []atype.Setter, cond .
 }
 
 // Delete
-func (p *{{.TableName}}) Delete(ctx context.Context, cond ...atype.Condition) (bool, error) {
+func (p *{{.TableName}}Dal) Delete(ctx context.Context, cond ...atype.Condition) (bool, error) {
 	result, err := p.D().Where(cond...).Do(ctx)
 	if err != nil {
 		return false, err
@@ -313,14 +313,14 @@ func (p *{{.TableName}}) Delete(ctx context.Context, cond ...atype.Condition) (b
 }
 
 // Exists
-func (p *{{.TableName}}) Exists(ctx context.Context, cond ...atype.Condition) (bool, error) {
+func (p *{{.TableName}}Dal) Exists(ctx context.Context, cond ...atype.Condition) (bool, error) {
 	c := p.R().Where(cond...)
 	n, err := c.Count(ctx)
 	return n > 0, err
 }
 
 // Single4Cols
-func (p *{{.TableName}}) Single4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dal) Single4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
 	c := p.R().Cols(cols...).Where(cond...).Limit(1)
 	rows, err := c.Query(ctx)
 	if err != nil {
@@ -342,7 +342,7 @@ func (p *{{.TableName}}) Single4Cols(ctx context.Context, cols []atype.Field, co
 }
 //
 // Multi4Cols
-func (p *{{.TableName}}) Multi4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dal) Multi4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
 	c := p.R().Cols(cols...).Where(cond...).Limit(1000)
 	rows, err := c.Query(ctx)
 	if err != nil {
@@ -360,18 +360,32 @@ func (p *{{.TableName}}) Multi4Cols(ctx context.Context, cols []atype.Field, con
 	return objs, nil
 }
 
+// Get Read a {{.TableName}} By Primary Key value
+func (p *{{.TableName}}Dal) Get(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
+	lens := len(test.PrimaryKeys)
+	if lens != len(args) {
+		return nil, atype.ErrArgsNotMatch
+	}
+	
+	cond := make([]atype.Condition, 0, lens)
+	for i, key := range test.PrimaryKeys {
+		cond = append(cond, key.Eq(args[i]))
+	}
+	return p.Single4Cols(ctx, []atype.Field{}, cond...)
+}
+
 // Single
-func (p *{{.TableName}}) Single(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dal) Single(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
 	return p.Single4Cols(ctx, []atype.Field{}, cond...)
 }
 
 // Multi
-func (p *{{.TableName}}) Multi(ctx context.Context, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dal) Multi(ctx context.Context, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
 	return p.Multi4Cols(ctx, []atype.Field{}, cond...)
 }
 
 // Count
-func (p *{{.TableName}}) Count(ctx context.Context, cond ...atype.Condition) (int64, error) {
+func (p *{{.TableName}}Dal) Count(ctx context.Context, cond ...atype.Condition) (int64, error) {
 	c := p.R().Where(cond...)
 	return c.Count(ctx)
 }
