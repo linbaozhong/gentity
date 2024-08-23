@@ -360,7 +360,8 @@ func (p *{{.TableName}}Dal) Multi4Cols(ctx context.Context, cols []atype.Field, 
 	return objs, nil
 }
 
-// Get Read a {{.TableName}} By Primary Key value
+// Get Read a {{.TableName}} By Primary Key value,
+// Pass values in this order：{{ range $key,$value := .Keys}}{{$value}},{{ end}}
 func (p *{{.TableName}}Dal) Get(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
 	lens := len(test.PrimaryKeys)
 	if lens != len(args) {
