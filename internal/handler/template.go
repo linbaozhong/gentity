@@ -232,6 +232,11 @@ func (p *{{.TableName}}Dal) C() *ace.Creator {
 	return ace.NewCreate(p.db, p.table)
 }
 
+// R Read {{ .TableName }}
+func (p *{{.TableName}}Dal) R() *ace.Selector{
+	return ace.NewSelect(p.db, p.table)
+}
+
 // U Update {{ .TableName }}
 func (p *{{.TableName}}Dal) U() *ace.Updater{
 	return ace.NewUpdate(p.db, p.table)
@@ -240,11 +245,6 @@ func (p *{{.TableName}}Dal) U() *ace.Updater{
 // D Delete {{ .TableName }}
 func (p *{{.TableName}}Dal) D() *ace.Deleter{
 	return ace.NewDelete(p.db, p.table)
-}
-
-// R Read {{ .TableName }}
-func (p *{{.TableName}}Dal) R() *ace.Selector{
-	return ace.NewSelect(p.db, p.table)
 }
 
 
