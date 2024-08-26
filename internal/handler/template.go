@@ -363,13 +363,13 @@ func (p *{{.TableName}}Dal) Multi4Cols(ctx context.Context, cols []atype.Field, 
 // Get Read a {{.TableName}} By Primary Key value,
 // Pass values in this order：{{ range $key,$value := .Keys}}{{$value}},{{ end}}
 func (p *{{.TableName}}Dal) Get(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
-	lens := len(test.PrimaryKeys)
+	lens := len({{.TableName}}.PrimaryKeys)
 	if lens != len(args) {
 		return nil, atype.ErrArgsNotMatch
 	}
 	
 	cond := make([]atype.Condition, 0, lens)
-	for i, key := range test.PrimaryKeys {
+	for i, key := range {{.TableName}}.PrimaryKeys {
 		cond = append(cond, key.Eq(args[i]))
 	}
 	return p.Single4Cols(ctx, []atype.Field{}, cond...)
