@@ -312,13 +312,6 @@ func (p *{{.TableName}}Dal) Delete(ctx context.Context, cond ...atype.Condition)
 	return n > 0, err
 }
 
-// Exists
-func (p *{{.TableName}}Dal) Exists(ctx context.Context, cond ...atype.Condition) (bool, error) {
-	c := p.R().Where(cond...)
-	n, err := c.Count(ctx)
-	return n > 0, err
-}
-
 // Single4Cols
 func (p *{{.TableName}}Dal) Single4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
 	c := p.R().Cols(cols...).Where(cond...).Limit(1)
@@ -389,6 +382,17 @@ func (p *{{.TableName}}Dal) Multi(ctx context.Context, cond ...atype.Condition) 
 func (p *{{.TableName}}Dal) Count(ctx context.Context, cond ...atype.Condition) (int64, error) {
 	c := p.R().Where(cond...)
 	return c.Count(ctx)
+}
+
+// Exists
+func (p *{{.TableName}}Dal) Exists(ctx context.Context, cond ...atype.Condition) (bool, error) {
+	c := p.R().Cols({{.TableName}}.PrimaryKeys...).Where(cond...).Limit(1)
+	rows, err := c.Query(ctx)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	return rows.Next(), nil
 }
 
 
