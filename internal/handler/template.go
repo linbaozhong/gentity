@@ -380,8 +380,12 @@ func (p *{{.TableName}}Dal) Multi(ctx context.Context, cond ...atype.Condition) 
 
 // Count
 func (p *{{.TableName}}Dal) Count(ctx context.Context, cond ...atype.Condition) (int64, error) {
-	c := p.R().Where(cond...)
-	return c.Count(ctx)
+	return p.R().Count(ctx, cond...)
+}
+
+// Sum
+func (p *{{.TableName}}Dal) Sum(ctx context.Context, col atype.Field, cond ...atype.Condition) (int64, error) {
+	return p.R().Sum(ctx, col, cond...)
 }
 
 // Exists
