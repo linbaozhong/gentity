@@ -356,7 +356,8 @@ func (c *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 }
 
 // Count
-func (c *Selector) Count(ctx context.Context) (int64, error) {
+func (c *Selector) Count(ctx context.Context, cond ...types.Condition) (int64, error) {
+	c.Where(cond...)
 	c.command.WriteString("SELECT COUNT(*)")
 	// FROM TABLE
 	c.command.WriteString(" FROM " + types.Quote_Char + c.table + types.Quote_Char)
