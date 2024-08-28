@@ -302,8 +302,9 @@ func (c *Selector) Limit(size uint, start ...uint) *Selector {
 func (c *Selector) stmt() {
 	c.command.WriteString("SELECT ")
 
-	lens := len(c.cols)
-	if lens == 0 {
+	colens := len(c.cols)
+	funlens := len(c.funcs)
+	if colens+funlens == 0 {
 		c.command.WriteString("*")
 	} else {
 		if c.distinct {
@@ -315,7 +316,7 @@ func (c *Selector) stmt() {
 			}
 			c.command.WriteString(col.Quote())
 		}
-		if lens > 0 && len(c.funcs) > 0 {
+		if colens > 0 && funlens > 0 {
 			c.command.WriteString(",")
 		}
 		c.command.WriteString(strings.Join(c.funcs, ","))
@@ -356,7 +357,7 @@ func (c *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 
 // Count
 func (c *Selector) Count(ctx context.Context) (int64, error) {
-	c.command.WriteString("COUNT(*)")
+	c.command.WriteString("SELECT COUNT(*)")
 	// FROM TABLE
 	c.command.WriteString(" FROM " + types.Quote_Char + c.table + types.Quote_Char)
 	// WHERE
@@ -380,37 +381,30 @@ func (c *Selector) Count(ctx context.Context) (int64, error) {
 	return 0, nil
 }
 
-//
-// func (c *Selector) Single(ctx context.Context) (types.Modeler, error) {
-// 	if c.limit == "" {
-// 		c.Limit(1)
-// 	}
-// 	rows, err := c.Query(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-//
-// 	modelers, err := c.object.Scan(rows, c.cols...)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if len(modelers) == 0 {
-// 		return nil, types.ErrNotFound
-// 	}
-// 	return modelers[0], nil
-// }
-//
-// func (c *Selector) More(ctx context.Context) ([]types.Modeler, error) {
-// 	rows, err := c.Query(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-//
-// 	modelers, err := c.object.Scan(rows, c.cols...)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return modelers, nil
-// }
+// Sum
+func (c *Selector) Sum(ctx context.Context, col types.Field, cond ...types.Condition) (int64, error) {
+	c.Funcs(col.Sum()).Where(cond...)
+	c.command.WriteString("SELECT ")
+	c.command.WriteString(c.funcs[0])
+	// FROM TABLE
+	c.command.WriteString(" FROM " + types.Quote_Char + c.table + types.Quote_Char)
+	// WHERE
+	if c.where.Len() > 0 {
+		c.command.WriteString(" WHERE " + c.where.String())
+	}
+
+	rows, err := c.db.QueryContext(ctx, c.command.String(), c.whereParams...)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	if rows.Next() {
+		var n int64
+		err := rows.Scan(&n)
+		if err != nil {
+			return 0, err
+		}
+		return n, nil
+	}
+	return 0, nil
+}

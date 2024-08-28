@@ -249,13 +249,13 @@ func (p *{{.TableName}}Dal) D() *ace.Deleter{
 
 
 // InsertStruct 批量插入,返回 LastInsertId
-func (p *{{.TableName}}Dal) InsertStruct(ctx context.Context, beans ...*{{.PackageName}}.{{.StructName}}) (int64, error) {
+func (p *{{.TableName}}Dal) InsertStruct(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
-	result, err := p.C().Struct(ctx, args...)
+	result, err := p.C().Cols(cols...).Struct(ctx, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -275,13 +275,13 @@ func (p *{{.TableName}}Dal) Insert(ctx context.Context, sets []atype.Setter) (in
 }
 
 // UpdateStruct
-func (p *{{.TableName}}Dal) UpdateStruct(ctx context.Context, beans ...*{{.PackageName}}.{{.StructName}}) (int64, error) {
+func (p *{{.TableName}}Dal) UpdateStruct(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
-	result, err := p.U().Struct(ctx, args...)
+	result, err := p.U().Cols(cols...).Struct(ctx, args...)
 	if err != nil {
 		return 0, err
 	}
