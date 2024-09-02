@@ -87,28 +87,6 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.Struc
 	}
 	return {{.TableName}}s, nil
 }
-//
-// func (p *{{.StructName}})AssignColumns(args ...atype.Field) []string {
-// 	var lens = len(args)
-// 	if lens > 0 {
-// 		cols := make([]string, 0, lens)
-// 		for _, arg := range args {
-// 			switch arg {
-// 			{{- range $key, $value := .Columns}}
-// 			case {{$tablename}}.{{ $key }}:
-// 				cols = append(cols, {{$tablename}}.{{ $key }}.Quote())
-// 			{{- end}}
-// 			}
-// 		}
-// 		return cols
-// 	}
-//
-// 	cols := make([]string, 0, len({{$tablename}}.WritableFields))
-// 	for _, col := range {{$tablename}}.WritableFields {
-// 		cols = append(cols, col.Quote())
-// 	}
-// 	return cols
-// }
 
 func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
 	var (
@@ -218,6 +196,16 @@ import (
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
+type {{.StructName}}Daoer interface {
+	atype.Daoer
+	InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
+	InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
+	UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error)
+	Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error)
+	Gets4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
+	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error)
+}
+
 type {{.TableName}}Dao struct {
 	db    ace.Executer
 	table string
@@ -249,7 +237,7 @@ func (p *{{.TableName}}Dao) D() *ace.Deleter{
 
 
 // Insert 返回 LastInsertId
-func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets []atype.Setter) (int64, error) {
+func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets ...atype.Setter) (int64, error) {
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
@@ -331,10 +319,16 @@ func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...atype.Condition)
 	return n >= 0, err
 }
 
-// Single4Cols
-func (p *{{.TableName}}Dao) Single4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
-	c := p.R().Cols(cols...).Where(cond...).Limit(1)
-	rows, err := c.Query(ctx)
+// Get4Cols
+func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
+	c := p.R()
+	if len(cols) == 0 {
+		c.Cols({{.TableName}}.ReadableFields...)
+	} else {
+		c.Cols(cols...)
+	}
+	
+	rows, err := c.Where(cond...).Limit(1).Query(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -353,10 +347,16 @@ func (p *{{.TableName}}Dao) Single4Cols(ctx context.Context, cols []atype.Field,
 	return objs[0], nil
 }
 //
-// Multi4Cols
-func (p *{{.TableName}}Dao) Multi4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
-	c := p.R().Cols(cols...).Where(cond...).Limit(1000)
-	rows, err := c.Query(ctx)
+// Gets4Cols
+func (p *{{.TableName}}Dao) Gets4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+	c := p.R()
+	if len(cols) == 0 {
+		c.Cols({{.TableName}}.ReadableFields...)
+	} else {
+		c.Cols(cols...)
+	}
+	
+	rows, err := c.Where(cond...).Limit(1000).Query(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -372,9 +372,9 @@ func (p *{{.TableName}}Dao) Multi4Cols(ctx context.Context, cols []atype.Field, 
 	return objs, nil
 }
 
-// Get Read a {{.TableName}} By Primary Key value,
+// GetByID Read a {{.TableName}} By Primary Key value,
 // Pass values in this order：{{ range $key,$value := .Keys}}{{$value}},{{ end}}
-func (p *{{.TableName}}Dao) Get(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
 	lens := len({{.TableName}}.PrimaryKeys)
 	if lens != len(args) {
 		return nil, atype.ErrArgsNotMatch
@@ -384,17 +384,17 @@ func (p *{{.TableName}}Dao) Get(ctx context.Context, args ...any) (*{{.PackageNa
 	for i, key := range {{.TableName}}.PrimaryKeys {
 		cond = append(cond, key.Eq(args[i]))
 	}
-	return p.Single4Cols(ctx, []atype.Field{}, cond...)
+	return p.Get4Cols(ctx, []atype.Field{}, cond...)
 }
 
-// Single
-func (p *{{.TableName}}Dao) Single(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
-	return p.Single4Cols(ctx, []atype.Field{}, cond...)
+// Get
+func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
+	return p.Get4Cols(ctx, []atype.Field{}, cond...)
 }
 
-// Multi
-func (p *{{.TableName}}Dao) Multi(ctx context.Context, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
-	return p.Multi4Cols(ctx, []atype.Field{}, cond...)
+// Gets
+func (p *{{.TableName}}Dao) Gets(ctx context.Context, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+	return p.Gets4Cols(ctx, []atype.Field{}, cond...)
 }
 
 // Count

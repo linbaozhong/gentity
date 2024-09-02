@@ -15,6 +15,7 @@
 package types
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 )
@@ -62,14 +63,17 @@ type (
 	UnknownType any
 
 	Modeler interface {
-		// New() Modeler
 		TableName() string
-		// Set(args ...Field) ([]string, []any)
-		// AssignColumns(args ...Field) []string
 		AssignValues(args ...Field) ([]string, []any)
-		Scan(rows *sql.Rows, args ...Field) ([]Modeler, error)
 		AssignKeys() ([]Field, []any)
-		// AssignValues(columns []string, values []any) error
-		// ScanValues(columns []string) ([]any, error)
+	}
+
+	Daoer interface {
+		Exists(ctx context.Context, cond ...Condition) (bool, error)
+		Sum(ctx context.Context, col Field, cond ...Condition) (int64, error)
+		Count(ctx context.Context, cond ...Condition) (int64, error)
+		Delete(ctx context.Context, cond ...Condition) (bool, error)
+		Update(ctx context.Context, sets []Setter, cond ...Condition) (bool, error)
+		Insert(ctx context.Context, sets ...Setter) (int64, error)
 	}
 )
