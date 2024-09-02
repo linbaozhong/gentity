@@ -351,12 +351,15 @@ func (c *Selector) stmt() {
 
 // Query
 func (c *Selector) Query(ctx context.Context) (*sql.Rows, error) {
+	defer c.Free()
 	c.stmt()
 	return c.db.QueryContext(ctx, c.command.String(), c.whereParams...)
 }
 
 // Count
 func (c *Selector) Count(ctx context.Context, cond ...types.Condition) (int64, error) {
+	defer c.Free()
+
 	c.Where(cond...)
 	c.command.WriteString("SELECT COUNT(*)")
 	// FROM TABLE
@@ -384,6 +387,8 @@ func (c *Selector) Count(ctx context.Context, cond ...types.Condition) (int64, e
 
 // Sum
 func (c *Selector) Sum(ctx context.Context, col types.Field, cond ...types.Condition) (int64, error) {
+	defer c.Free()
+
 	c.Funcs(col.Sum()).Where(cond...)
 	c.command.WriteString("SELECT ")
 	c.command.WriteString(c.funcs[0])
