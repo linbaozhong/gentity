@@ -25,7 +25,7 @@ import (
 
 type (
 	Deleter struct {
-		db          Executer
+		db          types.Executer
 		table       string
 		where       strings.Builder
 		whereParams []interface{}
@@ -43,7 +43,7 @@ var (
 )
 
 // Deleter
-func NewDelete(db Executer, tableName string) *Deleter {
+func NewDelete(db types.Executer, tableName string) *Deleter {
 	if db == nil || tableName == "" {
 		panic("db or table is nil")
 		return nil

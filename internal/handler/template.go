@@ -198,6 +198,10 @@ import (
 
 type {{.StructName}}Daoer interface {
 	atype.Daoer
+	C() *ace.Creator
+	R() *ace.Selector
+	U() *ace.Updater
+	D() *ace.Deleter
 	InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
 	InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
 	UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error)
@@ -207,11 +211,11 @@ type {{.StructName}}Daoer interface {
 }
 
 type {{.TableName}}Dao struct {
-	db    ace.Executer
+	db    atype.Executer
 	table string
 }
 
-func {{.StructName}}(exec ace.Executer) *{{.TableName}}Dao {
+func {{.StructName}}(exec atype.Executer) *{{.TableName}}Dao {
 	return &{{.TableName}}Dao{db: exec, table: "{{.TableName}}"}
 }
 

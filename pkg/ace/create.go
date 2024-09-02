@@ -25,7 +25,7 @@ import (
 
 type (
 	Creator struct {
-		db      Executer
+		db      types.Executer
 		table   string
 		affect  []types.Field
 		cols    []types.Field
@@ -44,7 +44,7 @@ var (
 )
 
 // Creator
-func NewCreate(db Executer, tableName string) *Creator {
+func NewCreate(db types.Executer, tableName string) *Creator {
 	if db == nil || tableName == "" {
 		panic("db or table is nil")
 		return nil

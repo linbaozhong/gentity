@@ -26,7 +26,7 @@ import (
 
 type (
 	Selector struct {
-		db           Executer
+		db           types.Executer
 		table        string
 		join         [][3]string
 		distinct     bool
@@ -54,7 +54,7 @@ var (
 )
 
 // Selector
-func NewSelect(db Executer, tableName string) *Selector {
+func NewSelect(db types.Executer, tableName string) *Selector {
 	if db == nil || tableName == "" {
 		panic("db or table is nil")
 		return nil
