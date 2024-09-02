@@ -208,6 +208,7 @@ type {{.StructName}}Daoer interface {
 	Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error)
 	Gets4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
 	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error)
+	Get(ctx context.Context, cond ...atype.Condition) (*db.Event, error)
 }
 
 type {{.TableName}}Dao struct {
