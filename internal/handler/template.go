@@ -248,31 +248,30 @@ type {{.StructName}}Daoer interface {
 
 type {{.TableName}}Dao struct {
 	db    atype.Executer
-	table string
 }
 
 func {{.StructName}}(exec atype.Executer) {{$structName}}Daoer {
-	return &{{.TableName}}Dao{db: exec, table: {{.PackageName}}.{{$structName}}TableName}
+	return &{{.TableName}}Dao{db: exec}
 }
 
 // C Create {{ .TableName }}
 func (p *{{.TableName}}Dao) C() *ace.Creator {
-	return ace.NewCreate(p.db, p.table)
+	return ace.NewCreate(p.db, {{.PackageName}}.{{$structName}}TableName)
 }
 
 // R Read {{ .TableName }}
 func (p *{{.TableName}}Dao) R() *ace.Selector{
-	return ace.NewSelect(p.db, p.table)
+	return ace.NewSelect(p.db, {{.PackageName}}.{{$structName}}TableName)
 }
 
 // U Update {{ .TableName }}
 func (p *{{.TableName}}Dao) U() *ace.Updater{
-	return ace.NewUpdate(p.db, p.table)
+	return ace.NewUpdate(p.db, {{.PackageName}}.{{$structName}}TableName)
 }
 
 // D Delete {{ .TableName }}
 func (p *{{.TableName}}Dao) D() *ace.Deleter{
-	return ace.NewDelete(p.db, p.table)
+	return ace.NewDelete(p.db, {{.PackageName}}.{{$structName}}TableName)
 }
 
 
