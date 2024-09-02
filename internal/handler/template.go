@@ -208,7 +208,7 @@ var (
 `
 	buildTpl = `
 {{- $tablename := .TableName}}
-package dal
+package dao
 
 import (
 	"context"
@@ -218,38 +218,38 @@ import (
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
-type {{.TableName}}Dal struct {
+type {{.TableName}}Dao struct {
 	db    ace.Executer
 	table string
 }
 
-func {{.StructName}}(exec ace.Executer) *{{.TableName}}Dal {
-	return &{{.TableName}}Dal{db: exec, table: "{{.TableName}}"}
+func {{.StructName}}(exec ace.Executer) *{{.TableName}}Dao {
+	return &{{.TableName}}Dao{db: exec, table: "{{.TableName}}"}
 }
 
 // C Create {{ .TableName }}
-func (p *{{.TableName}}Dal) C() *ace.Creator {
+func (p *{{.TableName}}Dao) C() *ace.Creator {
 	return ace.NewCreate(p.db, p.table)
 }
 
 // R Read {{ .TableName }}
-func (p *{{.TableName}}Dal) R() *ace.Selector{
+func (p *{{.TableName}}Dao) R() *ace.Selector{
 	return ace.NewSelect(p.db, p.table)
 }
 
 // U Update {{ .TableName }}
-func (p *{{.TableName}}Dal) U() *ace.Updater{
+func (p *{{.TableName}}Dao) U() *ace.Updater{
 	return ace.NewUpdate(p.db, p.table)
 }
 
 // D Delete {{ .TableName }}
-func (p *{{.TableName}}Dal) D() *ace.Deleter{
+func (p *{{.TableName}}Dao) D() *ace.Deleter{
 	return ace.NewDelete(p.db, p.table)
 }
 
 
 // InsertStruct 批量插入,返回 LastInsertId
-func (p *{{.TableName}}Dal) InsertStruct(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
+func (p *{{.TableName}}Dao) InsertStruct(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -263,7 +263,7 @@ func (p *{{.TableName}}Dal) InsertStruct(ctx context.Context, beans []*{{.Packag
 }
 
 // Insert
-func (p *{{.TableName}}Dal) Insert(ctx context.Context, sets []atype.Setter) (int64, error) {
+func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets []atype.Setter) (int64, error) {
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
@@ -275,7 +275,7 @@ func (p *{{.TableName}}Dal) Insert(ctx context.Context, sets []atype.Setter) (in
 }
 
 // UpdateStruct
-func (p *{{.TableName}}Dal) UpdateStruct(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
+func (p *{{.TableName}}Dao) UpdateStruct(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error) {
 	lens := len(beans)
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -283,37 +283,38 @@ func (p *{{.TableName}}Dal) UpdateStruct(ctx context.Context, beans []*{{.Packag
 	}
 	result, err := p.U().Cols(cols...).Struct(ctx, args...)
 	if err != nil {
-		return 0, err
+		return false, err
 	}
-	return result.LastInsertId()
-
+	n, err := result.RowsAffected()
+	return n >= 0, err
 }
 
 
 // Update
-func (p *{{.TableName}}Dal) Update(ctx context.Context, sets []atype.Setter, cond ...atype.Condition) (int64, error) {
+func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []atype.Setter, cond ...atype.Condition) (bool, error) {
 	if len(sets) == 0 {
-		return 0, atype.ErrSetterEmpty
+		return false, atype.ErrSetterEmpty
 	}
 	result, err := p.U().Where(cond...).Set(sets...).Do(ctx)
 	if err != nil {
-		return 0, err
+		return false, err
 	}
-	return result.RowsAffected()
+	n, err := result.RowsAffected()
+	return n >= 0, err
 }
 
 // Delete
-func (p *{{.TableName}}Dal) Delete(ctx context.Context, cond ...atype.Condition) (bool, error) {
+func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...atype.Condition) (bool, error) {
 	result, err := p.D().Where(cond...).Do(ctx)
 	if err != nil {
 		return false, err
 	}
 	n, err := result.RowsAffected()
-	return n > 0, err
+	return n >= 0, err
 }
 
 // Single4Cols
-func (p *{{.TableName}}Dal) Single4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) Single4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
 	c := p.R().Cols(cols...).Where(cond...).Limit(1)
 	rows, err := c.Query(ctx)
 	if err != nil {
@@ -335,7 +336,7 @@ func (p *{{.TableName}}Dal) Single4Cols(ctx context.Context, cols []atype.Field,
 }
 //
 // Multi4Cols
-func (p *{{.TableName}}Dal) Multi4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) Multi4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
 	c := p.R().Cols(cols...).Where(cond...).Limit(1000)
 	rows, err := c.Query(ctx)
 	if err != nil {
@@ -355,7 +356,7 @@ func (p *{{.TableName}}Dal) Multi4Cols(ctx context.Context, cols []atype.Field, 
 
 // Get Read a {{.TableName}} By Primary Key value,
 // Pass values in this order：{{ range $key,$value := .Keys}}{{$value}},{{ end}}
-func (p *{{.TableName}}Dal) Get(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) Get(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
 	lens := len({{.TableName}}.PrimaryKeys)
 	if lens != len(args) {
 		return nil, atype.ErrArgsNotMatch
@@ -369,27 +370,27 @@ func (p *{{.TableName}}Dal) Get(ctx context.Context, args ...any) (*{{.PackageNa
 }
 
 // Single
-func (p *{{.TableName}}Dal) Single(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) Single(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
 	return p.Single4Cols(ctx, []atype.Field{}, cond...)
 }
 
 // Multi
-func (p *{{.TableName}}Dal) Multi(ctx context.Context, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) Multi(ctx context.Context, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
 	return p.Multi4Cols(ctx, []atype.Field{}, cond...)
 }
 
 // Count
-func (p *{{.TableName}}Dal) Count(ctx context.Context, cond ...atype.Condition) (int64, error) {
+func (p *{{.TableName}}Dao) Count(ctx context.Context, cond ...atype.Condition) (int64, error) {
 	return p.R().Count(ctx, cond...)
 }
 
 // Sum
-func (p *{{.TableName}}Dal) Sum(ctx context.Context, col atype.Field, cond ...atype.Condition) (int64, error) {
+func (p *{{.TableName}}Dao) Sum(ctx context.Context, col atype.Field, cond ...atype.Condition) (int64, error) {
 	return p.R().Sum(ctx, col, cond...)
 }
 
 // Exists
-func (p *{{.TableName}}Dal) Exists(ctx context.Context, cond ...atype.Condition) (bool, error) {
+func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...atype.Condition) (bool, error) {
 	c := p.R().Cols({{.TableName}}.PrimaryKeys...).Where(cond...).Limit(1)
 	rows, err := c.Query(ctx)
 	if err != nil {

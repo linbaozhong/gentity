@@ -239,7 +239,7 @@ func (d *TempData) writeBuild(parent string) error {
 		return err
 	}
 
-	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_dal.go") // d.tableFilename(parent)
+	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_dao.go") // d.tableFilename(parent)
 
 	if fi, err := os.Stat(fileName); err == nil {
 		if !fi.IsDir() {

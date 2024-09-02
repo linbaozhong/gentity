@@ -147,7 +147,7 @@ func parseFile(parent, filename, pkgPath string) error {
 		}
 
 		// 写dal文件
-		err = tempData.writeBuild(filepath.Join(parent, "dal"))
+		err = tempData.writeBuild(filepath.Join(parent, "dao"))
 		if err != nil {
 			showError(err.Error())
 			return err
