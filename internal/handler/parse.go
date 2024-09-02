@@ -117,15 +117,10 @@ func parseFile(parent, filename, pkgPath string) error {
 					_namejson[0] = _namejson[1]
 				}
 			}
-			// if _namejson[3] == "" {
-			// 	_namejson[3] = field.Name
-			// }
 
 			tempData.Columns[field.Name] = _namejson
 			if pk != "" {
-				// tempData.PrimaryKey = _namejson
 				tempData.HasPrimaryKey = true
-				// tempData.PrimaryKeyName = field.Name
 				tempData.Keys = append(tempData.Keys, field.Name)
 			}
 			if _namejson[0] == "state" {

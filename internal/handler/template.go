@@ -22,14 +22,10 @@ package {{.PackageName}}
 import (
 	"database/sql"
 	"sync"
-	// {{- range $key,$value := .Imports}}
-	// "{{ $value }}"
-	// {{- end}}
 	{{- if .HasTime }}
 	"time"
 	{{- end}}
 	"{{.ModulePath}}/table/{{.TableName}}"
-	// "github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
@@ -209,6 +205,8 @@ type {{.StructName}}Daoer interface {
 	Gets4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
 	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error)
 	Get(ctx context.Context, cond ...atype.Condition) (*db.Event, error)
+	IDs(ctx context.Context, cond ...atype.Condition) ([]int64, error)
+	Columns(ctx context.Context, col atype.Field, cond ...atype.Condition) ([]any, error)
 }
 
 type {{.TableName}}Dao struct {
@@ -377,8 +375,8 @@ func (p *{{.TableName}}Dao) Gets4Cols(ctx context.Context, cols []atype.Field, c
 	return objs, nil
 }
 
-// GetByID Read a {{.TableName}} By Primary Key value,
-// Pass values in this order：{{ range $key,$value := .Keys}}{{$value}},{{ end}}
+// GetByID Read one {{.TableName}} By Primary Key value,
+// Pass values in this order：{{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$value}}{{ end}}
 func (p *{{.TableName}}Dao) GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
 	lens := len({{.TableName}}.PrimaryKeys)
 	if lens != len(args) {
@@ -392,7 +390,7 @@ func (p *{{.TableName}}Dao) GetByID(ctx context.Context, args ...any) (*{{.Packa
 	return p.Get4Cols(ctx, []atype.Field{}, cond...)
 }
 
-// Get
+// Get Read one {{.TableName}}
 func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
 	return p.Get4Cols(ctx, []atype.Field{}, cond...)
 }
@@ -400,6 +398,52 @@ func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...atype.Condition) (*
 // Gets
 func (p *{{.TableName}}Dao) Gets(ctx context.Context, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
 	return p.Gets4Cols(ctx, []atype.Field{}, cond...)
+}
+
+
+// IDs
+func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...atype.Condition) ([]int64, error) {
+	if len({{.TableName}}.PrimaryKeys) == 0 {
+		return nil, atype.ErrPrimaryKeyNotMatch
+	}
+	c := p.R().Cols({{.TableName}}.PrimaryKeys[0])
+	rows, err := c.Where(cond...).Limit(1000).Query(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	ids := make([]int64, 0)
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+
+	return ids, nil
+}
+
+// Columns
+func (p *{{.TableName}}Dao) Columns(ctx context.Context, col atype.Field, cond ...atype.Condition) ([]any, error) {
+	c := p.R().Cols(col)
+	rows, err := c.Where(cond...).Limit(1000).Query(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	cols := make([]any, 0)
+	for rows.Next() {
+		var v any
+		if err := rows.Scan(&v); err != nil {
+			return nil, err
+		}
+		cols = append(cols, v)
+	}
+
+	return cols, nil
 }
 
 // Count
@@ -414,7 +458,10 @@ func (p *{{.TableName}}Dao) Sum(ctx context.Context, col atype.Field, cond ...at
 
 // Exists
 func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...atype.Condition) (bool, error) {
-	c := p.R().Cols({{.TableName}}.PrimaryKeys...).Where(cond...).Limit(1)
+	if len({{.TableName}}.PrimaryKeys) == 0 {
+		return false, atype.ErrPrimaryKeyNotMatch
+	}
+	c := p.R().Cols({{.TableName}}.PrimaryKeys[0]).Where(cond...).Limit(1)
 	rows, err := c.Query(ctx)
 	if err != nil {
 		return false, err
