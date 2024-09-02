@@ -115,15 +115,11 @@ func (c *Creator) Struct(ctx context.Context, beans ...types.Modeler) (sql.Resul
 	defer c.Free()
 
 	lens := len(beans)
-	if lens == 0 {
-		return nil, types.ErrCreateEmpty
-	}
-
-	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.table + types.Quote_Char + " (")
-
 	if lens == 0 || lens > 100 || beans[0] == nil {
 		return nil, types.ErrBeanEmpty
 	}
+
+	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.table + types.Quote_Char + " (")
 
 	_cols, _vals := beans[0].AssignValues(c.affect...)
 	_colLens := len(_cols)

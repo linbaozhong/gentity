@@ -35,6 +35,7 @@ var (
 	ErrBeanEmpty    = fmt.Errorf("bean=nil 或者 len(beans)=0 或者 len(beans)>100")
 	ErrNotFound     = fmt.Errorf("not found")
 	ErrSetterEmpty  = fmt.Errorf("setter=nil 或者 len(setter)=0")
+	ErrBeansEmpty   = fmt.Errorf("beans=nil 或者 len(beans)=0")
 	ErrArgsNotMatch = fmt.Errorf("args not match")
 )
 

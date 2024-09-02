@@ -248,21 +248,7 @@ func (p *{{.TableName}}Dao) D() *ace.Deleter{
 }
 
 
-// InsertStruct 批量插入,返回 LastInsertId
-func (p *{{.TableName}}Dao) InsertStruct(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
-	lens := len(beans)
-	args := make([]atype.Modeler, 0, lens)
-	for _, bean := range beans {
-		args = append(args, bean)
-	}
-	result, err := p.C().Cols(cols...).Struct(ctx, args...)
-	if err != nil {
-		return 0, err
-	}
-	return result.LastInsertId()
-}
-
-// Insert
+// Insert 返回 LastInsertId
 func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets []atype.Setter) (int64, error) {
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
@@ -274,19 +260,32 @@ func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets []atype.Setter) (in
 	return result.LastInsertId()
 }
 
-// UpdateStruct
-func (p *{{.TableName}}Dao) UpdateStruct(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error) {
+// InsertOne 返回 LastInsertId
+// cols: 要插入的列名
+func (p *{{.TableName}}Dao) InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
+	result, err := p.C().Cols(cols...).Struct(ctx, bean)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+// InsertMulti 批量插入,返回 RowsAffected
+// cols: 要插入的列名
+func (p *{{.TableName}}Dao) InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
 	lens := len(beans)
+	if lens == 0 {
+		return 0, atype.ErrBeanEmpty
+	}
 	args := make([]atype.Modeler, 0, lens)
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
-	result, err := p.U().Cols(cols...).Struct(ctx, args...)
+	result, err := p.C().Cols(cols...).Struct(ctx, args...)
 	if err != nil {
-		return false, err
+		return 0, err
 	}
-	n, err := result.RowsAffected()
-	return n >= 0, err
+	return result.RowsAffected()
 }
 
 
@@ -296,6 +295,25 @@ func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []atype.Setter, con
 		return false, atype.ErrSetterEmpty
 	}
 	result, err := p.U().Where(cond...).Set(sets...).Do(ctx)
+	if err != nil {
+		return false, err
+	}
+	n, err := result.RowsAffected()
+	return n >= 0, err
+}
+
+// UpdateMulti
+// cols: 要更新的列名
+func (p *{{.TableName}}Dao) UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error) {
+	lens := len(beans)
+	if lens == 0 {
+		return false, atype.ErrBeanEmpty
+	}
+	args := make([]atype.Modeler, 0, lens)
+	for _, bean := range beans {
+		args = append(args, bean)
+	}
+	result, err := p.U().Cols(cols...).Struct(ctx, args...)
 	if err != nil {
 		return false, err
 	}
