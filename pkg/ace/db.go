@@ -8,6 +8,12 @@ import (
 )
 
 type (
+	Cruder interface {
+		C() *Creator
+		R() *Selector
+		U() *Updater
+		D() *Deleter
+	}
 	DB struct {
 		*sqlx.DB
 	}

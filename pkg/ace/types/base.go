@@ -39,6 +39,9 @@ var (
 	ErrBeansEmpty         = fmt.Errorf("beans=nil 或者 len(beans)=0")
 	ErrArgsNotMatch       = fmt.Errorf("args not match")
 	ErrPrimaryKeyNotMatch = fmt.Errorf("primary key not match")
+
+	MaxLimit uint = 1000
+	PageSize uint = 20
 )
 
 type (

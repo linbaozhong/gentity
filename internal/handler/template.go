@@ -16,6 +16,7 @@ package handler
 
 var model_str = `
 {{- $tablename := .TableName}}
+{{- $structName := .StructName}}
 {{- $keys := .Keys}}
 package {{.PackageName}}
 
@@ -25,9 +26,10 @@ import (
 	{{- if .HasTime }}
 	"time"
 	{{- end}}
-	"{{.ModulePath}}/table/{{.TableName}}"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
+
+const {{$structName}}TableName = "{{.TableName}}"
 
 var (
 	{{lower .StructName}}Pool = sync.Pool{
@@ -53,7 +55,7 @@ func (p *{{.StructName}}) Free() {
 
 
 func (p *{{.StructName}}) TableName() string {
-	return "{{.TableName}}"
+	return {{$structName}}TableName
 }
 
 func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.StructName}}, error) {
@@ -61,7 +63,7 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.Struc
 	{{.TableName}}s := make([]*{{.StructName}}, 0)
 
 	if len(args) == 0 {
-		args = {{$tablename}}.ReadableFields
+		args = {{$structName}}ReadableFields
 	}
 
 	for rows.Next() {
@@ -70,7 +72,7 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.Struc
 		for _, col := range args {
 			switch col {
 			{{- range $key, $value := .Columns}}
-			case {{$tablename}}.{{ $key }}:
+			case {{$structName}}Tbl.{{ $key }}:
 				vals = append(vals, &p.{{ $key }})
 			{{- end}}
 			}
@@ -92,18 +94,18 @@ func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
 	)
 
 	if len(args) == 0 {
-		args = {{$tablename}}.WritableFields
+		args = {{$structName}}WritableFields
 		lens = len(args)
 		cols = make([]string, 0, lens)
 		vals = make([]any, 0, lens)
 		for _, arg := range args {
 			switch arg {
 			{{- range $key, $value := .Columns}}
-			case {{$tablename}}.{{ $key }}:
+			case {{$structName}}Tbl.{{ $key }}:
 				if p.{{ $key }}{{getZeroValue $value}} {
 					continue
 				}
-				cols = append(cols, {{$tablename}}.{{ $key }}.Quote())
+				cols = append(cols, {{$structName}}Tbl.{{ $key }}.Quote())
 				vals = append(vals, p.{{ $key }})
 			{{- end}}
 			}
@@ -116,8 +118,8 @@ func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
 	for _, arg := range args {
 		switch arg {
 		{{- range $key, $value := .Columns}}
-		case {{$tablename}}.{{ $key }}:
-			cols = append(cols, {{$tablename}}.{{ $key }}.Quote())
+		case {{$structName}}Tbl.{{ $key }}:
+			cols = append(cols, {{$structName}}Tbl.{{ $key }}.Quote())
 			vals = append(vals, p.{{ $key }})
 		{{- end}}
 		}
@@ -127,7 +129,7 @@ func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
 
 //
 func (p *{{.StructName}}) AssignKeys() ([]atype.Field, []any) {
-	return {{$tablename}}.PrimaryKeys, []any{
+	return {{$structName}}PrimaryKeys, []any{
 	{{- range $key,$value := .Keys}}
 		p.{{$value}},
 	{{- end}}
@@ -135,6 +137,44 @@ func (p *{{.StructName}}) AssignKeys() ([]atype.Field, []any) {
 }
 
 
+var (
+	{{$structName}}Tbl = struct {
+	{{- range $key, $value := .Columns}}
+		{{ $key }} atype.Field
+	{{- end}}
+	}{
+	{{- range $key, $value := .Columns}}
+		{{ $key }}: atype.Field{Name: "{{index $value 0}}",Table: {{$structName}}TableName},
+	{{- end}}
+	}
+
+{{- if .HasPrimaryKey}}
+	// 主键
+	{{$structName}}PrimaryKeys = []atype.Field{
+	{{- range $key,$value := .Keys}}
+		{{$structName}}Tbl.{{$value}},
+	{{- end}}
+	}
+{{- end}}
+
+	// 可写列
+	{{$structName}}WritableFields = []atype.Field{
+	{{- range $key, $value := .Columns}}
+		{{- if or (eq (index $value 4) "->") (eq (index $value 4) "")}}
+		{{$structName}}Tbl.{{$key}},
+		{{- end}}
+	{{- end}}
+	}
+	// 可读列
+	{{$structName}}ReadableFields = []atype.Field{
+	{{- range $key, $value := .Columns}}
+		{{- if or (eq (index $value 4) "<-") (eq (index $value 4) "")}}
+		{{$structName}}Tbl.{{$key}},
+		{{- end}}
+	{{- end}}
+	}
+
+)
 `
 var (
 	//
@@ -161,7 +201,7 @@ var (
 {{- end}}
 
 	// 可写列
-	WritableFields = []atype.Field {
+	WritableFields = []atype.Field{
 {{- range $key, $value := .Columns}}
 	{{- if or (eq (index $value 4) "->") (eq (index $value 4) "")}}
 	{{$key}},
@@ -169,7 +209,7 @@ var (
 {{- end}}
 	}
 	// 可读列
-	ReadableFields = []atype.Field {
+	ReadableFields = []atype.Field{
 {{- range $key, $value := .Columns}}
 	{{- if or (eq (index $value 4) "<-") (eq (index $value 4) "")}}
 	{{$key}},
@@ -182,31 +222,28 @@ var (
 `
 	buildTpl = `
 {{- $tablename := .TableName}}
+{{- $structName := .StructName}}
 package dao
 
 import (
 	"context"
 	"{{.ModulePath}}/db"
-	"{{.ModulePath}}/table/{{.TableName}}"
+	// "{{.ModulePath}}/table/{{.TableName}}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
 type {{.StructName}}Daoer interface {
 	atype.Daoer
-	C() *ace.Creator
-	R() *ace.Selector
-	U() *ace.Updater
-	D() *ace.Deleter
+	ace.Cruder
 	InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
 	InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
 	UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error)
+	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
+	Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
 	Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error)
-	Gets4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
 	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error)
-	Get(ctx context.Context, cond ...atype.Condition) (*db.Event, error)
-	IDs(ctx context.Context, cond ...atype.Condition) ([]int64, error)
-	Columns(ctx context.Context, col atype.Field, cond ...atype.Condition) ([]any, error)
+	Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error)
 }
 
 type {{.TableName}}Dao struct {
@@ -214,8 +251,8 @@ type {{.TableName}}Dao struct {
 	table string
 }
 
-func {{.StructName}}(exec atype.Executer) *{{.TableName}}Dao {
-	return &{{.TableName}}Dao{db: exec, table: "{{.TableName}}"}
+func {{.StructName}}(exec atype.Executer) {{$structName}}Daoer {
+	return &{{.TableName}}Dao{db: exec, table: {{.PackageName}}.{{$structName}}TableName}
 }
 
 // C Create {{ .TableName }}
@@ -326,7 +363,7 @@ func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...atype.Condition)
 func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols({{.TableName}}.ReadableFields...)
+		c.Cols({{.PackageName}}.{{$structName}}ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -350,16 +387,20 @@ func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []atype.Field, co
 	return objs[0], nil
 }
 //
-// Gets4Cols
-func (p *{{.TableName}}Dao) Gets4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+// Find4Cols
+func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols({{.TableName}}.ReadableFields...)
+		c.Cols({{.PackageName}}.{{$structName}}ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
-	
-	rows, err := c.Where(cond...).Limit(1000).Query(ctx)
+	//
+	if pageSize == 0 {
+		pageSize = atype.PageSize
+	}
+	//
+	rows, err := c.Where(cond...).Limit(pageSize, pageSize*pageIndex).Query(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -378,13 +419,13 @@ func (p *{{.TableName}}Dao) Gets4Cols(ctx context.Context, cols []atype.Field, c
 // GetByID Read one {{.TableName}} By Primary Key value,
 // Pass values in this order：{{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$value}}{{ end}}
 func (p *{{.TableName}}Dao) GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
-	lens := len({{.TableName}}.PrimaryKeys)
+	lens := len({{.PackageName}}.{{$structName}}PrimaryKeys)
 	if lens != len(args) {
 		return nil, atype.ErrArgsNotMatch
 	}
 	
 	cond := make([]atype.Condition, 0, lens)
-	for i, key := range {{.TableName}}.PrimaryKeys {
+	for i, key := range {{.PackageName}}.{{$structName}}PrimaryKeys {
 		cond = append(cond, key.Eq(args[i]))
 	}
 	return p.Get4Cols(ctx, []atype.Field{}, cond...)
@@ -395,25 +436,25 @@ func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...atype.Condition) (*
 	return p.Get4Cols(ctx, []atype.Field{}, cond...)
 }
 
-// Gets
-func (p *{{.TableName}}Dao) Gets(ctx context.Context, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
-	return p.Gets4Cols(ctx, []atype.Field{}, cond...)
+// Find
+func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+	return p.Find4Cols(ctx, pageIndex, pageSize, []atype.Field{}, cond...)
 }
 
 
 // IDs
 func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...atype.Condition) ([]int64, error) {
-	if len({{.TableName}}.PrimaryKeys) == 0 {
+	if len({{.PackageName}}.{{$structName}}PrimaryKeys) == 0 {
 		return nil, atype.ErrPrimaryKeyNotMatch
 	}
-	c := p.R().Cols({{.TableName}}.PrimaryKeys[0])
-	rows, err := c.Where(cond...).Limit(1000).Query(ctx)
+	c := p.R().Cols({{.PackageName}}.{{$structName}}PrimaryKeys[0])
+	rows, err := c.Where(cond...).Limit(atype.MaxLimit).Query(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	ids := make([]int64, 0)
+	ids := make([]int64, atype.PageSize)
 	for rows.Next() {
 		var id int64
 		if err := rows.Scan(&id); err != nil {
@@ -428,13 +469,13 @@ func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...atype.Condition) ([
 // Columns
 func (p *{{.TableName}}Dao) Columns(ctx context.Context, col atype.Field, cond ...atype.Condition) ([]any, error) {
 	c := p.R().Cols(col)
-	rows, err := c.Where(cond...).Limit(1000).Query(ctx)
+	rows, err := c.Where(cond...).Limit(atype.MaxLimit).Query(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	cols := make([]any, 0)
+	cols := make([]any, atype.PageSize)
 	for rows.Next() {
 		var v any
 		if err := rows.Scan(&v); err != nil {
@@ -458,10 +499,10 @@ func (p *{{.TableName}}Dao) Sum(ctx context.Context, col atype.Field, cond ...at
 
 // Exists
 func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...atype.Condition) (bool, error) {
-	if len({{.TableName}}.PrimaryKeys) == 0 {
+	if len({{.PackageName}}.{{$structName}}PrimaryKeys) == 0 {
 		return false, atype.ErrPrimaryKeyNotMatch
 	}
-	c := p.R().Cols({{.TableName}}.PrimaryKeys[0]).Where(cond...).Limit(1)
+	c := p.R().Cols({{.PackageName}}.{{$structName}}PrimaryKeys[0]).Where(cond...).Limit(1)
 	rows, err := c.Query(ctx)
 	if err != nil {
 		return false, err
