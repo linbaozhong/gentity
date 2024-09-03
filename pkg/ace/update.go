@@ -74,7 +74,7 @@ func (u *Updater) Free() {
 	u.commandString.WriteString(fmt.Sprintf("%s  %v", u.command.String(), u.params))
 
 	if u.db.Debug() {
-		log.Info(u.commandString.String())
+		log.Info(u.String())
 	}
 	u.table = ""
 	u.affect = u.affect[:]

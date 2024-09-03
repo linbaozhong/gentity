@@ -66,7 +66,7 @@ func (c *Creator) Free() {
 	c.commandString.WriteString(fmt.Sprintf("%s  %v", c.command.String(), c.params))
 
 	if c.db.Debug() {
-		log.Info(c.commandString.String())
+		log.Info(c.String())
 	}
 	c.table = ""
 	c.affect = c.affect[:]

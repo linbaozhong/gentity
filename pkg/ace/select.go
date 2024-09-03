@@ -76,7 +76,7 @@ func (s *Selector) Free() {
 	s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.whereParams))
 
 	if s.db.Debug() {
-		log.Info(s.commandString.String())
+		log.Info(s.String())
 	}
 	s.table = ""
 	s.cols = s.cols[:]
