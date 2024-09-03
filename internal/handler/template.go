@@ -236,13 +236,24 @@ import (
 type {{.StructName}}Daoer interface {
 	atype.Daoer
 	ace.Cruder
+	// InsertOne 返回 LastInsertId
+	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
+	// InsertMulti 批量插入,返回 RowsAffected
+	// cols: 要插入的列名
 	InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
+	// UpdateMulti
+	// cols: 要更新的列名
 	UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error)
+	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
+	// Find 分页查询，返回一个slice
 	Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
+	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error)
+	// GetByID 按主键查询，返回一个对象
 	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error)
+	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error)
 }
 
