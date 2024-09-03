@@ -227,7 +227,7 @@ package dao
 
 import (
 	"context"
-	"{{.ModulePath}}/db"
+	"{{.ModulePath}}/{{.PackageName}}"
 	// "{{.ModulePath}}/table/{{.TableName}}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
@@ -236,13 +236,13 @@ import (
 type {{.StructName}}Daoer interface {
 	atype.Daoer
 	ace.Cruder
-	// InsertOne 返回 LastInsertId
+	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
-	// InsertMulti 批量插入,返回 RowsAffected
+	// InsertMulti 批量插入多条数据,返回 RowsAffected
 	// cols: 要插入的列名
 	InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
-	// UpdateMulti
+	// UpdateMulti 批量更新多条数据
 	// cols: 要更新的列名
 	UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
