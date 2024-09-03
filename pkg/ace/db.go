@@ -3,7 +3,7 @@ package ace
 import (
 	"context"
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 )
 
@@ -14,6 +14,8 @@ type (
 		U() *Updater
 		D() *Deleter
 	}
+	Dialect interface {
+	}
 	DB struct {
 		*sql.DB
 		debug bool // 如果是调试模式，则打印sql命令及错误
@@ -21,6 +23,7 @@ type (
 )
 
 func Connect(driverName, dns string) (*DB, error) {
+	dialect.Register(driverName)
 	db, e := sql.Open(driverName, dns)
 	if e != nil {
 		log.Panic(e)

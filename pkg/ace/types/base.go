@@ -27,8 +27,6 @@ const (
 
 	Operator_and = " AND "
 	Operator_or  = " OR "
-	placeholder  = "?"
-	Quote_Char   = "`"
 )
 
 var (
