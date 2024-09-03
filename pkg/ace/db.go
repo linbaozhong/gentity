@@ -9,9 +9,13 @@ import (
 
 type (
 	Cruder interface {
+		// C Create 命令体
 		C() *Creator
+		// R Read 命令体
 		R() *Selector
+		// U Update 命令体
 		U() *Updater
+		// D Delete 命令体
 		D() *Deleter
 	}
 	Dialect interface {
