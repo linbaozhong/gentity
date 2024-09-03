@@ -16,7 +16,7 @@ type (
 	}
 	DB struct {
 		*sql.DB
-		Debug bool // 如果是调试模式，则打印sql命令及错误
+		debug bool // 如果是调试模式，则打印sql命令及错误
 	}
 )
 
@@ -33,7 +33,12 @@ func Connect(driverName, dns string) (*DB, error) {
 
 // SetDebug
 func (s *DB) SetDebug(debug bool) {
-	s.Debug = debug
+	s.debug = debug
+}
+
+// Debug
+func (s *DB) Debug() bool {
+	return s.debug
 }
 
 // Transaction 事务处理
