@@ -65,7 +65,7 @@ func (d *Deleter) Free() {
 	d.commandString.WriteString(fmt.Sprintf("%s  %v", d.command.String(), d.whereParams))
 
 	if d.db.Debug() {
-		log.Info(d.commandString)
+		log.Info(d.commandString.String())
 	}
 	d.table = ""
 	d.where.Reset()
