@@ -14,6 +14,8 @@
 
 package dialect
 
+import "github.com/linbaozhong/gentity/pkg/ace/dialect/mysql"
+
 var (
 	Placeholder = "?"
 	Quote_Char  = "`"
@@ -22,7 +24,7 @@ var (
 func Register(driverName string) {
 	switch driverName {
 	case "mysql":
-		Placeholder = "?"
-		Quote_Char = "`"
+		Placeholder = mysql.Placeholder
+		Quote_Char = mysql.Quote_Char
 	}
 }
