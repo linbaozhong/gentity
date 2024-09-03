@@ -3,7 +3,6 @@ package dao
 import (
 	"context"
 	"github.com/linbaozhong/gentity/example/model"
-	// "github.com/linbaozhong/gentity/example/table/user"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
