@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strconv"
@@ -334,7 +335,7 @@ func (s *Selector) stmt() {
 		s.command.WriteString(strings.Join(s.funcs, ","))
 	}
 	// FROM TABLE
-	s.command.WriteString(" FROM " + types.Quote_Char + s.table + types.Quote_Char)
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
 	for _, j := range s.join {
 		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	}
@@ -376,7 +377,7 @@ func (s *Selector) Count(ctx context.Context, cond ...types.Condition) (int64, e
 	s.Where(cond...)
 	s.command.WriteString("SELECT COUNT(*)")
 	// FROM TABLE
-	s.command.WriteString(" FROM " + types.Quote_Char + s.table + types.Quote_Char)
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
 	// WHERE
 	if s.where.Len() > 0 {
 		s.command.WriteString(" WHERE " + s.where.String())
@@ -406,7 +407,7 @@ func (s *Selector) Sum(ctx context.Context, col types.Field, cond ...types.Condi
 	s.command.WriteString("SELECT ")
 	s.command.WriteString(s.funcs[0])
 	// FROM TABLE
-	s.command.WriteString(" FROM " + types.Quote_Char + s.table + types.Quote_Char)
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
 	// WHERE
 	if s.where.Len() > 0 {
 		s.command.WriteString(" WHERE " + s.where.String())

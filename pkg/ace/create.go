@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
@@ -108,7 +109,7 @@ func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 		return nil, types.ErrCreateEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.table + types.Quote_Char + " (")
+	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
 	for i, col := range c.cols {
 		if i > 0 {
 			c.command.WriteString(",")
@@ -131,7 +132,7 @@ func (c *Creator) Struct(ctx context.Context, beans ...types.Modeler) (sql.Resul
 		return nil, types.ErrBeanEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + types.Quote_Char + c.table + types.Quote_Char + " (")
+	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
 
 	_cols, _vals := beans[0].AssignValues(c.affect...)
 	_colLens := len(_cols)

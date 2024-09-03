@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
@@ -208,7 +209,7 @@ func (u *Updater) Do(ctx context.Context) (sql.Result, error) {
 		return nil, types.ErrCreateEmpty
 	}
 
-	u.command.WriteString("UPDATE " + types.Quote_Char + u.table + types.Quote_Char + " SET ")
+	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
 	_cols := make([]string, 0, lens)
 	for _, col := range u.cols {
 		_cols = append(_cols, col.Quote()+" = ?")
@@ -244,7 +245,7 @@ func (u *Updater) Struct(ctx context.Context, beans ...types.Modeler) (sql.Resul
 		if n > 0 {
 			u.command.WriteString(";")
 		}
-		u.command.WriteString("UPDATE " + types.Quote_Char + bean.TableName() + types.Quote_Char + " SET ")
+		u.command.WriteString("UPDATE " + dialect.Quote_Char + bean.TableName() + dialect.Quote_Char + " SET ")
 		cols, params := bean.AssignValues(u.affect...)
 		u.params = append(u.params, params...)
 		//

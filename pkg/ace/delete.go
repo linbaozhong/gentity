@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
@@ -165,7 +166,7 @@ func (d *Deleter) Or(fns ...types.Condition) *Deleter {
 func (d *Deleter) Do(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
 
-	d.command.WriteString("DELETE FROM " + types.Quote_Char + d.table + types.Quote_Char)
+	d.command.WriteString("DELETE FROM " + dialect.Quote_Char + d.table + dialect.Quote_Char)
 	// WHERE
 	if d.where.Len() > 0 {
 		d.command.WriteString(" WHERE " + d.where.String())
