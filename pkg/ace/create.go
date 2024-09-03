@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
@@ -25,12 +26,13 @@ import (
 
 type (
 	Creator struct {
-		db      types.Executer
-		table   string
-		affect  []types.Field
-		cols    []types.Field
-		params  []any
-		command strings.Builder
+		db            types.Executer
+		table         string
+		affect        []types.Field
+		cols          []types.Field
+		params        []any
+		command       strings.Builder
+		commandString strings.Builder
 	}
 )
 
@@ -60,8 +62,11 @@ func (c *Creator) Free() {
 	if c == nil {
 		return
 	}
+	c.commandString.Reset()
+	c.commandString.WriteString(fmt.Sprintf("%s  %v", c.command.String(), c.params))
+
 	if c.db.Debug() {
-		c.log()
+		log.Info(c.commandString)
 	}
 	c.table = ""
 	c.affect = c.affect[:]
@@ -71,8 +76,8 @@ func (c *Creator) Free() {
 	createPool.Put(c)
 }
 
-func (c *Creator) log() {
-	log.Infof("%s  %v", c.command.String(), c.params)
+func (c *Creator) String() string {
+	return c.commandString.String()
 }
 
 // Sets

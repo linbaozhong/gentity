@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
@@ -25,11 +26,12 @@ import (
 
 type (
 	Deleter struct {
-		db          types.Executer
-		table       string
-		where       strings.Builder
-		whereParams []interface{}
-		command     strings.Builder
+		db            types.Executer
+		table         string
+		where         strings.Builder
+		whereParams   []interface{}
+		command       strings.Builder
+		commandString strings.Builder
 	}
 )
 
@@ -59,8 +61,11 @@ func (d *Deleter) Free() {
 	if d == nil {
 		return
 	}
+	d.commandString.Reset()
+	d.commandString.WriteString(fmt.Sprintf("%s  %v", d.command.String(), d.whereParams))
+
 	if d.db.Debug() {
-		d.log()
+		log.Info(d.commandString)
 	}
 	d.table = ""
 	d.where.Reset()
@@ -69,8 +74,8 @@ func (d *Deleter) Free() {
 	deletePool.Put(d)
 }
 
-func (d *Deleter) log() {
-	log.Infof("%s  %v", d.command.String(), d.whereParams)
+func (d *Deleter) String() string {
+	return d.commandString.String()
 }
 
 // Where

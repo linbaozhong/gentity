@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strconv"
@@ -26,21 +27,22 @@ import (
 
 type (
 	Selector struct {
-		db           types.Executer
-		table        string
-		join         [][3]string
-		distinct     bool
-		cols         []types.Field
-		funcs        []string
-		omit         []any
-		groupBy      strings.Builder
-		having       strings.Builder
-		havingParams []any
-		orderBy      strings.Builder
-		limit        string
-		where        strings.Builder
-		whereParams  []any
-		command      strings.Builder
+		db            types.Executer
+		table         string
+		join          [][3]string
+		distinct      bool
+		cols          []types.Field
+		funcs         []string
+		omit          []any
+		groupBy       strings.Builder
+		having        strings.Builder
+		havingParams  []any
+		orderBy       strings.Builder
+		limit         string
+		where         strings.Builder
+		whereParams   []any
+		command       strings.Builder
+		commandString strings.Builder
 	}
 )
 
@@ -70,8 +72,11 @@ func (s *Selector) Free() {
 	if s == nil {
 		return
 	}
+	s.commandString.Reset()
+	s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.whereParams))
+
 	if s.db.Debug() {
-		s.log()
+		log.Info(s.commandString)
 	}
 	s.table = ""
 	s.cols = s.cols[:]
@@ -90,8 +95,8 @@ func (s *Selector) Free() {
 	selectPool.Put(s)
 }
 
-func (s *Selector) log() {
-	log.Infof("%s  %v \n", s.command.String(), s.whereParams)
+func (s *Selector) String() string {
+	return s.commandString.String()
 }
 
 // distinct

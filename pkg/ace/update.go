@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
@@ -25,15 +26,16 @@ import (
 
 type (
 	Updater struct {
-		db          types.Executer
-		table       string
-		affect      []types.Field
-		cols        []types.Field
-		params      []any
-		exprCols    []expr
-		where       strings.Builder
-		whereParams []interface{}
-		command     strings.Builder
+		db            types.Executer
+		table         string
+		affect        []types.Field
+		cols          []types.Field
+		params        []any
+		exprCols      []expr
+		where         strings.Builder
+		whereParams   []interface{}
+		command       strings.Builder
+		commandString strings.Builder
 	}
 	expr struct {
 		colName string
@@ -68,8 +70,11 @@ func (u *Updater) Free() {
 	if u == nil {
 		return
 	}
+	u.commandString.Reset()
+	u.commandString.WriteString(fmt.Sprintf("%s  %v", u.command.String(), u.params))
+
 	if u.db.Debug() {
-		u.log()
+		log.Info(u.commandString)
 	}
 	u.table = ""
 	u.affect = u.affect[:]
@@ -82,8 +87,8 @@ func (u *Updater) Free() {
 	updatePool.Put(u)
 }
 
-func (u *Updater) log() {
-	log.Infof("%s  %v", u.command.String(), u.params)
+func (u *Updater) String() string {
+	return u.commandString.String()
 }
 
 // Set
