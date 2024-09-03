@@ -228,7 +228,6 @@ package dao
 import (
 	"context"
 	"{{.ModulePath}}/{{.PackageName}}"
-	// "{{.ModulePath}}/table/{{.TableName}}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
