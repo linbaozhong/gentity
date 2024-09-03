@@ -17,8 +17,8 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 	"sync"
 )
@@ -59,25 +59,31 @@ func NewUpdate(db types.Executer, tableName string) *Updater {
 	obj := updatePool.Get().(*Updater)
 	obj.db = db
 	obj.table = tableName
-	obj.command.Reset()
 
 	return obj
 
 }
 
 func (u *Updater) Free() {
+	if u == nil {
+		return
+	}
+	if u.db.Debug() {
+		u.log()
+	}
 	u.table = ""
 	u.affect = u.affect[:]
 	u.cols = u.cols[:]
-	u.params = u.params[:]
 	u.exprCols = u.exprCols[:]
 	u.where.Reset()
 	u.whereParams = u.whereParams[:]
+	u.command.Reset()
+	u.params = u.params[:]
 	updatePool.Put(u)
 }
 
-func (u *Updater) String() string {
-	return fmt.Sprintf("%s  %v", u.command.String(), u.params)
+func (u *Updater) log() {
+	log.Infof("%s  %v", u.command.String(), u.params)
 }
 
 // Set

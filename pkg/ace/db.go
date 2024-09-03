@@ -2,8 +2,8 @@ package ace
 
 import (
 	"context"
+	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 	"github.com/linbaozhong/gentity/pkg/log"
 )
 
@@ -15,21 +15,30 @@ type (
 		D() *Deleter
 	}
 	DB struct {
-		*sqlx.DB
+		*sql.DB
+		Debug bool // 如果是调试模式，则打印sql命令及错误
 	}
 )
 
 func Connect(driverName, dns string) (*DB, error) {
-	db, e := sqlx.Connect(driverName, dns)
+	db, e := sql.Open(driverName, dns)
 	if e != nil {
 		log.Panic(e)
 	}
-	return &DB{db}, e
+	if e = db.Ping(); e != nil {
+		log.Panic(e)
+	}
+	return &DB{db, false}, e
+}
+
+// SetDebug
+func (s *DB) SetDebug(debug bool) {
+	s.Debug = debug
 }
 
 // Transaction 事务处理
-func (s *DB) Transaction(ctx context.Context, f func(tx *sqlx.Tx) (interface{}, error)) (interface{}, error) {
-	tx, e := s.BeginTxx(ctx, nil)
+func (s *DB) Transaction(ctx context.Context, f func(tx *sql.Tx) (interface{}, error)) (interface{}, error) {
+	tx, e := s.BeginTx(ctx, nil)
 	if e != nil {
 		return nil, e
 	}

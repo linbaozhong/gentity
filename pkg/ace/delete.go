@@ -17,8 +17,8 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 	"sync"
 )
@@ -51,20 +51,26 @@ func NewDelete(db types.Executer, tableName string) *Deleter {
 	obj := deletePool.Get().(*Deleter)
 	obj.db = db
 	obj.table = tableName
-	obj.command.Reset()
 	return obj
 
 }
 
 func (d *Deleter) Free() {
+	if d == nil {
+		return
+	}
+	if d.db.Debug() {
+		d.log()
+	}
 	d.table = ""
 	d.where.Reset()
 	d.whereParams = d.whereParams[:]
+	d.command.Reset()
 	deletePool.Put(d)
 }
 
-func (d *Deleter) String() string {
-	return fmt.Sprintf("%s  %v", d.command.String(), d.whereParams)
+func (d *Deleter) log() {
+	log.Infof("%s  %v", d.command.String(), d.whereParams)
 }
 
 // Where

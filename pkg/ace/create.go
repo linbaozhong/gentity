@@ -17,8 +17,8 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 	"sync"
 )
@@ -52,20 +52,27 @@ func NewCreate(db types.Executer, tableName string) *Creator {
 	obj := createPool.Get().(*Creator)
 	obj.db = db
 	obj.table = tableName
-	obj.command.Reset()
+
 	return obj
 }
 
 func (c *Creator) Free() {
+	if c == nil {
+		return
+	}
+	if c.db.Debug() {
+		c.log()
+	}
 	c.table = ""
 	c.affect = c.affect[:]
 	c.cols = c.cols[:]
+	c.command.Reset()
 	c.params = c.params[:]
 	createPool.Put(c)
 }
 
-func (c *Creator) String() string {
-	return fmt.Sprintf("%s  %v", c.command.String(), c.params)
+func (c *Creator) log() {
+	log.Infof("%s  %v", c.command.String(), c.params)
 }
 
 // Sets
