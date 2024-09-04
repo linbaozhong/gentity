@@ -58,7 +58,7 @@ func (p *{{.StructName}}) TableName() string {
 	return {{$structName}}TableName
 }
 
-func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.StructName}}, error) {
+func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.StructName}}, bool, error) {
 	defer rows.Close()
 	{{.TableName}}s := make([]*{{.StructName}}, 0)
 
@@ -79,11 +79,17 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.Struc
 		}
 		err := rows.Scan(vals...)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		{{.TableName}}s = append({{.TableName}}s, p)
 	}
-	return {{.TableName}}s, nil
+	if err := rows.Err(); err != nil {
+		return nil, false, err
+	}
+	if len({{.TableName}}s) == 0 {
+		return nil, false, sql.ErrNoRows
+	}
+	return {{.TableName}}s, true, nil
 }
 
 func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
@@ -245,15 +251,19 @@ type {{.StructName}}Daoer interface {
 	// cols: 要更新的列名
 	UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
-	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
+	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Find 分页查询，返回一个slice
-	Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error)
+	Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Get4Cols 读取一个对象的指定列
-	Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error)
+	Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error)
+	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Get 按条件读取一个对象
-	Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error)
+	Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
+	//
+	IDs(ctx context.Context, cond ...atype.Condition) ([]int64, error)
+	//
+	Columns(ctx context.Context, col atype.Field, cond ...atype.Condition) ([]any, error)
 }
 
 type {{.TableName}}Dao struct {
@@ -369,7 +379,7 @@ func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...atype.Condition)
 }
 
 // Get4Cols
-func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
 		c.Cols({{.PackageName}}.{{$structName}}ReadableFields...)
@@ -379,25 +389,26 @@ func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []atype.Field, co
 	
 	rows, err := c.Where(cond...).Limit(1).Query(ctx)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	defer rows.Close()
 
 	obj := {{.PackageName}}.New{{.StructName}}()
 	defer obj.Free()
 
-	objs, err := obj.Scan(rows, cols...)
+	objs, has, err := obj.Scan(rows, cols...)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	if len(objs) == 0 {
-		return nil, atype.ErrNotFound
+	if has {
+		return objs[0], true, nil
 	}
-	return objs[0], nil
+
+	return nil, false, atype.ErrNotFound
 }
 //
 // Find4Cols
-func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
 		c.Cols({{.PackageName}}.{{$structName}}ReadableFields...)
@@ -411,26 +422,26 @@ func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize u
 	//
 	rows, err := c.Where(cond...).Limit(pageSize, pageSize*pageIndex).Query(ctx)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	defer rows.Close()
 
 	obj := {{.PackageName}}.New{{.StructName}}()
 	defer obj.Free()
 
-	objs, err := obj.Scan(rows, cols...)
+	objs, has, err := obj.Scan(rows, cols...)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return objs, nil
+	return objs, has, nil
 }
 
 // GetByID Read one {{.TableName}} By Primary Key value,
 // Pass values in this order：{{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$value}}{{ end}}
-func (p *{{.TableName}}Dao) GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, bool, error) {
 	lens := len({{.PackageName}}.{{$structName}}PrimaryKeys)
 	if lens != len(args) {
-		return nil, atype.ErrArgsNotMatch
+		return nil, false, atype.ErrArgsNotMatch
 	}
 	
 	cond := make([]atype.Condition, 0, lens)
@@ -441,12 +452,12 @@ func (p *{{.TableName}}Dao) GetByID(ctx context.Context, args ...any) (*{{.Packa
 }
 
 // Get Read one {{.TableName}}
-func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error) {
 	return p.Get4Cols(ctx, []atype.Field{}, cond...)
 }
 
 // Find
-func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, error) {
+func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error) {
 	return p.Find4Cols(ctx, pageIndex, pageSize, []atype.Field{}, cond...)
 }
 
