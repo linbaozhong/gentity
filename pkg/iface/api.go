@@ -14,8 +14,6 @@
 
 package iface
 
-import "ganji/pkg/types"
-
 type Checker interface {
 	Check() error
 }
@@ -25,17 +23,6 @@ func Validate(arg any) error {
 		if err := checker.Check(); err != nil {
 			return err
 		}
-	}
-	return nil
-}
-
-type Registerer interface {
-	Register(visitor *types.UserClaims) error
-}
-
-func Register(arg any, fn func() *types.UserClaims) error {
-	if registerer, ok := arg.(Registerer); ok {
-		return registerer.Register(fn())
 	}
 	return nil
 }

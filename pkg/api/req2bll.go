@@ -40,14 +40,6 @@ func Post[A, B any](
 		return
 	}
 
-	if e := iface.Register(&req,
-		func() *types.UserClaims {
-			return GetClaims(ctx)
-		}); e != nil {
-		Fail(ctx, e)
-		return
-	}
-
 	var resp B
 	if e := fn(ctx, &req, &resp); e != nil {
 		log.Error(e)
@@ -68,14 +60,6 @@ func Get[A, B any](
 		return
 	}
 	if e := iface.Validate(&req); e != nil {
-		Fail(ctx, e)
-		return
-	}
-
-	if e := iface.Register(&req,
-		func() *types.UserClaims {
-			return GetClaims(ctx)
-		}); e != nil {
 		Fail(ctx, e)
 		return
 	}
