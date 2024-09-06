@@ -21,6 +21,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/schema"
 	"testing"
 	"time"
 )
@@ -236,4 +237,12 @@ func TestSelect(t *testing.T) {
 	for _, o := range obj {
 		t.Log(o)
 	}
+}
+
+func TestGenStruct(t *testing.T) {
+	buf, err := schema.SqlFile2Struct("./sql.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(buf))
 }
