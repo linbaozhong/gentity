@@ -22,21 +22,21 @@ import (
 	"os"
 )
 
-func Sql2Struct(buf []byte) ([]byte, error) {
-	return reader2Struct(bytes.NewReader(buf))
+func Sql2Struct(buf []byte, packageName string) ([]byte, error) {
+	return reader2Struct(bytes.NewReader(buf), packageName)
 }
 
-func SqlFile2Struct(filePath string) ([]byte, error) {
+func SqlFile2Struct(filePath, packageName string) ([]byte, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
 
-	return reader2Struct(f)
+	return reader2Struct(f, packageName)
 }
 
-func reader2Struct(r io.Reader) ([]byte, error) {
+func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 	parser := sqlparser.NewParser(r)
 	schema, err := parser.Parse()
 	if err != nil {
@@ -44,7 +44,12 @@ func reader2Struct(r io.Reader) ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
+	buf.WriteString("package " + packageName + "\n")
+	buf.WriteString("import (\n")
+	buf.WriteString("	\"time\" \n")
+	buf.WriteString(") \n")
 	for _, table := range schema {
+		buf.WriteString("// tablename " + table.Name + "\n")
 		buf.WriteString("type " + util.ParseField(table.Name) + " struct {\n")
 		for _, col := range table.Columns {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size))
