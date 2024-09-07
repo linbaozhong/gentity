@@ -46,15 +46,19 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 		return nil, err
 	}
 
+	for _, x := range schema["company"].ColumnsX {
+		fmt.Printf("%+v \n", x)
+	}
+
 	var buf bytes.Buffer
-	buf.WriteString("package " + packageName + "\n")
+	buf.WriteString("package " + packageName + "\n\n")
 	buf.WriteString("import (\n")
 	buf.WriteString("	\"time\" \n")
-	buf.WriteString(") \n")
+	buf.WriteString(") \n\n")
 	for _, table := range schema {
 		buf.WriteString("// tablename " + table.Name + "\n")
 		buf.WriteString("type " + util.ParseField(table.Name) + " struct {\n")
-		for _, col := range table.Columns {
+		for _, col := range table.ColumnsX {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size))
 			buf.WriteString("\t`json:\"" + col.Name + "\" db:\"'" + col.Name + "'") //
 			if strings.ToUpper(col.Key) == dialect.PrimaryKey {

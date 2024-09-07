@@ -267,7 +267,7 @@ func TestSelect(t *testing.T) {
 }
 
 func TestGenStruct(t *testing.T) {
-	buf, err := schema.SqlFile2Struct("./sql.sql", "db")
+	buf, err := schema.SqlFile2Struct("./data.sql", "db")
 	if err != nil {
 		t.Fatal(err)
 	}
