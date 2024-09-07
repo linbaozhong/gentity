@@ -74,7 +74,7 @@ func TestScheme(t *testing.T) {
 
 func TestCreateSet(t *testing.T) {
 	defer dbx.Close()
-	x := User(dbx).C()
+	x := Company(dbx).C()
 	result, err := x.Set(
 		obj.CorpName.Set("aaaaaa"),
 		obj.IsAuthenticated.Set(true),
@@ -91,27 +91,27 @@ func TestCreateSet(t *testing.T) {
 
 func TestCreateCols(t *testing.T) {
 	defer dbx.Close()
-	x := User(dbx).C()
+	x := Company(dbx).C()
 	result, err := x.Cols(
 		obj.CorpName,
 		obj.IsAuthenticated,
 		obj.State,
 		obj.CreatedTime,
-	).Struct(context.Background(), &model.User{
-		Name:        "m1",
-		IsAllow:     false,
-		Status:      0,
-		CreatedTime: time.Now(),
-	}, &model.User{
-		Name:        "m2",
-		IsAllow:     true,
-		Status:      1,
-		CreatedTime: time.Now(),
-	}, &model.User{
-		Name:        "m3",
-		IsAllow:     true,
-		Status:      0,
-		CreatedTime: time.Now(),
+	).Struct(context.Background(), &model.Company{
+		FullCorpName:     "m1",
+		IsEcologicalCorp: false,
+		State:            0,
+		CreatedTime:      time.Now(),
+	}, &model.Company{
+		FullCorpName:     "m2",
+		IsEcologicalCorp: true,
+		State:            1,
+		CreatedTime:      time.Now(),
+	}, &model.Company{
+		FullCorpName:     "m3",
+		IsEcologicalCorp: true,
+		State:            0,
+		CreatedTime:      time.Now(),
 	})
 
 	t.Log(x)
@@ -126,11 +126,11 @@ func TestCreateCols(t *testing.T) {
 func TestInsert(t *testing.T) {
 	defer dbx.Close()
 	//
-	id, err := User(dbx).InsertOne(context.Background(), &model.User{
-		Name:        "x1",
-		IsAllow:     false,
-		Status:      0,
-		CreatedTime: time.Now(),
+	id, err := Company(dbx).InsertOne(context.Background(), &model.Company{
+		FullCorpName:     "x1",
+		IsEcologicalCorp: false,
+		State:            0,
+		CreatedTime:      time.Now(),
 	})
 	t.Log(id)
 
@@ -138,21 +138,21 @@ func TestInsert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	n, err := User(dbx).InsertMulti(context.Background(), []*model.User{&model.User{
-		Name:        "x1",
-		IsAllow:     false,
-		Status:      0,
-		CreatedTime: time.Now(),
-	}, &model.User{
-		Name:        "x2",
-		IsAllow:     true,
-		Status:      1,
-		CreatedTime: time.Now(),
-	}, &model.User{
-		Name:        "x3",
-		IsAllow:     true,
-		Status:      0,
-		CreatedTime: time.Now(),
+	n, err := Company(dbx).InsertMulti(context.Background(), []*model.Company{&model.Company{
+		FullCorpName:     "x1",
+		IsEcologicalCorp: false,
+		State:            0,
+		CreatedTime:      time.Now(),
+	}, &model.Company{
+		FullCorpName:     "x2",
+		IsEcologicalCorp: true,
+		State:            1,
+		CreatedTime:      time.Now(),
+	}, &model.Company{
+		FullCorpName:     "x3",
+		IsEcologicalCorp: true,
+		State:            0,
+		CreatedTime:      time.Now(),
 	}})
 
 	t.Log(n)
@@ -164,7 +164,7 @@ func TestInsert(t *testing.T) {
 
 func TestUpdateSet(t *testing.T) {
 	defer dbx.Close()
-	x := User(dbx).U()
+	x := Company(dbx).U()
 	result, err := x.
 		Set(
 			obj.CorpName.Set("ttt"),
@@ -187,7 +187,7 @@ func TestUpdateSet(t *testing.T) {
 func TestUpdateCols(t *testing.T) {
 	defer dbx.Close()
 
-	x := User(dbx).U()
+	x := Company(dbx).U()
 	result, err := x.Cols(
 		obj.FullCorpName,
 		obj.IsEcologicalCorp,
@@ -195,12 +195,12 @@ func TestUpdateCols(t *testing.T) {
 		obj.CreatedTime,
 	).Where(
 		obj.Id.Eq(1),
-	).Struct(context.Background(), &model.User{
-		ID:          2,
-		Name:        "ccc",
-		IsAllow:     false,
-		Status:      1,
-		CreatedTime: time.Now(),
+	).Struct(context.Background(), &model.Company{
+		Id:               2,
+		FullCorpName:     "ccc",
+		IsEcologicalCorp: false,
+		State:            1,
+		CreatedTime:      time.Now(),
 	})
 
 	t.Log(x)
@@ -216,12 +216,12 @@ func TestUpdateCols(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	defer dbx.Close()
 
-	ok, err := User(dbx).UpdateMulti(context.Background(), []*model.User{&model.User{
-		ID:          2,
-		Name:        "ccc",
-		IsAllow:     false,
-		Status:      1,
-		CreatedTime: time.Now(),
+	ok, err := Company(dbx).UpdateMulti(context.Background(), []*model.Company{&model.Company{
+		Id:               2,
+		FullCorpName:     "ccc",
+		IsEcologicalCorp: false,
+		State:            1,
+		CreatedTime:      time.Now(),
 	}})
 
 	t.Log(ok)
@@ -234,7 +234,7 @@ func TestUpdate(t *testing.T) {
 func TestDelete(t *testing.T) {
 	defer dbx.Close()
 
-	x := User(dbx).D()
+	x := Company(dbx).D()
 	result, err := x.Where(
 		obj.Id.Eq(1),
 	).Do(context.Background())
