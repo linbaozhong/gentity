@@ -45,10 +45,10 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	for _, x := range schema["company"].ColumnsX {
-		fmt.Printf("%+v \n", x)
-	}
+	//
+	//for _, x := range schema["company"].ColumnsX {
+	//	fmt.Printf("%+v \n", x)
+	//}
 
 	var buf bytes.Buffer
 	buf.WriteString("package " + packageName + "\n\n")

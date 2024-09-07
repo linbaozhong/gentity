@@ -21,6 +21,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 )
@@ -61,11 +62,13 @@ var (
 				pkgPath = pkgPath[:pos]
 			}
 			//
-			_, err = filepath.Abs(dns)
-			if err == nil {
-				err = sql2struct(driver, dns, fullpath, packageName)
-			} else {
+			has, _ := regexp.MatchString("@.*:|:.*@", dns)
+			if has {
+				fmt.Println("2222222222")
 				err = db2struct(driver, dns, fullpath, packageName)
+			} else {
+				fmt.Println("111111111")
+				err = sql2struct(driver, dns, fullpath, packageName)
 			}
 			if err != nil {
 				showError(err)
@@ -104,12 +107,12 @@ func Execute() {
 	lens := len(os.Args)
 	if lens > 1 {
 		path = os.Args[1]
-		if lens > 2 {
-			driver = "mysql"
-			dns = os.Args[2]
-		} else if lens > 3 {
+		if lens > 3 {
 			driver = os.Args[2]
 			dns = os.Args[3]
+		} else if lens > 2 {
+			driver = "mysql"
+			dns = os.Args[2]
 		}
 	} else {
 		path = "."
