@@ -27,7 +27,7 @@ import (
 
 type (
 	Updater struct {
-		db            types.Executer
+		db            Executer
 		table         string
 		affect        []types.Field
 		cols          []types.Field
@@ -54,7 +54,7 @@ var (
 )
 
 // Updater
-func NewUpdate(db types.Executer, tableName string) *Updater {
+func NewUpdate(db Executer, tableName string) *Updater {
 	if db == nil || tableName == "" {
 		panic("db or table is nil")
 		return nil

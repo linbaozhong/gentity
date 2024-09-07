@@ -29,7 +29,7 @@ import (
 
 var (
 	dbx *ace.DB
-	obj = model.UserTbl
+	obj = model.CompanyTbl
 )
 
 func init() {
@@ -76,8 +76,8 @@ func TestCreateSet(t *testing.T) {
 	defer dbx.Close()
 	x := User(dbx).C()
 	result, err := x.Set(
-		obj.Name.Set("aaaaaa"),
-		obj.IsAllow.Set(true),
+		obj.CorpName.Set("aaaaaa"),
+		obj.IsAuthenticated.Set(true),
 	).Do(context.Background())
 
 	t.Log(x)
@@ -93,9 +93,9 @@ func TestCreateCols(t *testing.T) {
 	defer dbx.Close()
 	x := User(dbx).C()
 	result, err := x.Cols(
-		obj.Name,
-		obj.IsAllow,
-		obj.Status,
+		obj.CorpName,
+		obj.IsAuthenticated,
+		obj.State,
 		obj.CreatedTime,
 	).Struct(context.Background(), &model.User{
 		Name:        "m1",
@@ -167,12 +167,12 @@ func TestUpdateSet(t *testing.T) {
 	x := User(dbx).U()
 	result, err := x.
 		Set(
-			obj.Name.Set("ttt"),
-			obj.IsAllow.Set(true),
+			obj.CorpName.Set("ttt"),
+			obj.IsAuthenticated.Set(true),
 		).
-		SetExpr(obj.Status.Incr()).
+		SetExpr(obj.State.Incr()).
 		Where(
-			obj.ID.Eq(1),
+			obj.Id.Eq(1),
 		).
 		Do(context.Background())
 
@@ -189,12 +189,12 @@ func TestUpdateCols(t *testing.T) {
 
 	x := User(dbx).U()
 	result, err := x.Cols(
-		obj.Name,
-		obj.IsAllow,
-		obj.Status,
+		obj.FullCorpName,
+		obj.IsEcologicalCorp,
+		obj.State,
 		obj.CreatedTime,
 	).Where(
-		obj.ID.Eq(1),
+		obj.Id.Eq(1),
 	).Struct(context.Background(), &model.User{
 		ID:          2,
 		Name:        "ccc",
@@ -236,7 +236,7 @@ func TestDelete(t *testing.T) {
 
 	x := User(dbx).D()
 	result, err := x.Where(
-		obj.ID.Eq(1),
+		obj.Id.Eq(1),
 	).Do(context.Background())
 	t.Log(x)
 
@@ -249,12 +249,12 @@ func TestDelete(t *testing.T) {
 
 func TestSelect(t *testing.T) {
 	defer dbx.Close()
-	obj, _, err := User(dbx).Find4Cols(context.Background(), 0, 0, []atype.Field{
-		obj.ID,
-		obj.Name,
-		obj.Status,
+	obj, _, err := Company(dbx).Find4Cols(context.Background(), 0, 0, []atype.Field{
+		obj.Id,
+		obj.FullCorpName,
+		obj.State,
 	},
-		obj.ID.Eq(2),
+		obj.Id.Eq(2),
 	)
 
 	if err != nil {

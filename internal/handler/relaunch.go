@@ -64,10 +64,8 @@ var (
 			//
 			has, _ := regexp.MatchString("@.*:|:.*@", dns)
 			if has {
-				fmt.Println("2222222222")
 				err = db2struct(driver, dns, fullpath, packageName)
 			} else {
-				fmt.Println("111111111")
 				err = sql2struct(driver, dns, fullpath, packageName)
 			}
 			if err != nil {

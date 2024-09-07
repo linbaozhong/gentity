@@ -70,3 +70,30 @@ func (s *DB) Transaction(ctx context.Context, f func(tx *sql.Tx) (interface{}, e
 
 	return result, nil
 }
+
+func (s *DB) Insert(tableName string) *Creator {
+	return newCreate(s, tableName)
+}
+
+func (s *DB) Update(tableName string) *Updater {
+	return NewUpdate(s, tableName)
+}
+
+func (s *DB) Delete(tableName string) *Deleter {
+	return newDelete(s, tableName)
+}
+
+func (s *DB) Select(tableName string) *Selector {
+	return newSelect(s, tableName)
+}
+
+type Executer interface {
+	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+	Debug() bool
+	Insert(tableName string) *Creator
+	Delete(tableName string) *Deleter
+	Update(tableName string) *Updater
+	Select(tableName string) *Selector
+}
