@@ -24,7 +24,7 @@ type User struct {
 ## 生成代码
 ### 用法：
 ```
-gentity model路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"] [flags]
+gentity model路径 [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "数据库连接字符串"] [flags]
 ```
 ### 示例
 ```
@@ -34,22 +34,22 @@ gentity .\db
 
 gentity .\db mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 
-gentity . .\database.sql
+gentity . mysql .\database.sql
 ```
 ##### 1. 进入model目录
 ```
 cd model
 gentity
 ```
-##### 2. 或者指定目录
+##### 2. 或者指定model目录
 ```
 gentity ./model
 ```
-##### 3. 指定包含 Create Table 的 SQL文件，先在当前目录生成struct文件，再生成相应的ORM文件
+##### 3. 指定数据库驱动、包含 Create Table 的 SQL文件，先在当前目录生成struct文件，再生成相应的ORM文件
 ```
-gentity . ./database.sql
+gentity . mysql ./database.sql
 ```
-##### 4. 指定数据库连接字符串，先在当前目录生成struct文件，再生成相应的ORM文件
+##### 4. 指定数据库驱动、连接字符串，先在当前目录生成struct文件，再生成相应的ORM文件
 ```
 gentity . mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 ```

@@ -3,13 +3,16 @@ package handler
 import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/schema"
 	"os"
 	"path/filepath"
 	"regexp"
 )
 
-func sql2struct(sqlPath, outputPath, packageName string) error {
+func sql2struct(driver, sqlPath, outputPath, packageName string) error {
+	dialect.Register(driver)
+
 	sqlPath, err := filepath.Abs(sqlPath)
 	if err != nil {
 		return err

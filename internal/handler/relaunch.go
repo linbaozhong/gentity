@@ -26,10 +26,10 @@ import (
 )
 
 var (
-	path    string // model路径
-	driver  string // 数据库驱动
-	dns     string // 数据库连接字符串
-	sqlPath string // sql文件路径
+	path   string // model路径
+	driver string // 数据库驱动
+	dns    string // 数据库连接字符串
+	//sqlPath string // sql文件路径
 
 	launch = &cobra.Command{
 		Use:   `gentity model路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
@@ -61,9 +61,10 @@ var (
 				pkgPath = pkgPath[:pos]
 			}
 			//
-			if len(driver) == 0 && len(sqlPath) > 0 { // sql文件生成struct文件
-				err = sql2struct(sqlPath, fullpath, packageName)
-			} else if len(dns) > 0 { // 数据库生成struct文件
+			_, err = filepath.Abs(dns)
+			if err == nil {
+				err = sql2struct(driver, dns, fullpath, packageName)
+			} else {
 				err = db2struct(driver, dns, fullpath, packageName)
 			}
 			if err != nil {
@@ -103,11 +104,12 @@ func Execute() {
 	lens := len(os.Args)
 	if lens > 1 {
 		path = os.Args[1]
-		if lens > 3 {
+		if lens > 2 {
+			driver = "mysql"
+			dns = os.Args[2]
+		} else if lens > 3 {
 			driver = os.Args[2]
 			dns = os.Args[3]
-		} else if lens > 2 {
-			sqlPath = os.Args[2]
 		}
 	} else {
 		path = "."
