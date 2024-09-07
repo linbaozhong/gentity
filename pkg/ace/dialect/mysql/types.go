@@ -19,7 +19,7 @@ import _ "github.com/go-sql-driver/mysql"
 const (
 	Mysql_Placeholder = "?"
 	Mysql_Quote_Char  = "`"
-	Mysql_PrimaryKey  = "PRIMARY"
+	Mysql_PrimaryKey  = "PRI"
 	Mysql_AutoInc     = "AUTO_INCREMENT"
 	Mysql_UniqueKey   = "UNIQUE"
 )

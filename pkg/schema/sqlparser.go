@@ -73,10 +73,10 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 
 func DB2Struct(tables map[string][]dialect.Column, packageName string) ([]byte, error) {
 	var buf bytes.Buffer
-	buf.WriteString("package " + packageName + "\n")
+	buf.WriteString("package " + packageName + "\n\n")
 	buf.WriteString("import (\n")
 	buf.WriteString("	\"time\" \n")
-	buf.WriteString(") \n")
+	buf.WriteString(") \n\n")
 
 	for table, columns := range tables {
 		buf.WriteString("// tablename " + table + "\n")
@@ -84,10 +84,10 @@ func DB2Struct(tables map[string][]dialect.Column, packageName string) ([]byte, 
 		for _, col := range columns {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size))
 			buf.WriteString("\t`json:\"" + col.Name + "\" db:\"'" + col.Name + "'") //
-			if col.Key == mysql.Mysql_PrimaryKey {
+			if strings.ToUpper(col.Key) == mysql.Mysql_PrimaryKey {
 				buf.WriteString(" pk")
 			}
-			if col.Extra == mysql.Mysql_AutoInc {
+			if strings.ToUpper(col.Extra) == mysql.Mysql_AutoInc {
 				buf.WriteString(" auto")
 			}
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.ReplaceAll(col.Comment, "\n", "")))

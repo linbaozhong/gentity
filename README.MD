@@ -22,15 +22,38 @@ type User struct {
 - `db:"'id' pk auto"` 表示数据库字段名，主键，自增
 - `db:"created_time <-"` 表示数据库字段名，只读。 `<-`: 只读;`->`: 只写;`-`:不可读写
 ## 生成代码
-1. 进入model目录
+### 用法：
+```
+gentity model路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"] [flags]
+```
+### 示例
+```
+gentity
+
+gentity .\db
+
+gentity .\db mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+
+gentity . .\database.sql
+```
+##### 1. 进入model目录
 ```
 cd model
 gentity
 ```
-2. 或者指定目录
+##### 2. 或者指定目录
 ```
-gentity -p ./model
+gentity ./model
 ```
+##### 3. 指定包含 Create Table 的 SQL文件，先在当前目录生成struct文件，再生成相应的ORM文件
+```
+gentity . ./database.sql
+```
+##### 4. 指定数据库连接字符串，先在当前目录生成struct文件，再生成相应的ORM文件
+```
+gentity . mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+```
+##### 注意：命令参数的顺序
 ## 创建连接
 1. 导包
 ```go
