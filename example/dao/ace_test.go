@@ -16,7 +16,6 @@ package dao
 
 import (
 	"context"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/linbaozhong/gentity/example/model"
 	"github.com/linbaozhong/gentity/pkg/ace"
@@ -47,18 +46,21 @@ func init() {
 }
 
 func TestScheme(t *testing.T) {
-	rows, err := dbx.Query(`SELECT table_name,column_name,column_default,data_type,character_maximum_length,column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema = ?`, "assessment")
+	rows, err := dbx.Query(`SELECT table_name,column_name,column_default,data_type,ifnull(character_maximum_length,0),column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema = ?`, "assessment")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer rows.Close()
 
 	ms := make(map[string][]dialect.Column)
-	for rows.Next() {
+	if rows.Next() {
 		var tableName string
 		col := dialect.Column{}
 		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.Size, &col.Key, &col.Extra, &col.Comment)
-		fmt.Println(fmt.Sprintf("%+v", col))
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		if cols, ok := ms[tableName]; ok {
 			ms[tableName] = append(cols, col)
 		} else {

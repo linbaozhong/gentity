@@ -23,6 +23,7 @@ import (
 	"github.com/linbaozhong/sqlparser"
 	"io"
 	"os"
+	"strings"
 )
 
 func Sql2Struct(buf []byte, packageName string) ([]byte, error) {
@@ -63,7 +64,7 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 			if col.AutoIncr {
 				buf.WriteString(" auto")
 			}
-			buf.WriteString(fmt.Sprintf("\"`	// %s\n", col.Comment))
+			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.TrimSpace(col.Comment)))
 		}
 		buf.WriteString("} \n\n")
 	}
@@ -81,7 +82,7 @@ func DB2Struct(tables map[string][]dialect.Column, packageName string) ([]byte, 
 		buf.WriteString("// tablename " + table + "\n")
 		buf.WriteString("type " + util.ParseField(table) + " struct {\n")
 		for _, col := range columns {
-			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, *col.Size))
+			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size))
 			buf.WriteString("\t`json:\"" + col.Name + "\" db:\"'" + col.Name + "'") //
 			if col.Key == mysql.Mysql_PrimaryKey {
 				buf.WriteString(" pk")
@@ -89,7 +90,7 @@ func DB2Struct(tables map[string][]dialect.Column, packageName string) ([]byte, 
 			if col.Extra == mysql.Mysql_AutoInc {
 				buf.WriteString(" auto")
 			}
-			buf.WriteString(fmt.Sprintf("\"`	// %s\n", col.Comment))
+			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.ReplaceAll(col.Comment, "\n", "")))
 		}
 		buf.WriteString("} \n\n")
 	}
