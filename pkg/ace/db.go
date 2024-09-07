@@ -18,8 +18,18 @@ type (
 		// D Delete 命令体
 		D() *Deleter
 	}
-	Dialect interface {
+
+	Executer interface {
+		QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
+		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+		Debug() bool
+		Insert(tableName string) *Creator
+		Delete(tableName string) *Deleter
+		Update(tableName string) *Updater
+		Select(tableName string) *Selector
 	}
+
 	DB struct {
 		*sql.DB
 		debug bool // 如果是调试模式，则打印sql命令及错误
@@ -85,15 +95,4 @@ func (s *DB) Delete(tableName string) *Deleter {
 
 func (s *DB) Select(tableName string) *Selector {
 	return newSelect(s, tableName)
-}
-
-type Executer interface {
-	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
-	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
-	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
-	Debug() bool
-	Insert(tableName string) *Creator
-	Delete(tableName string) *Deleter
-	Update(tableName string) *Updater
-	Select(tableName string) *Selector
 }
