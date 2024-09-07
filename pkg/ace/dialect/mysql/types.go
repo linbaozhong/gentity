@@ -21,5 +21,5 @@ const (
 	Mysql_Quote_Char  = "`"
 	Mysql_PrimaryKey  = "PRI"
 	Mysql_AutoInc     = "AUTO_INCREMENT"
-	Mysql_UniqueKey   = "UNIQUE"
+	Mysql_UniqueKey   = "UNI"
 )

@@ -2,6 +2,7 @@ package ace
 
 import (
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"strings"
 )
 
 type Driverer interface {
@@ -25,7 +26,9 @@ func (mysql) GetTables(db *DB, dbName string) (map[string][]dialect.Column, erro
 		var tableName string
 		col := dialect.Column{}
 		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.Size, &col.Key, &col.Extra, &col.Comment)
-
+		if strings.ToUpper(col.Extra) == dialect.AutoInc {
+			col.AutoIncr = true
+		}
 		if cols, ok := ms[tableName]; ok {
 			ms[tableName] = append(cols, col)
 		} else {

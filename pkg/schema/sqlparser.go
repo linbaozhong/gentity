@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/dialect/mysql"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"github.com/linbaozhong/sqlparser"
 	"io"
@@ -58,7 +57,7 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 		for _, col := range table.Columns {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size))
 			buf.WriteString("\t`json:\"" + col.Name + "\" db:\"'" + col.Name + "'") //
-			if util.SliceContains(table.PrimaryKey, col.Name) {
+			if strings.ToUpper(col.Key) == dialect.PrimaryKey {
 				buf.WriteString(" pk")
 			}
 			if col.AutoIncr {
@@ -84,10 +83,10 @@ func DB2Struct(tables map[string][]dialect.Column, packageName string) ([]byte, 
 		for _, col := range columns {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size))
 			buf.WriteString("\t`json:\"" + col.Name + "\" db:\"'" + col.Name + "'") //
-			if strings.ToUpper(col.Key) == mysql.Mysql_PrimaryKey {
+			if strings.ToUpper(col.Key) == dialect.PrimaryKey {
 				buf.WriteString(" pk")
 			}
-			if strings.ToUpper(col.Extra) == mysql.Mysql_AutoInc {
+			if col.AutoIncr {
 				buf.WriteString(" auto")
 			}
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.ReplaceAll(col.Comment, "\n", "")))

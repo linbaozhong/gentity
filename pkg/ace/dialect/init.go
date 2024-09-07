@@ -19,6 +19,9 @@ import "github.com/linbaozhong/gentity/pkg/ace/dialect/mysql"
 var (
 	Placeholder = "?"
 	Quote_Char  = "`"
+	PrimaryKey  = ""
+	AutoInc     = ""
+	UniqueKey   = ""
 )
 
 func Register(driverName string) {
@@ -26,5 +29,8 @@ func Register(driverName string) {
 	case "mysql":
 		Placeholder = mysql.Mysql_Placeholder
 		Quote_Char = mysql.Mysql_Quote_Char
+		PrimaryKey = mysql.Mysql_PrimaryKey
+		AutoInc = mysql.Mysql_AutoInc
+		UniqueKey = mysql.Mysql_UniqueKey
 	}
 }
