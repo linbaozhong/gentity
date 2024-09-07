@@ -16,6 +16,9 @@ package schema
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect/mysql"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"github.com/linbaozhong/sqlparser"
 	"io"
@@ -60,9 +63,35 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 			if col.AutoIncr {
 				buf.WriteString(" auto")
 			}
-			buf.WriteString("\"` \n")
+			buf.WriteString(fmt.Sprintf("\"`	// %s\n", col.Comment))
 		}
-		buf.WriteString("}")
+		buf.WriteString("} \n\n")
+	}
+	return buf.Bytes(), nil
+}
+
+func DB2Struct(tables map[string][]dialect.Column, packageName string) ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteString("package " + packageName + "\n")
+	buf.WriteString("import (\n")
+	buf.WriteString("	\"time\" \n")
+	buf.WriteString(") \n")
+
+	for table, columns := range tables {
+		buf.WriteString("// tablename " + table + "\n")
+		buf.WriteString("type " + util.ParseField(table) + " struct {\n")
+		for _, col := range columns {
+			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size))
+			buf.WriteString("\t`json:\"" + col.Name + "\" db:\"'" + col.Name + "'") //
+			if col.Key == mysql.Mysql_PrimaryKey {
+				buf.WriteString(" pk")
+			}
+			if col.Extra == mysql.Mysql_AutoInc {
+				buf.WriteString(" auto")
+			}
+			buf.WriteString(fmt.Sprintf("\"`	// %s\n", col.Comment))
+		}
+		buf.WriteString("} \n\n")
 	}
 	return buf.Bytes(), nil
 }

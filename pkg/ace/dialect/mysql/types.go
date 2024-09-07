@@ -14,7 +14,12 @@
 
 package mysql
 
+import _ "github.com/go-sql-driver/mysql"
+
 const (
-	Placeholder = "?"
-	Quote_Char  = "`"
+	Mysql_Placeholder = "?"
+	Mysql_Quote_Char  = "`"
+	Mysql_PrimaryKey  = "PRIMARY"
+	Mysql_AutoInc     = "AUTO_INCREMENT"
+	Mysql_UniqueKey   = "UNIQUE"
 )

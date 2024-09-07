@@ -17,7 +17,7 @@ package handler
 import (
 	"fmt"
 	"github.com/linbaozhong/gentity/internal/base"
-	"github.com/linbaozhong/gentity/pkg/schema"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -61,29 +61,13 @@ var (
 				pkgPath = pkgPath[:pos]
 			}
 			//
-			if len(driver) == 0 {
-				sqlPath, err = filepath.Abs(sqlPath)
-				if err != nil {
-					showError(err)
-				}
-				_, err = os.Stat(sqlPath)
-				if err != nil {
-					showError(err)
-				}
-				f, e := os.OpenFile(filepath.Join(fullpath, "gentity_model.go"), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-				if e != nil {
-					showError(e.Error())
-				}
-				defer f.Close()
-
-				buf, err := schema.SqlFile2Struct(sqlPath, packageName)
-				if err != nil {
-					showError(err)
-				}
-				_, e = f.Write(buf)
-				if e != nil {
-					showError(e)
-				}
+			if len(driver) == 0 && len(sqlPath) > 0 { // sql文件生成struct文件
+				err = sql2struct(sqlPath, fullpath, packageName)
+			} else if len(dns) > 0 { // 数据库生成struct文件
+				err = db2struct(driver, dns, fullpath, packageName)
+			}
+			if err != nil {
+				showError(err)
 			}
 
 			dirs, err := os.ReadDir(path)
@@ -95,7 +79,7 @@ var (
 					continue
 				}
 				var filename = dir.Name()
-				fmt.Println(filename)
+				//fmt.Println(filename)
 				if filepath.Ext(filename) != ".go" {
 					continue
 				}
@@ -128,7 +112,7 @@ func Execute() {
 	} else {
 		path = "."
 	}
-
+	log.RegisterLogger(false)
 	err := launch.Execute()
 	if err != nil {
 		panic(err)

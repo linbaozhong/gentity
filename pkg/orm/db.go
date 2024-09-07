@@ -2,10 +2,10 @@ package orm
 
 import (
 	"context"
-	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/sql"
 )
 
 type (

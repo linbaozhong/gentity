@@ -24,7 +24,7 @@ var (
 func Register(driverName string) {
 	switch driverName {
 	case "mysql":
-		Placeholder = mysql.Placeholder
-		Quote_Char = mysql.Quote_Char
+		Placeholder = mysql.Mysql_Placeholder
+		Quote_Char = mysql.Mysql_Quote_Char
 	}
 }

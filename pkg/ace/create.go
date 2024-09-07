@@ -16,11 +16,11 @@ package ace
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/sql"
 	"strings"
 	"sync"
 )
