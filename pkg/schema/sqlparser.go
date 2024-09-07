@@ -81,7 +81,7 @@ func DB2Struct(tables map[string][]dialect.Column, packageName string) ([]byte, 
 		buf.WriteString("// tablename " + table + "\n")
 		buf.WriteString("type " + util.ParseField(table) + " struct {\n")
 		for _, col := range columns {
-			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size))
+			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, *col.Size))
 			buf.WriteString("\t`json:\"" + col.Name + "\" db:\"'" + col.Name + "'") //
 			if col.Key == mysql.Mysql_PrimaryKey {
 				buf.WriteString(" pk")

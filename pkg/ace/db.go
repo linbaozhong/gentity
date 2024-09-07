@@ -2,9 +2,9 @@ package ace
 
 import (
 	"context"
+	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"github.com/linbaozhong/gentity/pkg/sql"
 )
 
 type (

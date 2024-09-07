@@ -16,8 +16,8 @@ package orm
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/sql"
 	"strconv"
 	"strings"
 	"sync"

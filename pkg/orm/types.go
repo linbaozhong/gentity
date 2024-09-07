@@ -15,7 +15,7 @@
 package orm
 
 import (
-	"github.com/linbaozhong/gentity/pkg/sql"
+	"database/sql"
 	"strings"
 )
 
