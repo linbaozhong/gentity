@@ -17,6 +17,7 @@ package dao
 import (
 	"context"
 	_ "github.com/go-sql-driver/mysql"
+	obj "github.com/linbaozhong/gentity/example/define/table/companytbl"
 	"github.com/linbaozhong/gentity/example/model"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
@@ -29,7 +30,6 @@ import (
 
 var (
 	dbx *ace.DB
-	obj = model.CompanyTbl
 )
 
 func init() {
