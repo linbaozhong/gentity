@@ -33,7 +33,7 @@ var (
 	//sqlPath string // sql文件路径
 
 	launch = &cobra.Command{
-		Use:   `gentity model路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
+		Use:   `gentity Struct路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
 		Short: "ORM 代码生成工具",
 		Example: `	gentity
 	gentity .\db
@@ -44,15 +44,15 @@ var (
 			if err != nil {
 				showError(err)
 			}
-
+			//上一级目录
 			parent := filepath.Dir(fullpath)
 			pos := strings.LastIndex(fullpath, string(os.PathSeparator))
 			if pos > 0 {
 				parent = fullpath[:pos]
 			}
-			// package name
+			// 包名
 			packageName := fullpath[pos+1:]
-
+			// 包目录
 			pkgPath, err := base.PkgPath(nil, path)
 			if err != nil {
 				showError(err)
@@ -61,17 +61,29 @@ var (
 			if pos > 0 {
 				pkgPath = pkgPath[:pos]
 			}
-			//
-			has, _ := regexp.MatchString("@.*:|:.*@", dns)
-			if has {
-				err = db2struct(driver, dns, fullpath, packageName)
-			} else {
-				err = sql2struct(driver, dns, fullpath, packageName)
+
+			if len(driver) > 0 && len(dns) > 0 {
+				// 生成结构体
+				has, _ := regexp.MatchString("@.*:|:.*@", dns)
+				if has {
+					err = db2struct(driver, dns, fullpath, packageName)
+				} else {
+					err = sql2struct(driver, dns, fullpath, packageName)
+				}
+				if err != nil {
+					showError(err)
+				}
 			}
+			// 创建生成dao层代码的目录
+			err = os.MkdirAll(filepath.Join(parent, "define", "table"), os.ModePerm)
 			if err != nil {
 				showError(err)
 			}
-
+			err = os.MkdirAll(filepath.Join(parent, "define", "dao"), os.ModePerm)
+			if err != nil {
+				showError(err)
+			}
+			// 遍历结构体目录中的文件，生成dao层代码
 			dirs, err := os.ReadDir(path)
 			if err != nil {
 				showError(err)
@@ -86,7 +98,7 @@ var (
 					continue
 				}
 
-				err = parseFile(parent, filepath.Join(fullpath, filename), pkgPath)
+				err = parseFile(filepath.Join(parent, "define"), filepath.Join(fullpath, filename), pkgPath)
 				if err != nil {
 					showError(err)
 				}
