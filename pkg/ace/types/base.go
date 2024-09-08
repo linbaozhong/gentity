@@ -16,7 +16,6 @@ package types
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 )
 
@@ -27,6 +26,9 @@ const (
 
 	Operator_and = " AND "
 	Operator_or  = " OR "
+
+	MaxLimit uint = 1000
+	PageSize uint = 20
 )
 
 var (
@@ -37,32 +39,29 @@ var (
 	ErrBeansEmpty         = fmt.Errorf("beans=nil 或者 len(beans)=0")
 	ErrArgsNotMatch       = fmt.Errorf("args not match")
 	ErrPrimaryKeyNotMatch = fmt.Errorf("primary key not match")
-
-	MaxLimit uint = 1000
-	PageSize uint = 20
 )
 
 type (
 	JoinType string
-	// NullBool is an alias to sql.NullBool.
-	NullBool = sql.NullBool
-	// NullInt64 is an alias to sql.NullInt64.
-	NullInt64 = sql.NullInt64
-	// NullInt32 is an alias to sql.NullInt32.
-	NullInt32 = sql.NullInt32
-	// NullInt16 is an alias to sql.NullInt16.
-	NullInt16 = sql.NullInt16
-	// NullByte is an alias to sql.NullByte.
-	NullByte = sql.NullByte
-	// NullString is an alias to sql.NullString.
-	NullString = sql.NullString
-	// NullFloat64 is an alias to sql.NullFloat64.
-	NullFloat64 = sql.NullFloat64
-	// NullTime represents a time.Time that may be null.
-	NullTime = sql.NullTime
-	// UnknownType is a named type to any indicates the info
-	// needs to be extracted from the underlying rows.
-	UnknownType any
+	//// NullBool is an alias to sql.NullBool.
+	//NullBool = sql.NullBool
+	//// NullInt64 is an alias to sql.NullInt64.
+	//NullInt64 = sql.NullInt64
+	//// NullInt32 is an alias to sql.NullInt32.
+	//NullInt32 = sql.NullInt32
+	//// NullInt16 is an alias to sql.NullInt16.
+	//NullInt16 = sql.NullInt16
+	//// NullByte is an alias to sql.NullByte.
+	//NullByte = sql.NullByte
+	//// NullString is an alias to sql.NullString.
+	//NullString = sql.NullString
+	//// NullFloat64 is an alias to sql.NullFloat64.
+	//NullFloat64 = sql.NullFloat64
+	//// NullTime represents a time.Time that may be null.
+	//NullTime = sql.NullTime
+	//// UnknownType is a named type to any indicates the info
+	//// needs to be extracted from the underlying rows.
+	//UnknownType any
 
 	Modeler interface {
 		TableName() string
