@@ -53,7 +53,7 @@ func (p *{{.StructName}}) Free() {
 	if p == nil {
 		return
 	}
-	{{range $key, $value := .Columns}}p.{{$key}} = {{getTypeValue $value}}
+	{{range $key, $value := .Columns}}p.{{index $value 0}} = {{getTypeValue $value}}
 	{{end}}
 	{{lower .StructName}}Pool.Put(p)
 }
@@ -77,8 +77,8 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.Struc
 		for _, col := range args {
 			switch col {
 			{{- range $key, $value := .Columns}}
-			case {{$structNameLower}}tbl.{{ $key }}:
-				vals = append(vals, &p.{{ $key }})
+			case {{$structNameLower}}tbl.{{ index $value 0 }}:
+				vals = append(vals, &p.{{ index $value 0 }})
 			{{- end}}
 			}
 		}
@@ -112,12 +112,12 @@ func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
 		for _, arg := range args {
 			switch arg {
 			{{- range $key, $value := .Columns}}
-			case {{$structNameLower}}tbl.{{ $key }}:
-				if p.{{ $key }}{{getZeroValue $value}} {
+			case {{$structNameLower}}tbl.{{ index $value 0 }}:
+				if p.{{ index $value 0 }}{{getZeroValue $value}} {
 					continue
 				}
-				cols = append(cols, {{$structNameLower}}tbl.{{ $key }}.Quote())
-				vals = append(vals, p.{{ $key }})
+				cols = append(cols, {{$structNameLower}}tbl.{{ index $value 0 }}.Quote())
+				vals = append(vals, p.{{ index $value 0 }})
 			{{- end}}
 			}
 		}
@@ -129,9 +129,9 @@ func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
 	for _, arg := range args {
 		switch arg {
 		{{- range $key, $value := .Columns}}
-		case {{$structNameLower}}tbl.{{ $key }}:
-			cols = append(cols, {{$structNameLower}}tbl.{{ $key }}.Quote())
-			vals = append(vals, p.{{ $key }})
+		case {{$structNameLower}}tbl.{{ index $value 0 }}:
+			cols = append(cols, {{$structNameLower}}tbl.{{ index $value 0 }}.Quote())
+			vals = append(vals, p.{{ index $value 0 }})
 		{{- end}}
 		}
 	}
@@ -163,7 +163,7 @@ import (
 
 var (
 {{- range $key, $value := .Columns}}
-	{{ $key }} = atype.Field{Name: "{{index $value 0}}",Table: "{{ $tablename }}"}
+	{{ index $value 0 }} = atype.Field{Name: "{{index $value 1}}",Table: "{{ $tablename }}",Type: "{{index $value 2}}"}
 {{- end}}
 
 {{- if .HasPrimaryKey}}
@@ -179,7 +179,7 @@ var (
 	WritableFields = []atype.Field{
 {{- range $key, $value := .Columns}}
 	{{- if or (eq (index $value 4) "->") (eq (index $value 4) "")}}
-	{{$key}},
+	{{index $value 0}},
 	{{- end}}
 {{- end}}
 	}
@@ -187,7 +187,7 @@ var (
 	ReadableFields = []atype.Field{
 {{- range $key, $value := .Columns}}
 	{{- if or (eq (index $value 4) "<-") (eq (index $value 4) "")}}
-	{{$key}},
+	{{index $value 0}},
 	{{- end}}
 {{- end}}
 	}
@@ -235,6 +235,8 @@ type {{.StructName}}Daoer interface {
 	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
+	// GetSingle 按条件读取第一行的第一个字段
+	GetSingle(ctx context.Context,col atype.Field, cond ...atype.Condition) (any, error)
 	//
 	IDs(ctx context.Context, cond ...atype.Condition) ([]int64, error)
 	//
@@ -431,6 +433,25 @@ func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...atype.Condition) (*
 	return p.Get4Cols(ctx, []atype.Field{}, cond...)
 }
 
+// GetSingle Read the first column of the first row
+func (p *{{.TableName}}Dao) GetSingle(ctx context.Context,col atype.Field, cond ...atype.Condition) (any, error) {
+	c := p.R().Cols(col)
+	rows, err := c.Where(cond...).Limit(atype.MaxLimit).Query(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var v any
+	if rows.Next() {
+		if err = rows.Scan(&v); err != nil {
+			return nil, err
+		}
+	}
+
+	return v, rows.Err()
+}
+
 // Find
 func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error) {
 	return p.Find4Cols(ctx, pageIndex, pageSize, []atype.Field{}, cond...)
@@ -452,13 +473,13 @@ func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...atype.Condition) ([
 	ids := make([]int64, atype.PageSize)
 	for rows.Next() {
 		var id int64
-		if err := rows.Scan(&id); err != nil {
+		if err = rows.Scan(&id); err != nil {
 			return nil, err
 		}
 		ids = append(ids, id)
 	}
 
-	return ids, nil
+	return ids, rows.Err()
 }
 
 // Columns
@@ -473,13 +494,12 @@ func (p *{{.TableName}}Dao) Columns(ctx context.Context, col atype.Field, cond .
 	cols := make([]any, atype.PageSize)
 	for rows.Next() {
 		var v any
-		if err := rows.Scan(&v); err != nil {
+		if err = rows.Scan(&v); err != nil {
 			return nil, err
 		}
 		cols = append(cols, v)
 	}
-
-	return cols, nil
+	return cols, rows.Err()
 }
 
 // Count
@@ -503,7 +523,7 @@ func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...atype.Condition)
 		return false, err
 	}
 	defer rows.Close()
-	return rows.Next(), nil
+	return rows.Next(), rows.Err()
 }
 `
 )

@@ -63,7 +63,7 @@ func parseFile(parent, filename, pkgPath string) error {
 		// tempData.PrimaryKey = nil
 		// tempData.PrimaryKeyName = ""
 		tempData.Keys = make([]string, 0, 1)
-		tempData.Columns = make(map[string][]string)
+		tempData.Columns = make([][]string, 0, 20)
 		tempData.FileName = filename
 		tempData.StructName = stru.Name
 		// 解析struct文档
@@ -83,9 +83,9 @@ func parseFile(parent, filename, pkgPath string) error {
 			var _namejson = make([]string, 5)
 			for k, v := range field.Tags {
 				if k == "json" {
-					_namejson[1] = v[0] // json_name
+					_namejson[0] = v[0] // json_name
 				} else if k == "db" {
-					_namejson[0], pk, rw = parseTagsForDB(v) // column_name
+					_namejson[1], pk, rw = parseTagsForDB(v) // column_name
 				} else if k == "default" {
 					_namejson[3] = v[0]
 				}
@@ -110,15 +110,18 @@ func parseFile(parent, filename, pkgPath string) error {
 					_namejson[1] = _namejson[0]
 				}
 			}
-			if _namejson[0] == "" {
-				if _namejson[1] == "" {
-					_namejson[0] = getFieldName(field.Name)
-				} else {
-					_namejson[0] = _namejson[1]
-				}
-			}
+			// _namejson[0] = json_name
+			//if _namejson[0] == "" {
+			//	if _namejson[1] == "" {
+			//		_namejson[0] = getFieldName(field.Name)
+			//	} else {
+			//		_namejson[0] = _namejson[1]
+			//	}
+			//}
+			// _namejson[0] = field.Name 暂时
+			_namejson[0] = field.Name
 
-			tempData.Columns[field.Name] = _namejson
+			tempData.Columns = append(tempData.Columns, _namejson)
 			if pk != "" {
 				tempData.HasPrimaryKey = true
 				tempData.Keys = append(tempData.Keys, field.Name)

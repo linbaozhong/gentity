@@ -23,6 +23,7 @@ type (
 	Field struct {
 		Name  string
 		Table string
+		Type  string
 	}
 	Function   func() string
 	Condition  func() (string, any)
