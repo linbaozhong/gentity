@@ -17,7 +17,6 @@ package handler
 import (
 	"fmt"
 	"github.com/linbaozhong/gentity/internal/base"
-	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -123,7 +122,7 @@ func Execute() {
 	} else {
 		path = "."
 	}
-	log.RegisterLogger(false)
+
 	err := launch.Execute()
 	if err != nil {
 		panic(err)
