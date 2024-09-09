@@ -80,7 +80,7 @@ func (d *Deleter) String() string {
 }
 
 // Where
-func (d *Deleter) Where(fns ...types.Condition) *Deleter {
+func (d *Deleter) Where(fns ...dialect.Condition) *Deleter {
 	if len(fns) == 0 {
 		return d
 	}
@@ -107,7 +107,7 @@ func (d *Deleter) Where(fns ...types.Condition) *Deleter {
 }
 
 // And
-func (d *Deleter) And(fns ...types.Condition) *Deleter {
+func (d *Deleter) And(fns ...dialect.Condition) *Deleter {
 	if len(fns) == 0 {
 		return d
 	}
@@ -135,7 +135,7 @@ func (d *Deleter) And(fns ...types.Condition) *Deleter {
 }
 
 // Or
-func (d *Deleter) Or(fns ...types.Condition) *Deleter {
+func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
 	if len(fns) == 0 {
 		return d
 	}

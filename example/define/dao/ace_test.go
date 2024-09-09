@@ -21,7 +21,6 @@ import (
 	"github.com/linbaozhong/gentity/example/model"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/schema"
 	"testing"
@@ -249,7 +248,7 @@ func TestDelete(t *testing.T) {
 
 func TestSelect(t *testing.T) {
 	defer dbx.Close()
-	obj, _, err := Company(dbx).Find4Cols(context.Background(), 0, 0, []atype.Field{
+	obj, _, err := Company(dbx).Find4Cols(context.Background(), 0, 0, []dialect.Field{
 		obj.Id,
 		obj.FullCorpName,
 		obj.State,

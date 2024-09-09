@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package dialect
 
 import (
-	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
 
@@ -38,12 +37,12 @@ func (f Field) Quote() string {
 
 // TableName 为表名添加引号
 func (f Field) TableName() string {
-	return dialect.Quote_Char + f.Table + dialect.Quote_Char
+	return Quote_Char + f.Table + Quote_Char
 }
 
 // FieldName 为字段名添加引号
 func (f Field) FieldName() string {
-	return dialect.Quote_Char + f.Name + dialect.Quote_Char
+	return Quote_Char + f.Name + Quote_Char
 }
 
 // Set 为字段设置值
@@ -63,7 +62,7 @@ func (f Field) Incr(val ...any) ExprSetter {
 		v = 1
 	}
 	return func() (string, any) {
-		return f.Quote() + " = " + f.Quote() + " + " + dialect.Placeholder, v
+		return f.Quote() + " = " + f.Quote() + " + " + Placeholder, v
 	}
 }
 
@@ -77,7 +76,7 @@ func (f Field) Decr(val ...any) ExprSetter {
 		v = 1
 	}
 	return func() (string, any) {
-		return f.Quote() + " = " + f.Quote() + " - " + dialect.Placeholder, v
+		return f.Quote() + " = " + f.Quote() + " - " + Placeholder, v
 	}
 }
 
@@ -98,42 +97,42 @@ func (f Field) Expr(expr string) ExprSetter {
 // Eq 等于
 func (f Field) Eq(val any) Condition {
 	return func() (string, any) {
-		return f.Quote() + " = " + dialect.Placeholder, val
+		return f.Quote() + " = " + Placeholder, val
 	}
 }
 
 // NotEq 不等于
 func (f Field) NotEq(val any) Condition {
 	return func() (string, any) {
-		return f.Quote() + " != " + dialect.Placeholder, val
+		return f.Quote() + " != " + Placeholder, val
 	}
 }
 
 // Gt 大于
 func (f Field) Gt(val any) Condition {
 	return func() (string, any) {
-		return f.Quote() + " > " + dialect.Placeholder, val
+		return f.Quote() + " > " + Placeholder, val
 	}
 }
 
 // Gte 大于或等于
 func (f Field) Gte(val any) Condition {
 	return func() (string, any) {
-		return f.Quote() + " >= " + dialect.Placeholder, val
+		return f.Quote() + " >= " + Placeholder, val
 	}
 }
 
 // Lt 小于
 func (f Field) Lt(val any) Condition {
 	return func() (string, any) {
-		return f.Quote() + " < " + dialect.Placeholder, val
+		return f.Quote() + " < " + Placeholder, val
 	}
 }
 
 // Lte 小于或等于
 func (f Field) Lte(val any) Condition {
 	return func() (string, any) {
-		return f.Quote() + " <= " + dialect.Placeholder, val
+		return f.Quote() + " <= " + Placeholder, val
 	}
 }
 
@@ -141,7 +140,7 @@ func (f Field) Lte(val any) Condition {
 func (f Field) In(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
-		return f.Quote() + " In (" + strings.Repeat(dialect.Placeholder+",", l)[:2*l-1] + ") ", vals
+		return f.Quote() + " In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ") ", vals
 	}
 }
 
@@ -149,49 +148,49 @@ func (f Field) In(vals ...any) Condition {
 func (f Field) NotIn(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
-		return f.Quote() + " Not In (" + strings.Repeat(dialect.Placeholder+",", l)[:2*l-1] + ") ", vals
+		return f.Quote() + " Not In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ") ", vals
 	}
 }
 
 // Between 在区间
 func (f Field) Between(vals ...any) Condition {
 	return func() (string, any) {
-		return f.Quote() + " BETWEEN " + dialect.Placeholder + " AND " + dialect.Placeholder, vals
+		return f.Quote() + " BETWEEN " + Placeholder + " AND " + Placeholder, vals
 	}
 }
 
 // Like 匹配
 func (f Field) Like(val any) Condition {
 	return func() (string, any) {
-		return "(" + f.Quote() + " LIKE CONCAT('%'," + dialect.Placeholder + ",'%'))", val
+		return "(" + f.Quote() + " LIKE CONCAT('%'," + Placeholder + ",'%'))", val
 	}
 }
 
 // Llike 左匹配
 func (f Field) Llike(val any) Condition {
 	return func() (string, any) {
-		return "(" + f.Quote() + " LIKE CONCAT('%'," + dialect.Placeholder + "))", val
+		return "(" + f.Quote() + " LIKE CONCAT('%'," + Placeholder + "))", val
 	}
 }
 
 // Rlike 右匹配
 func (f Field) Rlike(val any) Condition {
 	return func() (string, any) {
-		return "(" + f.Quote() + " LIKE CONCAT(" + dialect.Placeholder + ",'%'))", val
+		return "(" + f.Quote() + " LIKE CONCAT(" + Placeholder + ",'%'))", val
 	}
 }
 
 // Null 为空
 func (f Field) Null(val any) Condition {
 	return func() (string, any) {
-		return " ISNULL(" + dialect.Placeholder + ")", val
+		return " ISNULL(" + Placeholder + ")", val
 	}
 }
 
 // NotNull 不为空
 func (f Field) NotNull(val any) Condition {
 	return func() (string, any) {
-		return " NOT ISNULL(" + dialect.Placeholder + ")", val
+		return " NOT ISNULL(" + Placeholder + ")", val
 	}
 }
 

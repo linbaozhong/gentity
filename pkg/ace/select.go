@@ -32,7 +32,7 @@ type (
 		table         string
 		join          [][3]string
 		distinct      bool
-		cols          []types.Field
+		cols          []dialect.Field
 		funcs         []string
 		omit          []any
 		groupBy       strings.Builder
@@ -101,7 +101,7 @@ func (s *Selector) String() string {
 }
 
 // distinct
-func (s *Selector) Distinct(cols ...types.Field) *Selector {
+func (s *Selector) Distinct(cols ...dialect.Field) *Selector {
 	s.distinct = true
 	for _, col := range cols {
 		s.cols = append(s.cols, col)
@@ -111,7 +111,7 @@ func (s *Selector) Distinct(cols ...types.Field) *Selector {
 }
 
 // cols
-func (s *Selector) Cols(cols ...types.Field) *Selector {
+func (s *Selector) Cols(cols ...dialect.Field) *Selector {
 	for _, col := range cols {
 		s.cols = append(s.cols, col)
 	}
@@ -119,7 +119,7 @@ func (s *Selector) Cols(cols ...types.Field) *Selector {
 }
 
 // funcs
-func (s *Selector) Funcs(fns ...types.Function) *Selector {
+func (s *Selector) Funcs(fns ...dialect.Function) *Selector {
 	for _, fn := range fns {
 		s.funcs = append(s.funcs, fn())
 	}
@@ -127,7 +127,7 @@ func (s *Selector) Funcs(fns ...types.Function) *Selector {
 }
 
 // join
-func (s *Selector) Join(joinType types.JoinType, left, right types.Field, fns ...types.Condition) *Selector {
+func (s *Selector) Join(joinType types.JoinType, left, right dialect.Field, fns ...dialect.Condition) *Selector {
 	var on strings.Builder
 	for _, fn := range fns {
 		on.WriteString(types.Operator_and)
@@ -147,15 +147,15 @@ func (s *Selector) Join(joinType types.JoinType, left, right types.Field, fns ..
 	return s
 }
 
-func (s *Selector) LeftJoin(left, right types.Field, fns ...types.Condition) *Selector {
+func (s *Selector) LeftJoin(left, right dialect.Field, fns ...dialect.Condition) *Selector {
 	return s.Join(types.Left_Join, left, right, fns...)
 }
-func (s *Selector) RightJoin(left, right types.Field, fns ...types.Condition) *Selector {
+func (s *Selector) RightJoin(left, right dialect.Field, fns ...dialect.Condition) *Selector {
 	return s.Join(types.Right_Join, left, right, fns...)
 }
 
 // Where
-func (s *Selector) Where(fns ...types.Condition) *Selector {
+func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 	if len(fns) == 0 {
 		return s
 	}
@@ -182,7 +182,7 @@ func (s *Selector) Where(fns ...types.Condition) *Selector {
 }
 
 // And
-func (s *Selector) And(fns ...types.Condition) *Selector {
+func (s *Selector) And(fns ...dialect.Condition) *Selector {
 	if len(fns) == 0 {
 		return s
 	}
@@ -210,7 +210,7 @@ func (s *Selector) And(fns ...types.Condition) *Selector {
 }
 
 // Or
-func (s *Selector) Or(fns ...types.Condition) *Selector {
+func (s *Selector) Or(fns ...dialect.Condition) *Selector {
 	if len(fns) == 0 {
 		return s
 	}
@@ -238,12 +238,12 @@ func (s *Selector) Or(fns ...types.Condition) *Selector {
 }
 
 // Order
-func (s *Selector) Order(cols ...types.Field) *Selector {
+func (s *Selector) Order(cols ...dialect.Field) *Selector {
 	return s.Asc(cols...)
 }
 
 // Order Asc
-func (s *Selector) Asc(cols ...types.Field) *Selector {
+func (s *Selector) Asc(cols ...dialect.Field) *Selector {
 	if len(cols) == 0 {
 		return s
 	}
@@ -257,7 +257,7 @@ func (s *Selector) Asc(cols ...types.Field) *Selector {
 }
 
 // Order Desc
-func (s *Selector) Desc(cols ...types.Field) *Selector {
+func (s *Selector) Desc(cols ...dialect.Field) *Selector {
 	if len(cols) == 0 {
 		return s
 	}
@@ -271,7 +271,7 @@ func (s *Selector) Desc(cols ...types.Field) *Selector {
 }
 
 // Group
-func (s *Selector) Group(cols ...types.Field) *Selector {
+func (s *Selector) Group(cols ...dialect.Field) *Selector {
 	if len(cols) == 0 {
 		return s
 	}
@@ -285,7 +285,7 @@ func (s *Selector) Group(cols ...types.Field) *Selector {
 }
 
 // Group Having
-func (s *Selector) Having(fns ...types.Condition) *Selector {
+func (s *Selector) Having(fns ...dialect.Condition) *Selector {
 	if len(fns) == 0 {
 		return s
 	}
@@ -371,7 +371,7 @@ func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 }
 
 // Count
-func (s *Selector) Count(ctx context.Context, cond ...types.Condition) (int64, error) {
+func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
 
 	s.Where(cond...)
@@ -400,7 +400,7 @@ func (s *Selector) Count(ctx context.Context, cond ...types.Condition) (int64, e
 }
 
 // Sum
-func (s *Selector) Sum(ctx context.Context, col types.Field, cond ...types.Condition) (int64, error) {
+func (s *Selector) Sum(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
 
 	s.Funcs(col.Sum()).Where(cond...)

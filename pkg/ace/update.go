@@ -29,8 +29,8 @@ type (
 	Updater struct {
 		db            Executer
 		table         string
-		affect        []types.Field
-		cols          []types.Field
+		affect        []dialect.Field
+		cols          []dialect.Field
 		params        []any
 		exprCols      []expr
 		where         strings.Builder
@@ -93,7 +93,7 @@ func (u *Updater) String() string {
 }
 
 // Set
-func (u *Updater) Set(fns ...types.Setter) *Updater {
+func (u *Updater) Set(fns ...dialect.Setter) *Updater {
 	for _, fn := range fns {
 		s, val := fn()
 		u.cols = append(u.cols, s)
@@ -102,7 +102,7 @@ func (u *Updater) Set(fns ...types.Setter) *Updater {
 	return u
 }
 
-func (u *Updater) SetExpr(fns ...types.ExprSetter) *Updater {
+func (u *Updater) SetExpr(fns ...dialect.ExprSetter) *Updater {
 	for _, fn := range fns {
 		s, val := fn()
 		u.exprCols = append(u.exprCols, expr{colName: s, arg: val})
@@ -111,7 +111,7 @@ func (u *Updater) SetExpr(fns ...types.ExprSetter) *Updater {
 }
 
 // Where
-func (u *Updater) Where(fns ...types.Condition) *Updater {
+func (u *Updater) Where(fns ...dialect.Condition) *Updater {
 	if len(fns) == 0 {
 		return u
 	}
@@ -138,7 +138,7 @@ func (u *Updater) Where(fns ...types.Condition) *Updater {
 }
 
 // And
-func (u *Updater) And(fns ...types.Condition) *Updater {
+func (u *Updater) And(fns ...dialect.Condition) *Updater {
 	if len(fns) == 0 {
 		return u
 	}
@@ -166,7 +166,7 @@ func (u *Updater) And(fns ...types.Condition) *Updater {
 }
 
 // Or
-func (u *Updater) Or(fns ...types.Condition) *Updater {
+func (u *Updater) Or(fns ...dialect.Condition) *Updater {
 	if len(fns) == 0 {
 		return u
 	}
@@ -193,7 +193,7 @@ func (u *Updater) Or(fns ...types.Condition) *Updater {
 	return u
 }
 
-func (u *Updater) Cols(cols ...types.Field) *Updater {
+func (u *Updater) Cols(cols ...dialect.Field) *Updater {
 	for _, col := range cols {
 		u.affect = append(u.affect, col)
 	}
@@ -232,7 +232,7 @@ func (u *Updater) Do(ctx context.Context) (sql.Result, error) {
 }
 
 // Struct
-func (u *Updater) Struct(ctx context.Context, beans ...types.Modeler) (sql.Result, error) {
+func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
 	lens := len(beans)

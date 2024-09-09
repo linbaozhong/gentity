@@ -29,8 +29,8 @@ type (
 	Creator struct {
 		db            Executer
 		table         string
-		affect        []types.Field
-		cols          []types.Field
+		affect        []dialect.Field
+		cols          []dialect.Field
 		params        []any
 		command       strings.Builder
 		commandString strings.Builder
@@ -82,7 +82,7 @@ func (c *Creator) String() string {
 }
 
 // Sets
-func (c *Creator) Set(fns ...types.Setter) *Creator {
+func (c *Creator) Set(fns ...dialect.Setter) *Creator {
 	for _, fn := range fns {
 		if fn == nil {
 			continue
@@ -94,7 +94,7 @@ func (c *Creator) Set(fns ...types.Setter) *Creator {
 	return c
 }
 
-func (c *Creator) Cols(cols ...types.Field) *Creator {
+func (c *Creator) Cols(cols ...dialect.Field) *Creator {
 	for _, col := range cols {
 		c.affect = append(c.affect, col)
 	}
@@ -124,7 +124,7 @@ func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 }
 
 // Struct
-func (c *Creator) Struct(ctx context.Context, beans ...types.Modeler) (sql.Result, error) {
+func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
 
 	lens := len(beans)

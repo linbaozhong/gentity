@@ -15,8 +15,8 @@
 package types
 
 import (
-	"context"
 	"fmt"
+	"time"
 )
 
 const (
@@ -43,44 +43,159 @@ var (
 
 type (
 	JoinType string
-	//// NullBool is an alias to sql.NullBool.
-	//NullBool = sql.NullBool
-	//// NullInt64 is an alias to sql.NullInt64.
-	//NullInt64 = sql.NullInt64
-	//// NullInt32 is an alias to sql.NullInt32.
-	//NullInt32 = sql.NullInt32
-	//// NullInt16 is an alias to sql.NullInt16.
-	//NullInt16 = sql.NullInt16
-	//// NullByte is an alias to sql.NullByte.
-	//NullByte = sql.NullByte
-	//// NullString is an alias to sql.NullString.
-	//NullString = sql.NullString
-	//// NullFloat64 is an alias to sql.NullFloat64.
-	//NullFloat64 = sql.NullFloat64
-	//// NullTime represents a time.Time that may be null.
-	//NullTime = sql.NullTime
-	//// UnknownType is a named type to any indicates the info
-	//// needs to be extracted from the underlying rows.
-	//UnknownType any
 
-	Modeler interface {
-		TableName() string
-		AssignValues(args ...Field) ([]string, []any)
-		AssignKeys() ([]Field, []any)
-	}
-
-	Daoer interface {
-		// Exists 是否存在符合条件的数据
-		Exists(ctx context.Context, cond ...Condition) (bool, error)
-		// Sum 获取指定列的总和
-		Sum(ctx context.Context, col Field, cond ...Condition) (int64, error)
-		// Count 获取符合条件的数据总数
-		Count(ctx context.Context, cond ...Condition) (int64, error)
-		// Delete 删除符合条件的数据
-		Delete(ctx context.Context, cond ...Condition) (bool, error)
-		// Update 更新符合条件的数据
-		Update(ctx context.Context, sets []Setter, cond ...Condition) (bool, error)
-		// Insert 插入数据
-		Insert(ctx context.Context, sets ...Setter) (int64, error)
-	}
+	AceString  string
+	AceInt64   int64
+	AceInt32   int32
+	AceInt16   int16
+	AceInt8    int8
+	AceInt     int
+	AceByte    byte
+	AceFloat64 float64
+	AceFloat32 float32
+	AceBool    bool
+	AceTime    time.Time
 )
+
+func (s *AceString) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*s = ""
+		return nil
+	case string:
+		*s = AceString(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceString: %T", src)
+	}
+}
+
+func (b *AceByte) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*b = 0
+		return nil
+	case int64:
+		*b = AceByte(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceByte: %T", src)
+	}
+}
+
+func (i8 *AceInt8) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*i8 = 0
+		return nil
+	case int64:
+		*i8 = AceInt8(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceInt8: %T", src)
+	}
+}
+
+func (i16 *AceInt16) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*i16 = 0
+		return nil
+	case int64:
+		*i16 = AceInt16(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceInt16: %T", src)
+	}
+}
+
+func (i32 *AceInt32) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*i32 = 0
+		return nil
+	case int64:
+		*i32 = AceInt32(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceInt32: %T", src)
+	}
+}
+
+func (i64 *AceInt64) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*i64 = 0
+		return nil
+	case int64:
+		*i64 = AceInt64(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceInt64: %T", src)
+	}
+}
+
+func (i *AceInt) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*i = 0
+		return nil
+	case int64:
+		*i = AceInt(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceInt: %T", src)
+	}
+}
+
+func (f32 *AceFloat32) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*f32 = 0
+		return nil
+	case float64:
+		*f32 = AceFloat32(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceFloat32: %T", src)
+	}
+}
+
+func (f64 *AceFloat64) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*f64 = 0
+		return nil
+	case float64:
+		*f64 = AceFloat64(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceFloat64: %T", src)
+	}
+}
+
+func (b *AceBool) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*b = false
+		return nil
+	case bool:
+		*b = AceBool(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceBool: %T", src)
+	}
+}
+
+func (t *AceTime) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*t = AceTime(time.Time{})
+		return nil
+	case time.Time:
+		*t = AceTime(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for AceTime: %T", src)
+	}
+}
