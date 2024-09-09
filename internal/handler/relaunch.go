@@ -57,10 +57,6 @@ var (
 			if err != nil {
 				showError(err)
 			}
-			pos = strings.LastIndex(pkgPath, "/")
-			if pos > 0 {
-				pkgPath = pkgPath[:pos]
-			}
 
 			if len(driver) > 0 && len(dns) > 0 {
 				// 生成结构体
