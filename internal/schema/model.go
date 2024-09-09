@@ -1,4 +1,4 @@
-package dialect
+package schema
 
 type Column struct {
 	Name     string `db:"name"`
@@ -10,8 +10,9 @@ type Column struct {
 	AutoIncr bool   `db:"auto_increment"`
 	Comment  string `db:"comment"`
 }
-type Table struct {
-	Name    string
-	Comment string
-	Columns []Column
-}
+
+//type Table struct {
+//	Name    string
+//	Comment string
+//	Columns []Column
+//}

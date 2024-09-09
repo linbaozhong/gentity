@@ -19,10 +19,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	obj "github.com/linbaozhong/gentity/example/define/table/companytbl"
 	"github.com/linbaozhong/gentity/example/model"
+	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"github.com/linbaozhong/gentity/pkg/schema"
 	"testing"
 	"time"
 )
@@ -51,10 +51,10 @@ func TestScheme(t *testing.T) {
 	}
 	defer rows.Close()
 
-	ms := make(map[string][]dialect.Column)
+	ms := make(map[string][]schema.Column)
 	if rows.Next() {
 		var tableName string
-		col := dialect.Column{}
+		col := schema.Column{}
 		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.Size, &col.Key, &col.Extra, &col.Comment)
 		if err != nil {
 			t.Fatal(err)
@@ -63,7 +63,7 @@ func TestScheme(t *testing.T) {
 		if cols, ok := ms[tableName]; ok {
 			ms[tableName] = append(cols, col)
 		} else {
-			ms[tableName] = []dialect.Column{col}
+			ms[tableName] = []schema.Column{col}
 		}
 	}
 	if err = rows.Err(); err != nil {

@@ -15,7 +15,7 @@
 package api
 
 import (
-	"github.com/linbaozhong/gentity/pkg/iface"
+	"github.com/linbaozhong/gentity/pkg/api/iface"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )

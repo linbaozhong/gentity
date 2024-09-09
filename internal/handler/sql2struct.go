@@ -2,9 +2,9 @@ package handler
 
 import (
 	"fmt"
+	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/schema"
 	"os"
 	"path/filepath"
 	"regexp"
