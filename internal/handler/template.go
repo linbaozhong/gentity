@@ -31,7 +31,7 @@ import (
 	"time"
 	{{- end}}
 	"{{.ModulePath}}/define/table/{{$structNameLower}}tbl"
-	atype "github.com/linbaozhong/gentity/pkg/ace/types"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
 const {{$structName}}TableName = "{{.TableName}}"
@@ -63,7 +63,7 @@ func (p *{{.StructName}}) TableName() string {
 	return {{$structName}}TableName
 }
 
-func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.StructName}}, bool, error) {
+func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]*{{.StructName}}, bool, error) {
 	defer rows.Close()
 	{{.TableName}}s := make([]*{{.StructName}}, 0)
 
@@ -97,7 +97,7 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...atype.Field) ([]*{{.Struc
 	return {{.TableName}}s, true, nil
 }
 
-func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
+func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		lens = len(args)
 		cols []string
@@ -139,7 +139,7 @@ func (p *{{.StructName}})AssignValues(args ...atype.Field) ([]string, []any) {
 }
 
 //
-func (p *{{.StructName}}) AssignKeys() ([]atype.Field, []any) {
+func (p *{{.StructName}}) AssignKeys() ([]dialect.Field, []any) {
 	return {{$structNameLower}}tbl.PrimaryKeys, []any{
 	{{- range $key,$value := .Keys}}
 		p.{{$value}},
@@ -158,17 +158,17 @@ var (
 package {{ .TableName }}tbl
 
 import (
-	atype "github.com/linbaozhong/gentity/pkg/ace/types"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
 var (
 {{- range $key, $value := .Columns}}
-	{{ index $value 0 }} = atype.Field{Name: "{{index $value 1}}",Table: "{{ $tablename }}",Type: "{{index $value 2}}"}
+	{{ index $value 0 }} = dialect.Field{Name: "{{index $value 1}}",Table: "{{ $tablename }}",Type: "{{index $value 2}}"}
 {{- end}}
 
 {{- if .HasPrimaryKey}}
 	// 主键
-	PrimaryKeys = []atype.Field{
+	PrimaryKeys = []dialect.Field{
 	{{- range $key,$value := .Keys}}
 		{{$value}},
 	{{- end}}
@@ -176,7 +176,7 @@ var (
 {{- end}}
 
 	// 可写列
-	WritableFields = []atype.Field{
+	WritableFields = []dialect.Field{
 {{- range $key, $value := .Columns}}
 	{{- if or (eq (index $value 4) "->") (eq (index $value 4) "")}}
 	{{index $value 0}},
@@ -184,7 +184,7 @@ var (
 {{- end}}
 	}
 	// 可读列
-	ReadableFields = []atype.Field{
+	ReadableFields = []dialect.Field{
 {{- range $key, $value := .Columns}}
 	{{- if or (eq (index $value 4) "<-") (eq (index $value 4) "")}}
 	{{index $value 0}},
@@ -210,37 +210,38 @@ import (
 	"{{.ModulePath}}/{{.PackageName}}"
 	"{{.ModulePath}}/define/table/{{$structNameLower}}tbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
 type {{.StructName}}Daoer interface {
-	atype.Daoer
+	dialect.Daoer
 	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
-	InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
+	InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error)
 	// InsertMulti 批量插入多条数据,返回 RowsAffected
 	// cols: 要插入的列名
-	InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error)
+	InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error)
 	// UpdateMulti 批量更新多条数据
 	// cols: 要更新的列名
-	UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error)
+	UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
-	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error)
+	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Find 分页查询，返回一个slice
-	Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error)
+	Find(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Get4Cols 读取一个对象的指定列
-	Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
+	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// GetByID 按主键查询，返回一个对象
 	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Get 按条件读取一个对象
-	Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
+	Get(ctx context.Context, cond ...dialect.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// GetSingle 按条件读取第一行的第一个字段
-	GetSingle(ctx context.Context,col atype.Field, cond ...atype.Condition) (any, error)
+	GetSingle(ctx context.Context,col dialect.Field, cond ...dialect.Condition) (any, error)
 	//
-	IDs(ctx context.Context, cond ...atype.Condition) ([]int64, error)
+	IDs(ctx context.Context, cond ...dialect.Condition) ([]int64, error)
 	//
-	Columns(ctx context.Context, col atype.Field, cond ...atype.Condition) ([]any, error)
+	Columns(ctx context.Context, col dialect.Field, cond ...dialect.Condition) ([]any, error)
 }
 
 type {{.TableName}}Dao struct {
@@ -273,7 +274,7 @@ func (p *{{.TableName}}Dao) D() *ace.Deleter{
 
 
 // Insert 返回 LastInsertId
-func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets ...atype.Setter) (int64, error) {
+func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
@@ -286,7 +287,7 @@ func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets ...atype.Setter) (i
 
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
-func (p *{{.TableName}}Dao) InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
+func (p *{{.TableName}}Dao) InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error) {
 	result, err := p.C().Cols(cols...).Struct(ctx, bean)
 	if err != nil {
 		return 0, err
@@ -296,12 +297,12 @@ func (p *{{.TableName}}Dao) InsertOne(ctx context.Context, bean *{{.PackageName}
 
 // InsertMulti 批量插入,返回 RowsAffected
 // cols: 要插入的列名
-func (p *{{.TableName}}Dao) InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (int64, error) {
+func (p *{{.TableName}}Dao) InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error) {
 	lens := len(beans)
 	if lens == 0 {
 		return 0, atype.ErrBeanEmpty
 	}
-	args := make([]atype.Modeler, 0, lens)
+	args := make([]dialect.Modeler, 0, lens)
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
@@ -314,7 +315,7 @@ func (p *{{.TableName}}Dao) InsertMulti(ctx context.Context, beans []*{{.Package
 
 
 // Update
-func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []atype.Setter, cond ...atype.Condition) (bool, error) {
+func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
 	if len(sets) == 0 {
 		return false, atype.ErrSetterEmpty
 	}
@@ -328,12 +329,12 @@ func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []atype.Setter, con
 
 // UpdateMulti
 // cols: 要更新的列名
-func (p *{{.TableName}}Dao) UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...atype.Field) (bool, error) {
+func (p *{{.TableName}}Dao) UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (bool, error) {
 	lens := len(beans)
 	if lens == 0 {
 		return false, atype.ErrBeanEmpty
 	}
-	args := make([]atype.Modeler, 0, lens)
+	args := make([]dialect.Modeler, 0, lens)
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
@@ -346,7 +347,7 @@ func (p *{{.TableName}}Dao) UpdateMulti(ctx context.Context, beans []*{{.Package
 }
 
 // Delete
-func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...atype.Condition) (bool, error) {
+func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	result, err := p.D().Where(cond...).Do(ctx)
 	if err != nil {
 		return false, err
@@ -356,7 +357,7 @@ func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...atype.Condition)
 }
 
 // Get4Cols
-func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []atype.Field, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error) {
+func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
 		c.Cols({{$structNameLower}}tbl.ReadableFields...)
@@ -385,7 +386,7 @@ func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []atype.Field, co
 }
 //
 // Find4Cols
-func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []atype.Field, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error) {
+func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
 		c.Cols({{$structNameLower}}tbl.ReadableFields...)
@@ -421,20 +422,20 @@ func (p *{{.TableName}}Dao) GetByID(ctx context.Context, args ...any) (*{{.Packa
 		return nil, false, atype.ErrArgsNotMatch
 	}
 	
-	cond := make([]atype.Condition, 0, lens)
+	cond := make([]dialect.Condition, 0, lens)
 	for i, key := range {{$structNameLower}}tbl.PrimaryKeys {
 		cond = append(cond, key.Eq(args[i]))
 	}
-	return p.Get4Cols(ctx, []atype.Field{}, cond...)
+	return p.Get4Cols(ctx, []dialect.Field{}, cond...)
 }
 
 // Get Read one {{.TableName}}
-func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...atype.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error) {
-	return p.Get4Cols(ctx, []atype.Field{}, cond...)
+func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...dialect.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error) {
+	return p.Get4Cols(ctx, []dialect.Field{}, cond...)
 }
 
 // GetSingle Read the first column of the first row
-func (p *{{.TableName}}Dao) GetSingle(ctx context.Context,col atype.Field, cond ...atype.Condition) (any, error) {
+func (p *{{.TableName}}Dao) GetSingle(ctx context.Context,col dialect.Field, cond ...dialect.Condition) (any, error) {
 	c := p.R().Cols(col)
 	rows, err := c.Where(cond...).Limit(atype.MaxLimit).Query(ctx)
 	if err != nil {
@@ -453,13 +454,13 @@ func (p *{{.TableName}}Dao) GetSingle(ctx context.Context,col atype.Field, cond 
 }
 
 // Find
-func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...atype.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error) {
-	return p.Find4Cols(ctx, pageIndex, pageSize, []atype.Field{}, cond...)
+func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error) {
+	return p.Find4Cols(ctx, pageIndex, pageSize, []dialect.Field{}, cond...)
 }
 
 
 // IDs
-func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...atype.Condition) ([]int64, error) {
+func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...dialect.Condition) ([]int64, error) {
 	if len({{$structNameLower}}tbl.PrimaryKeys) == 0 {
 		return nil, atype.ErrPrimaryKeyNotMatch
 	}
@@ -483,7 +484,7 @@ func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...atype.Condition) ([
 }
 
 // Columns
-func (p *{{.TableName}}Dao) Columns(ctx context.Context, col atype.Field, cond ...atype.Condition) ([]any, error) {
+func (p *{{.TableName}}Dao) Columns(ctx context.Context, col dialect.Field, cond ...dialect.Condition) ([]any, error) {
 	c := p.R().Cols(col)
 	rows, err := c.Where(cond...).Limit(atype.MaxLimit).Query(ctx)
 	if err != nil {
@@ -503,17 +504,17 @@ func (p *{{.TableName}}Dao) Columns(ctx context.Context, col atype.Field, cond .
 }
 
 // Count
-func (p *{{.TableName}}Dao) Count(ctx context.Context, cond ...atype.Condition) (int64, error) {
+func (p *{{.TableName}}Dao) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	return p.R().Count(ctx, cond...)
 }
 
 // Sum
-func (p *{{.TableName}}Dao) Sum(ctx context.Context, col atype.Field, cond ...atype.Condition) (int64, error) {
+func (p *{{.TableName}}Dao) Sum(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (int64, error) {
 	return p.R().Sum(ctx, col, cond...)
 }
 
 // Exists
-func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...atype.Condition) (bool, error) {
+func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	if len({{$structNameLower}}tbl.PrimaryKeys) == 0 {
 		return false, atype.ErrPrimaryKeyNotMatch
 	}
