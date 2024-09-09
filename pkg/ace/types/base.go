@@ -62,12 +62,19 @@ func (s *AceString) Scan(src any) error {
 	case nil:
 		*s = ""
 		return nil
+	case []byte:
+		*s = AceString(v)
+		return nil
 	case string:
 		*s = AceString(v)
 		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for AceString: %T", src)
 	}
+}
+
+func (s *AceString) String() string {
+	return string(*s)
 }
 
 func (b *AceByte) Scan(src any) error {
@@ -83,6 +90,10 @@ func (b *AceByte) Scan(src any) error {
 	}
 }
 
+func (i *AceByte) Byte() byte {
+	return byte(*i)
+}
+
 func (i8 *AceInt8) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
@@ -94,6 +105,10 @@ func (i8 *AceInt8) Scan(src any) error {
 	default:
 		return fmt.Errorf("unsupported scan type for AceInt8: %T", src)
 	}
+}
+
+func (i *AceInt8) Int8() int8 {
+	return int8(*i)
 }
 
 func (i16 *AceInt16) Scan(src any) error {
@@ -109,6 +124,10 @@ func (i16 *AceInt16) Scan(src any) error {
 	}
 }
 
+func (i *AceInt16) Int16() int16 {
+	return int16(*i)
+}
+
 func (i32 *AceInt32) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
@@ -120,6 +139,10 @@ func (i32 *AceInt32) Scan(src any) error {
 	default:
 		return fmt.Errorf("unsupported scan type for AceInt32: %T", src)
 	}
+}
+
+func (i *AceInt) Int32() int32 {
+	return int32(*i)
 }
 
 func (i64 *AceInt64) Scan(src any) error {
@@ -135,6 +158,10 @@ func (i64 *AceInt64) Scan(src any) error {
 	}
 }
 
+func (i64 *AceInt64) Int64() int64 {
+	return int64(*i64)
+}
+
 func (i *AceInt) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
@@ -146,6 +173,10 @@ func (i *AceInt) Scan(src any) error {
 	default:
 		return fmt.Errorf("unsupported scan type for AceInt: %T", src)
 	}
+}
+
+func (i *AceInt) Int() int {
+	return int(*i)
 }
 
 func (f32 *AceFloat32) Scan(src any) error {
@@ -161,6 +192,10 @@ func (f32 *AceFloat32) Scan(src any) error {
 	}
 }
 
+func (f32 *AceFloat32) Float32() float32 {
+	return float32(*f32)
+}
+
 func (f64 *AceFloat64) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
@@ -174,6 +209,10 @@ func (f64 *AceFloat64) Scan(src any) error {
 	}
 }
 
+func (f64 *AceFloat64) Float64() float64 {
+	return float64(*f64)
+}
+
 func (b *AceBool) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
@@ -182,9 +221,16 @@ func (b *AceBool) Scan(src any) error {
 	case bool:
 		*b = AceBool(v)
 		return nil
+	case int64:
+		*b = v != 0
+		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for AceBool: %T", src)
 	}
+}
+
+func (b *AceBool) Bool() bool {
+	return bool(*b)
 }
 
 func (t *AceTime) Scan(src any) error {
@@ -195,7 +241,22 @@ func (t *AceTime) Scan(src any) error {
 	case time.Time:
 		*t = AceTime(v)
 		return nil
+	case []byte:
+		t2, err := time.Parse(time.DateTime, string(v))
+		if err != nil {
+			return err
+		}
+		*t = AceTime(t2)
+		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for AceTime: %T", src)
 	}
+}
+
+func (t *AceTime) Time() time.Time {
+	return time.Time(*t)
+}
+
+func (t AceTime) String() string {
+	return t.Time().Format(time.DateTime)
 }
