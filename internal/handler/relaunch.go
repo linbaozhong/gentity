@@ -26,10 +26,16 @@ import (
 )
 
 var (
-	path   string // model路径
+	path     string // struct文件路径
+	fullpath string // struct文件全路径
+	parent   string // struct文件父级目录
+	// definePath string // define文件全路径
+	tablePath string // table文件全路径
+	daoPath   string // dao文件全路径
+
 	driver string // 数据库驱动
 	dns    string // 数据库连接字符串
-	//sqlPath string // sql文件路径
+	// sqlPath string // sql文件路径
 
 	launch = &cobra.Command{
 		Use:   `gentity Struct路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
@@ -39,16 +45,20 @@ var (
 	gentity .\db mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 	gentity . .\database.sql`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fullpath, err := filepath.Abs(path)
+			var err error
+			// struct全路径
+			fullpath, err = filepath.Abs(path)
 			if err != nil {
 				showError(err)
 			}
-			//上一级目录
-			parent := filepath.Dir(fullpath)
+			// 上一级目录
+			parent = filepath.Dir(fullpath)
 			pos := strings.LastIndex(fullpath, string(os.PathSeparator))
 			if pos > 0 {
 				parent = fullpath[:pos]
 			}
+			//
+			definePath := filepath.Join(parent, "define")
 			// 包名
 			packageName := fullpath[pos+1:]
 			// 包目录
@@ -69,12 +79,14 @@ var (
 					showError(err)
 				}
 			}
+			tablePath = filepath.Join(definePath, "table")
 			// 创建生成dao层代码的目录
-			err = os.MkdirAll(filepath.Join(parent, "define", "table"), os.ModePerm)
+			err = os.MkdirAll(tablePath, os.ModePerm)
 			if err != nil {
 				showError(err)
 			}
-			err = os.MkdirAll(filepath.Join(parent, "define", "dao"), os.ModePerm)
+			daoPath = filepath.Join(definePath, "dao")
+			err = os.MkdirAll(daoPath, os.ModePerm)
 			if err != nil {
 				showError(err)
 			}
@@ -87,13 +99,13 @@ var (
 				if dir.IsDir() {
 					continue
 				}
-				var filename = dir.Name()
-				//fmt.Println(filename)
+				var filename = dir.Name() // struct文件名
+				// fmt.Println(filename)
 				if filepath.Ext(filename) != ".go" {
 					continue
 				}
 
-				err = parseFile(filepath.Join(parent, "define"), filepath.Join(fullpath, filename), pkgPath)
+				err = parseFile(filename, pkgPath)
 				if err != nil {
 					showError(err)
 				}

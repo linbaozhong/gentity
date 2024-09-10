@@ -147,7 +147,8 @@ func (d *TempData) writeToModel(fileName string) error {
 	}
 
 	// absPath, _ := filepath.Abs(fileName)
-	fileName = fileName[:len(fileName)-3] + "_" + d.StructName + "_ace.go"
+	// fileName = fileName[:len(fileName)-3] + "_" + d.StructName + "_ace.go"
+	fileName = filepath.Join(fullpath, "ace_"+fileName[:len(fileName)-3]+"_"+d.StructName+".go")
 	if fi, err := os.Stat(fileName); err == nil {
 		if !fi.IsDir() {
 			if err := os.Remove(fileName); err != nil {

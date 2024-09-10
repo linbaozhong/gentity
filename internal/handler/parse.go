@@ -23,13 +23,14 @@ import (
 	"strings"
 )
 
-func parseFile(parent, filename, pkgPath string) error {
+func parseFile(filename, pkgPath string) error {
 	tempData := new(TempData)
 	tempData.ModulePath = pkgPath
 
 	fset := token.NewFileSet()
 	var src interface{}
-	f, err := parser.ParseFile(fset, filename, src, parser.ParseComments)
+	var structFullName = filepath.Join(fullpath, filename)
+	f, err := parser.ParseFile(fset, structFullName, src, parser.ParseComments)
 	if err != nil {
 		showError(err)
 		return err
@@ -37,7 +38,7 @@ func parseFile(parent, filename, pkgPath string) error {
 
 	tempData.PackageName = f.Name.Name
 
-	file, err := astra.ParseFile(filename,
+	file, err := astra.ParseFile(structFullName,
 		astra.IgnoreVariables|astra.IgnoreConstants|astra.IgnoreFunctions|
 			astra.IgnoreInterfaces|astra.IgnoreTypes|astra.IgnoreMethods)
 	if err != nil {
@@ -64,7 +65,7 @@ func parseFile(parent, filename, pkgPath string) error {
 		// tempData.PrimaryKeyName = ""
 		tempData.Keys = make([]string, 0, 1)
 		tempData.Columns = make([][]string, 0, 20)
-		tempData.FileName = filename
+		tempData.FileName = structFullName
 		tempData.StructName = stru.Name
 		// 解析struct文档
 		parseDocs(tempData, stru.Docs)
@@ -111,13 +112,13 @@ func parseFile(parent, filename, pkgPath string) error {
 				}
 			}
 			// _namejson[0] = json_name
-			//if _namejson[0] == "" {
+			// if _namejson[0] == "" {
 			//	if _namejson[1] == "" {
 			//		_namejson[0] = getFieldName(field.Name)
 			//	} else {
 			//		_namejson[0] = _namejson[1]
 			//	}
-			//}
+			// }
 			// _namejson[0] = field.Name 暂时
 			_namejson[0] = field.Name
 
@@ -138,7 +139,7 @@ func parseFile(parent, filename, pkgPath string) error {
 		}
 
 		// 写table文件
-		err = tempData.writeTable(filepath.Join(parent, "table", tempData.TableName+"tbl"))
+		err = tempData.writeTable(filepath.Join(tablePath, tempData.TableName+"tbl"))
 		if err != nil {
 			showError(err.Error())
 			return err
@@ -152,7 +153,7 @@ func parseFile(parent, filename, pkgPath string) error {
 		}
 
 		// 写dal文件
-		err = tempData.writeBuild(filepath.Join(parent, "dao"))
+		err = tempData.writeBuild(daoPath)
 		if err != nil {
 			showError(err.Error())
 			return err
