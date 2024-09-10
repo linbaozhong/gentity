@@ -1,18 +1,19 @@
 package schema
 
 type Column struct {
-	Name     string `db:"name"`
-	Type     string `db:"type"`
-	Default  any    `db:"default"`
-	Size     int    `db:"size"`
-	Key      string `db:"column_key"`
-	Extra    string `db:"extra"`
-	AutoIncr bool   `db:"auto_increment"`
-	Comment  string `db:"comment"`
+	Name     string
+	Type     string
+	Default  any
+	Size     int
+	Unsigned bool
+	Key      string
+	Extra    string
+	AutoIncr bool
+	Comment  string
 }
 
-//type Table struct {
+// type Table struct {
 //	Name    string
 //	Comment string
 //	Columns []Column
-//}
+// }

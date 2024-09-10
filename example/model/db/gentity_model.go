@@ -8,10 +8,10 @@ import (
 
 // tablename company
 type Company struct {
-	Id               int       `json:"id" db:"'id' pk auto"`                         // 授权方企业本地id
+	Id               int64     `json:"id" db:"'id' pk"`                              // 授权方企业本地id
 	Platform         string    `json:"platform" db:"'platform'"`                     // 授权方企业的平台方
 	CorpId           string    `json:"corp_id" db:"'corp_id'"`                       // 平台授权企业id
-	CorpType         int8      `json:"corp_type" db:"'corp_type'"`                   //
+	CorpType         int8      `json:"corp_type" db:"'corp_type'"`                   // 企业类型
 	FullCorpName     string    `json:"full_corp_name" db:"'full_corp_name'"`         // 企业全称
 	CorpType2        int8      `json:"corp_type2" db:"'corp_type2'"`                 // 0 是普通组织\n1 是项目\n2是圈子\n3没有业务表现形式\n4是自建班级群\n10是敏捷组织\n11是培训群敏捷组织
 	CorpName         string    `json:"corp_name" db:"'corp_name'"`                   // 企业简称
@@ -25,7 +25,7 @@ type Company struct {
 	AuthLevel        int8      `json:"auth_level" db:"'auth_level'"`                 // 企业认证等级：\n\n0：未认证\n1：高级认证\n2：中级认证\n3：初级认证
 	AuthChannel      string    `json:"auth_channel" db:"'auth_channel'"`             // 渠道码
 	AuthChannelType  string    `json:"auth_channel_type" db:"'auth_channel_type'"`   // 渠道类型。为了避免渠道码重复，可与渠道码共同确认渠道。可能为空，非空时当前只有满天星类型，值为STAR_ACTIVITY
-	State            int8      `json:"state" db:"'state'"`                           //
-	StateTime        time.Time `json:"state_time" db:"'state_time'"`                 //
-	CreatedTime      time.Time `json:"created_time" db:"'created_time'"`             //
+	State            int8      `json:"state" db:"'state'"`                           // 系统状态：-1：已删除；0：禁用；1：可用
+	StateTime        time.Time `json:"state_time" db:"'state_time'"`                 // 系统状态时间
+	CreatedTime      time.Time `json:"created_time" db:"'created_time'"`             // 创建时间
 }
