@@ -17,8 +17,8 @@ package dao
 import (
 	"context"
 	_ "github.com/go-sql-driver/mysql"
-	obj "github.com/linbaozhong/gentity/example/define/table/companytbl"
-	"github.com/linbaozhong/gentity/example/model"
+	"github.com/linbaozhong/gentity/example/model/db"
+	obj "github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
@@ -96,17 +96,17 @@ func TestCreateCols(t *testing.T) {
 		obj.IsAuthenticated,
 		obj.State,
 		obj.CreatedTime,
-	).Struct(context.Background(), &model.Company{
+	).Struct(context.Background(), &db.Company{
 		FullCorpName:     "m1",
 		IsEcologicalCorp: false,
 		State:            0,
 		CreatedTime:      time.Now(),
-	}, &model.Company{
+	}, &db.Company{
 		FullCorpName:     "m2",
 		IsEcologicalCorp: true,
 		State:            1,
 		CreatedTime:      time.Now(),
-	}, &model.Company{
+	}, &db.Company{
 		FullCorpName:     "m3",
 		IsEcologicalCorp: true,
 		State:            0,
@@ -125,7 +125,7 @@ func TestCreateCols(t *testing.T) {
 func TestInsert(t *testing.T) {
 	defer dbx.Close()
 	//
-	id, err := Company(dbx).InsertOne(context.Background(), &model.Company{
+	id, err := Company(dbx).InsertOne(context.Background(), &db.Company{
 		FullCorpName:     "x1",
 		IsEcologicalCorp: false,
 		State:            0,
@@ -137,17 +137,17 @@ func TestInsert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	n, err := Company(dbx).InsertMulti(context.Background(), []*model.Company{&model.Company{
+	n, err := Company(dbx).InsertMulti(context.Background(), []*db.Company{{
 		FullCorpName:     "x1",
 		IsEcologicalCorp: false,
 		State:            0,
 		CreatedTime:      time.Now(),
-	}, &model.Company{
+	}, {
 		FullCorpName:     "x2",
 		IsEcologicalCorp: true,
 		State:            1,
 		CreatedTime:      time.Now(),
-	}, &model.Company{
+	}, {
 		FullCorpName:     "x3",
 		IsEcologicalCorp: true,
 		State:            0,
@@ -194,7 +194,7 @@ func TestUpdateCols(t *testing.T) {
 		obj.CreatedTime,
 	).Where(
 		obj.Id.Eq(1),
-	).Struct(context.Background(), &model.Company{
+	).Struct(context.Background(), &db.Company{
 		Id:               2,
 		FullCorpName:     "ccc",
 		IsEcologicalCorp: false,
@@ -215,7 +215,7 @@ func TestUpdateCols(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	defer dbx.Close()
 
-	ok, err := Company(dbx).UpdateMulti(context.Background(), []*model.Company{&model.Company{
+	ok, err := Company(dbx).UpdateMulti(context.Background(), []*db.Company{&db.Company{
 		Id:               2,
 		FullCorpName:     "ccc",
 		IsEcologicalCorp: false,
