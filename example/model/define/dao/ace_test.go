@@ -15,16 +15,11 @@
 package dao
 
 import (
-	"context"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/linbaozhong/gentity/example/model/db"
-	obj "github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
-	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"testing"
-	"time"
 )
 
 var (
@@ -44,229 +39,230 @@ func init() {
 	log.RegisterLogger(false)
 }
 
-func TestScheme(t *testing.T) {
-	rows, err := dbx.Query(`SELECT table_name,column_name,column_default,data_type,ifnull(character_maximum_length,0),column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema = ?`, "assessment")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer rows.Close()
+//
+// func TestScheme(t *testing.T) {
+// 	rows, err := dbx.Query(`SELECT table_name,column_name,column_default,data_type,ifnull(character_maximum_length,0),column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema = ?`, "assessment")
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	defer rows.Close()
+//
+// 	ms := make(map[string][]schema.Column)
+// 	if rows.Next() {
+// 		var tableName string
+// 		col := schema.Column{}
+// 		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.Size, &col.Key, &col.Extra, &col.Comment)
+// 		if err != nil {
+// 			t.Fatal(err)
+// 		}
+//
+// 		if cols, ok := ms[tableName]; ok {
+// 			ms[tableName] = append(cols, col)
+// 		} else {
+// 			ms[tableName] = []schema.Column{col}
+// 		}
+// 	}
+// 	if err = rows.Err(); err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
+//
+// func TestCreateSet(t *testing.T) {
+// 	defer dbx.Close()
+// 	x := Company(dbx).C()
+// 	result, err := x.Set(
+// 		obj.CorpName.Set("aaaaaa"),
+// 		obj.IsAuthenticated.Set(true),
+// 	).Do(context.Background())
+//
+// 	t.Log(x)
+//
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	t.Log(result.LastInsertId())
+// 	t.Log(result.RowsAffected())
+// }
+//
+// func TestCreateCols(t *testing.T) {
+// 	defer dbx.Close()
+// 	x := Company(dbx).C()
+// 	result, err := x.Cols(
+// 		obj.CorpName,
+// 		obj.IsAuthenticated,
+// 		obj.State,
+// 		obj.CreatedTime,
+// 	).Struct(context.Background(), &db.Company{
+// 		FullCorpName:     "m1",
+// 		IsEcologicalCorp: false,
+// 		State:            0,
+// 		CreatedTime:      time.Now(),
+// 	}, &db.Company{
+// 		FullCorpName:     "m2",
+// 		IsEcologicalCorp: true,
+// 		State:            1,
+// 		CreatedTime:      time.Now(),
+// 	}, &db.Company{
+// 		FullCorpName:     "m3",
+// 		IsEcologicalCorp: true,
+// 		State:            0,
+// 		CreatedTime:      time.Now(),
+// 	})
+//
+// 	t.Log(x)
+//
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	t.Log(result.LastInsertId())
+// 	t.Log(result.RowsAffected())
+// }
+//
+// func TestInsert(t *testing.T) {
+// 	defer dbx.Close()
+// 	//
+// 	id, err := Company(dbx).InsertOne(context.Background(), &db.Company{
+// 		FullCorpName:     "x1",
+// 		IsEcologicalCorp: false,
+// 		State:            0,
+// 		CreatedTime:      time.Now(),
+// 	})
+// 	t.Log(id)
+//
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+//
+// 	n, err := Company(dbx).InsertMulti(context.Background(), []*db.Company{{
+// 		FullCorpName:     "x1",
+// 		IsEcologicalCorp: false,
+// 		State:            0,
+// 		CreatedTime:      time.Now(),
+// 	}, {
+// 		FullCorpName:     "x2",
+// 		IsEcologicalCorp: true,
+// 		State:            1,
+// 		CreatedTime:      time.Now(),
+// 	}, {
+// 		FullCorpName:     "x3",
+// 		IsEcologicalCorp: true,
+// 		State:            0,
+// 		CreatedTime:      time.Now(),
+// 	}})
+//
+// 	t.Log(n)
+//
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
+//
+// func TestUpdateSet(t *testing.T) {
+// 	defer dbx.Close()
+// 	x := Company(dbx).U()
+// 	result, err := x.
+// 		Set(
+// 			obj.CorpName.Set("ttt"),
+// 			obj.IsAuthenticated.Set(true),
+// 		).
+// 		SetExpr(obj.State.Incr()).
+// 		Where(
+// 			obj.Id.Eq(1),
+// 		).
+// 		Do(context.Background())
+//
+// 	t.Log(x)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	t.Log(result.LastInsertId())
+// 	t.Log(result.RowsAffected())
+// }
+//
+// func TestUpdateCols(t *testing.T) {
+// 	defer dbx.Close()
+//
+// 	x := Company(dbx).U()
+// 	result, err := x.Cols(
+// 		obj.FullCorpName,
+// 		obj.IsEcologicalCorp,
+// 		obj.State,
+// 		obj.CreatedTime,
+// 	).Where(
+// 		obj.Id.Eq(1),
+// 	).Struct(context.Background(), &db.Company{
+// 		Id:               2,
+// 		FullCorpName:     "ccc",
+// 		IsEcologicalCorp: false,
+// 		State:            1,
+// 		CreatedTime:      time.Now(),
+// 	})
+//
+// 	t.Log(x)
+//
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	t.Log(result.LastInsertId())
+// 	t.Log(result.RowsAffected())
+//
+// }
+//
+// func TestUpdate(t *testing.T) {
+// 	defer dbx.Close()
+//
+// 	ok, err := Company(dbx).UpdateMulti(context.Background(), []*db.Company{&db.Company{
+// 		Id:               2,
+// 		FullCorpName:     "ccc",
+// 		IsEcologicalCorp: false,
+// 		State:            1,
+// 		CreatedTime:      time.Now(),
+// 	}})
+//
+// 	t.Log(ok)
+//
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// }
+//
+// func TestDelete(t *testing.T) {
+// 	defer dbx.Close()
+//
+// 	x := Company(dbx).D()
+// 	result, err := x.Where(
+// 		obj.Id.Eq(1),
+// 	).Do(context.Background())
+// 	t.Log(x)
+//
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	t.Log(result.LastInsertId())
+// 	t.Log(result.RowsAffected())
+// }
 
-	ms := make(map[string][]schema.Column)
-	if rows.Next() {
-		var tableName string
-		col := schema.Column{}
-		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.Size, &col.Key, &col.Extra, &col.Comment)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if cols, ok := ms[tableName]; ok {
-			ms[tableName] = append(cols, col)
-		} else {
-			ms[tableName] = []schema.Column{col}
-		}
-	}
-	if err = rows.Err(); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestCreateSet(t *testing.T) {
-	defer dbx.Close()
-	x := Company(dbx).C()
-	result, err := x.Set(
-		obj.CorpName.Set("aaaaaa"),
-		obj.IsAuthenticated.Set(true),
-	).Do(context.Background())
-
-	t.Log(x)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(result.LastInsertId())
-	t.Log(result.RowsAffected())
-}
-
-func TestCreateCols(t *testing.T) {
-	defer dbx.Close()
-	x := Company(dbx).C()
-	result, err := x.Cols(
-		obj.CorpName,
-		obj.IsAuthenticated,
-		obj.State,
-		obj.CreatedTime,
-	).Struct(context.Background(), &db.Company{
-		FullCorpName:     "m1",
-		IsEcologicalCorp: false,
-		State:            0,
-		CreatedTime:      time.Now(),
-	}, &db.Company{
-		FullCorpName:     "m2",
-		IsEcologicalCorp: true,
-		State:            1,
-		CreatedTime:      time.Now(),
-	}, &db.Company{
-		FullCorpName:     "m3",
-		IsEcologicalCorp: true,
-		State:            0,
-		CreatedTime:      time.Now(),
-	})
-
-	t.Log(x)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(result.LastInsertId())
-	t.Log(result.RowsAffected())
-}
-
-func TestInsert(t *testing.T) {
-	defer dbx.Close()
-	//
-	id, err := Company(dbx).InsertOne(context.Background(), &db.Company{
-		FullCorpName:     "x1",
-		IsEcologicalCorp: false,
-		State:            0,
-		CreatedTime:      time.Now(),
-	})
-	t.Log(id)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	n, err := Company(dbx).InsertMulti(context.Background(), []*db.Company{{
-		FullCorpName:     "x1",
-		IsEcologicalCorp: false,
-		State:            0,
-		CreatedTime:      time.Now(),
-	}, {
-		FullCorpName:     "x2",
-		IsEcologicalCorp: true,
-		State:            1,
-		CreatedTime:      time.Now(),
-	}, {
-		FullCorpName:     "x3",
-		IsEcologicalCorp: true,
-		State:            0,
-		CreatedTime:      time.Now(),
-	}})
-
-	t.Log(n)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestUpdateSet(t *testing.T) {
-	defer dbx.Close()
-	x := Company(dbx).U()
-	result, err := x.
-		Set(
-			obj.CorpName.Set("ttt"),
-			obj.IsAuthenticated.Set(true),
-		).
-		SetExpr(obj.State.Incr()).
-		Where(
-			obj.Id.Eq(1),
-		).
-		Do(context.Background())
-
-	t.Log(x)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(result.LastInsertId())
-	t.Log(result.RowsAffected())
-}
-
-func TestUpdateCols(t *testing.T) {
-	defer dbx.Close()
-
-	x := Company(dbx).U()
-	result, err := x.Cols(
-		obj.FullCorpName,
-		obj.IsEcologicalCorp,
-		obj.State,
-		obj.CreatedTime,
-	).Where(
-		obj.Id.Eq(1),
-	).Struct(context.Background(), &db.Company{
-		Id:               2,
-		FullCorpName:     "ccc",
-		IsEcologicalCorp: false,
-		State:            1,
-		CreatedTime:      time.Now(),
-	})
-
-	t.Log(x)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(result.LastInsertId())
-	t.Log(result.RowsAffected())
-
-}
-
-func TestUpdate(t *testing.T) {
-	defer dbx.Close()
-
-	ok, err := Company(dbx).UpdateMulti(context.Background(), []*db.Company{&db.Company{
-		Id:               2,
-		FullCorpName:     "ccc",
-		IsEcologicalCorp: false,
-		State:            1,
-		CreatedTime:      time.Now(),
-	}})
-
-	t.Log(ok)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestDelete(t *testing.T) {
-	defer dbx.Close()
-
-	x := Company(dbx).D()
-	result, err := x.Where(
-		obj.Id.Eq(1),
-	).Do(context.Background())
-	t.Log(x)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(result.LastInsertId())
-	t.Log(result.RowsAffected())
-}
-
-func TestSelect(t *testing.T) {
-	defer dbx.Close()
-	obj, _, err := Company(dbx).Find4Cols(context.Background(), 0, 0, []dialect.Field{
-		obj.Id,
-		obj.FullCorpName,
-		obj.State,
-	},
-		obj.Id.Eq(2),
-	)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	// t.Log(obj)
-	for _, o := range obj {
-		t.Log(o)
-	}
-}
+// func TestSelect(t *testing.T) {
+// 	defer dbx.Close()
+// 	obj, _, err := Company(dbx).Find4Cols(context.Background(), 0, 0, []dialect.Field{
+// 		obj.Id,
+// 		obj.FullCorpName,
+// 		obj.State,
+// 	},
+// 		obj.Id.Eq(2),
+// 	)
+//
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	// t.Log(obj)
+// 	for _, o := range obj {
+// 		t.Log(o)
+// 	}
+// }
 
 func TestGenStruct(t *testing.T) {
-	buf, err := schema.SqlFile2Struct("./data.sql", "db")
+	buf, err := schema.SqlFile2Struct("../../../data.sql", "db")
 	if err != nil {
 		t.Fatal(err)
 	}

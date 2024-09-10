@@ -8,7 +8,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kataras/iris/v12 v12.2.11
-	github.com/linbaozhong/sqlparser v0.0.1
+	github.com/linbaozhong/sqlparser v0.0.6
 	github.com/spf13/cobra v1.8.1
 	github.com/vetcher/go-astra v1.2.0
 	golang.org/x/tools v0.22.0

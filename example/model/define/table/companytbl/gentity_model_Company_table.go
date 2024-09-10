@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	Id               = dialect.Field{Name: "id", Table: "company", Type: "int64"}
+	Id               = dialect.Field{Name: "id", Table: "company", Type: "uint64"}
 	Platform         = dialect.Field{Name: "platform", Table: "company", Type: "string"}
 	CorpId           = dialect.Field{Name: "corp_id", Table: "company", Type: "string"}
 	CorpType         = dialect.Field{Name: "corp_type", Table: "company", Type: "int8"}
