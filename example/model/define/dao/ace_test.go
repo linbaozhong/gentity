@@ -23,6 +23,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/sqlparser"
 	"testing"
 	"time"
 )
@@ -51,10 +52,10 @@ func TestScheme(t *testing.T) {
 	}
 	defer rows.Close()
 
-	ms := make(map[string][]schema.Column)
+	ms := make(map[string][]sqlparser.Column)
 	if rows.Next() {
 		var tableName string
-		col := schema.Column{}
+		col := sqlparser.Column{}
 		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.Size, &col.Key, &col.Extra, &col.Comment)
 		if err != nil {
 			t.Fatal(err)
@@ -63,7 +64,7 @@ func TestScheme(t *testing.T) {
 		if cols, ok := ms[tableName]; ok {
 			ms[tableName] = append(cols, col)
 		} else {
-			ms[tableName] = []schema.Column{col}
+			ms[tableName] = []sqlparser.Column{col}
 		}
 	}
 	if err = rows.Err(); err != nil {
