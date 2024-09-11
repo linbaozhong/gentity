@@ -135,8 +135,10 @@ func Execute() {
 		path = "."
 	}
 
-	err := launch.Execute()
+	var err error
+
+	err = launch.Execute()
 	if err != nil {
-		panic(err)
+		showError(err)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"go/format"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -31,7 +32,13 @@ func sql2struct(driver, sqlPath, outputPath, packageName string) error {
 	if err != nil {
 		return err
 	}
-	_, err = f.Write(buf)
+
+	formatted, err := format.Source(buf)
+	if err != nil {
+		return err
+	}
+
+	_, err = f.Write(formatted)
 	if err != nil {
 		return err
 	}
@@ -65,13 +72,18 @@ func db2struct(driver, dns, outputPath, packageName string) error {
 		return err
 	}
 
+	formatted, err := format.Source(buf)
+	if err != nil {
+		return err
+	}
+
 	f, err := os.OpenFile(filepath.Join(outputPath, "gentity_model.go"), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	_, err = f.Write(buf)
+	_, err = f.Write(formatted)
 	if err != nil {
 		return err
 	}
