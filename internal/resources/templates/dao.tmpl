@@ -21,12 +21,12 @@ type {{.StructName}}Daoer interface {
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error)
-	// InsertMulti 批量插入多条数据,返回 RowsAffected
+	// InsertBatch 批量插入多条数据,返回 RowsAffected
 	// cols: 要插入的列名
-	InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error)
-	// UpdateMulti 批量更新多条数据
+	InsertBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error)
+	// UpdateBatch 批量更新多条数据
 	// cols: 要更新的列名
-	UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (bool, error)
+	UpdateBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Find 分页查询，返回一个slice
@@ -96,9 +96,9 @@ func (p *{{.TableName}}Dao) InsertOne(ctx context.Context, bean *{{.PackageName}
 	return result.LastInsertId()
 }
 
-// InsertMulti 批量插入,返回 RowsAffected
+// InsertBatch 批量插入,返回 RowsAffected
 // cols: 要插入的列名
-func (p *{{.TableName}}Dao) InsertMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error) {
+func (p *{{.TableName}}Dao) InsertBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error) {
 	lens := len(beans)
 	if lens == 0 {
 		return 0, atype.ErrBeanEmpty
@@ -128,9 +128,9 @@ func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []dialect.Setter, c
 	return n >= 0, err
 }
 
-// UpdateMulti
+// UpdateBatch
 // cols: 要更新的列名
-func (p *{{.TableName}}Dao) UpdateMulti(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (bool, error) {
+func (p *{{.TableName}}Dao) UpdateBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (bool, error) {
 	lens := len(beans)
 	if lens == 0 {
 		return false, atype.ErrBeanEmpty
