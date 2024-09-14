@@ -98,8 +98,15 @@ func (u *Updater) String() string {
 
 // Set
 func (u *Updater) Set(fns ...dialect.Setter) *Updater {
+	if len(fns) == 0 || u.err != nil {
+		return u
+	}
 	for _, fn := range fns {
 		s, val := fn()
+		if v, ok := val.(error); ok {
+			u.err = v
+			return u
+		}
 		u.cols = append(u.cols, s)
 		u.params = append(u.params, val)
 	}
@@ -107,8 +114,15 @@ func (u *Updater) Set(fns ...dialect.Setter) *Updater {
 }
 
 func (u *Updater) SetExpr(fns ...dialect.ExprSetter) *Updater {
+	if len(fns) == 0 || u.err != nil {
+		return u
+	}
 	for _, fn := range fns {
 		s, val := fn()
+		if v, ok := val.(error); ok {
+			u.err = v
+			return u
+		}
 		u.exprCols = append(u.exprCols, expr{colName: s, arg: val})
 	}
 	return u
@@ -116,7 +130,7 @@ func (u *Updater) SetExpr(fns ...dialect.ExprSetter) *Updater {
 
 // Where
 func (u *Updater) Where(fns ...dialect.Condition) *Updater {
-	if len(fns) == 0 {
+	if len(fns) == 0 || u.err != nil {
 		return u
 	}
 	if u.where.Len() == 0 {
@@ -129,6 +143,10 @@ func (u *Updater) Where(fns ...dialect.Condition) *Updater {
 			u.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			u.err = v
+			return u
+		}
 		u.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			u.whereParams = append(u.whereParams, vals...)
@@ -143,7 +161,7 @@ func (u *Updater) Where(fns ...dialect.Condition) *Updater {
 
 // And
 func (u *Updater) And(fns ...dialect.Condition) *Updater {
-	if len(fns) == 0 {
+	if len(fns) == 0 || u.err != nil {
 		return u
 	}
 
@@ -158,6 +176,10 @@ func (u *Updater) And(fns ...dialect.Condition) *Updater {
 			u.where.WriteString(types.Operator_or)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			u.err = v
+			return u
+		}
 		u.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			u.whereParams = append(u.whereParams, vals...)
@@ -171,7 +193,7 @@ func (u *Updater) And(fns ...dialect.Condition) *Updater {
 
 // Or
 func (u *Updater) Or(fns ...dialect.Condition) *Updater {
-	if len(fns) == 0 {
+	if len(fns) == 0 || u.err != nil {
 		return u
 	}
 
@@ -186,6 +208,10 @@ func (u *Updater) Or(fns ...dialect.Condition) *Updater {
 			u.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			u.err = v
+			return u
+		}
 		u.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			u.whereParams = append(u.whereParams, vals...)
