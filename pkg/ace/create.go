@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
@@ -34,6 +35,7 @@ type (
 		params        []any
 		command       strings.Builder
 		commandString strings.Builder
+		err           error
 	}
 )
 
@@ -41,6 +43,7 @@ var (
 	createPool = sync.Pool{
 		New: func() any {
 			obj := &Creator{}
+			obj.err = nil
 			return obj
 		},
 	}
@@ -48,11 +51,12 @@ var (
 
 // Creator
 func newCreate(db Executer, tableName string) *Creator {
-	if db == nil || tableName == "" {
-		panic("db or table is nil")
-		return nil
-	}
 	obj := createPool.Get().(*Creator)
+	if db == nil || tableName == "" {
+		obj.err = errors.New("db or table is nil")
+		// panic(obj.err)
+		return obj
+	}
 	obj.db = db
 	obj.table = tableName
 
@@ -104,6 +108,11 @@ func (c *Creator) Cols(cols ...dialect.Field) *Creator {
 // Do
 func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 	defer c.Free()
+
+	if c.err != nil {
+		return nil, c.err
+	}
+
 	lens := len(c.cols)
 	if lens == 0 {
 		return nil, types.ErrCreateEmpty
@@ -126,6 +135,10 @@ func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 // Struct
 func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
+
+	if c.err != nil {
+		return nil, c.err
+	}
 
 	lens := len(beans)
 	if lens == 0 || lens > 100 || beans[0] == nil {

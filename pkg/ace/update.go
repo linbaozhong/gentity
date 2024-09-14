@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
@@ -37,6 +38,7 @@ type (
 		whereParams   []interface{}
 		command       strings.Builder
 		commandString strings.Builder
+		err           error
 	}
 	expr struct {
 		colName string
@@ -48,6 +50,7 @@ var (
 	updatePool = sync.Pool{
 		New: func() any {
 			obj := &Updater{}
+			obj.err = nil
 			return obj
 		},
 	}
@@ -55,11 +58,12 @@ var (
 
 // Updater
 func NewUpdate(db Executer, tableName string) *Updater {
-	if db == nil || tableName == "" {
-		panic("db or table is nil")
-		return nil
-	}
 	obj := updatePool.Get().(*Updater)
+	if db == nil || tableName == "" {
+		obj.err = errors.New("db or table is nil")
+		// panic(obj.err)
+		return obj
+	}
 	obj.db = db
 	obj.table = tableName
 
@@ -204,6 +208,10 @@ func (u *Updater) Cols(cols ...dialect.Field) *Updater {
 func (u *Updater) Do(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
 
+	if u.err != nil {
+		return nil, u.err
+	}
+
 	lens := len(u.cols) + len(u.exprCols)
 	if lens == 0 {
 		return nil, types.ErrCreateEmpty
@@ -234,6 +242,10 @@ func (u *Updater) Do(ctx context.Context) (sql.Result, error) {
 // Struct
 func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
+
+	if u.err != nil {
+		return nil, u.err
+	}
 
 	lens := len(beans)
 	if lens == 0 {

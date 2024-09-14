@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
@@ -33,6 +34,7 @@ type (
 		whereParams   []interface{}
 		command       strings.Builder
 		commandString strings.Builder
+		err           error
 	}
 )
 
@@ -40,6 +42,7 @@ var (
 	deletePool = sync.Pool{
 		New: func() interface{} {
 			obj := &Deleter{}
+			obj.err = nil
 			return obj
 		},
 	}
@@ -47,11 +50,12 @@ var (
 
 // Deleter
 func newDelete(db Executer, tableName string) *Deleter {
-	if db == nil || tableName == "" {
-		panic("db or table is nil")
-		return nil
-	}
 	obj := deletePool.Get().(*Deleter)
+	if db == nil || tableName == "" {
+		obj.err = errors.New("db or table is nil")
+		// panic(obj.err)
+		return obj
+	}
 	obj.db = db
 	obj.table = tableName
 	return obj
@@ -165,6 +169,10 @@ func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
 // Do
 func (d *Deleter) Do(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
+
+	if d.err != nil {
+		return nil, d.err
+	}
 
 	d.command.WriteString("DELETE FROM " + dialect.Quote_Char + d.table + dialect.Quote_Char)
 	// WHERE

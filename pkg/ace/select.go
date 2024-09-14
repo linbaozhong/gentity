@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
@@ -44,6 +45,7 @@ type (
 		whereParams   []any
 		command       strings.Builder
 		commandString strings.Builder
+		err           error
 	}
 )
 
@@ -51,6 +53,7 @@ var (
 	selectPool = sync.Pool{
 		New: func() any {
 			obj := &Selector{}
+			obj.err = nil
 			return obj
 		},
 	}
@@ -58,11 +61,12 @@ var (
 
 // Selector
 func newSelect(db Executer, tableName string) *Selector {
-	if db == nil || tableName == "" {
-		panic("db or table is nil")
-		return nil
-	}
 	obj := selectPool.Get().(*Selector)
+	if db == nil || tableName == "" {
+		obj.err = errors.New("db or table is nil")
+		// panic(obj.err)
+		return obj
+	}
 	obj.db = db
 	obj.table = tableName
 
@@ -365,6 +369,11 @@ func (s *Selector) stmt() {
 // Query
 func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
+
+	if s.err != nil {
+		return nil, s.err
+	}
+
 	s.stmt()
 	s.whereParams = append(s.whereParams, s.havingParams...)
 	return s.db.QueryContext(ctx, s.command.String(), s.whereParams...)
@@ -373,6 +382,10 @@ func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 // Count
 func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
+
+	if s.err != nil {
+		return 0, s.err
+	}
 
 	s.Where(cond...)
 	s.command.WriteString("SELECT COUNT(*)")
@@ -402,6 +415,10 @@ func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64,
 // Sum
 func (s *Selector) Sum(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
+
+	if s.err != nil {
+		return 0, s.err
+	}
 
 	s.Funcs(col.Sum()).Where(cond...)
 	s.command.WriteString("SELECT ")
