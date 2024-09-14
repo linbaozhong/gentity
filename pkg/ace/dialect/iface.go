@@ -1,28 +1,26 @@
 package dialect
 
-import (
-	"context"
-)
+import "context"
 
 type (
-	Modeler[T BaseType] interface {
+	Modeler interface {
 		TableName() string
-		AssignValues(args ...Field[T]) ([]string, []any)
-		AssignKeys() ([]Field[T], []any)
+		AssignValues(args ...Field) ([]string, []any)
+		AssignKeys() ([]Field, []any)
 	}
 
-	Daoer[T BaseType] interface {
+	Daoer interface {
 		// Exists 是否存在符合条件的数据
-		Exists(ctx context.Context, cond ...Condition[T]) (bool, error)
+		Exists(ctx context.Context, cond ...Condition) (bool, error)
 		// Sum 获取指定列的总和
-		Sum(ctx context.Context, col Field[T], cond ...Condition[T]) (int64, error)
+		Sum(ctx context.Context, col Field, cond ...Condition) (int64, error)
 		// Count 获取符合条件的数据总数
-		Count(ctx context.Context, cond ...Condition[T]) (int64, error)
+		Count(ctx context.Context, cond ...Condition) (int64, error)
 		// Delete 删除符合条件的数据
-		Delete(ctx context.Context, cond ...Condition[T]) (bool, error)
+		Delete(ctx context.Context, cond ...Condition) (bool, error)
 		// Update 更新符合条件的数据
-		Update(ctx context.Context, sets []Setter[T], cond ...Condition[T]) (bool, error)
+		Update(ctx context.Context, sets []Setter, cond ...Condition) (bool, error)
 		// Insert 插入数据
-		Insert(ctx context.Context, sets ...Setter[T]) (int64, error)
+		Insert(ctx context.Context, sets ...Setter) (int64, error)
 	}
 )

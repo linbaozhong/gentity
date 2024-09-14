@@ -16,55 +16,50 @@ package dialect
 
 import (
 	"strings"
-	"time"
 )
 
 type (
-	// 基本数据类型
-	BaseType interface {
-		~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~float32 | ~float64 | string | ~bool | time.Time
-	}
-	Field[T BaseType] struct {
+	Field struct {
 		Name  string
 		Table string
 		Type  string
 	}
-	Function               func() string
-	Condition[T BaseType]  func() (string, any)
-	Setter[T BaseType]     func() (Field[T], T)
-	ExprSetter[T BaseType] func() (string, any)
+	Function   func() string
+	Condition  func() (string, any)
+	Setter     func() (Field, any)
+	ExprSetter func() (string, any)
 )
 
 // Quote 为字段添加引号
-func (f Field[T]) Quote() string {
+func (f Field) Quote() string {
 	return f.TableName() + "." + f.FieldName()
 }
 
 // TableName 为表名添加引号
-func (f Field[T]) TableName() string {
+func (f Field) TableName() string {
 	return Quote_Char + f.Table + Quote_Char
 }
 
 // FieldName 为字段名添加引号
-func (f Field[T]) FieldName() string {
+func (f Field) FieldName() string {
 	return Quote_Char + f.Name + Quote_Char
 }
 
 // Set 为字段设置值
-func (f Field[T]) Set(val T) Setter[T] {
-	return func() (Field[T], T) {
+func (f Field) Set(val any) Setter {
+	return func() (Field, any) {
 		return f, val
 	}
 }
 
 // Incr 自增
 // val 默认为1
-func (f Field[T]) Incr(val ...T) ExprSetter[T] {
-	var v T
+func (f Field) Incr(val ...any) ExprSetter {
+	var v any
 	if len(val) > 0 {
 		v = val[0]
 	} else {
-		v = T(1)
+		v = 1
 	}
 	return func() (string, any) {
 		return f.Quote() + " = " + f.Quote() + " + " + Placeholder, v
@@ -73,12 +68,12 @@ func (f Field[T]) Incr(val ...T) ExprSetter[T] {
 
 // Decr 自减
 // val 默认为1
-func (f Field[T]) Decr(val ...T) ExprSetter[T] {
-	var v T
+func (f Field) Decr(val ...any) ExprSetter {
+	var v any
 	if len(val) > 0 {
 		v = val[0]
 	} else {
-		v = T(1)
+		v = 1
 	}
 	return func() (string, any) {
 		return f.Quote() + " = " + f.Quote() + " - " + Placeholder, v
@@ -86,63 +81,63 @@ func (f Field[T]) Decr(val ...T) ExprSetter[T] {
 }
 
 // Replace 替换
-func (f Field[T]) Replace(old, new string) ExprSetter[T] {
+func (f Field) Replace(old, new string) ExprSetter {
 	return func() (string, any) {
 		return f.Quote() + " = REPLACE(" + f.Quote() + ",'" + old + "','" + new + "')", nil
 	}
 }
 
 // Expr 其它表达式
-func (f Field[T]) Expr(expr string) ExprSetter[T] {
+func (f Field) Expr(expr string) ExprSetter {
 	return func() (string, any) {
 		return f.Quote() + " = " + expr, nil
 	}
 }
 
 // Eq 等于
-func (f Field[T]) Eq(val T) Condition[T] {
+func (f Field) Eq(val any) Condition {
 	return func() (string, any) {
 		return f.Quote() + " = " + Placeholder, val
 	}
 }
 
 // NotEq 不等于
-func (f Field[T]) NotEq(val T) Condition[T] {
+func (f Field) NotEq(val any) Condition {
 	return func() (string, any) {
 		return f.Quote() + " != " + Placeholder, val
 	}
 }
 
 // Gt 大于
-func (f Field[T]) Gt(val T) Condition[T] {
+func (f Field) Gt(val any) Condition {
 	return func() (string, any) {
 		return f.Quote() + " > " + Placeholder, val
 	}
 }
 
 // Gte 大于或等于
-func (f Field[T]) Gte(val T) Condition[T] {
+func (f Field) Gte(val any) Condition {
 	return func() (string, any) {
 		return f.Quote() + " >= " + Placeholder, val
 	}
 }
 
 // Lt 小于
-func (f Field[T]) Lt(val T) Condition[T] {
+func (f Field) Lt(val any) Condition {
 	return func() (string, any) {
 		return f.Quote() + " < " + Placeholder, val
 	}
 }
 
 // Lte 小于或等于
-func (f Field[T]) Lte(val T) Condition[T] {
+func (f Field) Lte(val any) Condition {
 	return func() (string, any) {
 		return f.Quote() + " <= " + Placeholder, val
 	}
 }
 
 // In 包含
-func (f Field[T]) In(vals ...T) Condition[T] {
+func (f Field) In(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
 		return f.Quote() + " In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ") ", vals
@@ -150,7 +145,7 @@ func (f Field[T]) In(vals ...T) Condition[T] {
 }
 
 // NotIn 不包含
-func (f Field[T]) NotIn(vals ...T) Condition[T] {
+func (f Field) NotIn(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
 		return f.Quote() + " Not In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ") ", vals
@@ -158,49 +153,49 @@ func (f Field[T]) NotIn(vals ...T) Condition[T] {
 }
 
 // Between 在区间
-func (f Field[T]) Between(vals ...T) Condition[T] {
+func (f Field) Between(vals ...any) Condition {
 	return func() (string, any) {
 		return f.Quote() + " BETWEEN " + Placeholder + " AND " + Placeholder, vals
 	}
 }
 
 // Like 匹配
-func (f Field[T]) Like(val T) Condition[T] {
+func (f Field) Like(val any) Condition {
 	return func() (string, any) {
 		return "(" + f.Quote() + " LIKE CONCAT('%'," + Placeholder + ",'%'))", val
 	}
 }
 
 // Llike 左匹配
-func (f Field[T]) Llike(val T) Condition[T] {
+func (f Field) Llike(val any) Condition {
 	return func() (string, any) {
 		return "(" + f.Quote() + " LIKE CONCAT('%'," + Placeholder + "))", val
 	}
 }
 
 // Rlike 右匹配
-func (f Field[T]) Rlike(val T) Condition[T] {
+func (f Field) Rlike(val any) Condition {
 	return func() (string, any) {
 		return "(" + f.Quote() + " LIKE CONCAT(" + Placeholder + ",'%'))", val
 	}
 }
 
 // Null 为空
-func (f Field[T]) Null(val T) Condition[T] {
+func (f Field) Null(val any) Condition {
 	return func() (string, any) {
 		return " ISNULL(" + Placeholder + ")", val
 	}
 }
 
 // NotNull 不为空
-func (f Field[T]) NotNull(val T) Condition[T] {
+func (f Field) NotNull(val any) Condition {
 	return func() (string, any) {
 		return " NOT ISNULL(" + Placeholder + ")", val
 	}
 }
 
 // Sum 合计
-func (f Field[T]) Sum(as ...string) Function {
+func (f Field) Sum(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]
@@ -211,7 +206,7 @@ func (f Field[T]) Sum(as ...string) Function {
 }
 
 // Avg 平均
-func (f Field[T]) Avg(as ...string) Function {
+func (f Field) Avg(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]
@@ -222,7 +217,7 @@ func (f Field[T]) Avg(as ...string) Function {
 }
 
 // Count 计数
-func (f Field[T]) Count(as ...string) Function {
+func (f Field) Count(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]
@@ -233,7 +228,7 @@ func (f Field[T]) Count(as ...string) Function {
 }
 
 // Max 最大值
-func (f Field[T]) Max(as ...string) Function {
+func (f Field) Max(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]
@@ -244,7 +239,7 @@ func (f Field[T]) Max(as ...string) Function {
 }
 
 // Min 最小值
-func (f Field[T]) Min(as ...string) Function {
+func (f Field) Min(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]

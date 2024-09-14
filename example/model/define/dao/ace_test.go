@@ -138,7 +138,7 @@ func TestInsert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	n, err := Company(dbx).InsertMulti(context.Background(), []*db.Company{{
+	n, err := Company(dbx).InsertBatch(context.Background(), []*db.Company{{
 		FullCorpName:     "x1",
 		IsEcologicalCorp: false,
 		State:            0,
@@ -216,7 +216,7 @@ func TestUpdateCols(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	defer dbx.Close()
 
-	ok, err := Company(dbx).UpdateMulti(context.Background(), []*db.Company{&db.Company{
+	ok, err := Company(dbx).UpdateBatch(context.Background(), []*db.Company{&db.Company{
 		Id:               2,
 		FullCorpName:     "ccc",
 		IsEcologicalCorp: false,

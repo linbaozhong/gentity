@@ -26,11 +26,11 @@ import (
 )
 
 type (
-	Creator[T dialect.BaseType] struct {
+	Creator struct {
 		db            Executer
 		table         string
-		affect        []dialect.Field[T]
-		cols          []dialect.Field[T]
+		affect        []dialect.Field
+		cols          []dialect.Field
 		params        []any
 		command       strings.Builder
 		commandString strings.Builder
@@ -40,30 +40,26 @@ type (
 var (
 	createPool = sync.Pool{
 		New: func() any {
-			return newCreator()
+			obj := &Creator{}
+			return obj
 		},
 	}
 )
 
 // Creator
-func newCreator[T dialect.BaseType]() *Creator[T] {
-	return &Creator[T]{}
-}
-
-// Creator
-func newCreate[T dialect.BaseType](db Executer, tableName string) *Creator[T] {
+func newCreate(db Executer, tableName string) *Creator {
 	if db == nil || tableName == "" {
 		panic("db or table is nil")
 		return nil
 	}
-	obj := createPool.Get().(*Creator[T])
+	obj := createPool.Get().(*Creator)
 	obj.db = db
 	obj.table = tableName
 
 	return obj
 }
 
-func (c *Creator[T]) Free() {
+func (c *Creator) Free() {
 	if c == nil {
 		return
 	}
@@ -81,12 +77,12 @@ func (c *Creator[T]) Free() {
 	createPool.Put(c)
 }
 
-func (c *Creator[T]) String() string {
+func (c *Creator) String() string {
 	return c.commandString.String()
 }
 
 // Sets
-func (c *Creator[T]) Set(fns ...dialect.Setter[T]) *Creator[T] {
+func (c *Creator) Set(fns ...dialect.Setter) *Creator {
 	for _, fn := range fns {
 		if fn == nil {
 			continue
@@ -98,7 +94,7 @@ func (c *Creator[T]) Set(fns ...dialect.Setter[T]) *Creator[T] {
 	return c
 }
 
-func (c *Creator[T]) Cols(cols ...dialect.Field[T]) *Creator[T] {
+func (c *Creator) Cols(cols ...dialect.Field) *Creator {
 	for _, col := range cols {
 		c.affect = append(c.affect, col)
 	}
@@ -106,7 +102,7 @@ func (c *Creator[T]) Cols(cols ...dialect.Field[T]) *Creator[T] {
 }
 
 // Do
-func (c *Creator[T]) Do(ctx context.Context) (sql.Result, error) {
+func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 	defer c.Free()
 	lens := len(c.cols)
 	if lens == 0 {
@@ -128,7 +124,7 @@ func (c *Creator[T]) Do(ctx context.Context) (sql.Result, error) {
 }
 
 // Struct
-func (c *Creator[T]) Struct(ctx context.Context, beans ...dialect.Modeler[T]) (sql.Result, error) {
+func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
 
 	lens := len(beans)
