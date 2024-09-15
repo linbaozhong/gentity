@@ -241,6 +241,10 @@ func (u *Updater) Cols(cols ...dialect.Field) *Updater {
 func (u *Updater) Do(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
 
+	if u.err != nil {
+		return nil, u.err
+	}
+
 	lens := len(u.cols) + len(u.exprCols)
 	if lens == 0 {
 		return nil, types.ErrCreateEmpty
@@ -276,6 +280,10 @@ func (u *Updater) Do(ctx context.Context) (sql.Result, error) {
 // Struct
 func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
+
+	if u.err != nil {
+		return nil, u.err
+	}
 
 	lens := len(beans)
 	if lens == 0 {

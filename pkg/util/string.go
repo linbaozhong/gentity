@@ -43,20 +43,40 @@ func ParseField(fieldName string) string {
 	return upper.String()
 }
 
-func ParseFieldType(tp string, size int) string {
+func ParseFieldType(tp string, size int, unsigned bool) string {
 	switch strings.ToUpper(tp) {
 	case "INT":
+		if unsigned {
+			return "uint"
+		}
 		return "int"
-	case "VARCHAR":
+	case "BIGINT":
+		if unsigned {
+			return "uint64"
+		}
+		return "int64"
+	case "SMALLINT":
+		if unsigned {
+			return "uint32"
+		}
+		return "int32"
+	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT":
 		return "string"
 	case "TINYINT":
 		if size == 1 {
 			return "bool"
 		}
+		if unsigned {
+			return "uint8"
+		}
 		return "int8"
 	case "BIT":
 		return "bool"
-	case "TIMESTAMP", "DATETIME":
+	case "FLOAT":
+		return "float32"
+	case "DOUBLE":
+		return "float64"
+	case "TIMESTAMP", "DATETIME", "DATE", "TIME":
 		return "time.Time"
 	default:
 		return "any" // 对于未明确映射的类型，使用接口类型作为占位符

@@ -16,6 +16,7 @@ package handler
 
 import (
 	"bytes"
+	"github.com/linbaozhong/gentity/internal/resources"
 	"go/format"
 	"io"
 	"os"
@@ -62,7 +63,6 @@ func getBaseFilename(filename string) string {
 // }
 
 func (d *TempData) writeToModel(fileName string) error {
-	var buf bytes.Buffer
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
 		"getTypeValue": func(t []string) any {
@@ -140,43 +140,16 @@ func (d *TempData) writeToModel(fileName string) error {
 		// "marshal": JSONValue,
 	}
 
-	e := template.Must(template.New("tableTpl").Funcs(funcMap).Parse(model_str)).Execute(&buf, d)
-	if e != nil {
-		showError(e)
-		return e
-	}
+	fileName = filepath.Join(fullpath, "ace_"+getBaseFilename(fileName)+"_"+d.StructName+".go")
 
-	// absPath, _ := filepath.Abs(fileName)
-	fileName = fileName[:len(fileName)-3] + "_" + d.StructName + "_ace.go"
-	if fi, err := os.Stat(fileName); err == nil {
-		if !fi.IsDir() {
-			if err := os.Remove(fileName); err != nil {
-				showError(err.Error())
-				return err
-			}
+	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
+		tmpl := template.New("").Funcs(funcMap)
+		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/struct.tmpl")
+		if err != nil {
+			showError(err)
 		}
-	}
-
-	f, e := os.OpenFile(fileName, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-	if e != nil {
-		showError(e.Error())
-		return e
-	}
-	defer f.Close()
-
-	_, e = f.Write(buf.Bytes())
-	if e != nil {
-		showError(e)
-		return e
-	}
-
-	return nil
-}
-func (d *TempData) writeTo(w io.Writer) error {
-	funcMap := template.FuncMap{
-		"lower": strings.ToLower,
-	}
-	return template.Must(template.New("tableTpl").Funcs(funcMap).Parse(tableTpl)).Execute(w, d)
+		return tmpl.ExecuteTemplate(ioWriter, "struct.tmpl", d)
+	})
 }
 
 // writeTable 将生成好的模块文件写到本地
@@ -188,48 +161,18 @@ func (d *TempData) writeTable(parent string) error {
 	}
 
 	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_table.go") // d.tableFilename(parent)
-
-	if fi, err := os.Stat(fileName); err == nil {
-		if !fi.IsDir() {
-			if err := os.Remove(fileName); err != nil {
-				showError(err.Error())
-				return err
-			}
-		}
-	}
-
-	f, e := os.OpenFile(fileName, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-	if e != nil {
-		showError(e.Error())
-		return e
-	}
-	defer f.Close()
-
-	var buf bytes.Buffer
-	e = d.writeTo(&buf)
-	if e != nil {
-		showError(e.Error())
-		return e
-	}
-
-	formatted, e := format.Source(buf.Bytes())
-	if e != nil {
-		showError(e.Error())
-		return e
-	}
-	_, e = f.Write(formatted)
-	if e != nil {
-		showError(e.Error())
-		return e
-	}
-	return e
-}
-
-func (d *TempData) writeToBuild(w io.Writer) error {
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
 	}
-	return template.Must(template.New("buildTpl").Funcs(funcMap).Parse(buildTpl)).Execute(w, d)
+	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
+		tmpl := template.New("").Funcs(funcMap)
+		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/table.tmpl")
+		if err != nil {
+			showError(err)
+		}
+		return tmpl.ExecuteTemplate(ioWriter, "table.tmpl", d)
+	})
+
 }
 
 func (d *TempData) writeBuild(parent string) error {
@@ -241,38 +184,51 @@ func (d *TempData) writeBuild(parent string) error {
 
 	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_dao.go") // d.tableFilename(parent)
 
-	if fi, err := os.Stat(fileName); err == nil {
+	funcMap := template.FuncMap{
+		"lower": strings.ToLower,
+	}
+	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
+		tmpl := template.New("").Funcs(funcMap)
+		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/dao.tmpl")
+		if err != nil {
+			showError(err)
+		}
+		return tmpl.ExecuteTemplate(ioWriter, "dao.tmpl", d)
+	})
+}
+
+func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(ioWriter io.Writer, funcMap template.FuncMap) error) error {
+	if fi, err := os.Stat(fullFilename); err == nil {
 		if !fi.IsDir() {
-			if err := os.Remove(fileName); err != nil {
+			if err := os.Remove(fullFilename); err != nil {
 				showError(err.Error())
 				return err
 			}
 		}
 	}
 
-	f, e := os.OpenFile(fileName, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-	if e != nil {
-		showError(e.Error())
-		return e
+	f, err := os.OpenFile(fullFilename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+	if err != nil {
+		showError(err.Error())
+		return err
 	}
 	defer f.Close()
-
 	var buf bytes.Buffer
-	e = d.writeToBuild(&buf)
-	if e != nil {
-		showError(e.Error())
-		return e
+	err = fn(&buf, funcMap)
+	if err != nil {
+		showError(err.Error())
+		return err
 	}
 
-	formatted, e := format.Source(buf.Bytes())
-	if e != nil {
-		showError(e.Error())
-		return e
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		showError(err.Error())
+		return err
 	}
-	_, e = f.Write(formatted)
-	if e != nil {
-		showError(e.Error())
-		return e
+	_, err = f.Write(formatted)
+	if err != nil {
+		showError(err.Error())
+		return err
 	}
-	return e
+	return err
 }
