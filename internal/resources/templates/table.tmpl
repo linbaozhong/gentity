@@ -16,7 +16,7 @@ var (
 	// 主键
 	PrimaryKeys = []dialect.Field{
 	{{- range $key,$value := .Keys}}
-		{{$value}},
+		{{ index $value 0 }},
 	{{- end}}
 	}
 {{- end}}

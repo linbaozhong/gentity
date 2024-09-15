@@ -5,6 +5,7 @@ import "context"
 type (
 	Modeler interface {
 		TableName() string
+		AssignPtr(args ...Field) []any
 		AssignValues(args ...Field) ([]string, []any)
 		AssignKeys() ([]Field, []any)
 	}

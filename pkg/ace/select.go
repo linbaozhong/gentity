@@ -415,6 +415,25 @@ func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 	return stmt.QueryContext(ctx, s.whereParams...)
 }
 
+// QueryRow
+func (s *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	s.parse()
+	s.whereParams = append(s.whereParams, s.havingParams...)
+
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	return stmt.QueryRowContext(ctx, s.whereParams...), nil
+}
+
 // Count
 func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
@@ -437,20 +456,13 @@ func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64,
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.QueryContext(ctx, s.whereParams...)
+	row := stmt.QueryRowContext(ctx, s.whereParams...)
+	var count int64
+	err = row.Scan(&count)
 	if err != nil {
 		return 0, err
 	}
-	defer rows.Close()
-	if rows.Next() {
-		var count int64
-		err := rows.Scan(&count)
-		if err != nil {
-			return 0, err
-		}
-		return count, nil
-	}
-	return 0, nil
+	return count, nil
 }
 
 // Sum
@@ -476,18 +488,11 @@ func (s *Selector) Sum(ctx context.Context, col dialect.Field, cond ...dialect.C
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.QueryContext(ctx, s.whereParams...)
+	row := stmt.QueryRowContext(ctx, s.whereParams...)
+	var sum int64
+	err = row.Scan(&sum)
 	if err != nil {
 		return 0, err
 	}
-	defer rows.Close()
-	if rows.Next() {
-		var n int64
-		err := rows.Scan(&n)
-		if err != nil {
-			return 0, err
-		}
-		return n, nil
-	}
-	return 0, nil
+	return sum, nil
 }

@@ -3,7 +3,7 @@
 {{- $tablename := .TableName}}
 {{- $structName := .StructName}}
 {{- $structNameLower := lower .StructName}}
-{{- $keys := .Keys}}
+
 package {{.PackageName}}
 
 import (
@@ -45,6 +45,24 @@ func (p *{{.StructName}}) TableName() string {
 	return {{$structName}}TableName
 }
 
+func (p *{{.StructName}}) AssignPtr(args ...dialect.Field) ([]any) {
+	if len(args) == 0 {
+		args = {{$structNameLower}}tbl.ReadableFields
+	}
+
+    vals := make([]any, 0, len(args))
+    for _, col := range args {
+        switch col {
+        {{- range $key, $value := .Columns}}
+        case {{$structNameLower}}tbl.{{ index $value 0 }}:
+            vals = append(vals, &p.{{ index $value 0 }})
+        {{- end}}
+        }
+    }
+
+	return vals
+}
+
 func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]*{{.StructName}}, bool, error) {
 	defer rows.Close()
 	{{.TableName}}s := make([]*{{.StructName}}, 0)
@@ -55,15 +73,7 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]*{{.Str
 
 	for rows.Next() {
 		p := New{{.StructName}}()
-		vals := make([]any, 0, len(args))
-		for _, col := range args {
-			switch col {
-			{{- range $key, $value := .Columns}}
-			case {{$structNameLower}}tbl.{{ index $value 0 }}:
-				vals = append(vals, &p.{{ index $value 0 }})
-			{{- end}}
-			}
-		}
+		vals := p.AssignPtr(args...)
 		err := rows.Scan(vals...)
 		if err != nil {
 			return nil, false, err
@@ -124,7 +134,7 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 func (p *{{.StructName}}) AssignKeys() ([]dialect.Field, []any) {
 	return {{$structNameLower}}tbl.PrimaryKeys, []any{
 	{{- range $key,$value := .Keys}}
-		p.{{$value}},
+		p.{{index $value 0}},
 	{{- end}}
 	}
 }

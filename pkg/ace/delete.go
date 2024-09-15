@@ -184,8 +184,8 @@ func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
 	return d
 }
 
-// Do
-func (d *Deleter) Do(ctx context.Context) (sql.Result, error) {
+// Exec
+func (d *Deleter) Exec(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
 
 	if d.err != nil {

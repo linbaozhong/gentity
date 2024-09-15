@@ -237,8 +237,8 @@ func (u *Updater) Cols(cols ...dialect.Field) *Updater {
 	return u
 }
 
-// Do
-func (u *Updater) Do(ctx context.Context) (sql.Result, error) {
+// Exec
+func (u *Updater) Exec(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
 
 	if u.err != nil {
@@ -291,14 +291,14 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	}
 
 	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
-	cols, params := beans[0].AssignValues(u.affect...)
+	cols, vals := beans[0].AssignValues(u.affect...)
 	for i, col := range cols {
 		if i > 0 {
 			u.command.WriteString(",")
 		}
 		u.command.WriteString(col + " = ?")
 	}
-	u.params = append(u.params, params...)
+	u.params = append(u.params, vals...)
 	//
 	keys, values := beans[0].AssignKeys()
 	for i := 0; i < len(keys); i++ {
@@ -332,9 +332,9 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 		if bean == nil {
 			return nil, types.ErrBeanEmpty
 		}
-		_, params = bean.AssignValues(u.affect...)
+		_, vals = bean.AssignValues(u.affect...)
 		u.params = u.params[:]
-		u.params = append(u.params, params...)
+		u.params = append(u.params, vals...)
 		//
 		_, values = bean.AssignKeys()
 		u.params = append(u.params, values...)

@@ -38,7 +38,7 @@ type TempData struct {
 	CacheList   string // list缓存时长
 	CacheLimit  string // list缓存长度
 	Columns     [][]string
-	Keys        []string
+	Keys        [][]string
 	// PrimaryKey     []string
 	// PrimaryKeyName string // struct pk属性名
 	HasPrimaryKey bool

@@ -8,6 +8,7 @@ package dao
 
 import (
 	"context"
+	"database/sql"
 	"{{.ModulePath}}/{{.PackageName}}"
 	"{{.ModulePath}}/define/table/{{$structNameLower}}tbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
@@ -34,13 +35,13 @@ type {{.StructName}}Daoer interface {
 	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, bool, error)
+	GetByID(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any, cols ...dialect.Field) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...dialect.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
-	// GetSingle 按条件读取第一行的第一个字段
-	GetSingle(ctx context.Context,col dialect.Field, cond ...dialect.Condition) (any, error)
+	// GetFirstCell 按条件读取第一行的第一个字段
+	GetFirstCell(ctx context.Context,col dialect.Field, cond ...dialect.Condition) (any, bool, error)
 	//
-	IDs(ctx context.Context, cond ...dialect.Condition) ([]int64, error)
+	IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error)
 	//
 	Columns(ctx context.Context, col dialect.Field, cond ...dialect.Condition) ([]any, error)
 }
@@ -79,7 +80,7 @@ func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets ...dialect.Setter) 
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
-	result, err := p.C().Set(sets...).Do(ctx)
+	result, err := p.C().Set(sets...).Exec(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -120,7 +121,7 @@ func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []dialect.Setter, c
 	if len(sets) == 0 {
 		return false, atype.ErrSetterEmpty
 	}
-	result, err := p.U().Where(cond...).Set(sets...).Do(ctx)
+	result, err := p.U().Where(cond...).Set(sets...).Exec(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -149,7 +150,7 @@ func (p *{{.TableName}}Dao) UpdateBatch(ctx context.Context, beans []*{{.Package
 
 // Delete
 func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	result, err := p.D().Where(cond...).Do(ctx)
+	result, err := p.D().Where(cond...).Exec(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -166,24 +167,23 @@ func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []dialect.Field, 
 		c.Cols(cols...)
 	}
 
-	rows, err := c.Where(cond...).Limit(1).Query(ctx)
+	row, err := c.Where(cond...).QueryRow(ctx)
 	if err != nil {
 		return nil, false, err
 	}
-	defer rows.Close()
 
 	obj := {{.PackageName}}.New{{.StructName}}()
 	defer obj.Free()
 
-	objs, has, err := obj.Scan(rows, cols...)
-	if err != nil {
-		return nil, false, err
+	err = row.Scan(obj.AssignPtr(cols...)...)
+	switch err {
+	case sql.ErrNoRows:
+		return nil,false, nil
+	case nil:
+		return obj,true, nil
+	default:
+		return nil,false, err
 	}
-	if has {
-		return objs[0], true, nil
-	}
-
-	return nil, false, atype.ErrNotFound
 }
 //
 // Find4Cols
@@ -216,18 +216,9 @@ func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize u
 }
 
 // GetByID Read one {{.TableName}} By Primary Key value,
-// Pass values in this order：{{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$value}}{{ end}}
-func (p *{{.TableName}}Dao) GetByID(ctx context.Context, args ...any) (*{{.PackageName}}.{{.StructName}}, bool, error) {
-	lens := len({{$structNameLower}}tbl.PrimaryKeys)
-	if lens != len(args) {
-		return nil, false, atype.ErrArgsNotMatch
-	}
-
-	cond := make([]dialect.Condition, 0, lens)
-	for i, key := range {{$structNameLower}}tbl.PrimaryKeys {
-		cond = append(cond, key.Eq(args[i]))
-	}
-	return p.Get4Cols(ctx, []dialect.Field{}, cond...)
+// Pass values in this order：{{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}}
+func (p *{{.TableName}}Dao) GetByID(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any, cols ...dialect.Field) (*{{.PackageName}}.{{.StructName}}, bool, error) {
+	return p.Get4Cols(ctx, cols, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}.Eq({{index $value 1}}){{ end}})
 }
 
 // Get Read one {{.TableName}}
@@ -235,23 +226,24 @@ func (p *{{.TableName}}Dao) Get(ctx context.Context, cond ...dialect.Condition) 
 	return p.Get4Cols(ctx, []dialect.Field{}, cond...)
 }
 
-// GetSingle Read the first column of the first row
-func (p *{{.TableName}}Dao) GetSingle(ctx context.Context,col dialect.Field, cond ...dialect.Condition) (any, error) {
+// GetFirstCell Read the first column of the first row
+func (p *{{.TableName}}Dao) GetFirstCell(ctx context.Context,col dialect.Field, cond ...dialect.Condition) (any, bool, error) {
 	c := p.R().Cols(col)
-	rows, err := c.Where(cond...).Limit(atype.MaxLimit).Query(ctx)
+	row, err := c.Where(cond...).QueryRow(ctx)
 	if err != nil {
-		return nil, err
+		return nil,false, err
 	}
-	defer rows.Close()
 
 	var v any
-	if rows.Next() {
-		if err = rows.Scan(&v); err != nil {
-			return nil, err
-		}
-	}
-
-	return v, rows.Err()
+	err = row.Scan(&v)
+	switch err {
+    case sql.ErrNoRows:
+        return nil,false,nil
+    case nil:
+        return v,true,nil
+    default:
+        return nil,false,err
+    }
 }
 
 // Find
@@ -261,24 +253,23 @@ func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, 
 
 
 // IDs
-func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...dialect.Condition) ([]int64, error) {
-	if len({{$structNameLower}}tbl.PrimaryKeys) == 0 {
-		return nil, atype.ErrPrimaryKeyNotMatch
-	}
-	c := p.R().Cols({{$structNameLower}}tbl.PrimaryKeys[0])
+func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
+	c := p.R().Cols({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}{{ end}})
 	rows, err := c.Where(cond...).Limit(atype.MaxLimit).Query(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	ids := make([]int64, atype.PageSize)
+	ids := make([]any, 0, atype.PageSize)
 	for rows.Next() {
-		var id int64
-		if err = rows.Scan(&id); err != nil {
+	{{- range $key,$value := .Keys}}
+	    var {{ index $value 1 }} {{index $value 2}}
+	{{- end}}
+		if err = rows.Scan({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}&{{index $value 1}}{{ end}}); err != nil {
 			return nil, err
 		}
-		ids = append(ids, id)
+		ids = append(ids, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}})
 	}
 
 	return ids, rows.Err()
@@ -293,7 +284,7 @@ func (p *{{.TableName}}Dao) Columns(ctx context.Context, col dialect.Field, cond
 	}
 	defer rows.Close()
 
-	cols := make([]any, atype.PageSize)
+	cols := make([]any, 0, atype.PageSize)
 	for rows.Next() {
 		var v any
 		if err = rows.Scan(&v); err != nil {
@@ -316,14 +307,22 @@ func (p *{{.TableName}}Dao) Sum(ctx context.Context, col dialect.Field, cond ...
 
 // Exists
 func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	if len({{$structNameLower}}tbl.PrimaryKeys) == 0 {
-		return false, atype.ErrPrimaryKeyNotMatch
-	}
-	c := p.R().Cols({{$structNameLower}}tbl.PrimaryKeys[0]).Where(cond...).Limit(1)
-	rows, err := c.Query(ctx)
-	if err != nil {
-		return false, err
-	}
-	defer rows.Close()
-	return rows.Next(), rows.Err()
+	c := p.R().Cols({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}{{ end}}).Where(cond...)
+	row, err := c.QueryRow(ctx)
+    if err != nil {
+        return false, err
+    }
+
+	{{- range $key,$value := .Keys}}
+	var {{ index $value 1 }} {{index $value 2}}
+	{{- end}}
+    err = row.Scan({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}&{{index $value 1}}{{ end}})
+    switch err {
+    case sql.ErrNoRows:
+        return false, nil
+    case nil:
+        return true, nil
+    default:
+        return false, err
+    }
 }

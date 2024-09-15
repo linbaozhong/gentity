@@ -78,7 +78,7 @@ func TestCreateSet(t *testing.T) {
 	result, err := x.Set(
 		obj.CorpName.Set("aaaaaa"),
 		obj.IsAuthenticated.Set(true),
-	).Do(context.Background())
+	).Exec(context.Background())
 
 	t.Log(x)
 
@@ -174,7 +174,7 @@ func TestUpdateSet(t *testing.T) {
 		Where(
 			obj.Id.Eq(1),
 		).
-		Do(context.Background())
+		Exec(context.Background())
 
 	t.Log(x)
 	if err != nil {
@@ -237,7 +237,7 @@ func TestDelete(t *testing.T) {
 	x := Company(dbx).D()
 	result, err := x.Where(
 		obj.Id.Eq(1),
-	).Do(context.Background())
+	).Exec(context.Background())
 	t.Log(x)
 
 	if err != nil {

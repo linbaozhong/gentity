@@ -117,8 +117,8 @@ func (c *Creator) Cols(cols ...dialect.Field) *Creator {
 	return c
 }
 
-// Do
-func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
+// Exec
+func (c *Creator) Exec(ctx context.Context) (sql.Result, error) {
 	defer c.Free()
 
 	if c.err != nil {
