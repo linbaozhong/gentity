@@ -10,7 +10,7 @@ var (
 	JSON = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
-type Smap map[string]interface{}
+type Smap map[string]any
 
 func NewSmap(size ...int) Smap {
 	if len(size) > 0 {
@@ -20,7 +20,7 @@ func NewSmap(size ...int) Smap {
 }
 
 func (p Smap) MarshalJSON() ([]byte, error) {
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	for k, v := range p {
 		if vv, ok := v.(ID); ok {
 			m[k] = vv.String()
@@ -43,9 +43,9 @@ func (p Smap) MarshalJSON() ([]byte, error) {
 	return JSON.Marshal(m)
 }
 
-func (p Smap) ConvertFrom(m map[string]interface{}) Smap {
+func (p Smap) ConvertFrom(m map[string]any) Smap {
 	for k, v := range m {
-		if vv, ok := v.(map[string]interface{}); ok {
+		if vv, ok := v.(map[string]any); ok {
 			sm := Smap(vv)
 			p[k] = sm
 			sm.ConvertFrom(vv)
@@ -56,12 +56,12 @@ func (p Smap) ConvertFrom(m map[string]interface{}) Smap {
 	return p
 }
 
-func (p Smap) Set(k string, v interface{}) Smap {
+func (p Smap) Set(k string, v any) Smap {
 	p[k] = v
 	return p
 }
 
-func (p Smap) Get(k string) interface{} {
+func (p Smap) Get(k string) any {
 	return p[k]
 }
 

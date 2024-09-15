@@ -188,7 +188,7 @@ func String2Time(s string, def ...time.Time) time.Time {
 	return time.Time{}
 }
 
-func Interface2Time(s interface{}, def ...time.Time) time.Time {
+func Interface2Time(s any, def ...time.Time) time.Time {
 	if b, ok := s.(time.Time); ok {
 		return b
 	}
@@ -198,7 +198,7 @@ func Interface2Time(s interface{}, def ...time.Time) time.Time {
 	return time.Time{}
 }
 
-func Interface2Int(s interface{}, def ...int) int {
+func Interface2Int(s any, def ...int) int {
 	switch v := s.(type) {
 	case uint64:
 		return int(v)
@@ -230,7 +230,7 @@ func Interface2Int(s interface{}, def ...int) int {
 	}
 }
 
-func Interface2Uint8(s interface{}, def ...uint8) uint8 {
+func Interface2Uint8(s any, def ...uint8) uint8 {
 	switch v := s.(type) {
 	case uint64:
 		return uint8(v)
@@ -261,7 +261,7 @@ func Interface2Uint8(s interface{}, def ...uint8) uint8 {
 		return 0
 	}
 }
-func Interface2Uint(s interface{}, def ...uint) uint {
+func Interface2Uint(s any, def ...uint) uint {
 	switch v := s.(type) {
 	case uint64:
 		return uint(v)
@@ -293,7 +293,7 @@ func Interface2Uint(s interface{}, def ...uint) uint {
 	}
 }
 
-func Interface2Uint32(s interface{}, def ...uint32) uint32 {
+func Interface2Uint32(s any, def ...uint32) uint32 {
 	switch v := s.(type) {
 	case uint64:
 		return uint32(v)
@@ -325,7 +325,7 @@ func Interface2Uint32(s interface{}, def ...uint32) uint32 {
 	}
 }
 
-func Interface2Int64(s interface{}, def ...int64) int64 {
+func Interface2Int64(s any, def ...int64) int64 {
 	if b, ok := s.(int64); ok {
 		return b
 	}
@@ -358,7 +358,7 @@ func Interface2Int64(s interface{}, def ...int64) int64 {
 	}
 }
 
-func Interface2Uint64(s interface{}, def ...uint64) uint64 {
+func Interface2Uint64(s any, def ...uint64) uint64 {
 	switch v := s.(type) {
 	case uint64:
 		return v
@@ -390,7 +390,7 @@ func Interface2Uint64(s interface{}, def ...uint64) uint64 {
 	}
 }
 
-func Interface2Int8(s interface{}, def ...int8) int8 {
+func Interface2Int8(s any, def ...int8) int8 {
 	switch v := s.(type) {
 	case uint64:
 		return int8(v)
@@ -421,7 +421,7 @@ func Interface2Int8(s interface{}, def ...int8) int8 {
 		return 0
 	}
 }
-func Interface2Int16(s interface{}, def ...int16) int16 {
+func Interface2Int16(s any, def ...int16) int16 {
 	if b, ok := s.(int16); ok {
 		return b
 	}
@@ -430,7 +430,7 @@ func Interface2Int16(s interface{}, def ...int16) int16 {
 	}
 	return 0
 }
-func Interface2String(s interface{}) string {
+func Interface2String(s any) string {
 	switch v := s.(type) {
 	case string:
 		return v
@@ -476,8 +476,8 @@ func Interface2String(s interface{}) string {
 	}
 }
 
-// Interface2StringSlice interface{}转[]string
-func Interface2StringSlice(s interface{}, def ...[]string) []string {
+// Interface2StringSlice any转[]string
+func Interface2StringSlice(s any, def ...[]string) []string {
 	if b, ok := s.([]string); ok {
 		return b
 	}
@@ -487,8 +487,8 @@ func Interface2StringSlice(s interface{}, def ...[]string) []string {
 	return []string{}
 }
 
-// Interface2IntSlice interface{}转[]int
-func Interface2IntSlice(s interface{}, def ...[]int) []int {
+// Interface2IntSlice any转[]int
+func Interface2IntSlice(s any, def ...[]int) []int {
 	if b, ok := s.([]int); ok {
 		return b
 	}
@@ -498,15 +498,15 @@ func Interface2IntSlice(s interface{}, def ...[]int) []int {
 	return []int{}
 }
 
-// Interface2StringMap interface{}转map[string]interface{}
-func Interface2StringMap(s interface{}, def ...map[string]interface{}) map[string]interface{} {
-	if b, ok := s.(map[string]interface{}); ok {
+// Interface2StringMap any转map[string]any
+func Interface2StringMap(s any, def ...map[string]any) map[string]any {
+	if b, ok := s.(map[string]any); ok {
 		return b
 	}
 	if len(def) > 0 {
 		return def[0]
 	}
-	return map[string]interface{}{}
+	return map[string]any{}
 }
 
 // IntToFloat64 IntToFloat64

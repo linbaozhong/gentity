@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
@@ -34,6 +35,7 @@ type (
 		params        []any
 		command       strings.Builder
 		commandString strings.Builder
+		err           error
 	}
 )
 
@@ -48,13 +50,15 @@ var (
 
 // Creator
 func newCreate(db Executer, tableName string) *Creator {
-	if db == nil || tableName == "" {
-		panic("db or table is nil")
-		return nil
-	}
 	obj := createPool.Get().(*Creator)
+	if db == nil || tableName == "" {
+		obj.err = errors.New("db or table is nil")
+		return obj
+	}
 	obj.db = db
 	obj.table = tableName
+	obj.err = nil
+	obj.commandString.Reset()
 
 	return obj
 }
@@ -63,7 +67,7 @@ func (c *Creator) Free() {
 	if c == nil {
 		return
 	}
-	c.commandString.Reset()
+
 	c.commandString.WriteString(fmt.Sprintf("%s  %v", c.command.String(), c.params))
 
 	if c.db.Debug() {
@@ -74,20 +78,32 @@ func (c *Creator) Free() {
 	c.cols = c.cols[:]
 	c.command.Reset()
 	c.params = c.params[:]
+
 	createPool.Put(c)
 }
 
 func (c *Creator) String() string {
-	return c.commandString.String()
+	if c.table == "" {
+		return c.commandString.String()
+	}
+	return fmt.Sprintf("%s  %v", c.command.String(), c.params)
 }
 
 // Sets
 func (c *Creator) Set(fns ...dialect.Setter) *Creator {
+	if len(fns) == 0 || c.err != nil {
+		return c
+	}
+
 	for _, fn := range fns {
 		if fn == nil {
 			continue
 		}
 		s, val := fn()
+		if v, ok := val.(error); ok {
+			c.err = v
+			return c
+		}
 		c.cols = append(c.cols, s)
 		c.params = append(c.params, val)
 	}
@@ -104,6 +120,11 @@ func (c *Creator) Cols(cols ...dialect.Field) *Creator {
 // Do
 func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 	defer c.Free()
+
+	if c.err != nil {
+		return nil, c.err
+	}
+
 	lens := len(c.cols)
 	if lens == 0 {
 		return nil, types.ErrCreateEmpty
@@ -119,16 +140,27 @@ func (c *Creator) Do(ctx context.Context) (sql.Result, error) {
 	c.command.WriteString(") VALUES ")
 	c.command.WriteString("(" + strings.Repeat("?,", lens)[:lens*2-1] + ")")
 
+	stmt, err := c.db.PrepareContext(ctx, c.command.String())
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
 	// fmt.Println(c.command.String(), c.params)
-	return c.db.ExecContext(ctx, c.command.String(), c.params...)
+	//return c.db.ExecContext(ctx, c.command.String(), c.params...)
+	return stmt.ExecContext(ctx, c.params...)
 }
 
 // Struct
 func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
 
+	if c.err != nil {
+		return nil, c.err
+	}
+
 	lens := len(beans)
-	if lens == 0 || lens > 100 || beans[0] == nil {
+	if lens == 0 {
 		return nil, types.ErrBeanEmpty
 	}
 
@@ -138,19 +170,46 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
-	c.params = append(c.params, _vals...)
+	//c.params = append(c.params, _vals...)
 	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
+
+	//
+	tx, err := c.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	stmt, err := tx.PrepareContext(ctx, c.command.String())
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	c.params = _vals
+	result, err := stmt.ExecContext(ctx, _vals...)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
 	for i := 1; i < lens; i++ {
 		bean := beans[i]
 		if bean == nil {
 			return nil, types.ErrBeanEmpty
 		}
-		c.command.WriteString(",")
+		//c.command.WriteString(",")
 		_, _vals = bean.AssignValues(c.affect...)
-		c.params = append(c.params, _vals...)
-		c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
+		//c.params = append(c.params, _vals...)
+		//c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
+		c.params = _vals
+		result, err = stmt.ExecContext(ctx, _vals...)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
 	}
+	err = tx.Commit()
 	// fmt.Println(c.command.String(), c.params)
-	return c.db.ExecContext(ctx, c.command.String(), c.params...)
+	//return c.db.ExecContext(ctx, c.command.String(), c.params...)
+	return result, err
 }

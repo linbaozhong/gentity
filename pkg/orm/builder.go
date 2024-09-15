@@ -45,14 +45,14 @@ type (
 	// expr represents an SQL express
 	expr struct {
 		colName string
-		arg     interface{}
+		arg     any
 	}
 
 	Creator struct {
 		db      ExtContext
 		object  Modeler
 		cols    []string
-		params  []interface{}
+		params  []any
 		command strings.Builder
 	}
 	Selector struct {
@@ -61,35 +61,35 @@ type (
 		join         [][3]string
 		distinct     bool
 		cols         []string
-		omit         []interface{}
+		omit         []any
 		groupBy      strings.Builder
 		having       strings.Builder
-		havingParams []interface{}
+		havingParams []any
 		orderBy      strings.Builder
 		limit        string
 		limitSize    int
 		limitStart   int
 		where        strings.Builder
-		whereParams  []interface{}
+		whereParams  []any
 		command      strings.Builder
 	}
 	Updater struct {
 		db     ExtContext
 		object Modeler
 		cols   []string
-		params []interface{}
+		params []any
 		// incrCols    []expr
 		// decrCols    []expr
 		exprCols    []expr
 		where       strings.Builder
-		whereParams []interface{}
+		whereParams []any
 		command     strings.Builder
 	}
 	Deleter struct {
 		db          ExtContext
 		object      Modeler
 		where       strings.Builder
-		whereParams []interface{}
+		whereParams []any
 		command     strings.Builder
 	}
 )
@@ -114,7 +114,7 @@ var (
 		},
 	}
 	deletePool = sync.Pool{
-		New: func() interface{} {
+		New: func() any {
 			obj := &Deleter{}
 			return obj
 		},

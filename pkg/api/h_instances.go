@@ -1,7 +1,7 @@
 package api
 
 var (
-	Instances = make([]interface{}, 0)
+	Instances = make([]any, 0)
 )
 
 type IRegisterRouter interface {

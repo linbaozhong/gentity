@@ -28,7 +28,7 @@ func parseFile(parent, filename, pkgPath string) error {
 	tempData.ModulePath = pkgPath
 
 	fset := token.NewFileSet()
-	var src interface{}
+	var src any
 	f, err := parser.ParseFile(fset, filename, src, parser.ParseComments)
 	if err != nil {
 		showError(err)

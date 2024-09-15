@@ -10,14 +10,14 @@ import (
 
 // JsonResult API响应数据结构
 type JsonResult struct {
-	Code    int         `json:"code"`
-	Data    interface{} `json:"data"`
-	Message string      `json:"msg"`
-	Info    string      `json:"info"` // dev消息
+	Code    int    `json:"code"`
+	Data    any    `json:"data"`
+	Message string `json:"msg"`
+	Info    string `json:"info"` // dev消息
 }
 
 var resultPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return &JsonResult{
 			Data: []int{},
 		}
@@ -56,7 +56,7 @@ func (j *JsonResult) Free() {
 // 	return j
 // }
 //
-// func (j *JsonResult) SetData(d interface{}) *JsonResult {
+// func (j *JsonResult) SetData(d any) *JsonResult {
 // 	j.Data = d
 // 	return j
 // }

@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
@@ -44,6 +45,7 @@ type (
 		whereParams   []any
 		command       strings.Builder
 		commandString strings.Builder
+		err           error
 	}
 )
 
@@ -58,13 +60,15 @@ var (
 
 // Selector
 func newSelect(db Executer, tableName string) *Selector {
-	if db == nil || tableName == "" {
-		panic("db or table is nil")
-		return nil
-	}
 	obj := selectPool.Get().(*Selector)
+	if db == nil || tableName == "" {
+		obj.err = errors.New("db or table is nil")
+		return obj
+	}
 	obj.db = db
 	obj.table = tableName
+	obj.err = nil
+	obj.commandString.Reset()
 
 	return obj
 }
@@ -73,7 +77,7 @@ func (s *Selector) Free() {
 	if s == nil {
 		return
 	}
-	s.commandString.Reset()
+
 	s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.whereParams))
 
 	if s.db.Debug() {
@@ -93,11 +97,15 @@ func (s *Selector) Free() {
 	s.orderBy.Reset()
 	s.limit = ""
 	s.command.Reset()
+
 	selectPool.Put(s)
 }
 
 func (s *Selector) String() string {
-	return s.commandString.String()
+	if s.table == "" {
+		return s.commandString.String()
+	}
+	return fmt.Sprintf("%s  %v", s.command.String(), s.whereParams)
 }
 
 // distinct
@@ -128,10 +136,19 @@ func (s *Selector) Funcs(fns ...dialect.Function) *Selector {
 
 // join
 func (s *Selector) Join(joinType types.JoinType, left, right dialect.Field, fns ...dialect.Condition) *Selector {
+	if s.err != nil {
+		return s
+	}
+
 	var on strings.Builder
 	for _, fn := range fns {
 		on.WriteString(types.Operator_and)
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			s.err = v
+			return s
+		}
+
 		on.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -156,9 +173,10 @@ func (s *Selector) RightJoin(left, right dialect.Field, fns ...dialect.Condition
 
 // Where
 func (s *Selector) Where(fns ...dialect.Condition) *Selector {
-	if len(fns) == 0 {
+	if len(fns) == 0 || s.err != nil {
 		return s
 	}
+
 	if s.where.Len() == 0 {
 		s.where.WriteString("(")
 	} else {
@@ -169,6 +187,11 @@ func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 			s.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			s.err = v
+			return s
+		}
+
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -183,7 +206,7 @@ func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 
 // And
 func (s *Selector) And(fns ...dialect.Condition) *Selector {
-	if len(fns) == 0 {
+	if len(fns) == 0 || s.err != nil {
 		return s
 	}
 
@@ -198,6 +221,11 @@ func (s *Selector) And(fns ...dialect.Condition) *Selector {
 			s.where.WriteString(types.Operator_or)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			s.err = v
+			return s
+		}
+
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -211,7 +239,7 @@ func (s *Selector) And(fns ...dialect.Condition) *Selector {
 
 // Or
 func (s *Selector) Or(fns ...dialect.Condition) *Selector {
-	if len(fns) == 0 {
+	if len(fns) == 0 || s.err != nil {
 		return s
 	}
 
@@ -226,6 +254,11 @@ func (s *Selector) Or(fns ...dialect.Condition) *Selector {
 			s.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			s.err = v
+			return s
+		}
+
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -286,15 +319,21 @@ func (s *Selector) Group(cols ...dialect.Field) *Selector {
 
 // Group Having
 func (s *Selector) Having(fns ...dialect.Condition) *Selector {
-	if len(fns) == 0 {
+	if len(fns) == 0 || s.err != nil {
 		return s
 	}
+
 	s.having.WriteString("(")
 	for i, fn := range fns {
 		if i > 0 {
 			s.having.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			s.err = v
+			return s
+		}
+
 		s.having.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.havingParams = append(s.havingParams, vals...)
@@ -312,7 +351,7 @@ func (s *Selector) Limit(size uint, start ...uint) *Selector {
 	return s
 }
 
-func (s *Selector) stmt() {
+func (s *Selector) parse() {
 	s.command.WriteString("SELECT ")
 
 	colens := len(s.cols)
@@ -365,14 +404,28 @@ func (s *Selector) stmt() {
 // Query
 func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
-	s.stmt()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	s.parse()
 	s.whereParams = append(s.whereParams, s.havingParams...)
-	return s.db.QueryContext(ctx, s.command.String(), s.whereParams...)
+
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	return stmt.QueryContext(ctx, s.whereParams...)
 }
 
 // Count
 func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
+	if s.err != nil {
+		return 0, s.err
+	}
 
 	s.Where(cond...)
 	s.command.WriteString("SELECT COUNT(*)")
@@ -383,7 +436,13 @@ func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64,
 		s.command.WriteString(" WHERE " + s.where.String())
 	}
 
-	rows, err := s.db.QueryContext(ctx, s.command.String(), s.whereParams...)
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.QueryContext(ctx, s.whereParams...)
 	if err != nil {
 		return 0, err
 	}
@@ -402,6 +461,9 @@ func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64,
 // Sum
 func (s *Selector) Sum(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
+	if s.err != nil {
+		return 0, s.err
+	}
 
 	s.Funcs(col.Sum()).Where(cond...)
 	s.command.WriteString("SELECT ")
@@ -413,7 +475,13 @@ func (s *Selector) Sum(ctx context.Context, col dialect.Field, cond ...dialect.C
 		s.command.WriteString(" WHERE " + s.where.String())
 	}
 
-	rows, err := s.db.QueryContext(ctx, s.command.String(), s.whereParams...)
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.QueryContext(ctx, s.whereParams...)
 	if err != nil {
 		return 0, err
 	}

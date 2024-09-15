@@ -20,6 +20,8 @@ type (
 	}
 
 	Executer interface {
+		BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
+		PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
 		QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
@@ -45,6 +47,7 @@ func Connect(driverName, dns string) (*DB, error) {
 	if e = db.Ping(); e != nil {
 		log.Panic(e)
 	}
+
 	return &DB{db, false}, e
 }
 
@@ -59,13 +62,13 @@ func (s *DB) Debug() bool {
 }
 
 // Transaction 事务处理
-func (s *DB) Transaction(ctx context.Context, f func(tx *sql.Tx) (interface{}, error)) (interface{}, error) {
+func (s *DB) Transaction(ctx context.Context, f func(tx *sql.Tx) (any, error)) (any, error) {
 	tx, e := s.BeginTx(ctx, nil)
 	if e != nil {
 		return nil, e
 	}
 
-	var result interface{}
+	var result any
 	result, e = f(tx)
 	if e != nil {
 		if e = tx.Rollback(); e != nil {

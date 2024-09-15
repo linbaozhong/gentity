@@ -40,13 +40,13 @@ func (s session) Close() bool {
 }
 
 // Transaction 事务处理
-func (s session) Transaction(ctx context.Context, f func(tx *sqlx.Tx) (interface{}, error)) (interface{}, error) {
+func (s session) Transaction(ctx context.Context, f func(tx *sqlx.Tx) (any, error)) (any, error) {
 	tx, e := s.BeginTxx(ctx, nil)
 	if e != nil {
 		return nil, e
 	}
 
-	var result interface{}
+	var result any
 	result, e = f(tx)
 	if e != nil {
 		if e = tx.Rollback(); e != nil {

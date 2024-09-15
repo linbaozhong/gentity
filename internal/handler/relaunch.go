@@ -102,7 +102,7 @@ var (
 	}
 )
 
-func showError(msg interface{}) {
+func showError(msg any) {
 	_, file, line, _ := runtime.Caller(1)
 	fmt.Println("Error:", msg, file, line)
 	os.Exit(1)

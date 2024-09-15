@@ -21,7 +21,7 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
-func Fail(c Context, e error, args ...interface{}) {
+func Fail(c Context, e error, args ...any) {
 	j := types.NewResult()
 	defer j.Free()
 
@@ -49,7 +49,7 @@ func FailWithParam(c Context, key string, message string) {
 	c.JSON(j)
 }
 
-func Ok(c Context, args ...interface{}) {
+func Ok(c Context, args ...any) {
 	j := types.NewResult()
 	defer j.Free()
 

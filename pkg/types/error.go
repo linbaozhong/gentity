@@ -27,7 +27,7 @@ func (e Error) Is(err error) bool {
 	return false
 }
 
-func (e Error) SetInfo(i interface{}) Error {
+func (e Error) SetInfo(i any) Error {
 	if i == nil {
 		return e
 	}

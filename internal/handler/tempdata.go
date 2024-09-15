@@ -65,11 +65,11 @@ func (d *TempData) writeToModel(fileName string) error {
 	var buf bytes.Buffer
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
-		"getTypeValue": func(t []string) interface{} {
+		"getTypeValue": func(t []string) any {
 			if len(t) < 3 {
 				return `""`
 			}
-			var ret interface{}
+			var ret any
 			switch t[2] {
 			case "string":
 				ret = `""`
@@ -84,11 +84,11 @@ func (d *TempData) writeToModel(fileName string) error {
 			}
 			return ret
 		},
-		"getZeroValue": func(t []string) interface{} {
+		"getZeroValue": func(t []string) any {
 			if len(t) < 3 {
 				return `""`
 			}
-			var ret interface{}
+			var ret any
 			switch t[2] {
 			case "string":
 				ret = ` == ""`
@@ -105,7 +105,7 @@ func (d *TempData) writeToModel(fileName string) error {
 			}
 			return ret
 		},
-		"getSqlValue": func(t []string) interface{} {
+		"getSqlValue": func(t []string) any {
 			switch t[2] {
 			case "string":
 				return "sql.NullString"
@@ -121,7 +121,7 @@ func (d *TempData) writeToModel(fileName string) error {
 				return "sql.NullInt64"
 			}
 		},
-		"getSqlType": func(t []string) interface{} {
+		"getSqlType": func(t []string) any {
 			switch t[2] {
 			case "string":
 				return "String"

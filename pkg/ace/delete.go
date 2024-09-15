@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
@@ -30,15 +31,16 @@ type (
 		db            Executer
 		table         string
 		where         strings.Builder
-		whereParams   []interface{}
+		whereParams   []any
 		command       strings.Builder
 		commandString strings.Builder
+		err           error
 	}
 )
 
 var (
 	deletePool = sync.Pool{
-		New: func() interface{} {
+		New: func() any {
 			obj := &Deleter{}
 			return obj
 		},
@@ -47,13 +49,16 @@ var (
 
 // Deleter
 func newDelete(db Executer, tableName string) *Deleter {
-	if db == nil || tableName == "" {
-		panic("db or table is nil")
-		return nil
-	}
 	obj := deletePool.Get().(*Deleter)
+	if db == nil || tableName == "" {
+		obj.err = errors.New("db or table is nil")
+		return obj
+	}
 	obj.db = db
 	obj.table = tableName
+	obj.err = nil
+	obj.commandString.Reset()
+
 	return obj
 
 }
@@ -62,7 +67,7 @@ func (d *Deleter) Free() {
 	if d == nil {
 		return
 	}
-	d.commandString.Reset()
+
 	d.commandString.WriteString(fmt.Sprintf("%s  %v", d.command.String(), d.whereParams))
 
 	if d.db.Debug() {
@@ -72,18 +77,23 @@ func (d *Deleter) Free() {
 	d.where.Reset()
 	d.whereParams = d.whereParams[:]
 	d.command.Reset()
+
 	deletePool.Put(d)
 }
 
 func (d *Deleter) String() string {
-	return d.commandString.String()
+	if d.table == "" {
+		return d.commandString.String()
+	}
+	return fmt.Sprintf("%s  %v", d.command.String(), d.whereParams)
 }
 
 // Where
 func (d *Deleter) Where(fns ...dialect.Condition) *Deleter {
-	if len(fns) == 0 {
+	if len(fns) == 0 || d.err != nil {
 		return d
 	}
+
 	if d.where.Len() == 0 {
 		d.where.WriteString("(")
 	} else {
@@ -94,6 +104,11 @@ func (d *Deleter) Where(fns ...dialect.Condition) *Deleter {
 			d.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			d.err = v
+			return d
+		}
+
 		d.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			d.whereParams = append(d.whereParams, vals...)
@@ -108,7 +123,7 @@ func (d *Deleter) Where(fns ...dialect.Condition) *Deleter {
 
 // And
 func (d *Deleter) And(fns ...dialect.Condition) *Deleter {
-	if len(fns) == 0 {
+	if len(fns) == 0 || d.err != nil {
 		return d
 	}
 
@@ -123,6 +138,10 @@ func (d *Deleter) And(fns ...dialect.Condition) *Deleter {
 			d.where.WriteString(types.Operator_or)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			d.err = v
+			return d
+		}
 		d.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			d.whereParams = append(d.whereParams, vals...)
@@ -136,7 +155,7 @@ func (d *Deleter) And(fns ...dialect.Condition) *Deleter {
 
 // Or
 func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
-	if len(fns) == 0 {
+	if len(fns) == 0 || d.err != nil {
 		return d
 	}
 
@@ -151,6 +170,10 @@ func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
 			d.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
+		if v, ok := val.(error); ok {
+			d.err = v
+			return d
+		}
 		d.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			d.whereParams = append(d.whereParams, vals...)
@@ -166,11 +189,21 @@ func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
 func (d *Deleter) Do(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
 
+	if d.err != nil {
+		return nil, d.err
+	}
+
 	d.command.WriteString("DELETE FROM " + dialect.Quote_Char + d.table + dialect.Quote_Char)
 	// WHERE
 	if d.where.Len() > 0 {
 		d.command.WriteString(" WHERE " + d.where.String())
 	}
 
-	return d.db.ExecContext(ctx, d.command.String(), d.whereParams...)
+	stmt, err := d.db.PrepareContext(ctx, d.command.String())
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	return stmt.ExecContext(ctx, d.whereParams...)
 }
