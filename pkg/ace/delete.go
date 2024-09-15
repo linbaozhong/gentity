@@ -104,11 +104,10 @@ func (d *Deleter) Where(fns ...dialect.Condition) *Deleter {
 			d.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		if v, ok := val.(error); ok {
-			d.err = v
-			return d
-		}
-
+		//if v, ok := val.(error); ok {
+		//	d.err = v
+		//	return d
+		//}
 		d.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			d.whereParams = append(d.whereParams, vals...)
@@ -138,10 +137,10 @@ func (d *Deleter) And(fns ...dialect.Condition) *Deleter {
 			d.where.WriteString(types.Operator_or)
 		}
 		cond, val := fn()
-		if v, ok := val.(error); ok {
-			d.err = v
-			return d
-		}
+		//if v, ok := val.(error); ok {
+		//	d.err = v
+		//	return d
+		//}
 		d.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			d.whereParams = append(d.whereParams, vals...)
@@ -170,10 +169,10 @@ func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
 			d.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		if v, ok := val.(error); ok {
-			d.err = v
-			return d
-		}
+		//if v, ok := val.(error); ok {
+		//	d.err = v
+		//	return d
+		//}
 		d.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			d.whereParams = append(d.whereParams, vals...)

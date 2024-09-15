@@ -100,10 +100,10 @@ func (c *Creator) Set(fns ...dialect.Setter) *Creator {
 			continue
 		}
 		s, val := fn()
-		if v, ok := val.(error); ok {
-			c.err = v
-			return c
-		}
+		//if v, ok := val.(error); ok {
+		//	c.err = v
+		//	return c
+		//}
 		c.cols = append(c.cols, s)
 		c.params = append(c.params, val)
 	}

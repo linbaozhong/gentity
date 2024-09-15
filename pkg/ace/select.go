@@ -144,11 +144,10 @@ func (s *Selector) Join(joinType types.JoinType, left, right dialect.Field, fns 
 	for _, fn := range fns {
 		on.WriteString(types.Operator_and)
 		cond, val := fn()
-		if v, ok := val.(error); ok {
-			s.err = v
-			return s
-		}
-
+		//if v, ok := val.(error); ok {
+		//	s.err = v
+		//	return s
+		//}
 		on.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -187,11 +186,10 @@ func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 			s.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		if v, ok := val.(error); ok {
-			s.err = v
-			return s
-		}
-
+		//if v, ok := val.(error); ok {
+		//	s.err = v
+		//	return s
+		//}
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -221,11 +219,10 @@ func (s *Selector) And(fns ...dialect.Condition) *Selector {
 			s.where.WriteString(types.Operator_or)
 		}
 		cond, val := fn()
-		if v, ok := val.(error); ok {
-			s.err = v
-			return s
-		}
-
+		//if v, ok := val.(error); ok {
+		//	s.err = v
+		//	return s
+		//}
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -254,11 +251,10 @@ func (s *Selector) Or(fns ...dialect.Condition) *Selector {
 			s.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		if v, ok := val.(error); ok {
-			s.err = v
-			return s
-		}
-
+		//if v, ok := val.(error); ok {
+		//	s.err = v
+		//	return s
+		//}
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -329,11 +325,10 @@ func (s *Selector) Having(fns ...dialect.Condition) *Selector {
 			s.having.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		if v, ok := val.(error); ok {
-			s.err = v
-			return s
-		}
-
+		//if v, ok := val.(error); ok {
+		//	s.err = v
+		//	return s
+		//}
 		s.having.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.havingParams = append(s.havingParams, vals...)
