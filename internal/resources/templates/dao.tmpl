@@ -25,9 +25,13 @@ type {{.StructName}}Daoer interface {
 	// InsertBatch 批量插入多条数据,返回 RowsAffected
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error)
+    // UpdateById 按主键更新一条数据
+    UpdateById(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新多条数据
 	// cols: 要更新的列名
 	UpdateBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (bool, error)
+	// DeleteById 按主键删除一条数据
+    DeleteById(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Find 分页查询，返回一个slice
@@ -80,7 +84,9 @@ func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets ...dialect.Setter) 
 	if len(sets) == 0 {
 		return 0, atype.ErrSetterEmpty
 	}
-	result, err := p.C().Set(sets...).Exec(ctx)
+	result, err := p.C().
+	    Set(sets...).
+	    Exec(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -90,7 +96,9 @@ func (p *{{.TableName}}Dao) Insert(ctx context.Context, sets ...dialect.Setter) 
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *{{.TableName}}Dao) InsertOne(ctx context.Context, bean *{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error) {
-	result, err := p.C().Cols(cols...).Struct(ctx, bean)
+	result, err := p.C().
+	    Cols(cols...).
+	    Struct(ctx, bean)
 	if err != nil {
 		return 0, err
 	}
@@ -108,25 +116,38 @@ func (p *{{.TableName}}Dao) InsertBatch(ctx context.Context, beans []*{{.Package
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
-	result, err := p.C().Cols(cols...).Struct(ctx, args...)
+	result, err := p.C().
+	    Cols(cols...).
+	    Struct(ctx, args...)
 	if err != nil {
 		return 0, err
 	}
 	return result.RowsAffected()
 }
 
-
 // Update
 func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
 	if len(sets) == 0 {
 		return false, atype.ErrSetterEmpty
 	}
-	result, err := p.U().Where(cond...).Set(sets...).Exec(ctx)
+	result, err := p.U().
+	    Where(cond...).
+	    Set(sets...).
+	    Exec(ctx)
 	if err != nil {
 		return false, err
 	}
 	n, err := result.RowsAffected()
 	return n >= 0, err
+}
+
+// UpdateById
+func (p *{{.TableName}}Dao) UpdateById(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any, sets ...dialect.Setter) (bool, error) {
+    return p.Update(ctx,
+        sets,
+        {{- range $key,$value := .Keys}}
+        {{- if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}.Eq({{index $value 1}})
+        {{- end}})
 }
 
 // UpdateBatch
@@ -140,7 +161,9 @@ func (p *{{.TableName}}Dao) UpdateBatch(ctx context.Context, beans []*{{.Package
 	for _, bean := range beans {
 		args = append(args, bean)
 	}
-	result, err := p.U().Cols(cols...).Struct(ctx, args...)
+	result, err := p.U().
+	    Cols(cols...).
+	    Struct(ctx, args...)
 	if err != nil {
 		return false, err
 	}
@@ -150,12 +173,22 @@ func (p *{{.TableName}}Dao) UpdateBatch(ctx context.Context, beans []*{{.Package
 
 // Delete
 func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	result, err := p.D().Where(cond...).Exec(ctx)
+	result, err := p.D().
+	    Where(cond...).
+	    Exec(ctx)
 	if err != nil {
 		return false, err
 	}
 	n, err := result.RowsAffected()
 	return n >= 0, err
+}
+
+// DeleteById
+func (p *{{.TableName}}Dao) DeleteById(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any) (bool, error) {
+    return p.Delete(ctx,
+        {{- range $key,$value := .Keys}}
+        {{- if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}.Eq({{index $value 1}})
+        {{- end}})
 }
 
 // Get4Cols
@@ -167,7 +200,8 @@ func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []dialect.Field, 
 		c.Cols(cols...)
 	}
 
-	row, err := c.Where(cond...).QueryRow(ctx)
+	row, err := c.Where(cond...).
+	    QueryRow(ctx)
 	if err != nil {
 		return nil, false, err
 	}
@@ -199,7 +233,9 @@ func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize u
 		pageSize = atype.PageSize
 	}
 	//
-	rows, err := c.Where(cond...).Limit(pageSize, pageSize*pageIndex).Query(ctx)
+	rows, err := c.Where(cond...).
+	    Limit(pageSize, pageSize*pageIndex).
+	    Query(ctx)
 	if err != nil {
 		return nil, false, err
 	}
@@ -255,7 +291,9 @@ func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, 
 // IDs
 func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
 	c := p.R().Cols({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}{{ end}})
-	rows, err := c.Where(cond...).Limit(atype.MaxLimit).Query(ctx)
+	rows, err := c.Where(cond...).
+	    Limit(atype.MaxLimit).
+	    Query(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -278,7 +316,9 @@ func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...dialect.Condition) 
 // Columns
 func (p *{{.TableName}}Dao) Columns(ctx context.Context, col dialect.Field, cond ...dialect.Condition) ([]any, error) {
 	c := p.R().Cols(col)
-	rows, err := c.Where(cond...).Limit(atype.MaxLimit).Query(ctx)
+	rows, err := c.Where(cond...).
+	    Limit(atype.MaxLimit).
+	    Query(ctx)
 	if err != nil {
 		return nil, err
 	}

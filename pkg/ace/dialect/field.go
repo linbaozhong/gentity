@@ -194,6 +194,11 @@ func (f Field) NotNull(val any) Condition {
 	}
 }
 
+// AsName 别名
+func (f Field) AsName(name string) string {
+	return f.Quote() + " AS " + name
+}
+
 // Sum 合计
 func (f Field) Sum(as ...string) Function {
 	var a = f.Name
