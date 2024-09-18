@@ -78,11 +78,11 @@ func (s *Selector) Free() {
 		return
 	}
 
-	s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.whereParams))
-
+	_ = s.String()
 	if s.db.Debug() {
 		log.Info(s.String())
 	}
+
 	s.table = ""
 	s.cols = s.cols[:]
 	s.funcs = s.funcs[:]
@@ -102,10 +102,10 @@ func (s *Selector) Free() {
 }
 
 func (s *Selector) String() string {
-	if s.table == "" {
-		return s.commandString.String()
+	if s.commandString.Len() == 0 {
+		s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.whereParams))
 	}
-	return fmt.Sprintf("%s  %v", s.command.String(), s.whereParams)
+	return s.commandString.String()
 }
 
 // distinct
@@ -144,10 +144,10 @@ func (s *Selector) Join(joinType types.JoinType, left, right dialect.Field, fns 
 	for _, fn := range fns {
 		on.WriteString(types.Operator_and)
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	s.err = v
 		//	return s
-		//}
+		// }
 		on.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -186,10 +186,10 @@ func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 			s.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	s.err = v
 		//	return s
-		//}
+		// }
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -219,10 +219,10 @@ func (s *Selector) And(fns ...dialect.Condition) *Selector {
 			s.where.WriteString(types.Operator_or)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	s.err = v
 		//	return s
-		//}
+		// }
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -251,10 +251,10 @@ func (s *Selector) Or(fns ...dialect.Condition) *Selector {
 			s.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	s.err = v
 		//	return s
-		//}
+		// }
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -325,10 +325,10 @@ func (s *Selector) Having(fns ...dialect.Condition) *Selector {
 			s.having.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	s.err = v
 		//	return s
-		//}
+		// }
 		s.having.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.havingParams = append(s.havingParams, vals...)

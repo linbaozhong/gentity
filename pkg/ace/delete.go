@@ -68,8 +68,7 @@ func (d *Deleter) Free() {
 		return
 	}
 
-	d.commandString.WriteString(fmt.Sprintf("%s  %v", d.command.String(), d.whereParams))
-
+	_ = d.String()
 	if d.db.Debug() {
 		log.Info(d.String())
 	}
@@ -82,10 +81,10 @@ func (d *Deleter) Free() {
 }
 
 func (d *Deleter) String() string {
-	if d.table == "" {
-		return d.commandString.String()
+	if d.commandString.Len() == 0 {
+		d.commandString.WriteString(fmt.Sprintf("%s  %v \n", d.command.String(), d.whereParams))
 	}
-	return fmt.Sprintf("%s  %v", d.command.String(), d.whereParams)
+	return d.commandString.String()
 }
 
 // Where
@@ -104,10 +103,10 @@ func (d *Deleter) Where(fns ...dialect.Condition) *Deleter {
 			d.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	d.err = v
 		//	return d
-		//}
+		// }
 		d.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			d.whereParams = append(d.whereParams, vals...)
@@ -137,10 +136,10 @@ func (d *Deleter) And(fns ...dialect.Condition) *Deleter {
 			d.where.WriteString(types.Operator_or)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	d.err = v
 		//	return d
-		//}
+		// }
 		d.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			d.whereParams = append(d.whereParams, vals...)
@@ -169,10 +168,10 @@ func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
 			d.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	d.err = v
 		//	return d
-		//}
+		// }
 		d.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			d.whereParams = append(d.whereParams, vals...)

@@ -68,11 +68,11 @@ func (c *Creator) Free() {
 		return
 	}
 
-	c.commandString.WriteString(fmt.Sprintf("%s  %v", c.command.String(), c.params))
-
+	_ = c.String()
 	if c.db.Debug() {
 		log.Info(c.String())
 	}
+
 	c.table = ""
 	c.affect = c.affect[:]
 	c.cols = c.cols[:]
@@ -83,10 +83,10 @@ func (c *Creator) Free() {
 }
 
 func (c *Creator) String() string {
-	if c.table == "" {
-		return c.commandString.String()
+	if c.commandString.Len() == 0 {
+		c.commandString.WriteString(fmt.Sprintf("%s  %v \n", c.command.String(), c.params))
 	}
-	return fmt.Sprintf("%s  %v", c.command.String(), c.params)
+	return c.commandString.String()
 }
 
 // Sets
@@ -100,10 +100,10 @@ func (c *Creator) Set(fns ...dialect.Setter) *Creator {
 			continue
 		}
 		s, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	c.err = v
 		//	return c
-		//}
+		// }
 		c.cols = append(c.cols, s)
 		c.params = append(c.params, val)
 	}
@@ -147,7 +147,7 @@ func (c *Creator) Exec(ctx context.Context) (sql.Result, error) {
 	defer stmt.Close()
 
 	// fmt.Println(c.command.String(), c.params)
-	//return c.db.ExecContext(ctx, c.command.String(), c.params...)
+	// return c.db.ExecContext(ctx, c.command.String(), c.params...)
 	return stmt.ExecContext(ctx, c.params...)
 }
 
@@ -170,7 +170,7 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
-	//c.params = append(c.params, _vals...)
+	// c.params = append(c.params, _vals...)
 	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 
 	//
@@ -197,10 +197,10 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 		if bean == nil {
 			return nil, types.ErrBeanEmpty
 		}
-		//c.command.WriteString(",")
+		// c.command.WriteString(",")
 		_, _vals = bean.AssignValues(c.affect...)
-		//c.params = append(c.params, _vals...)
-		//c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
+		// c.params = append(c.params, _vals...)
+		// c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 		c.params = _vals
 		result, err = stmt.ExecContext(ctx, _vals...)
 		if err != nil {
@@ -210,6 +210,6 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	}
 	err = tx.Commit()
 	// fmt.Println(c.command.String(), c.params)
-	//return c.db.ExecContext(ctx, c.command.String(), c.params...)
+	// return c.db.ExecContext(ctx, c.command.String(), c.params...)
 	return result, err
 }

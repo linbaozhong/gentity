@@ -76,11 +76,11 @@ func (u *Updater) Free() {
 		return
 	}
 
-	u.commandString.WriteString(fmt.Sprintf("%s  %v", u.command.String(), u.params))
-
+	_ = u.String()
 	if u.db.Debug() {
 		log.Info(u.String())
 	}
+
 	u.table = ""
 	u.affect = u.affect[:]
 	u.cols = u.cols[:]
@@ -95,9 +95,9 @@ func (u *Updater) Free() {
 
 func (u *Updater) String() string {
 	if u.table == "" {
-		return u.commandString.String()
+		u.commandString.WriteString(fmt.Sprintf("%s  %v \n", u.command.String(), u.params))
 	}
-	return fmt.Sprintf("%s  %v", u.command.String(), u.params)
+	return u.commandString.String()
 }
 
 // Set
@@ -108,10 +108,10 @@ func (u *Updater) Set(fns ...dialect.Setter) *Updater {
 
 	for _, fn := range fns {
 		s, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	u.err = v
 		//	return u
-		//}
+		// }
 		u.cols = append(u.cols, s)
 		u.params = append(u.params, val)
 	}
@@ -125,10 +125,10 @@ func (u *Updater) SetExpr(fns ...dialect.ExprSetter) *Updater {
 
 	for _, fn := range fns {
 		s, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	u.err = v
 		//	return u
-		//}
+		// }
 		u.exprCols = append(u.exprCols, expr{colName: s, arg: val})
 	}
 	return u
@@ -150,10 +150,10 @@ func (u *Updater) Where(fns ...dialect.Condition) *Updater {
 			u.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	u.err = v
 		//	return u
-		//}
+		// }
 		u.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			u.whereParams = append(u.whereParams, vals...)
@@ -183,10 +183,10 @@ func (u *Updater) And(fns ...dialect.Condition) *Updater {
 			u.where.WriteString(types.Operator_or)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	u.err = v
 		//	return u
-		//}
+		// }
 		u.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			u.whereParams = append(u.whereParams, vals...)
@@ -215,10 +215,10 @@ func (u *Updater) Or(fns ...dialect.Condition) *Updater {
 			u.where.WriteString(types.Operator_and)
 		}
 		cond, val := fn()
-		//if v, ok := val.(error); ok {
+		// if v, ok := val.(error); ok {
 		//	u.err = v
 		//	return u
-		//}
+		// }
 		u.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			u.whereParams = append(u.whereParams, vals...)
@@ -349,7 +349,7 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	err = tx.Commit()
 	return result, err
 
-	//for n, bean := range beans {
+	// for n, bean := range beans {
 	//	if n > 0 {
 	//		u.command.WriteString(";")
 	//	}
@@ -371,6 +371,6 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	//		u.command.WriteString(" WHERE " + u.where.String())
 	//	}
 	//	u.params = append(u.params, u.whereParams...)
-	//}
-	//return u.db.ExecContext(ctx, u.command.String(), u.params...)
+	// }
+	// return u.db.ExecContext(ctx, u.command.String(), u.params...)
 }
