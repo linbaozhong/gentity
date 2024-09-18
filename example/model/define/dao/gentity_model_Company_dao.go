@@ -56,22 +56,22 @@ func Company(exec ace.Executer) CompanyDaoer {
 
 // C Create company
 func (p *companyDao) C() *ace.Creator {
-	return p.db.Insert(db.CompanyTableName)
+	return p.db.C(db.CompanyTableName)
 }
 
 // R Read company
 func (p *companyDao) R() *ace.Selector {
-	return p.db.Select(db.CompanyTableName)
+	return p.db.R(db.CompanyTableName)
 }
 
 // U Update company
 func (p *companyDao) U() *ace.Updater {
-	return p.db.Update(db.CompanyTableName)
+	return p.db.U(db.CompanyTableName)
 }
 
 // D Delete company
 func (p *companyDao) D() *ace.Deleter {
-	return p.db.Delete(db.CompanyTableName)
+	return p.db.D(db.CompanyTableName)
 }
 
 // Insert 返回 LastInsertId

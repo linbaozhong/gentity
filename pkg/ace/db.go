@@ -26,10 +26,10 @@ type (
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 		Debug() bool
-		Insert(tableName string) *Creator
-		Delete(tableName string) *Deleter
-		Update(tableName string) *Updater
-		Select(tableName string) *Selector
+		C(tableName string) *Creator
+		D(tableName string) *Deleter
+		U(tableName string) *Updater
+		R(tableName string) *Selector
 	}
 
 	DB struct {
@@ -84,18 +84,18 @@ func (s *DB) Transaction(ctx context.Context, f func(tx *sql.Tx) (any, error)) (
 	return result, nil
 }
 
-func (s *DB) Insert(tableName string) *Creator {
+func (s *DB) C(tableName string) *Creator {
 	return newCreate(s, tableName)
 }
 
-func (s *DB) Update(tableName string) *Updater {
+func (s *DB) U(tableName string) *Updater {
 	return NewUpdate(s, tableName)
 }
 
-func (s *DB) Delete(tableName string) *Deleter {
+func (s *DB) D(tableName string) *Deleter {
 	return newDelete(s, tableName)
 }
 
-func (s *DB) Select(tableName string) *Selector {
+func (s *DB) R(tableName string) *Selector {
 	return newSelect(s, tableName)
 }

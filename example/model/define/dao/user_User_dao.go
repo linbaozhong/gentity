@@ -56,22 +56,22 @@ func User(exec ace.Executer) UserDaoer {
 
 // C Create user
 func (p *userDao) C() *ace.Creator {
-	return p.db.Insert(db.UserTableName)
+	return p.db.C(db.UserTableName)
 }
 
 // R Read user
 func (p *userDao) R() *ace.Selector {
-	return p.db.Select(db.UserTableName)
+	return p.db.R(db.UserTableName)
 }
 
 // U Update user
 func (p *userDao) U() *ace.Updater {
-	return p.db.Update(db.UserTableName)
+	return p.db.U(db.UserTableName)
 }
 
 // D Delete user
 func (p *userDao) D() *ace.Deleter {
-	return p.db.Delete(db.UserTableName)
+	return p.db.D(db.UserTableName)
 }
 
 // Insert 返回 LastInsertId

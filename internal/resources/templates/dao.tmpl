@@ -60,22 +60,22 @@ func {{.StructName}}(exec ace.Executer) {{$structName}}Daoer {
 
 // C Create {{ .TableName }}
 func (p *{{.TableName}}Dao) C() *ace.Creator {
-	return p.db.Insert({{.PackageName}}.{{$structName}}TableName)
+	return p.db.C({{.PackageName}}.{{$structName}}TableName)
 }
 
 // R Read {{ .TableName }}
 func (p *{{.TableName}}Dao) R() *ace.Selector{
-	return p.db.Select({{.PackageName}}.{{$structName}}TableName)
+	return p.db.R({{.PackageName}}.{{$structName}}TableName)
 }
 
 // U Update {{ .TableName }}
 func (p *{{.TableName}}Dao) U() *ace.Updater{
-	return p.db.Update({{.PackageName}}.{{$structName}}TableName)
+	return p.db.U({{.PackageName}}.{{$structName}}TableName)
 }
 
 // D Delete {{ .TableName }}
 func (p *{{.TableName}}Dao) D() *ace.Deleter{
-	return p.db.Delete({{.PackageName}}.{{$structName}}TableName)
+	return p.db.D({{.PackageName}}.{{$structName}}TableName)
 }
 
 

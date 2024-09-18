@@ -128,11 +128,11 @@ func (p *Company) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Company, bool,
 		}
 		companys = append(companys, p)
 	}
-	if len(companys) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
 	if err := rows.Err(); err != nil {
 		return nil, false, err
+	}
+	if len(companys) == 0 {
+		return nil, false, sql.ErrNoRows
 	}
 	return companys, true, nil
 }

@@ -89,11 +89,11 @@ func (p *User) Scan(rows *sql.Rows, args ...dialect.Field) ([]*User, bool, error
 		}
 		users = append(users, p)
 	}
-	if len(users) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
 	if err := rows.Err(); err != nil {
 		return nil, false, err
+	}
+	if len(users) == 0 {
+		return nil, false, sql.ErrNoRows
 	}
 	return users, true, nil
 }
