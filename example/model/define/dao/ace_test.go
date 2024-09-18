@@ -23,7 +23,6 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"github.com/linbaozhong/gentity/pkg/sqlparser"
 	"testing"
 	"time"
 )
@@ -35,7 +34,7 @@ var (
 func init() {
 	var err error
 	dbx, err = ace.Connect("mysql",
-		"ssld_dev:Cu83&sr66@tcp(39.107.252.66:13306)/assessment?charset=utf8mb4&parseTime=True&loc=Local")
+		"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,33 +42,6 @@ func init() {
 	dbx.SetMaxIdleConns(25)
 	dbx.SetDebug(true)
 	log.RegisterLogger(false)
-}
-
-func TestScheme(t *testing.T) {
-	rows, err := dbx.Query(`SELECT table_name,column_name,column_default,data_type,ifnull(character_maximum_length,0),column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema = ?`, "assessment")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer rows.Close()
-
-	ms := make(map[string][]sqlparser.Column)
-	if rows.Next() {
-		var tableName string
-		col := sqlparser.Column{}
-		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.Size, &col.Key, &col.Extra, &col.Comment)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if cols, ok := ms[tableName]; ok {
-			ms[tableName] = append(cols, col)
-		} else {
-			ms[tableName] = []sqlparser.Column{col}
-		}
-	}
-	if err = rows.Err(); err != nil {
-		t.Fatal(err)
-	}
 }
 
 func TestCreateSet(t *testing.T) {
