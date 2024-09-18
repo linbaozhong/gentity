@@ -88,15 +88,16 @@ log.RegisterLogger(false)
 ```
 4. 使用
 ```go
+
 func TestCreateSet(t *testing.T) {
-	x := Test(dbx).C()  // Create
-
+	defer dbx.Close()
+	x := Company(dbx).C()
 	result, err := x.Set(
-		tt.Name.Set("aaaaaa"),
-		tt.IsAllow.Set(true),
-	).Do(context.Background())
+		obj.CorpName.Set("aaaaaa"),
+		obj.IsAuthenticated.Set(true),
+	).Exec(context.Background())
 
-	t.Log(x)  // 打印SQL语句
+	t.Log(x)
 
 	if err != nil {
 		t.Fatal(err)
@@ -106,30 +107,31 @@ func TestCreateSet(t *testing.T) {
 }
 
 func TestCreateCols(t *testing.T) {
-	x := Test(dbx).C()  // Create
+	defer dbx.Close()
+	x := Company(dbx).C()
 	result, err := x.Cols(
-		tt.Name,
-		tt.IsAllow,
-		tt.Type,
-		tt.CreatedTime,
-	).Struct(context.Background(), &db.Test{
-		Name:        "m1",
-		IsAllow:     false,
-		Type:        0,
-		CreatedTime: time.Now(),
-	}, &db.Test{
-		Name:        "m2",
-		IsAllow:     true,
-		Type:        1,
-		CreatedTime: time.Now(),
-	}, &db.Test{
-		Name:        "m3",
-		IsAllow:     true,
-		Type:        0,
-		CreatedTime: time.Now(),
+		obj.CorpName,
+		obj.IsAuthenticated,
+		obj.State,
+		obj.CreatedTime,
+	).Struct(context.Background(), &db.Company{
+		FullCorpName:     "m1",
+		IsEcologicalCorp: false,
+		State:            0,
+		CreatedTime:      time.Now(),
+	}, &db.Company{
+		FullCorpName:     "m2",
+		IsEcologicalCorp: true,
+		State:            1,
+		CreatedTime:      time.Now(),
+	}, &db.Company{
+		FullCorpName:     "m3",
+		IsEcologicalCorp: true,
+		State:            0,
+		CreatedTime:      time.Now(),
 	})
 
-	t.Log(x)  // 打印SQL语句
+	t.Log(x)
 
 	if err != nil {
 		t.Fatal(err)
@@ -139,22 +141,35 @@ func TestCreateCols(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	// 批量创建
-	n, err := Test(dbx).InsertMulti(context.Background(), []*db.Test{&db.Test{
-		Name:        "x1",
-		IsAllow:     false,
-		Type:        0,
-		CreatedTime: time.Now(),
-	}, &db.Test{
-		Name:        "x2",
-		IsAllow:     true,
-		Type:        1,
-		CreatedTime: time.Now(),
-	}, &db.Test{
-		Name:        "x3",
-		IsAllow:     true,
-		Type:        0,
-		CreatedTime: time.Now(),
+	defer dbx.Close()
+	//
+	id, err := Company(dbx).InsertOne(context.Background(), &db.Company{
+		FullCorpName:     "x1",
+		IsEcologicalCorp: false,
+		State:            0,
+		CreatedTime:      time.Now(),
+	})
+	t.Log(id)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	n, err := Company(dbx).InsertBatch(context.Background(), []*db.Company{{
+		FullCorpName:     "x1",
+		IsEcologicalCorp: false,
+		State:            0,
+		CreatedTime:      time.Now(),
+	}, {
+		FullCorpName:     "x2",
+		IsEcologicalCorp: true,
+		State:            1,
+		CreatedTime:      time.Now(),
+	}, {
+		FullCorpName:     "x3",
+		IsEcologicalCorp: true,
+		State:            0,
+		CreatedTime:      time.Now(),
 	}})
 
 	t.Log(n)
@@ -165,19 +180,20 @@ func TestInsert(t *testing.T) {
 }
 
 func TestUpdateSet(t *testing.T) {
-	x := Test(dbx).U()  // Update
+	defer dbx.Close()
+	x := Company(dbx).U()
 	result, err := x.
 		Set(
-			tt.Name.Set("ttt"),
-			tt.IsAllow.Set(true),
+			obj.CorpName.Set("ttt"),
+			obj.IsAuthenticated.Set(true),
 		).
-		SetExpr(tt.Type.Incr()).
+		SetExpr(obj.State.Incr()).
 		Where(
-			tt.ID.Eq(1),
+			obj.Id.Eq(1),
 		).
-		Do(context.Background())
+		Exec(context.Background())
 
-	t.Log(x)   // 打印SQL语句
+	t.Log(x)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,23 +202,25 @@ func TestUpdateSet(t *testing.T) {
 }
 
 func TestUpdateCols(t *testing.T) {
-	x := Test(dbx).U()  // Update
+	defer dbx.Close()
+
+	x := Company(dbx).U()
 	result, err := x.Cols(
-		tt.Name,
-		tt.IsAllow,
-		tt.Type,
-		tt.CreatedTime,
+		obj.FullCorpName,
+		obj.IsEcologicalCorp,
+		obj.State,
+		obj.CreatedTime,
 	).Where(
-		tt.ID.Eq(1),
-	).Struct(context.Background(), &db.Test{
-		ID:          2,
-		Name:        "ccc",
-		IsAllow:     false,
-		Type:        1,
-		CreatedTime: time.Now(),
+		obj.Id.Eq(1),
+	).Struct(context.Background(), &db.Company{
+		Id:               2,
+		FullCorpName:     "ccc",
+		IsEcologicalCorp: false,
+		State:            1,
+		CreatedTime:      time.Now(),
 	})
 
-	t.Log(x)   // 打印SQL语句
+	t.Log(x)
 
 	if err != nil {
 		t.Fatal(err)
@@ -213,13 +231,14 @@ func TestUpdateCols(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-    // 批量更新
-	ok, err := Test(dbx).UpdateMulti(context.Background(), []*db.Test{&db.Test{
-		ID:          2,
-		Name:        "ccc",
-		IsAllow:     false,
-		Type:        1,
-		CreatedTime: time.Now(),
+	defer dbx.Close()
+
+	ok, err := Company(dbx).UpdateBatch(context.Background(), []*db.Company{&db.Company{
+		Id:               2,
+		FullCorpName:     "ccc",
+		IsEcologicalCorp: false,
+		State:            1,
+		CreatedTime:      time.Now(),
 	}})
 
 	t.Log(ok)
@@ -230,12 +249,13 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	x := Test(dbx).D()  // Delete
+	defer dbx.Close()
+
+	x := Company(dbx).D()
 	result, err := x.Where(
-		tt.ID.Eq(1),
-	).Do(context.Background())
-	
-	t.Log(x)    // 打印SQL语句
+		obj.Id.Eq(1),
+	).Exec(context.Background())
+	t.Log(x)
 
 	if err != nil {
 		t.Fatal(err)
@@ -245,21 +265,29 @@ func TestDelete(t *testing.T) {
 }
 
 func TestSelect(t *testing.T) {
-	// 查询指定列
-	obj, err := Test(dbx).Find4Cols(context.Background(), 0, 0, []atype.Field{
-		tt.ID,
-		tt.Name,
-		tt.Type,
+	defer dbx.Close()
+	obj, _, err := Company(dbx).Find4Cols(context.Background(), 0, 0, []dialect.Field{
+		obj.Id,
+		obj.FullCorpName,
+		obj.State,
 	},
-		tt.ID.Eq(2),
+		obj.Id.Eq(2),
 	)
 
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+	// t.Log(obj)
 	for _, o := range obj {
 		t.Log(o)
 	}
+}
+
+func TestGenStruct(t *testing.T) {
+	buf, err := schema.SqlFile2Struct("../../../data.sql", "db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(buf))
 }
 ```
