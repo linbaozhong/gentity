@@ -80,11 +80,11 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]*{{.Str
 		}
 		{{.TableName}}s = append({{.TableName}}s, p)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, false, err
-	}
 	if len({{.TableName}}s) == 0 {
 		return nil, false, sql.ErrNoRows
+	}
+	if err := rows.Err(); err != nil {
+		return nil, false, err
 	}
 	return {{.TableName}}s, true, nil
 }
