@@ -182,7 +182,6 @@ func TestUpdateCols(t *testing.T) {
 	}
 	t.Log(result.LastInsertId())
 	t.Log(result.RowsAffected())
-
 }
 
 func TestUpdate(t *testing.T) {
