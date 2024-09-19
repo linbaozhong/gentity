@@ -84,16 +84,16 @@ func (s *Selector) Free() {
 	}
 
 	s.table = ""
-	s.cols = s.cols[:]
-	s.funcs = s.funcs[:]
+	s.cols = s.cols[:0]
+	s.funcs = s.funcs[:0]
 	s.distinct = false
-	s.join = s.join[:]
-	s.omit = s.omit[:]
+	s.join = s.join[:0]
+	s.omit = s.omit[:0]
 	s.where.Reset()
-	s.whereParams = s.whereParams[:]
+	s.whereParams = s.whereParams[:0]
 	s.groupBy.Reset()
 	s.having.Reset()
-	s.havingParams = s.havingParams[:]
+	s.havingParams = s.havingParams[:0]
 	s.orderBy.Reset()
 	s.limit = ""
 	s.command.Reset()

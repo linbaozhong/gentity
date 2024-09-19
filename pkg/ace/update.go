@@ -82,13 +82,13 @@ func (u *Updater) Free() {
 	}
 
 	u.table = ""
-	u.affect = u.affect[:]
-	u.cols = u.cols[:]
-	u.exprCols = u.exprCols[:]
+	u.affect = u.affect[:0]
+	u.cols = u.cols[:0]
+	u.exprCols = u.exprCols[:0]
 	u.where.Reset()
-	u.whereParams = u.whereParams[:]
+	u.whereParams = u.whereParams[:0]
 	u.command.Reset()
-	u.params = u.params[:]
+	u.params = u.params[:0]
 
 	updatePool.Put(u)
 }
@@ -333,7 +333,7 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 			return nil, types.ErrBeanEmpty
 		}
 		_, vals = bean.AssignValues(u.affect...)
-		u.params = u.params[:]
+		u.params = u.params[:0]
 		u.params = append(u.params, vals...)
 		//
 		_, values = bean.AssignKeys()

@@ -74,7 +74,7 @@ func (d *Deleter) Free() {
 	}
 	d.table = ""
 	d.where.Reset()
-	d.whereParams = d.whereParams[:]
+	d.whereParams = d.whereParams[:0]
 	d.command.Reset()
 
 	deletePool.Put(d)

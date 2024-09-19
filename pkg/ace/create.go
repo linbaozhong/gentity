@@ -74,10 +74,10 @@ func (c *Creator) Free() {
 	}
 
 	c.table = ""
-	c.affect = c.affect[:]
-	c.cols = c.cols[:]
+	c.affect = c.affect[:0]
+	c.cols = c.cols[:0]
 	c.command.Reset()
-	c.params = c.params[:]
+	c.params = c.params[:0]
 
 	createPool.Put(c)
 }
