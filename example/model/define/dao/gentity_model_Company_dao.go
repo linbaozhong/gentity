@@ -17,7 +17,7 @@ type CompanyDaoer interface {
 	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
-	InsertOne(ctx context.Context, bean *db.Company, cols ...dialect.Field) (int64, error)
+	InsertOne(ctx context.Context, bean *db.Company, cols ...dialect.Field) (bool, error)
 	// InsertBatch 批量插入多条数据,返回 RowsAffected
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*db.Company, cols ...dialect.Field) (int64, error)
@@ -90,14 +90,18 @@ func (p *companyDao) Insert(ctx context.Context, sets ...dialect.Setter) (int64,
 
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
-func (p *companyDao) InsertOne(ctx context.Context, bean *db.Company, cols ...dialect.Field) (int64, error) {
+func (p *companyDao) InsertOne(ctx context.Context, bean *db.Company, cols ...dialect.Field) (bool, error) {
 	result, err := p.C().
 		Cols(cols...).
 		Struct(ctx, bean)
 	if err != nil {
-		return 0, err
+		return false, err
 	}
-	return result.LastInsertId()
+
+	bean.AssignPrimaryKeyValues(result)
+
+	n, err := result.RowsAffected()
+	return n > 0, err
 }
 
 // InsertBatch 批量插入,返回 RowsAffected
@@ -117,6 +121,7 @@ func (p *companyDao) InsertBatch(ctx context.Context, beans []*db.Company, cols 
 	if err != nil {
 		return 0, err
 	}
+
 	return result.RowsAffected()
 }
 

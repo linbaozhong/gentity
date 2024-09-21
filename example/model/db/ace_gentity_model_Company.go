@@ -350,3 +350,7 @@ func (p *Company) AssignKeys() ([]dialect.Field, []any) {
 		p.Id,
 	}
 }
+
+func (p *Company) AssignPrimaryKeyValues(result sql.Result) error {
+	return nil
+}

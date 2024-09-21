@@ -21,6 +21,7 @@ import (
 	"go/token"
 	"path/filepath"
 	"strings"
+	"unicode"
 )
 
 func parseFile(filename, pkgPath string) error {
@@ -213,23 +214,23 @@ func getFieldName(name string) string {
 	bs := bytes.NewBuffer([]byte{})
 
 	pre_lower := true // 前一个字母是小写
-	for i, s := range name {
+	for i, s := range []rune(name) {
 		// 如果是大写字母
-		if s >= 65 && s <= 90 {
-			s += 32 // 转成小写
+		if unicode.IsUpper(s) {
+			r := unicode.ToLower(s)
 			if i == 0 {
-				bs.WriteByte(byte(s))
+				bs.WriteRune(r)
 			} else {
 				if pre_lower {
 					bs.WriteByte(byte(95)) // 写下划线
 				}
-				bs.WriteByte(byte(s))
+				bs.WriteRune(r)
 			}
 			pre_lower = false
 			continue
 		}
 		pre_lower = true
-		bs.WriteByte(byte(s))
+		bs.WriteRune(s)
 	}
 	return bs.String()
 }

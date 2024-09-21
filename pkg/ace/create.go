@@ -207,6 +207,7 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 			tx.Rollback()
 			return nil, err
 		}
+		bean.AssignPrimaryKeyValues(result)
 	}
 	err = tx.Commit()
 	// fmt.Println(c.command.String(), c.params)

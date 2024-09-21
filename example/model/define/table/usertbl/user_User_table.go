@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ID          = dialect.Field{Name: "id", Table: "user", Type: "int64"}
+	ID          = dialect.Field{Name: "id", Table: "user", Type: "uint64"}
 	Name        = dialect.Field{Name: "name", Table: "user", Type: "string"}
 	Avatar      = dialect.Field{Name: "avatar", Table: "user", Type: "string"}
 	Nickname    = dialect.Field{Name: "nickname", Table: "user", Type: "string"}

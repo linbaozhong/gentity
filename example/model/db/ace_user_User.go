@@ -194,3 +194,12 @@ func (p *User) AssignKeys() ([]dialect.Field, []any) {
 		p.ID,
 	}
 }
+
+func (p *User) AssignPrimaryKeyValues(result sql.Result) error {
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	p.ID = uint64(id)
+	return nil
+}

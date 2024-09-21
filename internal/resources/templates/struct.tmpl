@@ -139,3 +139,17 @@ func (p *{{.StructName}}) AssignKeys() ([]dialect.Field, []any) {
 	}
 }
 
+
+//
+func (p *{{.StructName}}) AssignPrimaryKeyValues(result sql.Result) error {
+{{- range $key,$value := .Keys}}
+    {{- if eq (index $value 4) "<-" }}
+	id, err := result.LastInsertId()
+	if err != nil {
+        return err
+    }
+    p.{{index $value 0}} = {{index $value 2}}(id)
+    {{- end}}
+{{- end}}
+    return nil
+}

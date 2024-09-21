@@ -18,7 +18,7 @@ import "time"
 
 // tablename user
 type User struct {
-	ID          int64     `json:"id" db:"'id' pk auto"`
+	ID          uint64    `json:"id" db:"'id' pk auto"`
 	Name        string    `json:"name" db:"name"`
 	Avatar      string    `json:"avatar" db:"avatar"`
 	Nickname    string    `json:"nickname" db:"nickname"`

@@ -17,7 +17,7 @@ type UserDaoer interface {
 	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
-	InsertOne(ctx context.Context, bean *db.User, cols ...dialect.Field) (int64, error)
+	InsertOne(ctx context.Context, bean *db.User, cols ...dialect.Field) (bool, error)
 	// InsertBatch 批量插入多条数据,返回 RowsAffected
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*db.User, cols ...dialect.Field) (int64, error)
@@ -90,14 +90,18 @@ func (p *userDao) Insert(ctx context.Context, sets ...dialect.Setter) (int64, er
 
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
-func (p *userDao) InsertOne(ctx context.Context, bean *db.User, cols ...dialect.Field) (int64, error) {
+func (p *userDao) InsertOne(ctx context.Context, bean *db.User, cols ...dialect.Field) (bool, error) {
 	result, err := p.C().
 		Cols(cols...).
 		Struct(ctx, bean)
 	if err != nil {
-		return 0, err
+		return false, err
 	}
-	return result.LastInsertId()
+
+	bean.AssignPrimaryKeyValues(result)
+
+	n, err := result.RowsAffected()
+	return n > 0, err
 }
 
 // InsertBatch 批量插入,返回 RowsAffected
@@ -117,6 +121,7 @@ func (p *userDao) InsertBatch(ctx context.Context, beans []*db.User, cols ...dia
 	if err != nil {
 		return 0, err
 	}
+
 	return result.RowsAffected()
 }
 
@@ -289,7 +294,7 @@ func (p *userDao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, er
 
 	ids := make([]any, 0, atype.PageSize)
 	for rows.Next() {
-		var id int64
+		var id uint64
 		if err = rows.Scan(&id); err != nil {
 			return nil, err
 		}
@@ -338,7 +343,7 @@ func (p *userDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, 
 	if err != nil {
 		return false, err
 	}
-	var id int64
+	var id uint64
 	err = row.Scan(&id)
 	switch err {
 	case sql.ErrNoRows:

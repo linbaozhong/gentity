@@ -1,6 +1,9 @@
 package dialect
 
-import "context"
+import (
+	"context"
+	"database/sql"
+)
 
 type (
 	Modeler interface {
@@ -8,6 +11,7 @@ type (
 		AssignPtr(args ...Field) []any
 		AssignValues(args ...Field) ([]string, []any)
 		AssignKeys() ([]Field, []any)
+		AssignPrimaryKeyValues(result sql.Result) error
 	}
 
 	Daoer interface {
