@@ -3,12 +3,14 @@ module github.com/linbaozhong/gentity
 go 1.22.4
 
 require (
+	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
+	github.com/faabiosr/cachego v0.22.2
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/gookit/slog v0.5.6
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kataras/iris/v12 v12.2.11
-	github.com/linbaozhong/sqlparser v0.0.6
+	github.com/redis/go-redis/v9 v9.5.1
 	github.com/spf13/cobra v1.8.1
 	github.com/vetcher/go-astra v1.2.0
 	golang.org/x/tools v0.22.0
@@ -23,6 +25,8 @@ require (
 	github.com/Shopify/goreferrer v0.0.0-20220729165902-8cddb4f5de06 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
@@ -66,8 +70,6 @@ require (
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
-	google.golang.org/grpc v1.66.1 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

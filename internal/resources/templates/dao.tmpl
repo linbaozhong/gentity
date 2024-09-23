@@ -9,6 +9,8 @@ package dao
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
+	"strconv"
 	"{{.ModulePath}}/{{.PackageName}}"
 	"{{.ModulePath}}/define/table/{{$structNameLower}}tbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
@@ -370,4 +372,41 @@ func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...dialect.Conditio
     default:
         return false, err
     }
+}
+
+// onUpdate
+func (p *{{.TableName}}Dao) onUpdate(ids {{ range $key,$value := .Keys}}...{{index $value 2}}{{ end}}) error {
+	for _, id := range ids {
+		if err := p.db.Cache().Delete({{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(id, 10)); err != nil {
+			return err
+		}
+	}
+
+	return p.db.Cache().Delete({{.PackageName}}.{{$structName}}TableName+":ids")
+}
+
+// getCache
+func (p *{{.TableName}}Dao) getCache({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}} {{index $value 2}}{{ end}}) (*db.Company, bool, error) {
+	s,err := p.db.Cache().Fetch({{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(id, 10))
+	if err != nil {
+		return nil, false, err
+	}
+	if len(s)==0 {
+		return nil, false, nil
+	}
+	obj := {{.PackageName}}.New{{.StructName}}()
+	err = json.Unmarshal([]byte(s), obj)
+	if err != nil {
+		return nil, false, err
+	}
+	return obj, true,nil
+}
+
+// setCache
+func (p *{{.TableName}}Dao) setCache(obj *{{.PackageName}}.{{.StructName}}) error {
+	s,err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+	return p.db.Cache().Save({{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(obj.Id, 10), string(s), 0)
 }

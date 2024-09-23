@@ -3,8 +3,17 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"sync"
+
+	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/linbaozhong/gentity/pkg/cachego/memcached"
+	"github.com/linbaozhong/gentity/pkg/cachego/redis"
+
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/cachego"
+	syc "github.com/linbaozhong/gentity/pkg/cachego/sync"
 	"github.com/linbaozhong/gentity/pkg/log"
+	rd "github.com/redis/go-redis/v9"
 )
 
 type (
@@ -26,6 +35,7 @@ type (
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 		Debug() bool
+		Cache(prefix string) cachego.Cache
 		C(tableName string) *Creator
 		D(tableName string) *Deleter
 		U(tableName string) *Updater
@@ -34,8 +44,23 @@ type (
 
 	DB struct {
 		*sql.DB
-		debug bool // 如果是调试模式，则打印sql命令及错误
+		debug     bool // 如果是调试模式，则打印sql命令及错误
+		cacheType cacheType
+		cacheOpts any
+		cacheMap  sync.Map
 	}
+
+	cacheType string
+	cache     struct {
+		prefix string
+		cachego.Cache
+	}
+)
+
+const (
+	CacheTypeMemory  cacheType = "memory"
+	CacheTypeRedis   cacheType = "redis"
+	CacheTypeSyncMap cacheType = "sync"
 )
 
 func Connect(driverName, dns string) (*DB, error) {
@@ -43,22 +68,64 @@ func Connect(driverName, dns string) (*DB, error) {
 	db, e := sql.Open(driverName, dns)
 	if e != nil {
 		log.Panic(e)
+		return nil, e
 	}
 	if e = db.Ping(); e != nil {
 		log.Panic(e)
+		return nil, e
 	}
 
-	return &DB{db, false}, e
+	obj := &DB{}
+	obj.DB = db
+	obj.debug = false
+
+	return obj, e
 }
 
 // SetDebug
-func (s *DB) SetDebug(debug bool) {
+func (s *DB) SetDebug(debug bool) *DB {
 	s.debug = debug
+	return s
 }
 
 // Debug
 func (s *DB) Debug() bool {
 	return s.debug
+}
+
+// SetCache
+// opts string: memcache地址(github.com/bradfitz/gomemcache/memcache)
+// opts *rd.Options: redis配置(github.com/redis/go-redis/v9)
+// opts nil：缺省 sync.Map
+func (s *DB) SetCache(t cacheType, opts any) *DB {
+	s.cacheType = t
+	s.cacheOpts = opts
+	return s
+}
+
+// Cache
+func (s *DB) Cache(prefix string) cachego.Cache {
+	if c, ok := s.cacheMap.Load(prefix); ok {
+		return c.(*cache).Cache
+	}
+	var c *cache
+	switch s.cacheType {
+	case CacheTypeSyncMap:
+		c = &cache{prefix, syc.New()}
+
+	case CacheTypeMemory:
+		if opts, ok := s.cacheOpts.(string); ok {
+			c = &cache{prefix, memcached.New(memcache.New(opts))}
+		}
+	case CacheTypeRedis:
+		if opts, ok := s.cacheOpts.(*rd.Options); ok {
+			c = &cache{prefix, redis.New(rd.NewClient(opts))}
+		}
+	default:
+		c = &cache{prefix, syc.New()}
+	}
+	s.cacheMap.Store(prefix, c)
+	return c
 }
 
 // Transaction 事务处理

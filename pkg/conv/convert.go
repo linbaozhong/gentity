@@ -5,11 +5,15 @@
 package conv
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/types"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+	"unsafe"
 )
 
 // String2Bool 字符串转bool
@@ -474,6 +478,80 @@ func Interface2String(s any) string {
 	default:
 		return fmt.Sprintf("%+v", s)
 	}
+}
+
+// Interface2Bytes
+func Interface2Bytes(s any) ([]byte, error) {
+	switch v := s.(type) {
+	case []byte:
+		return v, nil
+	case string:
+		return StringToBytes(v), nil
+	case uint64, uint32, uint16, uint8, int64, int32, int16, int8, float32, float64, bool:
+		return any2Bytes(v)
+	case uint:
+		return any2Bytes(uint64(v))
+	case int:
+		return any2Bytes(int64(v))
+	case time.Time:
+		if s.(time.Time).IsZero() {
+			return []byte{}, nil
+		}
+		return StringToBytes(Interface2Time(s).Format(time.DateTime)), nil
+	default:
+		return types.JSON.Marshal(v)
+	}
+}
+
+// Bytes2Interface r 必须是引用地址
+func Bytes2Interface(b []byte, r any) error {
+	var err error
+	switch v := r.(type) {
+	case []byte:
+		r = b
+	case string:
+		r = BytesToString(b)
+	case uint64, uint32, uint16, uint8, int64, int32, int16, int8, float32, float64, bool:
+		return bytes2Any(b, r)
+	case uint:
+		r = uint64(v)
+		return bytes2Any(b, r)
+	case int:
+		r = int64(v)
+		return bytes2Any(b, r)
+	case time.Time:
+		r, err = time.Parse(time.DateTime, BytesToString(b))
+	default:
+		return types.JSON.Unmarshal(b, r)
+	}
+	return err
+}
+func any2Bytes(s any) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.BigEndian, s)
+	if err != nil {
+		return []byte{}, err
+	}
+	return buf.Bytes(), nil
+}
+func bytes2Any(b []byte, t any) error {
+	bufReader := bytes.NewReader(b)
+	return binary.Read(bufReader, binary.BigEndian, t)
+}
+
+// BytesToString converts byte slice to string.
+func BytesToString(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
+}
+
+// StringToBytes converts string to byte slice.
+func StringToBytes(s string) []byte {
+	return *(*[]byte)(unsafe.Pointer(
+		&struct {
+			string
+			Cap int
+		}{s, len(s)},
+	))
 }
 
 // Interface2StringSlice any转[]string

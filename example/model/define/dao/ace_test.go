@@ -22,6 +22,7 @@ import (
 	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"testing"
 	"time"
@@ -32,15 +33,16 @@ var (
 )
 
 func init() {
-	var err error
-	dbx, err = ace.Connect("mysql",
-		"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
-	if err != nil {
-		log.Fatal(err)
-	}
-	dbx.SetMaxOpenConns(50)
-	dbx.SetMaxIdleConns(25)
-	dbx.SetDebug(true)
+	// var err error
+	// dbx, err = ace.Connect("mysql",
+	// 	"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// dbx.SetMaxOpenConns(50)
+	// dbx.SetMaxIdleConns(25)
+	// dbx.SetDebug(true)
+	// dbx.SetCache(ace.CacheTypeSyncMap, 0)
 	log.RegisterLogger(false)
 }
 
@@ -243,4 +245,21 @@ func TestGenStruct(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(string(buf))
+}
+
+func TestConvert(t *testing.T) {
+	type Abc struct {
+		Name string
+	}
+	var num = make([]string, 2)
+	num[0] = "1"
+	num[1] = "kds界定"
+
+	r, _ := conv.Interface2Bytes(num)
+	t.Log(r)
+
+	var n []any
+	conv.Bytes2Interface(r, &n)
+	t.Log(n)
+
 }

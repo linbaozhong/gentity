@@ -354,3 +354,41 @@ func (p *userDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, 
 		return false, err
 	}
 }
+
+//
+// // onUpdate
+// func (p *userDao) onUpdate(ids ...uint64) error {
+// 	for _, id := range ids {
+// 		if err := p.db.Cache().Delete(db.UserTableName + ":id:" + strconv.FormatUint(id, 10)); err != nil {
+// 			return err
+// 		}
+// 	}
+//
+// 	return p.db.Cache().Delete(db.UserTableName + ":ids")
+// }
+//
+// // getCache
+// func (p *userDao) getCache(id uint64) (*db.Company, bool, error) {
+// 	s, err := p.db.Cache().Fetch(db.UserTableName + ":id:" + strconv.FormatUint(id, 10))
+// 	if err != nil {
+// 		return nil, false, err
+// 	}
+// 	if len(s) == 0 {
+// 		return nil, false, nil
+// 	}
+// 	obj := db.NewUser()
+// 	err = json.Unmarshal([]byte(s), obj)
+// 	if err != nil {
+// 		return nil, false, err
+// 	}
+// 	return obj, true, nil
+// }
+//
+// // setCache
+// func (p *userDao) setCache(obj *db.User) error {
+// 	s, err := json.Marshal(obj)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return p.db.Cache().Save(db.UserTableName+":id:"+strconv.FormatUint(obj.Id, 10), string(s), 0)
+// }
