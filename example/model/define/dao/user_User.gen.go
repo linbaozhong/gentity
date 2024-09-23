@@ -13,7 +13,6 @@ import (
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
-	"strconv"
 )
 
 type UserDaoer interface {
@@ -367,7 +366,7 @@ func (p *userDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, 
 // onUpdate
 func (p *userDao) onUpdate(ctx context.Context, ids ...uint64) error {
 	for _, id := range ids {
-		if err := p.cache.Delete(ctx, db.UserTableName+":id:"+strconv.FormatUint(id, 10)); err != nil {
+		if err := p.cache.Delete(ctx, db.UserTableName+":id:"+conv.Interface2String(id)); err != nil {
 			return err
 		}
 	}
@@ -377,7 +376,7 @@ func (p *userDao) onUpdate(ctx context.Context, ids ...uint64) error {
 
 // getCache
 func (p *userDao) getCache(ctx context.Context, id uint64) (*db.User, bool, error) {
-	s, err := p.cache.Fetch(ctx, db.UserTableName+":id:"+strconv.FormatUint(id, 10))
+	s, err := p.cache.Fetch(ctx, db.UserTableName+":id:"+conv.Interface2String(id))
 	if err != nil {
 		return nil, false, err
 	}

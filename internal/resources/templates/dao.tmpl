@@ -10,7 +10,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"strconv"
 	"{{.ModulePath}}/{{.PackageName}}"
 	"{{.ModulePath}}/define/table/{{$structNameLower}}tbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
@@ -373,7 +372,7 @@ func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...dialect.Conditio
 // onUpdate
 func (p *{{.TableName}}Dao) onUpdate(ctx context.Context, ids ...{{index .PrimaryKey 2}}) error {
 	for _, id := range ids {
-		if err := p.cache.Delete(ctx, {{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(id, 10)); err != nil {
+		if err := p.cache.Delete(ctx, {{.PackageName}}.{{$structName}}TableName+":id:"+conv.Interface2String(id)); err != nil {
 			return err
 		}
 	}
@@ -383,7 +382,7 @@ func (p *{{.TableName}}Dao) onUpdate(ctx context.Context, ids ...{{index .Primar
 
 // getCache
 func (p *{{.TableName}}Dao) getCache(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (*{{.PackageName}}.{{$structName}}, bool, error) {
-	s,err := p.cache.Fetch(ctx, {{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(id, 10))
+	s,err := p.cache.Fetch(ctx, {{.PackageName}}.{{$structName}}TableName+":id:"+conv.Interface2String({{index .PrimaryKey 1}}))
 	if err != nil {
 		return nil, false, err
 	}
