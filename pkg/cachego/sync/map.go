@@ -52,7 +52,7 @@ func (sm *syncMap) read(ctx context.Context, key string) (*syncMapItem, error) {
 
 	if item.duration <= time.Now().Unix() {
 		_ = sm.Delete(ctx, key)
-		return nil, cachego.ErrCacheExpired
+		return nil, cachego.ErrCacheMiss
 	}
 
 	return item, nil

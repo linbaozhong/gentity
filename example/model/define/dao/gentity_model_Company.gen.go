@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
@@ -378,6 +379,17 @@ func (p *companyDao) onUpdate(ctx context.Context, ids ...uint64) error {
 func (p *companyDao) getCache(ctx context.Context, id uint64) (*db.Company, bool, error) {
 	s, err := p.cache.Fetch(ctx, db.CompanyTableName+":id:"+conv.Interface2String(id))
 	if err != nil {
+		if errors.Is(err, cachego.ErrCacheMiss) {
+			// todo: 从数据库读取
+			obj, has, err := p.GetByID(ctx, id)
+			if err != nil {
+				return nil, false, err
+			}
+			if has {
+				p.setCache(ctx, obj)
+				return obj, true, nil
+			}
+		}
 		return nil, false, err
 	}
 	if len(s) == 0 {
