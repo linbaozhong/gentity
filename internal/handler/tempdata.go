@@ -140,7 +140,7 @@ func (d *TempData) writeToModel(fileName string) error {
 		// "marshal": JSONValue,
 	}
 
-	fileName = filepath.Join(fullpath, "ace_"+getBaseFilename(fileName)+"_"+d.StructName+".go")
+	fileName = filepath.Join(fullpath, getBaseFilename(fileName)+"_"+d.StructName+".gen.go")
 
 	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)
@@ -160,7 +160,7 @@ func (d *TempData) writeTable(parent string) error {
 		return err
 	}
 
-	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_table.go") // d.tableFilename(parent)
+	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".gen.go") // d.tableFilename(parent)
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
 	}
@@ -182,7 +182,7 @@ func (d *TempData) writeBuild(parent string) error {
 		return err
 	}
 
-	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+"_dao.go") // d.tableFilename(parent)
+	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".gen.go") // d.tableFilename(parent)
 
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
