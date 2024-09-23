@@ -17,17 +17,12 @@ package cachego
 import (
 	"context"
 	"errors"
-	"go/types"
 	"time"
 )
 
 var (
 	ErrCacheExpired = errors.New("cache expired")
 )
-
-type CacheValueType interface {
-	int | float64 | string | bool | []byte | types.Map | types.Slice | types.Struct
-}
 
 type Cache interface {
 	Contains(ctx context.Context, key string) bool

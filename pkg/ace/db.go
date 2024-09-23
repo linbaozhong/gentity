@@ -35,7 +35,7 @@ type (
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 		Debug() bool
-		Cache(prefix string) cachego.Cache
+		Cache() cachego.Cache
 		C(tableName string) *Creator
 		D(tableName string) *Deleter
 		U(tableName string) *Updater
@@ -51,10 +51,6 @@ type (
 	}
 
 	cacheType string
-	cache     struct {
-		prefix string
-		cachego.Cache
-	}
 )
 
 const (
@@ -104,28 +100,22 @@ func (s *DB) SetCache(t cacheType, opts any) *DB {
 }
 
 // Cache
-func (s *DB) Cache(prefix string) cachego.Cache {
-	if c, ok := s.cacheMap.Load(prefix); ok {
-		return c.(*cache).Cache
-	}
-	var c *cache
+func (s *DB) Cache() cachego.Cache {
 	switch s.cacheType {
 	case CacheTypeSyncMap:
-		c = &cache{prefix, syc.New()}
-
+		return syc.New()
 	case CacheTypeMemory:
 		if opts, ok := s.cacheOpts.(string); ok {
-			c = &cache{prefix, memcached.New(memcache.New(opts))}
+			return memcached.New(memcache.New(opts))
 		}
 	case CacheTypeRedis:
 		if opts, ok := s.cacheOpts.(*rd.Options); ok {
-			c = &cache{prefix, redis.New(rd.NewClient(opts))}
+			return redis.New(rd.NewClient(opts))
 		}
 	default:
-		c = &cache{prefix, syc.New()}
+		return syc.New()
 	}
-	s.cacheMap.Store(prefix, c)
-	return c
+	return syc.New()
 }
 
 // Transaction 事务处理

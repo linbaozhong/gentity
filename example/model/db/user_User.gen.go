@@ -189,10 +189,8 @@ func (p *User) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return cols, vals
 }
 
-func (p *User) AssignKeys() ([]dialect.Field, []any) {
-	return usertbl.PrimaryKeys, []any{
-		p.ID,
-	}
+func (p *User) AssignKeys() (dialect.Field, any) {
+	return usertbl.PrimaryKey, p.ID
 }
 
 func (p *User) AssignPrimaryKeyValues(result sql.Result) error {

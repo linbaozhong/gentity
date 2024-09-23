@@ -16,6 +16,8 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
+	"github.com/linbaozhong/gentity/pkg/cachego"
+	"github.com/linbaozhong/gentity/pkg/conv"
 )
 
 type {{.StructName}}Daoer interface {
@@ -28,12 +30,12 @@ type {{.StructName}}Daoer interface {
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error)
     // UpdateById 按主键更新一条数据
-    UpdateById(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any, sets ...dialect.Setter) (bool, error)
+	UpdateById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新多条数据
 	// cols: 要更新的列名
 	UpdateBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
-    DeleteById(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any) (bool, error)
+    DeleteById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Find 分页查询，返回一个slice
@@ -41,7 +43,7 @@ type {{.StructName}}Daoer interface {
 	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any, cols ...dialect.Field) (*{{.PackageName}}.{{.StructName}}, bool, error)
+	GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, cols ...dialect.Field) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...dialect.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error)
 	// GetFirstCell 按条件读取第一行的第一个字段
@@ -54,10 +56,11 @@ type {{.StructName}}Daoer interface {
 
 type {{.TableName}}Dao struct {
 	db    ace.Executer
+	cache cachego.Cache
 }
 
 func {{.StructName}}(exec ace.Executer) {{$structName}}Daoer {
-	return &{{.TableName}}Dao{db: exec}
+	return &{{.TableName}}Dao{db: exec, cache: exec.Cache()}
 }
 
 // C Create {{ .TableName }}
@@ -149,12 +152,11 @@ func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []dialect.Setter, c
 }
 
 // UpdateById
-func (p *{{.TableName}}Dao) UpdateById(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any, sets ...dialect.Setter) (bool, error) {
+func (p *{{.TableName}}Dao) UpdateById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, sets ...dialect.Setter) (bool, error) {
     return p.Update(ctx,
         sets,
-        {{- range $key,$value := .Keys}}
-        {{- if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}.Eq({{index $value 1}})
-        {{- end}})
+       	{{$structNameLower}}tbl.{{index .PrimaryKey 0}}.Eq({{index .PrimaryKey 1}}),
+    )
 }
 
 // UpdateBatch
@@ -191,11 +193,10 @@ func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...dialect.Conditio
 }
 
 // DeleteById
-func (p *{{.TableName}}Dao) DeleteById(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any) (bool, error) {
+func (p *{{.TableName}}Dao) DeleteById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (bool, error) {
     return p.Delete(ctx,
-        {{- range $key,$value := .Keys}}
-        {{- if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}.Eq({{index $value 1}})
-        {{- end}})
+        {{$structNameLower}}tbl.{{index .PrimaryKey 0}}.Eq({{index .PrimaryKey 1}}),
+	)
 }
 
 // Get4Cols
@@ -259,9 +260,8 @@ func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize u
 }
 
 // GetByID Read one {{.TableName}} By Primary Key value,
-// Pass values in this order：{{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}}
-func (p *{{.TableName}}Dao) GetByID(ctx context.Context, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}} any, cols ...dialect.Field) (*{{.PackageName}}.{{.StructName}}, bool, error) {
-	return p.Get4Cols(ctx, cols, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}.Eq({{index $value 1}}){{ end}})
+func (p *{{.TableName}}Dao) GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, cols ...dialect.Field) (*{{.PackageName}}.{{.StructName}}, bool, error) {
+	return p.Get4Cols(ctx, cols,{{$structNameLower}}tbl.{{index .PrimaryKey 0}}.Eq({{index .PrimaryKey 1}}))
 }
 
 // Get Read one {{.TableName}}
@@ -297,7 +297,7 @@ func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, 
 
 // IDs
 func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}{{ end}})
+	c := p.R().Cols({{$structNameLower}}tbl.{{index .PrimaryKey 0}})
 	rows, err := c.Where(cond...).
 	    Limit(atype.MaxLimit).
 	    Query(ctx)
@@ -308,13 +308,11 @@ func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...dialect.Condition) 
 
 	ids := make([]any, 0, atype.PageSize)
 	for rows.Next() {
-	{{- range $key,$value := .Keys}}
-	    var {{ index $value 1 }} {{index $value 2}}
-	{{- end}}
-		if err = rows.Scan({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}&{{index $value 1}}{{ end}}); err != nil {
+	    var {{ index .PrimaryKey 1 }} {{index .PrimaryKey 2}}
+		if err = rows.Scan(&{{index .PrimaryKey 1}}); err != nil {
 			return nil, err
 		}
-		ids = append(ids, {{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}}{{ end}})
+		ids = append(ids, {{index .PrimaryKey 1}})
 	}
 
 	return ids, rows.Err()
@@ -354,16 +352,14 @@ func (p *{{.TableName}}Dao) Sum(ctx context.Context, col dialect.Field, cond ...
 
 // Exists
 func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	c := p.R().Cols({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{$structNameLower}}tbl.{{index $value 0}}{{ end}}).Where(cond...)
+	c := p.R().Cols({{$structNameLower}}tbl.{{index .PrimaryKey 0}}).Where(cond...)
 	row, err := c.QueryRow(ctx)
     if err != nil {
         return false, err
     }
 
-	{{- range $key,$value := .Keys}}
-	var {{ index $value 1 }} {{index $value 2}}
-	{{- end}}
-    err = row.Scan({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}&{{index $value 1}}{{ end}})
+	var {{ index .PrimaryKey 1 }} {{index .PrimaryKey 2}}
+    err = row.Scan(&{{index .PrimaryKey 1}})
     switch err {
     case sql.ErrNoRows:
         return false, nil
@@ -375,19 +371,19 @@ func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...dialect.Conditio
 }
 
 // onUpdate
-func (p *{{.TableName}}Dao) onUpdate(ids {{ range $key,$value := .Keys}}...{{index $value 2}}{{ end}}) error {
+func (p *{{.TableName}}Dao) onUpdate(ctx context.Context, ids ...{{index .PrimaryKey 2}}) error {
 	for _, id := range ids {
-		if err := p.db.Cache().Delete({{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(id, 10)); err != nil {
+		if err := p.cache.Delete(ctx, {{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(id, 10)); err != nil {
 			return err
 		}
 	}
 
-	return p.db.Cache().Delete({{.PackageName}}.{{$structName}}TableName+":ids")
+	return p.cache.Delete(ctx, {{.PackageName}}.{{$structName}}TableName+":ids")
 }
 
 // getCache
-func (p *{{.TableName}}Dao) getCache({{ range $key,$value := .Keys}}{{if gt $key 0}},{{end}}{{index $value 1}} {{index $value 2}}{{ end}}) (*db.Company, bool, error) {
-	s,err := p.db.Cache().Fetch({{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(id, 10))
+func (p *{{.TableName}}Dao) getCache(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (*{{.PackageName}}.{{$structName}}, bool, error) {
+	s,err := p.cache.Fetch(ctx, {{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(id, 10))
 	if err != nil {
 		return nil, false, err
 	}
@@ -395,7 +391,7 @@ func (p *{{.TableName}}Dao) getCache({{ range $key,$value := .Keys}}{{if gt $key
 		return nil, false, nil
 	}
 	obj := {{.PackageName}}.New{{.StructName}}()
-	err = json.Unmarshal([]byte(s), obj)
+	err = json.Unmarshal(s, obj)
 	if err != nil {
 		return nil, false, err
 	}
@@ -403,10 +399,10 @@ func (p *{{.TableName}}Dao) getCache({{ range $key,$value := .Keys}}{{if gt $key
 }
 
 // setCache
-func (p *{{.TableName}}Dao) setCache(obj *{{.PackageName}}.{{.StructName}}) error {
+func (p *{{.TableName}}Dao) setCache(ctx context.Context, obj *{{.PackageName}}.{{.StructName}}) error {
 	s,err := json.Marshal(obj)
 	if err != nil {
 		return err
 	}
-	return p.db.Cache().Save({{.PackageName}}.{{$structName}}TableName+":id:"+strconv.FormatUint(obj.Id, 10), string(s), 0)
+	return p.cache.Save(ctx, {{.PackageName}}.{{$structName}}TableName+":id:"+conv.Interface2String(obj.{{index .PrimaryKey 0}}), string(s), 0)
 }

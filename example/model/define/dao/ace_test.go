@@ -33,16 +33,16 @@ var (
 )
 
 func init() {
-	// var err error
-	// dbx, err = ace.Connect("mysql",
-	// 	"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// dbx.SetMaxOpenConns(50)
-	// dbx.SetMaxIdleConns(25)
-	// dbx.SetDebug(true)
-	// dbx.SetCache(ace.CacheTypeSyncMap, 0)
+	var err error
+	dbx, err = ace.Connect("mysql",
+		"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbx.SetMaxOpenConns(50)
+	dbx.SetMaxIdleConns(25)
+	dbx.SetDebug(true)
+	dbx.SetCache(ace.CacheTypeSyncMap, 0)
 	log.RegisterLogger(false)
 }
 

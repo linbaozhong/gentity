@@ -5,11 +5,15 @@ package dao
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
+	"github.com/linbaozhong/gentity/pkg/cachego"
+	"github.com/linbaozhong/gentity/pkg/conv"
+	"strconv"
 )
 
 type CompanyDaoer interface {
@@ -22,12 +26,12 @@ type CompanyDaoer interface {
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*db.Company, cols ...dialect.Field) (int64, error)
 	// UpdateById 按主键更新一条数据
-	UpdateById(ctx context.Context, id any, sets ...dialect.Setter) (bool, error)
+	UpdateById(ctx context.Context, id uint64, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新多条数据
 	// cols: 要更新的列名
 	UpdateBatch(ctx context.Context, beans []*db.Company, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
-	DeleteById(ctx context.Context, id any) (bool, error)
+	DeleteById(ctx context.Context, id uint64) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*db.Company, bool, error)
 	// Find 分页查询，返回一个slice
@@ -35,7 +39,7 @@ type CompanyDaoer interface {
 	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*db.Company, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, id any, cols ...dialect.Field) (*db.Company, bool, error)
+	GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.Company, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...dialect.Condition) (*db.Company, bool, error)
 	// GetFirstCell 按条件读取第一行的第一个字段
@@ -47,11 +51,12 @@ type CompanyDaoer interface {
 }
 
 type companyDao struct {
-	db ace.Executer
+	db    ace.Executer
+	cache cachego.Cache
 }
 
 func Company(exec ace.Executer) CompanyDaoer {
-	return &companyDao{db: exec}
+	return &companyDao{db: exec, cache: exec.Cache()}
 }
 
 // C Create company
@@ -142,9 +147,11 @@ func (p *companyDao) Update(ctx context.Context, sets []dialect.Setter, cond ...
 }
 
 // UpdateById
-func (p *companyDao) UpdateById(ctx context.Context, id any, sets ...dialect.Setter) (bool, error) {
+func (p *companyDao) UpdateById(ctx context.Context, id uint64, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
-		sets, companytbl.Id.Eq(id))
+		sets,
+		companytbl.Id.Eq(id),
+	)
 }
 
 // UpdateBatch
@@ -181,8 +188,10 @@ func (p *companyDao) Delete(ctx context.Context, cond ...dialect.Condition) (boo
 }
 
 // DeleteById
-func (p *companyDao) DeleteById(ctx context.Context, id any) (bool, error) {
-	return p.Delete(ctx, companytbl.Id.Eq(id))
+func (p *companyDao) DeleteById(ctx context.Context, id uint64) (bool, error) {
+	return p.Delete(ctx,
+		companytbl.Id.Eq(id),
+	)
 }
 
 // Get4Cols
@@ -246,8 +255,7 @@ func (p *companyDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 }
 
 // GetByID Read one company By Primary Key value,
-// Pass values in this order：id
-func (p *companyDao) GetByID(ctx context.Context, id any, cols ...dialect.Field) (*db.Company, bool, error) {
+func (p *companyDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.Company, bool, error) {
 	return p.Get4Cols(ctx, cols, companytbl.Id.Eq(id))
 }
 
@@ -343,6 +351,7 @@ func (p *companyDao) Exists(ctx context.Context, cond ...dialect.Condition) (boo
 	if err != nil {
 		return false, err
 	}
+
 	var id uint64
 	err = row.Scan(&id)
 	switch err {
@@ -355,40 +364,39 @@ func (p *companyDao) Exists(ctx context.Context, cond ...dialect.Condition) (boo
 	}
 }
 
-//
-// // onUpdate
-// func (p *companyDao) onUpdate(ids ...uint64) error {
-// 	for _, id := range ids {
-// 		if err := p.db.Cache().Delete(db.CompanyTableName + ":id:" + strconv.FormatUint(id, 10)); err != nil {
-// 			return err
-// 		}
-// 	}
-//
-// 	return p.db.Cache().Delete(db.CompanyTableName + ":ids")
-// }
-//
-// // getCache
-// func (p *companyDao) getCache(id uint64) (*db.Company, bool, error) {
-// 	s, err := p.db.Cache().Fetch(db.CompanyTableName + ":id:" + strconv.FormatUint(id, 10))
-// 	if err != nil {
-// 		return nil, false, err
-// 	}
-// 	if len(s) == 0 {
-// 		return nil, false, nil
-// 	}
-// 	obj := db.NewCompany()
-// 	err = json.Unmarshal([]byte(s), obj)
-// 	if err != nil {
-// 		return nil, false, err
-// 	}
-// 	return obj, true, nil
-// }
-//
-// // setCache
-// func (p *companyDao) setCache(obj *db.Company) error {
-// 	s, err := json.Marshal(obj)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return p.db.Cache().Save(db.CompanyTableName+":id:"+strconv.FormatUint(obj.Id, 10), string(s), 0)
-// }
+// onUpdate
+func (p *companyDao) onUpdate(ctx context.Context, ids ...uint64) error {
+	for _, id := range ids {
+		if err := p.cache.Delete(ctx, db.CompanyTableName+":id:"+strconv.FormatUint(id, 10)); err != nil {
+			return err
+		}
+	}
+
+	return p.cache.Delete(ctx, db.CompanyTableName+":ids")
+}
+
+// getCache
+func (p *companyDao) getCache(ctx context.Context, id uint64) (*db.Company, bool, error) {
+	s, err := p.cache.Fetch(ctx, db.CompanyTableName+":id:"+strconv.FormatUint(id, 10))
+	if err != nil {
+		return nil, false, err
+	}
+	if len(s) == 0 {
+		return nil, false, nil
+	}
+	obj := db.NewCompany()
+	err = json.Unmarshal(s, obj)
+	if err != nil {
+		return nil, false, err
+	}
+	return obj, true, nil
+}
+
+// setCache
+func (p *companyDao) setCache(ctx context.Context, obj *db.Company) error {
+	s, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+	return p.cache.Save(ctx, db.CompanyTableName+":id:"+conv.Interface2String(obj.Id), string(s), 0)
+}

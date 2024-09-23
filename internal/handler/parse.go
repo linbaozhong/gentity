@@ -62,9 +62,9 @@ func parseFile(filename, pkgPath string) error {
 		tempData.CacheData = ""
 		tempData.CacheList = ""
 		tempData.CacheLimit = ""
-		// tempData.PrimaryKey = nil
+		tempData.PrimaryKey = nil
 		// tempData.PrimaryKeyName = ""
-		tempData.Keys = make([][]string, 0, 1)
+		//tempData.Keys = make([][]string, 0, 1)
 		tempData.Columns = make([][]string, 0, 20)
 		tempData.FileName = structFullName
 		tempData.StructName = stru.Name
@@ -126,7 +126,8 @@ func parseFile(filename, pkgPath string) error {
 			tempData.Columns = append(tempData.Columns, _namejson)
 			if pk != "" {
 				tempData.HasPrimaryKey = true
-				tempData.Keys = append(tempData.Keys, _namejson)
+				//tempData.Keys = append(tempData.Keys, _namejson)
+				tempData.PrimaryKey = _namejson
 			}
 			if _namejson[0] == "state" {
 				tempData.HasState = true

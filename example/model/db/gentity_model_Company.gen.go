@@ -345,10 +345,8 @@ func (p *Company) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return cols, vals
 }
 
-func (p *Company) AssignKeys() ([]dialect.Field, []any) {
-	return companytbl.PrimaryKeys, []any{
-		p.Id,
-	}
+func (p *Company) AssignKeys() (dialect.Field, any) {
+	return companytbl.PrimaryKey, p.Id
 }
 
 func (p *Company) AssignPrimaryKeyValues(result sql.Result) error {

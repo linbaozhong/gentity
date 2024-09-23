@@ -4,7 +4,6 @@ go 1.22.4
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
-	github.com/faabiosr/cachego v0.22.2
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/gookit/slog v0.5.6
 	github.com/jmoiron/sqlx v1.4.0

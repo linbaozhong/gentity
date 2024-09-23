@@ -28,9 +28,7 @@ var (
 	StateTime        = dialect.Field{Name: "state_time", Table: "company", Type: "time.Time"}
 	CreatedTime      = dialect.Field{Name: "created_time", Table: "company", Type: "time.Time"}
 	// 主键
-	PrimaryKeys = []dialect.Field{
-		Id,
-	}
+	PrimaryKey = Id
 
 	// 可写列
 	WritableFields = []dialect.Field{

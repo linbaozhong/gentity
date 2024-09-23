@@ -301,9 +301,8 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	u.params = append(u.params, vals...)
 	//
 	keys, values := beans[0].AssignKeys()
-	for i := 0; i < len(keys); i++ {
-		u.Where(keys[i].Eq(values[i]))
-	}
+	u.Where(keys.Eq(values))
+
 	// WHERE
 	if u.where.Len() > 0 {
 		u.command.WriteString(" WHERE " + u.where.String())
@@ -337,7 +336,7 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 		u.params = append(u.params, vals...)
 		//
 		_, values = bean.AssignKeys()
-		u.params = append(u.params, values...)
+		u.params = append(u.params, values)
 
 		result, err = stmt.ExecContext(ctx, u.params...)
 		if err != nil {

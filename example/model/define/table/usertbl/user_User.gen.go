@@ -15,9 +15,7 @@ var (
 	IsAllow     = dialect.Field{Name: "is_allow", Table: "user", Type: "bool"}
 	CreatedTime = dialect.Field{Name: "created_time", Table: "user", Type: "time.Time"}
 	// 主键
-	PrimaryKeys = []dialect.Field{
-		ID,
-	}
+	PrimaryKey = ID
 
 	// 可写列
 	WritableFields = []dialect.Field{

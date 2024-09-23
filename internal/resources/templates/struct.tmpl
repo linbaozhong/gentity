@@ -131,25 +131,19 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 }
 
 //
-func (p *{{.StructName}}) AssignKeys() ([]dialect.Field, []any) {
-	return {{$structNameLower}}tbl.PrimaryKeys, []any{
-	{{- range $key,$value := .Keys}}
-		p.{{index $value 0}},
-	{{- end}}
-	}
+func (p *{{.StructName}}) AssignKeys() (dialect.Field, any) {
+	return {{$structNameLower}}tbl.PrimaryKey,p.{{index .PrimaryKey 0}}
 }
 
 
 //
 func (p *{{.StructName}}) AssignPrimaryKeyValues(result sql.Result) error {
-{{- range $key,$value := .Keys}}
-    {{- if eq (index $value 4) "<-" }}
+    {{- if eq (index .PrimaryKey 4) "<-" }}
 	id, err := result.LastInsertId()
 	if err != nil {
         return err
     }
-    p.{{index $value 0}} = {{index $value 2}}(id)
+    p.{{index .PrimaryKey 0}} = {{index .PrimaryKey 2}}(id)
     {{- end}}
-{{- end}}
     return nil
 }

@@ -5,11 +5,15 @@ package dao
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/usertbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
+	"github.com/linbaozhong/gentity/pkg/cachego"
+	"github.com/linbaozhong/gentity/pkg/conv"
+	"strconv"
 )
 
 type UserDaoer interface {
@@ -22,12 +26,12 @@ type UserDaoer interface {
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*db.User, cols ...dialect.Field) (int64, error)
 	// UpdateById 按主键更新一条数据
-	UpdateById(ctx context.Context, id any, sets ...dialect.Setter) (bool, error)
+	UpdateById(ctx context.Context, id uint64, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新多条数据
 	// cols: 要更新的列名
 	UpdateBatch(ctx context.Context, beans []*db.User, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
-	DeleteById(ctx context.Context, id any) (bool, error)
+	DeleteById(ctx context.Context, id uint64) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*db.User, bool, error)
 	// Find 分页查询，返回一个slice
@@ -35,7 +39,7 @@ type UserDaoer interface {
 	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*db.User, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, id any, cols ...dialect.Field) (*db.User, bool, error)
+	GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.User, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...dialect.Condition) (*db.User, bool, error)
 	// GetFirstCell 按条件读取第一行的第一个字段
@@ -47,11 +51,12 @@ type UserDaoer interface {
 }
 
 type userDao struct {
-	db ace.Executer
+	db    ace.Executer
+	cache cachego.Cache
 }
 
 func User(exec ace.Executer) UserDaoer {
-	return &userDao{db: exec}
+	return &userDao{db: exec, cache: exec.Cache()}
 }
 
 // C Create user
@@ -142,9 +147,11 @@ func (p *userDao) Update(ctx context.Context, sets []dialect.Setter, cond ...dia
 }
 
 // UpdateById
-func (p *userDao) UpdateById(ctx context.Context, id any, sets ...dialect.Setter) (bool, error) {
+func (p *userDao) UpdateById(ctx context.Context, id uint64, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
-		sets, usertbl.ID.Eq(id))
+		sets,
+		usertbl.ID.Eq(id),
+	)
 }
 
 // UpdateBatch
@@ -181,8 +188,10 @@ func (p *userDao) Delete(ctx context.Context, cond ...dialect.Condition) (bool, 
 }
 
 // DeleteById
-func (p *userDao) DeleteById(ctx context.Context, id any) (bool, error) {
-	return p.Delete(ctx, usertbl.ID.Eq(id))
+func (p *userDao) DeleteById(ctx context.Context, id uint64) (bool, error) {
+	return p.Delete(ctx,
+		usertbl.ID.Eq(id),
+	)
 }
 
 // Get4Cols
@@ -246,8 +255,7 @@ func (p *userDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols 
 }
 
 // GetByID Read one user By Primary Key value,
-// Pass values in this order：id
-func (p *userDao) GetByID(ctx context.Context, id any, cols ...dialect.Field) (*db.User, bool, error) {
+func (p *userDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.User, bool, error) {
 	return p.Get4Cols(ctx, cols, usertbl.ID.Eq(id))
 }
 
@@ -343,6 +351,7 @@ func (p *userDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, 
 	if err != nil {
 		return false, err
 	}
+
 	var id uint64
 	err = row.Scan(&id)
 	switch err {
@@ -355,40 +364,39 @@ func (p *userDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, 
 	}
 }
 
-//
-// // onUpdate
-// func (p *userDao) onUpdate(ids ...uint64) error {
-// 	for _, id := range ids {
-// 		if err := p.db.Cache().Delete(db.UserTableName + ":id:" + strconv.FormatUint(id, 10)); err != nil {
-// 			return err
-// 		}
-// 	}
-//
-// 	return p.db.Cache().Delete(db.UserTableName + ":ids")
-// }
-//
-// // getCache
-// func (p *userDao) getCache(id uint64) (*db.Company, bool, error) {
-// 	s, err := p.db.Cache().Fetch(db.UserTableName + ":id:" + strconv.FormatUint(id, 10))
-// 	if err != nil {
-// 		return nil, false, err
-// 	}
-// 	if len(s) == 0 {
-// 		return nil, false, nil
-// 	}
-// 	obj := db.NewUser()
-// 	err = json.Unmarshal([]byte(s), obj)
-// 	if err != nil {
-// 		return nil, false, err
-// 	}
-// 	return obj, true, nil
-// }
-//
-// // setCache
-// func (p *userDao) setCache(obj *db.User) error {
-// 	s, err := json.Marshal(obj)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return p.db.Cache().Save(db.UserTableName+":id:"+strconv.FormatUint(obj.Id, 10), string(s), 0)
-// }
+// onUpdate
+func (p *userDao) onUpdate(ctx context.Context, ids ...uint64) error {
+	for _, id := range ids {
+		if err := p.cache.Delete(ctx, db.UserTableName+":id:"+strconv.FormatUint(id, 10)); err != nil {
+			return err
+		}
+	}
+
+	return p.cache.Delete(ctx, db.UserTableName+":ids")
+}
+
+// getCache
+func (p *userDao) getCache(ctx context.Context, id uint64) (*db.User, bool, error) {
+	s, err := p.cache.Fetch(ctx, db.UserTableName+":id:"+strconv.FormatUint(id, 10))
+	if err != nil {
+		return nil, false, err
+	}
+	if len(s) == 0 {
+		return nil, false, nil
+	}
+	obj := db.NewUser()
+	err = json.Unmarshal(s, obj)
+	if err != nil {
+		return nil, false, err
+	}
+	return obj, true, nil
+}
+
+// setCache
+func (p *userDao) setCache(ctx context.Context, obj *db.User) error {
+	s, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+	return p.cache.Save(ctx, db.UserTableName+":id:"+conv.Interface2String(obj.ID), string(s), 0)
+}

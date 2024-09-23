@@ -14,11 +14,7 @@ var (
 
 {{- if .HasPrimaryKey}}
 	// 主键
-	PrimaryKeys = []dialect.Field{
-	{{- range $key,$value := .Keys}}
-		{{ index $value 0 }},
-	{{- end}}
-	}
+	PrimaryKey = {{index .PrimaryKey 0}}
 {{- end}}
 
 	// 可写列
