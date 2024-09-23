@@ -22,6 +22,7 @@ import (
 
 var (
 	ErrCacheExpired = errors.New("cache expired")
+	ErrCacheMiss    = errors.New("cache miss")
 )
 
 type Cache interface {

@@ -16,7 +16,6 @@ package sync
 
 import (
 	"context"
-	"errors"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"sync"
@@ -42,7 +41,7 @@ func New() cachego.Cache {
 func (sm *syncMap) read(ctx context.Context, key string) (*syncMapItem, error) {
 	v, ok := sm.storage.Load(key)
 	if !ok {
-		return nil, errors.New("key not found")
+		return nil, cachego.ErrCacheMiss
 	}
 
 	item := v.(*syncMapItem)

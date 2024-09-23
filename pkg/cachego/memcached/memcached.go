@@ -16,6 +16,7 @@ package memcached
 
 import (
 	"context"
+	"errors"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"time"
@@ -47,6 +48,9 @@ func (m *memcached) Delete(ctx context.Context, key string) error {
 func (m *memcached) Fetch(ctx context.Context, key string) ([]byte, error) {
 	item, err := m.driver.Get(key)
 	if err != nil {
+		if errors.Is(err, memcache.ErrCacheMiss) {
+			return nil, cachego.ErrCacheMiss
+		}
 		return nil, err
 	}
 	return item.Value, nil

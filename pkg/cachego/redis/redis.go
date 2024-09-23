@@ -16,6 +16,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"time"
@@ -45,7 +46,15 @@ func (r *redis) Delete(ctx context.Context, key string) error {
 
 // Fetch retrieves the cached value from key of the Redis storage
 func (r *redis) Fetch(ctx context.Context, key string) ([]byte, error) {
-	return r.driver.Get(ctx, key).Bytes()
+	b, e := r.driver.Get(ctx, key).Bytes()
+	if e != nil {
+		if errors.Is(e, rd.Nil) {
+			return nil, cachego.ErrCacheMiss
+		}
+		return nil, e
+	}
+
+	return b, nil
 }
 
 // FetchMulti retrieves multiple cached value from keys of the Redis storage
