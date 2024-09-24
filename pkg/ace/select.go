@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/util"
 	"strconv"
 	"strings"
 	"sync"
@@ -34,7 +35,7 @@ type (
 		distinct      bool
 		cols          []dialect.Field
 		funcs         []string
-		omit          []any
+		omit          []dialect.Field
 		groupBy       strings.Builder
 		having        strings.Builder
 		havingParams  []any
@@ -121,6 +122,14 @@ func (s *Selector) Distinct(cols ...dialect.Field) *Selector {
 func (s *Selector) Cols(cols ...dialect.Field) *Selector {
 	for _, col := range cols {
 		s.cols = append(s.cols, col)
+	}
+	return s
+}
+
+// omits
+func (s *Selector) Omit(cols ...dialect.Field) *Selector {
+	for _, col := range cols {
+		s.omit = append(s.omit, col)
 	}
 	return s
 }
@@ -345,10 +354,11 @@ func (s *Selector) Limit(size uint, start ...uint) *Selector {
 	return s
 }
 
-func (s *Selector) parse() {
+func (s *Selector) parse() []dialect.Field {
 	s.command.WriteString("SELECT ")
 
-	colens := len(s.cols)
+	var cols = util.SliceDiff(s.cols, s.omit)
+	colens := len(cols)
 	funlens := len(s.funcs)
 	if colens+funlens == 0 {
 		s.command.WriteString("*")
@@ -356,7 +366,7 @@ func (s *Selector) parse() {
 		if s.distinct {
 			s.command.WriteString("DISTINCT ")
 		}
-		for i, col := range s.cols {
+		for i, col := range cols {
 			if i > 0 {
 				s.command.WriteString(",")
 			}
@@ -382,6 +392,7 @@ func (s *Selector) parse() {
 		// HAVING
 		if s.having.Len() > 0 {
 			s.command.WriteString(" HAVING " + s.having.String())
+			s.whereParams = append(s.whereParams, s.havingParams...)
 		}
 	}
 	// ORDER BY
@@ -393,44 +404,114 @@ func (s *Selector) parse() {
 	if s.limit != "" {
 		s.command.WriteString(s.limit)
 	}
+
+	return cols
+}
+
+// query
+func (s *Selector) query(ctx context.Context) (*sql.Rows, []dialect.Field, error) {
+	defer s.Free()
+	if s.err != nil {
+		return nil, nil, s.err
+	}
+
+	cols := s.parse()
+
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return nil, cols, err
+	}
+	defer stmt.Close()
+
+	row, err := stmt.QueryContext(ctx, s.whereParams...)
+	return row, cols, err
 }
 
 // Query
 func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
+	rows, _, err := s.query(ctx)
+	return rows, err
+}
+
+// queryRow
+func (s *Selector) queryRow(ctx context.Context) (*sql.Row, []dialect.Field, error) {
 	defer s.Free()
 	if s.err != nil {
-		return nil, s.err
+		return nil, nil, s.err
 	}
 
-	s.parse()
-	s.whereParams = append(s.whereParams, s.havingParams...)
+	cols := s.parse()
 
 	stmt, err := s.db.PrepareContext(ctx, s.command.String())
 	if err != nil {
-		return nil, err
+		return nil, cols, err
 	}
 	defer stmt.Close()
 
-	return stmt.QueryContext(ctx, s.whereParams...)
+	return stmt.QueryRowContext(ctx, s.whereParams...), cols, nil
 }
 
 // QueryRow
 func (s *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
-	defer s.Free()
-	if s.err != nil {
-		return nil, s.err
-	}
+	row, _, err := s.queryRow(ctx)
+	return row, err
+}
 
-	s.parse()
-	s.whereParams = append(s.whereParams, s.havingParams...)
-
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+// Get
+func (s *Selector) Get(ctx context.Context, bean dialect.Modeler) (bool, error) {
+	row, cols, err := s.queryRow(ctx)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
-	defer stmt.Close()
 
-	return stmt.QueryRowContext(ctx, s.whereParams...), nil
+	err = row.Scan(bean.AssignPtr(cols...)...)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+// Gets
+func (s *Selector) Gets(ctx context.Context, beans dialect.Modeler) (bool, error) {
+	rows, cols, err := s.query(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	if len(beans) == 0 {
+		return false, nil
+	}
+
+	for rows.Next() {
+		beans[0].
+			vals := beans.AssignPtr(args...)
+		err := rows.Scan(vals...)
+		if err != nil {
+			return nil, false, err
+		}
+		companys = append(companys, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, false, err
+	}
+	if len(companys) == 0 {
+		return nil, false, sql.ErrNoRows
+	}
+	return companys, true, nil
+
+	bean := beans[0]
+	bean.Scan(cols...)
+	err = rows.Scan(bean.AssignPtr(cols...)...)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 // Count

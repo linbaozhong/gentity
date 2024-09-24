@@ -22,3 +22,20 @@ func SliceContains[T comparable](slice []T, item T) bool {
 	}
 	return false
 }
+
+// 计算两个slice的差集
+func SliceDiff[T comparable](slice1, slice2 []T) []T {
+	var diff []T
+	var set = make(map[T]struct{})
+	for _, s := range slice2 {
+		set[s] = struct{}{}
+	}
+
+	for _, s := range slice1 {
+		if _, ok := set[s]; !ok {
+			diff = append(diff, s)
+		}
+	}
+
+	return diff
+}
