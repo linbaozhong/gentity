@@ -12,20 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package db
+package cachego
 
-import "time"
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"github.com/dchest/siphash"
+	"github.com/linbaozhong/gentity/pkg/conv"
+	"testing"
+)
 
-// tablename user
-// cachedata time.Minute * 10
-// cachelist time.Minute * 1
-// cachelimit   1000
-type User struct {
-	ID          uint64    `json:"id" db:"'id' pk auto"`
-	Name        string    `json:"name" db:"name"`
-	Avatar      string    `json:"avatar" db:"avatar"`
-	Nickname    string    `json:"nickname" db:"nickname"`
-	Status      int8      `json:"status" db:"status"`
-	IsAllow     bool      `json:"is_allow" db:"is_allow"`
-	CreatedTime time.Time `json:"created_time" db:"created_time <-"`
+func TestConvert(t *testing.T) {
+	key := "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+	hash := siphash.New(conv.String2Bytes(key)).Sum64()
+	// 将哈希值转换为字节切片
+	hashBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(hashBytes, hash)
+
+	buf := hex.EncodeToString(hashBytes)
+	t.Log(buf)
+	buf = "company:" + buf
+	t.Log(buf)
 }

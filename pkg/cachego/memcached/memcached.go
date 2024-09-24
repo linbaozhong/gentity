@@ -19,34 +19,70 @@ import (
 	"errors"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
+	"strings"
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
-type memcached struct {
-	driver *memcache.Client
+type (
+	option func(o *memcached)
+
+	memcached struct {
+		driver *memcache.Client
+		prefix string // key前缀
+	}
+)
+
+// WithPrefix 设置key前缀
+func WithPrefix(prefix string) option {
+	return func(o *memcached) {
+		o.prefix = prefix
+	}
 }
 
 // New creates an instance of Memcached cache driver
-func New(driver *memcache.Client) cachego.Cache {
-	return &memcached{driver}
+func New(driver *memcache.Client, opts ...option) cachego.Cache {
+	obj := &memcached{driver: driver}
+	for _, opt := range opts {
+		opt(obj)
+	}
+	return obj
 }
 
 // Contains checks if cached key exists in Memcached storage
 func (m *memcached) Contains(ctx context.Context, key string) bool {
-	_, err := m.Fetch(ctx, key)
+	_, err := m.Fetch(ctx, m.getKey(key))
 	return err == nil
 }
 
 // Delete the cached key from Memcached storage
 func (m *memcached) Delete(ctx context.Context, key string) error {
-	return m.driver.Delete(key)
+	return m.driver.Delete(m.getKey(key))
+}
+
+func (m *memcached) PrefixDelete(ctx context.Context, prefix string) error {
+	items, err := m.driver.GetMulti([]string{})
+	if err != nil {
+		return err
+	}
+
+	k := m.getKey(prefix)
+	for _, item := range items {
+		if strings.HasPrefix(item.Key, k) {
+			if err = m.driver.Delete(item.Key); err != nil {
+				if !errors.Is(err, memcache.ErrCacheMiss) {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // Fetch retrieves the cached value from key of the Memcached storage
 func (m *memcached) Fetch(ctx context.Context, key string) ([]byte, error) {
-	item, err := m.driver.Get(key)
+	item, err := m.driver.Get(m.getKey(key))
 	if err != nil {
 		if errors.Is(err, memcache.ErrCacheMiss) {
 			return nil, cachego.ErrCacheMiss
@@ -58,7 +94,18 @@ func (m *memcached) Fetch(ctx context.Context, key string) ([]byte, error) {
 
 // FetchMulti retrieves multiple cached value from keys of the Memcached storage
 func (m *memcached) FetchMulti(ctx context.Context, keys ...string) ([][]byte, error) {
-	items, err := m.driver.GetMulti(keys)
+	var ks []string
+
+	if len(m.prefix) == 0 {
+		ks = keys
+	} else {
+		ks = make([]string, 0, len(keys))
+		for _, k := range keys {
+			ks = append(ks, m.getKey(k))
+		}
+	}
+
+	items, err := m.driver.GetMulti(ks)
 	if err != nil {
 		return nil, err
 	}
@@ -84,9 +131,16 @@ func (m *memcached) Save(ctx context.Context, key string, value any, lifeTime ti
 	}
 	return m.driver.Set(
 		&memcache.Item{
-			Key:        key,
+			Key:        m.getKey(key),
 			Value:      val,
 			Expiration: int32(lifeTime.Seconds()),
 		},
 	)
+}
+
+func (m *memcached) getKey(key string) string {
+	if m.prefix == "" {
+		return key
+	}
+	return m.prefix + ":" + key
 }

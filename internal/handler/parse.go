@@ -64,7 +64,7 @@ func parseFile(filename, pkgPath string) error {
 		tempData.CacheLimit = ""
 		tempData.PrimaryKey = nil
 		// tempData.PrimaryKeyName = ""
-		//tempData.Keys = make([][]string, 0, 1)
+		// tempData.Keys = make([][]string, 0, 1)
 		tempData.Columns = make([][]string, 0, 20)
 		tempData.FileName = structFullName
 		tempData.StructName = stru.Name
@@ -126,7 +126,7 @@ func parseFile(filename, pkgPath string) error {
 			tempData.Columns = append(tempData.Columns, _namejson)
 			if pk != "" {
 				tempData.HasPrimaryKey = true
-				//tempData.Keys = append(tempData.Keys, _namejson)
+				// tempData.Keys = append(tempData.Keys, _namejson)
 				tempData.PrimaryKey = _namejson
 			}
 			if _namejson[0] == "state" {
@@ -171,6 +171,33 @@ func parseDocs(tmp *TempData, docs []string) {
 		if strings.Contains(doc, "tablename") {
 			tmp.TableName = strings.TrimSpace(strings.TrimLeft(doc, "tablename"))
 			continue
+		}
+		if strings.HasPrefix(doc, "cache ") {
+			tmp.HasCache = true
+			cache := strings.Replace(strings.TrimSpace(strings.TrimLeft(doc, "cache")), "  ", " ", -1)
+			caches := strings.Split(cache, " ")
+			if len(caches) >= 3 {
+				tmp.CacheData = caches[0]
+				tmp.CacheList = caches[1]
+				tmp.CacheLimit = caches[2]
+			}
+			continue
+		} else {
+			if strings.HasPrefix(doc, "cachedata") {
+				tmp.HasCache = true
+				tmp.CacheData = strings.TrimSpace(strings.TrimLeft(doc, "cachedata"))
+				continue
+			}
+			if strings.HasPrefix(doc, "cachelist") {
+				tmp.HasCache = true
+				tmp.CacheList = strings.TrimSpace(strings.TrimLeft(doc, "cachelist"))
+				continue
+			}
+			if strings.HasPrefix(doc, "cachelimit") {
+				tmp.HasCache = true
+				tmp.CacheLimit = strings.TrimSpace(strings.TrimLeft(doc, "cachelimit"))
+				continue
+			}
 		}
 	}
 }

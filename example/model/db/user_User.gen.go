@@ -21,7 +21,9 @@ var (
 )
 
 func NewUser() *User {
-	return userPool.Get().(*User)
+	obj := userPool.Get().(*User)
+	obj.reset()
+	return obj
 }
 
 // Free
@@ -29,6 +31,11 @@ func (p *User) Free() {
 	if p == nil {
 		return
 	}
+	userPool.Put(p)
+}
+
+// reset
+func (p *User) reset() {
 	p.ID = 0
 	p.Name = ""
 	p.Avatar = ""
@@ -37,7 +44,6 @@ func (p *User) Free() {
 	p.IsAllow = false
 	p.CreatedTime = time.Time{}
 
-	userPool.Put(p)
 }
 
 func (p *User) TableName() string {

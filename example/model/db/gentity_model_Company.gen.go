@@ -21,7 +21,9 @@ var (
 )
 
 func NewCompany() *Company {
-	return companyPool.Get().(*Company)
+	obj := companyPool.Get().(*Company)
+	obj.reset()
+	return obj
 }
 
 // Free
@@ -29,6 +31,11 @@ func (p *Company) Free() {
 	if p == nil {
 		return
 	}
+	companyPool.Put(p)
+}
+
+// reset
+func (p *Company) reset() {
 	p.Id = 0
 	p.Platform = ""
 	p.CorpId = ""
@@ -50,7 +57,6 @@ func (p *Company) Free() {
 	p.StateTime = time.Time{}
 	p.CreatedTime = time.Time{}
 
-	companyPool.Put(p)
 }
 
 func (p *Company) TableName() string {

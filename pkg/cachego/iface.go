@@ -16,7 +16,11 @@ package cachego
 
 import (
 	"context"
+	"encoding/binary"
+	"encoding/hex"
 	"errors"
+	"github.com/dchest/siphash"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"time"
 )
 
@@ -28,8 +32,32 @@ var (
 type Cache interface {
 	Contains(ctx context.Context, key string) bool
 	Delete(ctx context.Context, key string) error
+	PrefixDelete(ctx context.Context, prefix string) error
 	Fetch(ctx context.Context, key string) ([]byte, error)
 	FetchMulti(ctx context.Context, keys ...string) ([][]byte, error)
 	Flush(ctx context.Context) error
 	Save(ctx context.Context, key string, value any, lifeTime time.Duration) error
+}
+
+// HashKey 使用SipHash算法生成key
+func HashKey(prefix, key string) string {
+	hashBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(hashBytes, siphash.New(conv.String2Bytes(key)).Sum64())
+
+	return prefix + hex.EncodeToString(hashBytes)
+}
+
+// 生成综合条件cond缓存key
+func GetHashKey(key string) string {
+	return HashKey("c:", key)
+}
+
+// 生成id缓存key
+func GetIdHashKey(key string) string {
+	return HashKey("i:", key)
+}
+
+// 生成ids缓存key
+func GetIdsHashKey(key string) string {
+	return HashKey("s:", key)
 }

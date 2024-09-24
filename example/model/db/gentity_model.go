@@ -7,6 +7,9 @@ import (
 )
 
 // tablename company
+// cachedata time.Minute * 10
+// cachelist time.Minute * 1
+// cachelimit   1000
 type Company struct {
 	Id               uint64    `json:"id" db:"'id' pk"`                              // 授权方企业本地id
 	Platform         string    `json:"platform" db:"'platform'"`                     // 授权方企业的平台方

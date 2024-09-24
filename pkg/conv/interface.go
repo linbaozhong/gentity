@@ -453,11 +453,14 @@ func Interface2Float64(s any, def ...float64) float64 {
 }
 
 func Interface2String(s any) string {
+	if ss, ok := s.(Stringer); ok {
+		return ss.String()
+	}
 	switch v := s.(type) {
 	case string:
 		return v
 	case []byte:
-		return string(v)
+		return Bytes2String(v)
 	case uint64:
 		return strconv.FormatUint(v, 10)
 	case uint32:

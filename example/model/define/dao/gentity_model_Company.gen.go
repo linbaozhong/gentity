@@ -6,7 +6,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
@@ -14,6 +13,8 @@ import (
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
+	"golang.org/x/sync/singleflight"
+	"time"
 )
 
 type CompanyDaoer interface {
@@ -53,10 +54,11 @@ type CompanyDaoer interface {
 type companyDao struct {
 	db    ace.Executer
 	cache cachego.Cache
+	sg    singleflight.Group
 }
 
 func Company(exec ace.Executer) CompanyDaoer {
-	return &companyDao{db: exec, cache: exec.Cache()}
+	return &companyDao{db: exec, cache: exec.Cache(db.CompanyTableName)}
 }
 
 // C Create company
@@ -194,7 +196,7 @@ func (p *companyDao) DeleteById(ctx context.Context, id uint64) (bool, error) {
 	)
 }
 
-// Get4Cols
+// Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *companyDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*db.Company, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
@@ -223,7 +225,7 @@ func (p *companyDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ..
 	}
 }
 
-// Find4Cols
+// Find4Cols 分页获取company} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *companyDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*db.Company, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
@@ -248,23 +250,39 @@ func (p *companyDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 	defer obj.Free()
 
 	objs, has, err := obj.Scan(rows, cols...)
-	if err != nil {
-		return nil, false, err
+	if has {
+		return objs, true, err
 	}
-	return objs, has, nil
+	return nil, false, err
 }
 
-// GetByID Read one company By Primary Key value,
+// GetByID 按主键读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *companyDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.Company, bool, error) {
-	return p.Get4Cols(ctx, cols, companytbl.Id.Eq(id))
+	obj, has, e := p.getCache(ctx, id)
+	if has {
+		return obj, has, nil
+	}
+
+	v, e, _ := p.sg.Do(conv.Interface2String(id), func() (interface{}, error) {
+		obj, has, e = p.Get4Cols(ctx, cols, companytbl.Id.Eq(id))
+		if has {
+			e = p.setCache(ctx, obj)
+		}
+		return obj, e
+	})
+	if v != nil {
+		return v.(*db.Company), true, e
+	}
+
+	return nil, false, e
 }
 
-// Get Read one company
+// Get 按条件读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *companyDao) Get(ctx context.Context, cond ...dialect.Condition) (*db.Company, bool, error) {
 	return p.Get4Cols(ctx, []dialect.Field{}, cond...)
 }
 
-// GetFirstCell Read the first column of the first row
+// GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *companyDao) GetFirstCell(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (any, bool, error) {
 	c := p.R().Cols(col)
 	row, err := c.Where(cond...).QueryRow(ctx)
@@ -284,7 +302,7 @@ func (p *companyDao) GetFirstCell(ctx context.Context, col dialect.Field, cond .
 	}
 }
 
-// Find
+// Find 按条件读取一个company slice对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *companyDao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]*db.Company, bool, error) {
 	return p.Find4Cols(ctx, pageIndex, pageSize, []dialect.Field{}, cond...)
 }
@@ -367,29 +385,18 @@ func (p *companyDao) Exists(ctx context.Context, cond ...dialect.Condition) (boo
 // onUpdate
 func (p *companyDao) onUpdate(ctx context.Context, ids ...uint64) error {
 	for _, id := range ids {
-		if err := p.cache.Delete(ctx, db.CompanyTableName+":id:"+conv.Interface2String(id)); err != nil {
+		if err := p.cache.Delete(ctx, cachego.GetIdHashKey(conv.Interface2String(id))); err != nil {
 			return err
 		}
 	}
 
-	return p.cache.Delete(ctx, db.CompanyTableName+":ids")
+	return p.cache.PrefixDelete(ctx, "s:")
 }
 
 // getCache
 func (p *companyDao) getCache(ctx context.Context, id uint64) (*db.Company, bool, error) {
-	s, err := p.cache.Fetch(ctx, db.CompanyTableName+":id:"+conv.Interface2String(id))
+	s, err := p.cache.Fetch(ctx, cachego.GetIdHashKey(conv.Interface2String(id)))
 	if err != nil {
-		if errors.Is(err, cachego.ErrCacheMiss) {
-			// todo: 从数据库读取
-			obj, has, err := p.GetByID(ctx, id)
-			if err != nil {
-				return nil, false, err
-			}
-			if has {
-				p.setCache(ctx, obj)
-				return obj, true, nil
-			}
-		}
 		return nil, false, err
 	}
 	if len(s) == 0 {
@@ -409,5 +416,5 @@ func (p *companyDao) setCache(ctx context.Context, obj *db.Company) error {
 	if err != nil {
 		return err
 	}
-	return p.cache.Save(ctx, db.CompanyTableName+":id:"+conv.Interface2String(obj.Id), string(s), 0)
+	return p.cache.Save(ctx, cachego.GetIdHashKey(conv.Interface2String(obj.Id)), string(s), time.Minute*10)
 }

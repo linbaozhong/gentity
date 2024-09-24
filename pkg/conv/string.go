@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+type Stringer interface {
+	String() string
+}
+
 // String2Bool 字符串转bool
 func String2Bool(s string, def ...bool) bool {
 	if b, e := strconv.ParseBool(strings.TrimSpace(s)); e == nil {

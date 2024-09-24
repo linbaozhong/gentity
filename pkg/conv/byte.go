@@ -49,7 +49,7 @@ func Bytes2Interface(b []byte, r any) error {
 	}
 	return err
 }
-func any2Bytes(s any) ([]byte, error) {
+func Any2Bytes(s any) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	err := binary.Write(buf, binary.BigEndian, s)
 	if err != nil {
@@ -57,7 +57,7 @@ func any2Bytes(s any) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-func bytes2Any(b []byte, t any) error {
+func Bytes2Any(b []byte, t any) error {
 	bufReader := bytes.NewReader(b)
 	return binary.Read(bufReader, binary.BigEndian, t)
 }

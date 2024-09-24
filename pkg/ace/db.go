@@ -3,6 +3,8 @@ package ace
 import (
 	"context"
 	"database/sql"
+	syc "github.com/linbaozhong/gentity/pkg/cachego/sync"
+	"golang.org/x/sync/singleflight"
 	"sync"
 
 	"github.com/bradfitz/gomemcache/memcache"
@@ -11,7 +13,6 @@ import (
 
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/cachego"
-	syc "github.com/linbaozhong/gentity/pkg/cachego/sync"
 	"github.com/linbaozhong/gentity/pkg/log"
 	rd "github.com/redis/go-redis/v9"
 )
@@ -35,7 +36,7 @@ type (
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 		Debug() bool
-		Cache() cachego.Cache
+		Cache(string) cachego.Cache
 		C(tableName string) *Creator
 		D(tableName string) *Deleter
 		U(tableName string) *Updater
@@ -48,6 +49,7 @@ type (
 		cacheType cacheType
 		cacheOpts any
 		cacheMap  sync.Map
+		sg        singleflight.Group
 	}
 
 	cacheType string
@@ -59,6 +61,7 @@ const (
 	CacheTypeSyncMap cacheType = "sync"
 )
 
+// Connect
 func Connect(driverName, dns string) (*DB, error) {
 	dialect.Register(driverName)
 	db, e := sql.Open(driverName, dns)
@@ -100,22 +103,32 @@ func (s *DB) SetCache(t cacheType, opts any) *DB {
 }
 
 // Cache
-func (s *DB) Cache() cachego.Cache {
-	switch s.cacheType {
-	case CacheTypeSyncMap:
-		return syc.New()
-	case CacheTypeMemory:
-		if opts, ok := s.cacheOpts.(string); ok {
-			return memcached.New(memcache.New(opts))
-		}
-	case CacheTypeRedis:
-		if opts, ok := s.cacheOpts.(*rd.Options); ok {
-			return redis.New(rd.NewClient(opts))
-		}
-	default:
-		return syc.New()
+func (s *DB) Cache(name string) cachego.Cache {
+	if v, ok := s.cacheMap.Load(name); ok {
+		return v.(cachego.Cache)
 	}
-	return syc.New()
+
+	v, _, _ := s.sg.Do(name, func() (any, error) {
+		var v cachego.Cache
+		switch s.cacheType {
+		// case CacheTypeSyncMap:
+		// 	v = syc.New(syc.WithPrefix(name))
+		case CacheTypeMemory:
+			if opts, ok := s.cacheOpts.(string); ok {
+				v = memcached.New(memcache.New(opts), memcached.WithPrefix(name))
+			}
+		case CacheTypeRedis:
+			if opts, ok := s.cacheOpts.(*rd.Options); ok {
+				v = redis.New(rd.NewClient(opts), redis.WithPrefix(name))
+			}
+		}
+		if v == nil {
+			v = syc.New() // sync.Map 不需要前缀
+		}
+		s.cacheMap.Store(name, v)
+		return v, nil
+	})
+	return v.(cachego.Cache)
 }
 
 // Transaction 事务处理

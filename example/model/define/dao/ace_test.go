@@ -22,7 +22,6 @@ import (
 	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/conv"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"testing"
 	"time"
@@ -245,21 +244,4 @@ func TestGenStruct(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(string(buf))
-}
-
-func TestConvert(t *testing.T) {
-	type Abc struct {
-		Name string
-	}
-	var num = make([]string, 2)
-	num[0] = "1"
-	num[1] = "kds界定"
-
-	r, _ := conv.Interface2Bytes(num)
-	t.Log(r)
-
-	var n []any
-	conv.Bytes2Interface(r, &n)
-	t.Log(n)
-
 }

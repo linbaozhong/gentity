@@ -13,6 +13,7 @@ import (
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
+	"golang.org/x/sync/singleflight"
 )
 
 type UserDaoer interface {
@@ -52,10 +53,11 @@ type UserDaoer interface {
 type userDao struct {
 	db    ace.Executer
 	cache cachego.Cache
+	sg    singleflight.Group
 }
 
 func User(exec ace.Executer) UserDaoer {
-	return &userDao{db: exec, cache: exec.Cache()}
+	return &userDao{db: exec, cache: exec.Cache(db.UserTableName)}
 }
 
 // C Create user
@@ -193,7 +195,7 @@ func (p *userDao) DeleteById(ctx context.Context, id uint64) (bool, error) {
 	)
 }
 
-// Get4Cols
+// Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *userDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*db.User, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
@@ -222,7 +224,7 @@ func (p *userDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...di
 	}
 }
 
-// Find4Cols
+// Find4Cols 分页获取user} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *userDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*db.User, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
@@ -247,23 +249,39 @@ func (p *userDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols 
 	defer obj.Free()
 
 	objs, has, err := obj.Scan(rows, cols...)
-	if err != nil {
-		return nil, false, err
+	if has {
+		return objs, true, err
 	}
-	return objs, has, nil
+	return nil, false, err
 }
 
-// GetByID Read one user By Primary Key value,
+// GetByID 按主键读取一个user对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *userDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.User, bool, error) {
-	return p.Get4Cols(ctx, cols, usertbl.ID.Eq(id))
+	obj, has, e := p.getCache(ctx, id)
+	if has {
+		return obj, has, nil
+	}
+
+	v, e, _ := p.sg.Do(conv.Interface2String(id), func() (interface{}, error) {
+		obj, has, e = p.Get4Cols(ctx, cols, usertbl.ID.Eq(id))
+		if has {
+			e = p.setCache(ctx, obj)
+		}
+		return obj, e
+	})
+	if v != nil {
+		return v.(*db.User), true, e
+	}
+
+	return nil, false, e
 }
 
-// Get Read one user
+// Get 按条件读取一个user对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *userDao) Get(ctx context.Context, cond ...dialect.Condition) (*db.User, bool, error) {
 	return p.Get4Cols(ctx, []dialect.Field{}, cond...)
 }
 
-// GetFirstCell Read the first column of the first row
+// GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *userDao) GetFirstCell(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (any, bool, error) {
 	c := p.R().Cols(col)
 	row, err := c.Where(cond...).QueryRow(ctx)
@@ -283,7 +301,7 @@ func (p *userDao) GetFirstCell(ctx context.Context, col dialect.Field, cond ...d
 	}
 }
 
-// Find
+// Find 按条件读取一个user slice对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *userDao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]*db.User, bool, error) {
 	return p.Find4Cols(ctx, pageIndex, pageSize, []dialect.Field{}, cond...)
 }
@@ -366,17 +384,17 @@ func (p *userDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, 
 // onUpdate
 func (p *userDao) onUpdate(ctx context.Context, ids ...uint64) error {
 	for _, id := range ids {
-		if err := p.cache.Delete(ctx, db.UserTableName+":id:"+conv.Interface2String(id)); err != nil {
+		if err := p.cache.Delete(ctx, cachego.GetIdHashKey(conv.Interface2String(id))); err != nil {
 			return err
 		}
 	}
 
-	return p.cache.Delete(ctx, db.UserTableName+":ids")
+	return p.cache.PrefixDelete(ctx, "s:")
 }
 
 // getCache
 func (p *userDao) getCache(ctx context.Context, id uint64) (*db.User, bool, error) {
-	s, err := p.cache.Fetch(ctx, db.UserTableName+":id:"+conv.Interface2String(id))
+	s, err := p.cache.Fetch(ctx, cachego.GetIdHashKey(conv.Interface2String(id)))
 	if err != nil {
 		return nil, false, err
 	}
@@ -397,5 +415,5 @@ func (p *userDao) setCache(ctx context.Context, obj *db.User) error {
 	if err != nil {
 		return err
 	}
-	return p.cache.Save(ctx, db.UserTableName+":id:"+conv.Interface2String(obj.ID), string(s), 0)
+	return p.cache.Save(ctx, cachego.GetIdHashKey(conv.Interface2String(obj.ID)), string(s), time.Minute*10)
 }
