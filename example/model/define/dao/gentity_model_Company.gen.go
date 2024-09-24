@@ -9,7 +9,6 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 )
 
 type CompanyDaoer interface {
@@ -79,7 +78,7 @@ func (p *companyDao) D() *ace.Deleter {
 // Insert 返回 LastInsertId
 func (p *companyDao) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
 	if len(sets) == 0 {
-		return 0, atype.ErrSetterEmpty
+		return 0, dialect.ErrSetterEmpty
 	}
 	result, err := p.C().
 		Set(sets...).
@@ -111,7 +110,7 @@ func (p *companyDao) InsertOne(ctx context.Context, bean *db.Company, cols ...di
 func (p *companyDao) InsertBatch(ctx context.Context, beans []*db.Company, cols ...dialect.Field) (int64, error) {
 	lens := len(beans)
 	if lens == 0 {
-		return 0, atype.ErrBeanEmpty
+		return 0, dialect.ErrBeanEmpty
 	}
 	args := make([]dialect.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -130,7 +129,7 @@ func (p *companyDao) InsertBatch(ctx context.Context, beans []*db.Company, cols 
 // Update
 func (p *companyDao) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
 	if len(sets) == 0 {
-		return false, atype.ErrSetterEmpty
+		return false, dialect.ErrSetterEmpty
 	}
 	result, err := p.U().
 		Where(cond...).
@@ -156,7 +155,7 @@ func (p *companyDao) UpdateById(ctx context.Context, id uint64, sets ...dialect.
 func (p *companyDao) UpdateBatch(ctx context.Context, beans []*db.Company, cols ...dialect.Field) (bool, error) {
 	lens := len(beans)
 	if lens == 0 {
-		return false, atype.ErrBeanEmpty
+		return false, dialect.ErrBeanEmpty
 	}
 	args := make([]dialect.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -230,7 +229,7 @@ func (p *companyDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 	}
 	//
 	if pageSize == 0 {
-		pageSize = atype.PageSize
+		pageSize = dialect.PageSize
 	}
 	//
 	rows, err := c.Where(cond...).
@@ -290,14 +289,14 @@ func (p *companyDao) Find(ctx context.Context, pageIndex, pageSize uint, cond ..
 func (p *companyDao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
 	c := p.R().Cols(companytbl.Id)
 	rows, err := c.Where(cond...).
-		Limit(atype.MaxLimit).
+		Limit(dialect.MaxLimit).
 		Query(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	ids := make([]any, 0, atype.PageSize)
+	ids := make([]any, 0, dialect.PageSize)
 	for rows.Next() {
 		var id uint64
 		if err = rows.Scan(&id); err != nil {
@@ -313,14 +312,14 @@ func (p *companyDao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any,
 func (p *companyDao) Columns(ctx context.Context, col dialect.Field, cond ...dialect.Condition) ([]any, error) {
 	c := p.R().Cols(col)
 	rows, err := c.Where(cond...).
-		Limit(atype.MaxLimit).
+		Limit(dialect.MaxLimit).
 		Query(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	cols := make([]any, 0, atype.PageSize)
+	cols := make([]any, 0, dialect.PageSize)
 	for rows.Next() {
 		var v any
 		if err = rows.Scan(&v); err != nil {

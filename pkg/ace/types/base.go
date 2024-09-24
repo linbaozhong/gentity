@@ -19,31 +19,7 @@ import (
 	"time"
 )
 
-const (
-	Inner_Join JoinType = " INNER"
-	Left_Join  JoinType = " LEFT"
-	Right_Join JoinType = " RIGHT"
-
-	Operator_and = " AND "
-	Operator_or  = " OR "
-
-	MaxLimit uint = 1000
-	PageSize uint = 20
-)
-
-var (
-	ErrCreateEmpty        = fmt.Errorf("No data is created")
-	ErrBeanEmpty          = fmt.Errorf("bean=nil 或者 len(beans)=0 或者 len(beans)>100")
-	ErrNotFound           = fmt.Errorf("not found")
-	ErrSetterEmpty        = fmt.Errorf("setter=nil 或者 len(setter)=0")
-	ErrBeansEmpty         = fmt.Errorf("beans=nil 或者 len(beans)=0")
-	ErrArgsNotMatch       = fmt.Errorf("args not match")
-	ErrPrimaryKeyNotMatch = fmt.Errorf("primary key not match")
-)
-
 type (
-	JoinType string
-
 	AceString  string
 	AceInt64   int64
 	AceInt32   int32

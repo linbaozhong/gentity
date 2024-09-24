@@ -1,0 +1,35 @@
+package router
+
+import (
+	conf "{{.ModulePath}}/internal/config"
+	"{{.ModulePath}}/internal/lib/api"
+	"net/http"
+)
+
+func Init() api.Application {
+	app := api.NewApplication()
+
+	app.HandleDir("/", http.Dir("./web"))
+	app.RegisterView(api.GetHtmlView(
+		"./web/views",
+		".html",
+		conf.Config.App.Mode != conf.App_Mode_Prod))
+
+	if conf.Config.App.Mode == conf.App_Mode_Prod {
+		app.Use(api.Recovery())
+	}
+
+	if conf.Config.App.Mode != conf.App_Mode_Prod {
+		app.Use(api.Logger())
+	}
+
+	v1 := api.NewParty(app, "/")
+	// 注册路由
+	l := len(api.Instances)
+	for i := 0; i < l; i++ {
+		if m, ok := api.Instances[i].(api.IRegisterRouter); ok {
+			m.RegisterRouter(v1)
+		}
+	}
+	return app
+}

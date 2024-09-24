@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strconv"
 	"strings"
@@ -135,14 +134,14 @@ func (s *Selector) Funcs(fns ...dialect.Function) *Selector {
 }
 
 // join
-func (s *Selector) Join(joinType types.JoinType, left, right dialect.Field, fns ...dialect.Condition) *Selector {
+func (s *Selector) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) *Selector {
 	if s.err != nil {
 		return s
 	}
 
 	var on strings.Builder
 	for _, fn := range fns {
-		on.WriteString(types.Operator_and)
+		on.WriteString(dialect.Operator_and)
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
 		//	s.err = v
@@ -164,10 +163,10 @@ func (s *Selector) Join(joinType types.JoinType, left, right dialect.Field, fns 
 }
 
 func (s *Selector) LeftJoin(left, right dialect.Field, fns ...dialect.Condition) *Selector {
-	return s.Join(types.Left_Join, left, right, fns...)
+	return s.Join(dialect.Left_Join, left, right, fns...)
 }
 func (s *Selector) RightJoin(left, right dialect.Field, fns ...dialect.Condition) *Selector {
-	return s.Join(types.Right_Join, left, right, fns...)
+	return s.Join(dialect.Right_Join, left, right, fns...)
 }
 
 // Where
@@ -179,11 +178,11 @@ func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 	if s.where.Len() == 0 {
 		s.where.WriteString("(")
 	} else {
-		s.where.WriteString(types.Operator_and + "(")
+		s.where.WriteString(dialect.Operator_and + "(")
 	}
 	for i, fn := range fns {
 		if i > 0 {
-			s.where.WriteString(types.Operator_and)
+			s.where.WriteString(dialect.Operator_and)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
@@ -211,12 +210,12 @@ func (s *Selector) And(fns ...dialect.Condition) *Selector {
 	if s.where.Len() == 0 {
 		s.where.WriteString("(")
 	} else {
-		s.where.WriteString(types.Operator_and + "(")
+		s.where.WriteString(dialect.Operator_and + "(")
 	}
 
 	for i, fn := range fns {
 		if i > 0 {
-			s.where.WriteString(types.Operator_or)
+			s.where.WriteString(dialect.Operator_or)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
@@ -243,12 +242,12 @@ func (s *Selector) Or(fns ...dialect.Condition) *Selector {
 	if s.where.Len() == 0 {
 		s.where.WriteString("(")
 	} else {
-		s.where.WriteString(types.Operator_or + "(")
+		s.where.WriteString(dialect.Operator_or + "(")
 	}
 
 	for i, fn := range fns {
 		if i > 0 {
-			s.where.WriteString(types.Operator_and)
+			s.where.WriteString(dialect.Operator_and)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
@@ -322,7 +321,7 @@ func (s *Selector) Having(fns ...dialect.Condition) *Selector {
 	s.having.WriteString("(")
 	for i, fn := range fns {
 		if i > 0 {
-			s.having.WriteString(types.Operator_and)
+			s.having.WriteString(dialect.Operator_and)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {

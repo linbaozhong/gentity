@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 	"sync"
@@ -143,11 +142,11 @@ func (u *Updater) Where(fns ...dialect.Condition) *Updater {
 	if u.where.Len() == 0 {
 		u.where.WriteString("(")
 	} else {
-		u.where.WriteString(types.Operator_and + "(")
+		u.where.WriteString(dialect.Operator_and + "(")
 	}
 	for i, fn := range fns {
 		if i > 0 {
-			u.where.WriteString(types.Operator_and)
+			u.where.WriteString(dialect.Operator_and)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
@@ -175,12 +174,12 @@ func (u *Updater) And(fns ...dialect.Condition) *Updater {
 	if u.where.Len() == 0 {
 		u.where.WriteString("(")
 	} else {
-		u.where.WriteString(types.Operator_and + "(")
+		u.where.WriteString(dialect.Operator_and + "(")
 	}
 
 	for i, fn := range fns {
 		if i > 0 {
-			u.where.WriteString(types.Operator_or)
+			u.where.WriteString(dialect.Operator_or)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
@@ -207,12 +206,12 @@ func (u *Updater) Or(fns ...dialect.Condition) *Updater {
 	if u.where.Len() == 0 {
 		u.where.WriteString("(")
 	} else {
-		u.where.WriteString(types.Operator_or + "(")
+		u.where.WriteString(dialect.Operator_or + "(")
 	}
 
 	for i, fn := range fns {
 		if i > 0 {
-			u.where.WriteString(types.Operator_and)
+			u.where.WriteString(dialect.Operator_and)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
@@ -247,7 +246,7 @@ func (u *Updater) Exec(ctx context.Context) (sql.Result, error) {
 
 	lens := len(u.cols) + len(u.exprCols)
 	if lens == 0 {
-		return nil, types.ErrCreateEmpty
+		return nil, dialect.ErrCreateEmpty
 	}
 
 	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
@@ -287,7 +286,7 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 
 	lens := len(beans)
 	if lens == 0 {
-		return nil, types.ErrCreateEmpty
+		return nil, dialect.ErrCreateEmpty
 	}
 
 	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
@@ -329,7 +328,7 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	for i := 1; i < lens; i++ {
 		bean := beans[i]
 		if bean == nil {
-			return nil, types.ErrBeanEmpty
+			return nil, dialect.ErrBeanEmpty
 		}
 		_, vals = bean.AssignValues(u.affect...)
 		u.params = u.params[:0]

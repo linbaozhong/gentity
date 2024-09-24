@@ -10,7 +10,6 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/usertbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"golang.org/x/sync/singleflight"
@@ -61,7 +60,6 @@ func User(exec ace.Executer) UserDaoer {
 	obj := &userDao{}
 	obj.db = exec
 	obj.cache = exec.Cache(db.UserTableName)
-	obj.sg = singleflight.Group{}
 	return obj
 }
 
@@ -88,7 +86,7 @@ func (p *userDao) D() *ace.Deleter {
 // Insert 返回 LastInsertId
 func (p *userDao) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
 	if len(sets) == 0 {
-		return 0, atype.ErrSetterEmpty
+		return 0, dialect.ErrSetterEmpty
 	}
 	result, err := p.C().
 		Set(sets...).
@@ -120,7 +118,7 @@ func (p *userDao) InsertOne(ctx context.Context, bean *db.User, cols ...dialect.
 func (p *userDao) InsertBatch(ctx context.Context, beans []*db.User, cols ...dialect.Field) (int64, error) {
 	lens := len(beans)
 	if lens == 0 {
-		return 0, atype.ErrBeanEmpty
+		return 0, dialect.ErrBeanEmpty
 	}
 	args := make([]dialect.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -139,7 +137,7 @@ func (p *userDao) InsertBatch(ctx context.Context, beans []*db.User, cols ...dia
 // Update
 func (p *userDao) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
 	if len(sets) == 0 {
-		return false, atype.ErrSetterEmpty
+		return false, dialect.ErrSetterEmpty
 	}
 	result, err := p.U().
 		Where(cond...).
@@ -165,7 +163,7 @@ func (p *userDao) UpdateById(ctx context.Context, id uint64, sets ...dialect.Set
 func (p *userDao) UpdateBatch(ctx context.Context, beans []*db.User, cols ...dialect.Field) (bool, error) {
 	lens := len(beans)
 	if lens == 0 {
-		return false, atype.ErrBeanEmpty
+		return false, dialect.ErrBeanEmpty
 	}
 	args := make([]dialect.Modeler, 0, lens)
 	for _, bean := range beans {
@@ -239,7 +237,7 @@ func (p *userDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols 
 	}
 	//
 	if pageSize == 0 {
-		pageSize = atype.PageSize
+		pageSize = dialect.PageSize
 	}
 	//
 	rows, err := c.Where(cond...).
@@ -315,14 +313,14 @@ func (p *userDao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...di
 func (p *userDao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
 	c := p.R().Cols(usertbl.ID)
 	rows, err := c.Where(cond...).
-		Limit(atype.MaxLimit).
+		Limit(dialect.MaxLimit).
 		Query(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	ids := make([]any, 0, atype.PageSize)
+	ids := make([]any, 0, dialect.PageSize)
 	for rows.Next() {
 		var id uint64
 		if err = rows.Scan(&id); err != nil {
@@ -338,14 +336,14 @@ func (p *userDao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, er
 func (p *userDao) Columns(ctx context.Context, col dialect.Field, cond ...dialect.Condition) ([]any, error) {
 	c := p.R().Cols(col)
 	rows, err := c.Where(cond...).
-		Limit(atype.MaxLimit).
+		Limit(dialect.MaxLimit).
 		Query(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	cols := make([]any, 0, atype.PageSize)
+	cols := make([]any, 0, dialect.PageSize)
 	for rows.Next() {
 		var v any
 		if err = rows.Scan(&v); err != nil {

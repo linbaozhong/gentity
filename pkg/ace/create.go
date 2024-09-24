@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 	"sync"
@@ -127,7 +126,7 @@ func (c *Creator) Exec(ctx context.Context) (sql.Result, error) {
 
 	lens := len(c.cols)
 	if lens == 0 {
-		return nil, types.ErrCreateEmpty
+		return nil, dialect.ErrCreateEmpty
 	}
 
 	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
@@ -161,7 +160,7 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 
 	lens := len(beans)
 	if lens == 0 {
-		return nil, types.ErrBeanEmpty
+		return nil, dialect.ErrBeanEmpty
 	}
 
 	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
@@ -195,7 +194,7 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	for i := 1; i < lens; i++ {
 		bean := beans[i]
 		if bean == nil {
-			return nil, types.ErrBeanEmpty
+			return nil, dialect.ErrBeanEmpty
 		}
 		// c.command.WriteString(",")
 		_, _vals = bean.AssignValues(c.affect...)

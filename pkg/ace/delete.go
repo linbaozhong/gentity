@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 	"sync"
@@ -96,11 +95,11 @@ func (d *Deleter) Where(fns ...dialect.Condition) *Deleter {
 	if d.where.Len() == 0 {
 		d.where.WriteString("(")
 	} else {
-		d.where.WriteString(types.Operator_and + "(")
+		d.where.WriteString(dialect.Operator_and + "(")
 	}
 	for i, fn := range fns {
 		if i > 0 {
-			d.where.WriteString(types.Operator_and)
+			d.where.WriteString(dialect.Operator_and)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
@@ -128,12 +127,12 @@ func (d *Deleter) And(fns ...dialect.Condition) *Deleter {
 	if d.where.Len() == 0 {
 		d.where.WriteString("(")
 	} else {
-		d.where.WriteString(types.Operator_and + "(")
+		d.where.WriteString(dialect.Operator_and + "(")
 	}
 
 	for i, fn := range fns {
 		if i > 0 {
-			d.where.WriteString(types.Operator_or)
+			d.where.WriteString(dialect.Operator_or)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
@@ -160,12 +159,12 @@ func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
 	if d.where.Len() == 0 {
 		d.where.WriteString("(")
 	} else {
-		d.where.WriteString(types.Operator_or + "(")
+		d.where.WriteString(dialect.Operator_or + "(")
 	}
 
 	for i, fn := range fns {
 		if i > 0 {
-			d.where.WriteString(types.Operator_and)
+			d.where.WriteString(dialect.Operator_and)
 		}
 		cond, val := fn()
 		// if v, ok := val.(error); ok {
