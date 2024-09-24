@@ -5,16 +5,11 @@ package dao
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
-	"github.com/linbaozhong/gentity/pkg/cachego"
-	"github.com/linbaozhong/gentity/pkg/conv"
-	"golang.org/x/sync/singleflight"
-	"time"
 )
 
 type CompanyDaoer interface {
@@ -52,13 +47,13 @@ type CompanyDaoer interface {
 }
 
 type companyDao struct {
-	db    ace.Executer
-	cache cachego.Cache
-	sg    singleflight.Group
+	db ace.Executer
 }
 
 func Company(exec ace.Executer) CompanyDaoer {
-	return &companyDao{db: exec, cache: exec.Cache(db.CompanyTableName)}
+	obj := &companyDao{}
+	obj.db = exec
+	return obj
 }
 
 // C Create company
@@ -258,23 +253,7 @@ func (p *companyDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 
 // GetByID 按主键读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *companyDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.Company, bool, error) {
-	obj, has, e := p.getCache(ctx, id)
-	if has {
-		return obj, has, nil
-	}
-
-	v, e, _ := p.sg.Do(conv.Interface2String(id), func() (interface{}, error) {
-		obj, has, e = p.Get4Cols(ctx, cols, companytbl.Id.Eq(id))
-		if has {
-			e = p.setCache(ctx, obj)
-		}
-		return obj, e
-	})
-	if v != nil {
-		return v.(*db.Company), true, e
-	}
-
-	return nil, false, e
+	return p.Get4Cols(ctx, cols, companytbl.Id.Eq(id))
 }
 
 // Get 按条件读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -384,37 +363,5 @@ func (p *companyDao) Exists(ctx context.Context, cond ...dialect.Condition) (boo
 
 // onUpdate
 func (p *companyDao) onUpdate(ctx context.Context, ids ...uint64) error {
-	for _, id := range ids {
-		if err := p.cache.Delete(ctx, cachego.GetIdHashKey(conv.Interface2String(id))); err != nil {
-			return err
-		}
-	}
-
-	return p.cache.PrefixDelete(ctx, "s:")
-}
-
-// getCache
-func (p *companyDao) getCache(ctx context.Context, id uint64) (*db.Company, bool, error) {
-	s, err := p.cache.Fetch(ctx, cachego.GetIdHashKey(conv.Interface2String(id)))
-	if err != nil {
-		return nil, false, err
-	}
-	if len(s) == 0 {
-		return nil, false, nil
-	}
-	obj := db.NewCompany()
-	err = json.Unmarshal(s, obj)
-	if err != nil {
-		return nil, false, err
-	}
-	return obj, true, nil
-}
-
-// setCache
-func (p *companyDao) setCache(ctx context.Context, obj *db.Company) error {
-	s, err := json.Marshal(obj)
-	if err != nil {
-		return err
-	}
-	return p.cache.Save(ctx, cachego.GetIdHashKey(conv.Interface2String(obj.Id)), string(s), time.Minute*10)
+	return nil
 }

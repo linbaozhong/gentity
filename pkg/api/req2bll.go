@@ -15,6 +15,7 @@
 package api
 
 import (
+	"context"
 	"github.com/linbaozhong/gentity/pkg/api/iface"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -27,7 +28,7 @@ var (
 
 func Post[A, B any](
 	ctx Context,
-	fn func(ctx Context, req *A, resp *B) error,
+	fn func(ctx context.Context, req *A, resp *B) error,
 ) {
 	var req A
 	if e := ctx.ReadJSON(&req); e != nil {
@@ -51,7 +52,7 @@ func Post[A, B any](
 
 func Get[A, B any](
 	ctx Context,
-	fn func(ctx Context, req *A, resp *B) error,
+	fn func(ctx context.Context, req *A, resp *B) error,
 ) {
 	var req A
 	if e := ctx.ReadQuery(&req); e != nil {

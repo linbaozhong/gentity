@@ -14,6 +14,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"golang.org/x/sync/singleflight"
+	"time"
 )
 
 type UserDaoer interface {
@@ -57,7 +58,11 @@ type userDao struct {
 }
 
 func User(exec ace.Executer) UserDaoer {
-	return &userDao{db: exec, cache: exec.Cache(db.UserTableName)}
+	obj := &userDao{}
+	obj.db = exec
+	obj.cache = exec.Cache(db.UserTableName)
+	obj.sg = singleflight.Group{}
+	return obj
 }
 
 // C Create user

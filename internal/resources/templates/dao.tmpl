@@ -9,18 +9,18 @@ package dao
 import (
 	{{- if .HasCache}}
 	"time"
+	"encoding/json"
+	"golang.org/x/sync/singleflight"
+	"github.com/linbaozhong/gentity/pkg/cachego"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	{{- end}}
 	"context"
 	"database/sql"
-	"encoding/json"
 	"{{.ModulePath}}/{{.PackageName}}"
 	"{{.ModulePath}}/define/table/{{$structNameLower}}tbl"
-	"golang.org/x/sync/singleflight"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
-	"github.com/linbaozhong/gentity/pkg/cachego"
-	"github.com/linbaozhong/gentity/pkg/conv"
 )
 
 type {{.StructName}}Daoer interface {
@@ -59,12 +59,19 @@ type {{.StructName}}Daoer interface {
 
 type {{.TableName}}Dao struct {
 	db    ace.Executer
+{{- if .HasCache}}
 	cache cachego.Cache
 	sg singleflight.Group
+{{- end}}
 }
 
 func {{.StructName}}(exec ace.Executer) {{$structName}}Daoer {
-	return &{{.TableName}}Dao{db: exec, cache: exec.Cache({{.PackageName}}.{{$structName}}TableName)}
+	obj := &{{.TableName}}Dao{}
+	obj.db = exec
+{{- if .HasCache}}
+	obj.cache = exec.Cache({{.PackageName}}.{{$structName}}TableName)
+{{- end}}
+	return obj
 }
 
 // C Create {{ .TableName }}
@@ -265,6 +272,7 @@ func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize u
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *{{.TableName}}Dao) GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, cols ...dialect.Field) (*{{.PackageName}}.{{.StructName}}, bool, error) {
+{{- if .HasCache}}
 	obj,has,e:=p.getCache(ctx, {{index .PrimaryKey 1}})
 	if has{
 		return obj,has,nil
@@ -282,6 +290,9 @@ func (p *{{.TableName}}Dao) GetByID(ctx context.Context,{{index .PrimaryKey 1}} 
 	}
 
 	return nil,false,e
+{{- else}}
+	return p.Get4Cols(ctx, cols, {{$structNameLower}}tbl.{{index .PrimaryKey 0}}.Eq({{index .PrimaryKey 1}}))
+{{- end}}
 }
 
 // Get 按条件读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -392,6 +403,7 @@ func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...dialect.Conditio
 
 // onUpdate
 func (p *{{.TableName}}Dao) onUpdate(ctx context.Context, ids ...{{index .PrimaryKey 2}}) error {
+{{- if .HasCache}}
 	for _, id := range ids {
 		if err := p.cache.Delete(ctx, cachego.GetIdHashKey(conv.Interface2String(id))); err != nil {
 			return err
@@ -399,8 +411,12 @@ func (p *{{.TableName}}Dao) onUpdate(ctx context.Context, ids ...{{index .Primar
 	}
 
 	return p.cache.PrefixDelete(ctx, "s:")
+{{- else}}
+	return nil
+{{- end}}
 }
 
+{{if .HasCache}}
 // getCache
 func (p *{{.TableName}}Dao) getCache(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (*{{.PackageName}}.{{$structName}}, bool, error) {
 	s,err := p.cache.Fetch(ctx, cachego.GetIdHashKey(conv.Interface2String({{index .PrimaryKey 1}})))
@@ -426,3 +442,4 @@ func (p *{{.TableName}}Dao) setCache(ctx context.Context, obj *{{.PackageName}}.
 	}
 	return p.cache.Save(ctx, cachego.GetIdHashKey(conv.Interface2String(obj.{{index .PrimaryKey 0}})), string(s), {{.CacheData}})
 }
+{{end}}
