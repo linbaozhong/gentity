@@ -43,7 +43,7 @@ type (
 		// Exists 是否存在符合条件的数据
 		Exists(ctx context.Context, cond ...Condition) (bool, error)
 		// Sum 获取指定列的总和
-		Sum(ctx context.Context, col Field, cond ...Condition) (int64, error)
+		Sum(ctx context.Context, col []Field, cond ...Condition) (map[string]any, error)
 		// Count 获取符合条件的数据总数
 		Count(ctx context.Context, cond ...Condition) (int64, error)
 		// Delete 删除符合条件的数据

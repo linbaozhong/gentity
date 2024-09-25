@@ -46,6 +46,7 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
+		inPool        bool //是否在池中
 	}
 )
 
@@ -65,6 +66,7 @@ func newSelect(db Executer, tableName string) *Selector {
 		obj.err = errors.New("db or table is nil")
 		return obj
 	}
+	obj.inPool = false
 	obj.db = db
 	obj.table = tableName
 	obj.err = nil
@@ -74,7 +76,7 @@ func newSelect(db Executer, tableName string) *Selector {
 }
 
 func (s *Selector) Free() {
-	if s == nil {
+	if s == nil || s.inPool {
 		return
 	}
 
@@ -83,6 +85,7 @@ func (s *Selector) Free() {
 		log.Info(s.String())
 	}
 
+	s.inPool = true
 	s.table = ""
 	s.cols = s.cols[:0]
 	s.funcs = s.funcs[:0]
@@ -409,109 +412,175 @@ func (s *Selector) parse() []dialect.Field {
 }
 
 // query
-func (s *Selector) query(ctx context.Context) (*sql.Rows, []dialect.Field, error) {
-	defer s.Free()
-	if s.err != nil {
-		return nil, nil, s.err
-	}
-
-	cols := s.parse()
+func (s *Selector) query(ctx context.Context) (*sql.Rows, error) {
+	_ = s.parse()
 
 	stmt, err := s.db.PrepareContext(ctx, s.command.String())
 	if err != nil {
-		return nil, cols, err
+		return nil, err
 	}
 	defer stmt.Close()
 
 	row, err := stmt.QueryContext(ctx, s.whereParams...)
-	return row, cols, err
+	return row, err
 }
 
 // Query
 func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
-	rows, _, err := s.query(ctx)
-	return rows, err
-}
-
-// queryRow
-func (s *Selector) queryRow(ctx context.Context) (*sql.Row, []dialect.Field, error) {
 	defer s.Free()
 	if s.err != nil {
-		return nil, nil, s.err
+		return nil, s.err
 	}
 
-	cols := s.parse()
-
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	if err != nil {
-		return nil, cols, err
-	}
-	defer stmt.Close()
-
-	return stmt.QueryRowContext(ctx, s.whereParams...), cols, nil
+	return s.query(ctx)
 }
 
 // QueryRow
 func (s *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
-	row, _, err := s.queryRow(ctx)
-	return row, err
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	_ = s.parse()
+
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	return stmt.QueryRowContext(ctx, s.whereParams...), nil
 }
 
-// Get
-func (s *Selector) Get(ctx context.Context, bean dialect.Modeler) (bool, error) {
-	row, cols, err := s.queryRow(ctx)
-	if err != nil {
-		return false, err
+// Get 返回单个数据，dest 必须是指针
+func (s *Selector) Get(ctx context.Context, dest any) error {
+	defer s.Free()
+	if s.err != nil {
+		return s.err
 	}
 
-	err = row.Scan(bean.AssignPtr(cols...)...)
+	s.Limit(1)
+
+	rows, err := s.query(ctx)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
-		return false, err
+		return err
 	}
-	return true, nil
+	defer rows.Close()
+
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+
+	return r.scanAny(dest, false)
 }
 
-// Gets
-func (s *Selector) Gets(ctx context.Context, beans dialect.Modeler) (bool, error) {
-	rows, cols, err := s.query(ctx)
+// Gets 返回数据切片，dest 必须是指针
+func (s *Selector) Gets(ctx context.Context, dest any) error {
+	defer s.Free()
+	if s.err != nil {
+		return s.err
+	}
+
+	rows, err := s.query(ctx)
 	if err != nil {
-		return false, err
+		return err
+	}
+	defer rows.Close()
+
+	return scanAll(rows, dest, false)
+}
+
+// Map 返回 map[string]any，用于列数未知的情况
+func (s *Selector) Map(ctx context.Context) (map[string]any, error) {
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
 	}
 
-	if len(beans) == 0 {
-		return false, nil
+	s.Limit(1)
+
+	rows, err := s.query(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	dest := make(map[string]any)
+	return dest, r.MapScan(dest)
+}
+
+// Maps 返回 map[string]any 切片 []map[string]any，用于列数未知的情况
+func (s *Selector) Maps(ctx context.Context) ([]map[string]any, error) {
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
 	}
 
-	for rows.Next() {
-		beans[0].
-			vals := beans.AssignPtr(args...)
-		err := rows.Scan(vals...)
+	rows, err := s.query(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	defer rs.Close()
+
+	dests := make([]map[string]any, 0)
+	for rs.Next() {
+		dest := make(map[string]any)
+		err = rs.MapScan(dest)
 		if err != nil {
-			return nil, false, err
+			break
 		}
-		companys = append(companys, p)
+		dests = append(dests, dest)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, false, err
-	}
-	if len(companys) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
-	return companys, true, nil
 
-	bean := beans[0]
-	bean.Scan(cols...)
-	err = rows.Scan(bean.AssignPtr(cols...)...)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
-		return false, err
+	return dests, rs.Err()
+}
+
+// Slice 返回切片 []any，用于列数未知的情况
+func (s *Selector) Slice(ctx context.Context) ([]any, error) {
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
 	}
-	return true, nil
+
+	s.Limit(1)
+
+	rows, err := s.query(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	return r.SliceScan()
+}
+
+// Slices 返回 map[string]any 切片 []map[string]any，用于列数未知的情况
+func (s *Selector) Slices(ctx context.Context) ([][]any, error) {
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	rows, err := s.query(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	defer rs.Close()
+
+	dests := make([][]any, 0)
+	for rs.Next() {
+		dest, err := rs.SliceScan()
+		if err != nil {
+			break
+		}
+		dests = append(dests, dest)
+	}
+
+	return dests, rs.Err()
 }
 
 // Count
@@ -546,15 +615,18 @@ func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64,
 }
 
 // Sum
-func (s *Selector) Sum(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (int64, error) {
+func (s *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer s.Free()
 	if s.err != nil {
-		return 0, s.err
+		return nil, s.err
 	}
 
-	s.Funcs(col.Sum()).Where(cond...)
+	for _, col := range cols {
+		s.Funcs(col.Sum())
+	}
+	s.Where(cond...)
 	s.command.WriteString("SELECT ")
-	s.command.WriteString(s.funcs[0])
+	s.command.WriteString(strings.Join(s.funcs, ","))
 	// FROM TABLE
 	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
 	// WHERE
@@ -564,15 +636,20 @@ func (s *Selector) Sum(ctx context.Context, col dialect.Field, cond ...dialect.C
 
 	stmt, err := s.db.PrepareContext(ctx, s.command.String())
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	defer stmt.Close()
 
 	row := stmt.QueryRowContext(ctx, s.whereParams...)
-	var sum int64
-	err = row.Scan(&sum)
+	var sum = make([]any, len(cols))
+	err = row.Scan(sum...)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return sum, nil
+
+	sums := make(map[string]any, len(cols))
+	for i := range sum {
+		sums[cols[i].Name] = sum[i]
+	}
+	return sums, nil
 }

@@ -3,6 +3,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
 	syc "github.com/linbaozhong/gentity/pkg/cachego/sync"
 	"golang.org/x/sync/singleflight"
 	"sync"
@@ -30,6 +31,7 @@ type (
 	}
 
 	Executer interface {
+		Mapper() *reflectx.Mapper
 		BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
 		PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
 		QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
@@ -45,6 +47,9 @@ type (
 
 	DB struct {
 		*sql.DB
+		driverName string
+		mapper     *reflectx.Mapper
+
 		debug     bool // 如果是调试模式，则打印sql命令及错误
 		cacheType cacheType
 		cacheOpts any
@@ -70,15 +75,23 @@ func Connect(driverName, dns string) (*DB, error) {
 		return nil, e
 	}
 	if e = db.Ping(); e != nil {
+		db.Close()
 		log.Panic(e)
 		return nil, e
 	}
 
 	obj := &DB{}
 	obj.DB = db
+	obj.driverName = driverName
+	obj.mapper = mapper()
 	obj.debug = false
 
 	return obj, e
+}
+
+// Mapper
+func (s *DB) Mapper() *reflectx.Mapper {
+	return s.mapper
 }
 
 // SetDebug

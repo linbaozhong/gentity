@@ -360,8 +360,8 @@ func (p *userDao) Count(ctx context.Context, cond ...dialect.Condition) (int64, 
 }
 
 // Sum
-func (p *userDao) Sum(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (int64, error) {
-	return p.R().Sum(ctx, col, cond...)
+func (p *userDao) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+	return p.R().Sum(ctx, cols, cond...)
 }
 
 // Exists

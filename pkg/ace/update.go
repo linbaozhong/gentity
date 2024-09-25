@@ -38,6 +38,7 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
+		inPool        bool
 	}
 	expr struct {
 		colName string
@@ -61,6 +62,8 @@ func NewUpdate(db Executer, tableName string) *Updater {
 		obj.err = errors.New("db or table is nil")
 		return obj
 	}
+
+	obj.inPool = false
 	obj.db = db
 	obj.table = tableName
 	obj.err = nil
@@ -71,7 +74,7 @@ func NewUpdate(db Executer, tableName string) *Updater {
 }
 
 func (u *Updater) Free() {
-	if u == nil {
+	if u == nil || u.inPool {
 		return
 	}
 
@@ -80,6 +83,7 @@ func (u *Updater) Free() {
 		log.Info(u.String())
 	}
 
+	u.inPool = true
 	u.table = ""
 	u.affect = u.affect[:0]
 	u.cols = u.cols[:0]

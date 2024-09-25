@@ -336,8 +336,8 @@ func (p *companyDao) Count(ctx context.Context, cond ...dialect.Condition) (int6
 }
 
 // Sum
-func (p *companyDao) Sum(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (int64, error) {
-	return p.R().Sum(ctx, col, cond...)
+func (p *companyDao) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+	return p.R().Sum(ctx, cols, cond...)
 }
 
 // Exists

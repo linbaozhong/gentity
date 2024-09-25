@@ -35,6 +35,7 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
+		inPool        bool //是否在池中
 	}
 )
 
@@ -54,6 +55,7 @@ func newCreate(db Executer, tableName string) *Creator {
 		obj.err = errors.New("db or table is nil")
 		return obj
 	}
+	obj.inPool = false
 	obj.db = db
 	obj.table = tableName
 	obj.err = nil
@@ -63,7 +65,7 @@ func newCreate(db Executer, tableName string) *Creator {
 }
 
 func (c *Creator) Free() {
-	if c == nil {
+	if c == nil || c.inPool {
 		return
 	}
 
@@ -72,6 +74,7 @@ func (c *Creator) Free() {
 		log.Info(c.String())
 	}
 
+	c.inPool = true
 	c.table = ""
 	c.affect = c.affect[:0]
 	c.cols = c.cols[:0]
