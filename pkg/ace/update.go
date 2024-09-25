@@ -38,7 +38,7 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
-		inPool        bool
+		mu            sync.Mutex
 	}
 	expr struct {
 		colName string
@@ -63,7 +63,6 @@ func NewUpdate(db Executer, tableName string) *Updater {
 		return obj
 	}
 
-	obj.inPool = false
 	obj.db = db
 	obj.table = tableName
 	obj.err = nil
@@ -74,7 +73,10 @@ func NewUpdate(db Executer, tableName string) *Updater {
 }
 
 func (u *Updater) Free() {
-	if u == nil || u.inPool {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+
+	if u == nil || u.table == "" {
 		return
 	}
 
@@ -83,7 +85,6 @@ func (u *Updater) Free() {
 		log.Info(u.String())
 	}
 
-	u.inPool = true
 	u.table = ""
 	u.affect = u.affect[:0]
 	u.cols = u.cols[:0]

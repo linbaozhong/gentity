@@ -214,7 +214,6 @@ func (p *companyDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ..
 	}
 
 	obj := db.NewCompany()
-	defer obj.Free()
 
 	err = row.Scan(obj.AssignPtr(cols...)...)
 	switch err {
@@ -249,7 +248,6 @@ func (p *companyDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 	defer rows.Close()
 
 	obj := db.NewCompany()
-	defer obj.Free()
 
 	objs, has, err := obj.Scan(rows, cols...)
 	if has {

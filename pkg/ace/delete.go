@@ -34,7 +34,7 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
-		inPool        bool
+		mu            sync.Mutex
 	}
 )
 
@@ -54,7 +54,7 @@ func newDelete(db Executer, tableName string) *Deleter {
 		obj.err = errors.New("db or table is nil")
 		return obj
 	}
-	obj.inPool = false
+
 	obj.db = db
 	obj.table = tableName
 	obj.err = nil
@@ -65,7 +65,10 @@ func newDelete(db Executer, tableName string) *Deleter {
 }
 
 func (d *Deleter) Free() {
-	if d == nil || d.inPool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	if d == nil || d.table == "" {
 		return
 	}
 
@@ -74,7 +77,6 @@ func (d *Deleter) Free() {
 		log.Info(d.String())
 	}
 
-	d.inPool = true
 	d.table = ""
 	d.where.Reset()
 	d.whereParams = d.whereParams[:0]

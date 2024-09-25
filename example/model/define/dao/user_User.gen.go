@@ -206,7 +206,6 @@ func (p *userDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...di
 	}
 
 	obj := db.NewUser()
-	defer obj.Free()
 
 	err = row.Scan(obj.AssignPtr(cols...)...)
 	switch err {
@@ -241,7 +240,6 @@ func (p *userDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols 
 	defer rows.Close()
 
 	obj := db.NewUser()
-	defer obj.Free()
 
 	objs, has, err := obj.Scan(rows, cols...)
 	if has {

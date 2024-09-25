@@ -6,44 +6,12 @@ import (
 	"database/sql"
 	"github.com/linbaozhong/gentity/example/model/define/table/usertbl"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"sync"
-	"time"
 )
 
 const UserTableName = "user"
 
-var (
-	userPool = sync.Pool{
-		New: func() interface{} {
-			return &User{}
-		},
-	}
-)
-
 func NewUser() *User {
-	obj := userPool.Get().(*User)
-	obj.reset()
-	return obj
-}
-
-// Free
-func (p *User) Free() {
-	if p == nil {
-		return
-	}
-	userPool.Put(p)
-}
-
-// reset
-func (p *User) reset() {
-	p.ID = 0
-	p.Name = ""
-	p.Avatar = ""
-	p.Nickname = ""
-	p.Status = 0
-	p.IsAllow = false
-	p.CreatedTime = time.Time{}
-
+	return &User{}
 }
 
 func (p *User) TableName() string {

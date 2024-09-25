@@ -58,7 +58,7 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 		buf.WriteString("type " + util.ParseField(table.Name) + " struct {\n")
 		for _, col := range table.ColumnsX {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size, col.Unsigned))
-			buf.WriteString("\t`json:\"" + col.Name + "\" db:\"'" + col.Name + "'") //
+			buf.WriteString("\t`json:\"" + col.Name + ",omitempty\" db:\"'" + col.Name + "'") //
 			if strings.ToUpper(col.Key) == dialect.PrimaryKey {
 				buf.WriteString(" pk")
 			}
@@ -67,6 +67,7 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 			}
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.TrimSpace(col.Comment)))
 		}
+		//buf.WriteString("\tinPool\tbool\t`json:\"inPool,omitempty\"` \n")
 		buf.WriteString("} \n\n")
 	}
 	return buf.Bytes(), nil
@@ -86,7 +87,7 @@ func DB2Struct(tables map[string][]sqlparser.Column, packageName string) ([]byte
 		buf.WriteString("type " + util.ParseField(table) + " struct {\n")
 		for _, col := range columns {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size, col.Unsigned))
-			buf.WriteString("\t`json:\"" + col.Name + "\" db:\"'" + col.Name + "'") //
+			buf.WriteString("\t`json:\"" + col.Name + ",omitempty\" db:\"'" + col.Name + "'") //
 			if strings.ToUpper(col.Key) == dialect.PrimaryKey {
 				buf.WriteString(" pk")
 			}
@@ -95,6 +96,7 @@ func DB2Struct(tables map[string][]sqlparser.Column, packageName string) ([]byte
 			}
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.ReplaceAll(col.Comment, "\n", "")))
 		}
+		//buf.WriteString("\tinPool\tbool\t`json:\"inPool,omitempty\" \n")
 		buf.WriteString("} \n\n")
 	}
 	return buf.Bytes(), nil

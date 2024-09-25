@@ -46,7 +46,7 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
-		inPool        bool //是否在池中
+		mu            sync.Mutex
 	}
 )
 
@@ -66,7 +66,7 @@ func newSelect(db Executer, tableName string) *Selector {
 		obj.err = errors.New("db or table is nil")
 		return obj
 	}
-	obj.inPool = false
+
 	obj.db = db
 	obj.table = tableName
 	obj.err = nil
@@ -76,7 +76,10 @@ func newSelect(db Executer, tableName string) *Selector {
 }
 
 func (s *Selector) Free() {
-	if s == nil || s.inPool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s == nil || s.table == "" {
 		return
 	}
 
@@ -85,7 +88,6 @@ func (s *Selector) Free() {
 		log.Info(s.String())
 	}
 
-	s.inPool = true
 	s.table = ""
 	s.cols = s.cols[:0]
 	s.funcs = s.funcs[:0]

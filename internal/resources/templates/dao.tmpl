@@ -225,7 +225,6 @@ func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []dialect.Field, 
 	}
 
 	obj := {{.PackageName}}.New{{.StructName}}()
-	defer obj.Free()
 
 	err = row.Scan(obj.AssignPtr(cols...)...)
 	switch err {
@@ -260,7 +259,6 @@ func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize u
 	defer rows.Close()
 
 	obj := {{.PackageName}}.New{{.StructName}}()
-	defer obj.Free()
 
 	objs, has, err := obj.Scan(rows, cols...)
 	if has {
