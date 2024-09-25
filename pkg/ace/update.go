@@ -38,7 +38,6 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
-		mu            sync.Mutex
 	}
 	expr struct {
 		colName string
@@ -73,9 +72,6 @@ func NewUpdate(db Executer, tableName string) *Updater {
 }
 
 func (u *Updater) Free() {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-
 	if u == nil || u.table == "" {
 		return
 	}
@@ -95,6 +91,7 @@ func (u *Updater) Free() {
 	u.params = u.params[:0]
 
 	updatePool.Put(u)
+	Dispose(u)
 }
 
 func (u *Updater) String() string {

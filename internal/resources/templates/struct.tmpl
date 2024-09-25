@@ -8,15 +8,46 @@ package {{.PackageName}}
 
 import (
 	"database/sql"
+	"sync"
+	{{- if .HasTime }}
+	"time"
+	{{- end}}
 	"{{.ModulePath}}/define/table/{{ $tablename }}tbl"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
 const {{$structName}}TableName = "{{.TableName}}"
 
+var (
+	{{lower .StructName}}Pool = sync.Pool{
+		New: func() interface{} {
+			return &{{.StructName}}{}
+		},
+	}
+)
+
 func New{{.StructName}}() *{{.StructName}} {
-	return &{{.StructName}}{}
+	obj := {{lower .StructName}}Pool.Get().(*{{.StructName}})
+	return obj
 }
+
+// Free
+func (p *{{.StructName}}) Free() {
+	if p == nil {
+		return
+	}
+	p.reset()
+	{{lower .StructName}}Pool.Put(p)
+	ace.Dispose(p)
+}
+
+// reset
+func (p *{{.StructName}}) reset() {
+	{{range $key, $value := .Columns}}p.{{index $value 0}} = {{getTypeValue $value}}
+	{{end}}
+}
+
 
 func (p *{{.StructName}}) TableName() string {
 	return {{$structName}}TableName

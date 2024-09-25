@@ -67,7 +67,6 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 			}
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.TrimSpace(col.Comment)))
 		}
-		//buf.WriteString("\tinPool\tbool\t`json:\"inPool,omitempty\"` \n")
 		buf.WriteString("} \n\n")
 	}
 	return buf.Bytes(), nil
@@ -96,7 +95,6 @@ func DB2Struct(tables map[string][]sqlparser.Column, packageName string) ([]byte
 			}
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.ReplaceAll(col.Comment, "\n", "")))
 		}
-		//buf.WriteString("\tinPool\tbool\t`json:\"inPool,omitempty\" \n")
 		buf.WriteString("} \n\n")
 	}
 	return buf.Bytes(), nil

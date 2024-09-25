@@ -15,11 +15,46 @@
 package types
 
 import (
-	"reflect"
+	"fmt"
+	"sync"
 	"testing"
 )
 
+type A struct {
+	Name string
+}
+
+var pool = sync.Pool{
+	New: func() interface{} {
+		fmt.Println("New")
+		return &A{}
+	},
+}
+
+func NewA() *A {
+	return pool.Get().(*A)
+}
+func Dispose(x any) {
+	x = nil
+}
+func (a *A) Free() {
+	if a == nil {
+		return
+	}
+	a.Name = ""
+	pool.Put(&(*a))
+	Dispose(a)
+}
+
 func TestType(t *testing.T) {
-	var a *AceInt64
-	t.Log(reflect.TypeOf(a))
+	for i := 0; i < 10; i++ {
+		fmt.Println(i)
+		a := NewA()
+		fmt.Println(a)
+		a.Free()
+		a.Name = "world"
+		fmt.Println(a)
+		a.Free()
+		a.Name = "hahaha"
+	}
 }

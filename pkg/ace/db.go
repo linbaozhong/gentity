@@ -182,3 +182,7 @@ func (s *DB) D(tableName string) *Deleter {
 func (s *DB) R(tableName string) *Selector {
 	return newSelect(s, tableName)
 }
+
+func Dispose(obj any) {
+	obj = nil
+}

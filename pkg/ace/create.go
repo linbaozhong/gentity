@@ -35,7 +35,6 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
-		mu            sync.Mutex
 	}
 )
 
@@ -65,9 +64,6 @@ func newCreate(db Executer, tableName string) *Creator {
 }
 
 func (c *Creator) Free() {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	if c == nil || c.table == "" {
 		return
 	}
@@ -84,6 +80,7 @@ func (c *Creator) Free() {
 	c.params = c.params[:0]
 
 	createPool.Put(c)
+	Dispose(c)
 }
 
 func (c *Creator) String() string {

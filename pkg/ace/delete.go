@@ -34,7 +34,6 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
-		mu            sync.Mutex
 	}
 )
 
@@ -65,9 +64,6 @@ func newDelete(db Executer, tableName string) *Deleter {
 }
 
 func (d *Deleter) Free() {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
 	if d == nil || d.table == "" {
 		return
 	}
@@ -83,6 +79,7 @@ func (d *Deleter) Free() {
 	d.command.Reset()
 
 	deletePool.Put(d)
+	Dispose(d)
 }
 
 func (d *Deleter) String() string {

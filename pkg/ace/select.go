@@ -46,7 +46,6 @@ type (
 		command       strings.Builder
 		commandString strings.Builder
 		err           error
-		mu            sync.Mutex
 	}
 )
 
@@ -76,9 +75,6 @@ func newSelect(db Executer, tableName string) *Selector {
 }
 
 func (s *Selector) Free() {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	if s == nil || s.table == "" {
 		return
 	}
@@ -104,6 +100,7 @@ func (s *Selector) Free() {
 	s.command.Reset()
 
 	selectPool.Put(s)
+	Dispose(s)
 }
 
 func (s *Selector) String() string {

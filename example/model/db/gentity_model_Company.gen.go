@@ -5,13 +5,60 @@ package db
 import (
 	"database/sql"
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"sync"
+	"time"
 )
 
 const CompanyTableName = "company"
 
+var (
+	companyPool = sync.Pool{
+		New: func() interface{} {
+			return &Company{}
+		},
+	}
+)
+
 func NewCompany() *Company {
-	return &Company{}
+	obj := companyPool.Get().(*Company)
+	return obj
+}
+
+// Free
+func (p *Company) Free() {
+	if p == nil {
+		return
+	}
+	p.reset()
+	companyPool.Put(p)
+	ace.Dispose(p)
+}
+
+// reset
+func (p *Company) reset() {
+	p.Id = 0
+	p.Platform = ""
+	p.CorpId = ""
+	p.CorpType = 0
+	p.FullCorpName = ""
+	p.CorpType2 = 0
+	p.CorpName = ""
+	p.Industry = ""
+	p.IsAuthenticated = false
+	p.LicenseCode = ""
+	p.CorpLogoUrl = ""
+	p.InviteUrl = ""
+	p.InviteCode = ""
+	p.IsEcologicalCorp = false
+	p.AuthLevel = 0
+	p.AuthChannel = ""
+	p.AuthChannelType = ""
+	p.State = 0
+	p.StateTime = time.Time{}
+	p.CreatedTime = time.Time{}
+
 }
 
 func (p *Company) TableName() string {
