@@ -7,6 +7,7 @@ import (
 )
 
 // tablename company
+// cache time.Minute time.Minute 1000
 type Company struct {
 	Id               uint64    `json:"id" db:"'id' pk"`                              // 授权方企业本地id
 	Platform         string    `json:"platform" db:"'platform'"`                     // 授权方企业的平台方

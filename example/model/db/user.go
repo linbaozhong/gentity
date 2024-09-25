@@ -17,9 +17,6 @@ package db
 import "time"
 
 // tablename user
-// cachedata time.Minute * 10
-// cachelist time.Minute * 1
-// cachelimit   1000
 type User struct {
 	ID          uint64    `json:"id" db:"'id' pk auto"`
 	Name        string    `json:"name" db:"name"`

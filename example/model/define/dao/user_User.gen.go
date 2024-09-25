@@ -5,15 +5,10 @@ package dao
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/usertbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/cachego"
-	"github.com/linbaozhong/gentity/pkg/conv"
-	"golang.org/x/sync/singleflight"
-	"time"
 )
 
 type UserDaoer interface {
@@ -51,15 +46,12 @@ type UserDaoer interface {
 }
 
 type userDao struct {
-	db    ace.Executer
-	cache cachego.Cache
-	sg    singleflight.Group
+	db ace.Executer
 }
 
 func User(exec ace.Executer) UserDaoer {
 	obj := &userDao{}
 	obj.db = exec
-	obj.cache = exec.Cache(db.UserTableName)
 	return obj
 }
 
@@ -260,23 +252,7 @@ func (p *userDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols 
 
 // GetByID 按主键读取一个user对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *userDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.User, bool, error) {
-	obj, has, e := p.getCache(ctx, id)
-	if has {
-		return obj, has, nil
-	}
-
-	v, e, _ := p.sg.Do(conv.Interface2String(id), func() (interface{}, error) {
-		obj, has, e = p.Get4Cols(ctx, cols, usertbl.ID.Eq(id))
-		if has {
-			e = p.setCache(ctx, obj)
-		}
-		return obj, e
-	})
-	if v != nil {
-		return v.(*db.User), true, e
-	}
-
-	return nil, false, e
+	return p.Get4Cols(ctx, cols, usertbl.ID.Eq(id))
 }
 
 // Get 按条件读取一个user对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -386,37 +362,5 @@ func (p *userDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, 
 
 // onUpdate
 func (p *userDao) onUpdate(ctx context.Context, ids ...uint64) error {
-	for _, id := range ids {
-		if err := p.cache.Delete(ctx, cachego.GetIdHashKey(conv.Interface2String(id))); err != nil {
-			return err
-		}
-	}
-
-	return p.cache.PrefixDelete(ctx, "s:")
-}
-
-// getCache
-func (p *userDao) getCache(ctx context.Context, id uint64) (*db.User, bool, error) {
-	s, err := p.cache.Fetch(ctx, cachego.GetIdHashKey(conv.Interface2String(id)))
-	if err != nil {
-		return nil, false, err
-	}
-	if len(s) == 0 {
-		return nil, false, nil
-	}
-	obj := db.NewUser()
-	err = json.Unmarshal(s, obj)
-	if err != nil {
-		return nil, false, err
-	}
-	return obj, true, nil
-}
-
-// setCache
-func (p *userDao) setCache(ctx context.Context, obj *db.User) error {
-	s, err := json.Marshal(obj)
-	if err != nil {
-		return err
-	}
-	return p.cache.Save(ctx, cachego.GetIdHashKey(conv.Interface2String(obj.ID)), string(s), time.Minute*10)
+	return nil
 }

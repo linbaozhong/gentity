@@ -59,9 +59,9 @@ func parseFile(filename, pkgPath string) error {
 		tempData.HasCache = false
 		tempData.HasPrimaryKey = false
 		tempData.HasState = false
-		tempData.CacheData = ""
-		tempData.CacheList = ""
-		tempData.CacheLimit = ""
+		tempData.CacheData = "time.Minute"
+		tempData.CacheList = "time.Minute"
+		tempData.CacheLimit = "1000"
 		tempData.PrimaryKey = nil
 		// tempData.PrimaryKeyName = ""
 		// tempData.Keys = make([][]string, 0, 1)
@@ -180,23 +180,6 @@ func parseDocs(tmp *TempData, docs []string) {
 				tmp.CacheData = caches[0]
 				tmp.CacheList = caches[1]
 				tmp.CacheLimit = caches[2]
-			}
-			continue
-		} else {
-			if strings.HasPrefix(doc, "cachedata") {
-				tmp.HasCache = true
-				tmp.CacheData = strings.TrimSpace(strings.TrimLeft(doc, "cachedata"))
-				continue
-			}
-			if strings.HasPrefix(doc, "cachelist") {
-				tmp.HasCache = true
-				tmp.CacheList = strings.TrimSpace(strings.TrimLeft(doc, "cachelist"))
-				continue
-			}
-			if strings.HasPrefix(doc, "cachelimit") {
-				tmp.HasCache = true
-				tmp.CacheLimit = strings.TrimSpace(strings.TrimLeft(doc, "cachelimit"))
-				continue
 			}
 		}
 	}

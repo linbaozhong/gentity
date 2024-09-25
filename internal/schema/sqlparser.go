@@ -54,6 +54,7 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 	buf.WriteString(") \n\n")
 	for _, table := range schema {
 		buf.WriteString("// tablename " + table.Name + "\n")
+		buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + util.ParseField(table.Name) + " struct {\n")
 		for _, col := range table.ColumnsX {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size, col.Unsigned))
@@ -81,6 +82,7 @@ func DB2Struct(tables map[string][]sqlparser.Column, packageName string) ([]byte
 
 	for table, columns := range tables {
 		buf.WriteString("// tablename " + table + "\n")
+		buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + util.ParseField(table) + " struct {\n")
 		for _, col := range columns {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size, col.Unsigned))

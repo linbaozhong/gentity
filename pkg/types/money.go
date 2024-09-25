@@ -7,8 +7,8 @@ import (
 
 type Money int64
 
-func (m *Money) MarshalJSON() ([]byte, error) {
-	yuan := strconv.FormatFloat((float64(*m) / 100), 'f', -1, 64)
+func (m Money) MarshalJSON() ([]byte, error) {
+	yuan := strconv.FormatFloat((float64(m) / 100), 'f', -1, 64)
 	return []byte(yuan), nil
 }
 

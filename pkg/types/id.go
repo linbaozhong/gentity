@@ -7,7 +7,7 @@ import (
 
 type ID int64
 
-func (i *ID) MarshalJSON() ([]byte, error) {
+func (i ID) MarshalJSON() ([]byte, error) {
 	return []byte(`"` + i.String() + `"`), nil
 }
 
