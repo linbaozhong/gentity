@@ -165,7 +165,7 @@ func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []dialect.Setter, c
 func (p *{{.TableName}}Dao) UpdateById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, sets ...dialect.Setter) (bool, error) {
     return p.Update(ctx,
         sets,
-       	{{$tablename}}tbl.{{index .PrimaryKey 0}}.Eq({{index .PrimaryKey 1}}),
+       	{{$tablename}}tbl.PrimaryKey.Eq({{index .PrimaryKey 1}}),
     )
 }
 
@@ -205,7 +205,7 @@ func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...dialect.Conditio
 // DeleteById
 func (p *{{.TableName}}Dao) DeleteById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (bool, error) {
     return p.Delete(ctx,
-        {{$tablename}}tbl.{{index .PrimaryKey 0}}.Eq({{index .PrimaryKey 1}}),
+        {{$tablename}}tbl.PrimaryKey.Eq({{index .PrimaryKey 1}}),
 	)
 }
 
@@ -278,7 +278,7 @@ func (p *{{.TableName}}Dao) GetByID(ctx context.Context,{{index .PrimaryKey 1}} 
 	}
 
 	v, e, _ := p.sg.Do(conv.Interface2String({{index .PrimaryKey 1}}), func() (interface{}, error) {
-		obj, has, e = p.Get4Cols(ctx, cols, {{$tablename}}tbl.{{index .PrimaryKey 0}}.Eq({{index .PrimaryKey 1}}))
+		obj, has, e = p.Get4Cols(ctx, cols, {{$tablename}}tbl.PrimaryKey.Eq({{index .PrimaryKey 1}}))
 		if has {
 			e = p.setCache(ctx, obj)
 		}
@@ -290,7 +290,7 @@ func (p *{{.TableName}}Dao) GetByID(ctx context.Context,{{index .PrimaryKey 1}} 
 
 	return nil,false,e
 {{- else}}
-	return p.Get4Cols(ctx, cols, {{$tablename}}tbl.{{index .PrimaryKey 0}}.Eq({{index .PrimaryKey 1}}))
+	return p.Get4Cols(ctx, cols, {{$tablename}}tbl.PrimaryKey.Eq({{index .PrimaryKey 1}}))
 {{- end}}
 }
 
@@ -327,7 +327,7 @@ func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, 
 
 // IDs
 func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols({{$tablename}}tbl.{{index .PrimaryKey 0}})
+	c := p.R().Cols({{$tablename}}tbl.PrimaryKey)
 	rows, err := c.Where(cond...).
 	    Limit(dialect.MaxLimit).
 	    Query(ctx)
@@ -382,7 +382,7 @@ func (p *{{.TableName}}Dao) Sum(ctx context.Context, cols []dialect.Field, cond 
 
 // Exists
 func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	c := p.R().Cols({{$tablename}}tbl.{{index .PrimaryKey 0}}).Where(cond...)
+	c := p.R().Cols({{$tablename}}tbl.PrimaryKey).Where(cond...)
 	row, err := c.QueryRow(ctx)
     if err != nil {
         return false, err

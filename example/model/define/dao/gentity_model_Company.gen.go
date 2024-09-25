@@ -154,7 +154,7 @@ func (p *companyDao) Update(ctx context.Context, sets []dialect.Setter, cond ...
 func (p *companyDao) UpdateById(ctx context.Context, id uint64, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
 		sets,
-		companytbl.Id.Eq(id),
+		companytbl.PrimaryKey.Eq(id),
 	)
 }
 
@@ -194,7 +194,7 @@ func (p *companyDao) Delete(ctx context.Context, cond ...dialect.Condition) (boo
 // DeleteById
 func (p *companyDao) DeleteById(ctx context.Context, id uint64) (bool, error) {
 	return p.Delete(ctx,
-		companytbl.Id.Eq(id),
+		companytbl.PrimaryKey.Eq(id),
 	)
 }
 
@@ -266,7 +266,7 @@ func (p *companyDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Fie
 	}
 
 	v, e, _ := p.sg.Do(conv.Interface2String(id), func() (interface{}, error) {
-		obj, has, e = p.Get4Cols(ctx, cols, companytbl.Id.Eq(id))
+		obj, has, e = p.Get4Cols(ctx, cols, companytbl.PrimaryKey.Eq(id))
 		if has {
 			e = p.setCache(ctx, obj)
 		}
@@ -311,7 +311,7 @@ func (p *companyDao) Find(ctx context.Context, pageIndex, pageSize uint, cond ..
 
 // IDs
 func (p *companyDao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols(companytbl.Id)
+	c := p.R().Cols(companytbl.PrimaryKey)
 	rows, err := c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		Query(ctx)
@@ -366,7 +366,7 @@ func (p *companyDao) Sum(ctx context.Context, cols []dialect.Field, cond ...dial
 
 // Exists
 func (p *companyDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	c := p.R().Cols(companytbl.Id).Where(cond...)
+	c := p.R().Cols(companytbl.PrimaryKey).Where(cond...)
 	row, err := c.QueryRow(ctx)
 	if err != nil {
 		return false, err
