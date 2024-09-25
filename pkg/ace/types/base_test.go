@@ -27,34 +27,51 @@ type A struct {
 var pool = sync.Pool{
 	New: func() interface{} {
 		fmt.Println("New")
-		return &A{}
+		return A{}
 	},
 }
 
 func NewA() *A {
-	return pool.Get().(*A)
+	obj := pool.Get().(A)
+	return &obj
 }
-func Dispose(x any) {
+func Dispose(x *A) {
 	x = nil
+	//fmt.Println(x == nil)
 }
 func (a *A) Free() {
 	if a == nil {
 		return
 	}
 	a.Name = ""
-	pool.Put(&(*a))
 	Dispose(a)
+	pool.Put(*a)
 }
 
 func TestType(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		fmt.Println(i)
-		a := NewA()
-		fmt.Println(a)
-		a.Free()
-		a.Name = "world"
-		fmt.Println(a)
-		a.Free()
-		a.Name = "hahaha"
-	}
+	a := NewA()
+	fmt.Println(a)
+	a.Free()
+	a.Free()
+	a.Free()
+	a.Free()
+	a.Name = "world"
+	a = NewA()
+	fmt.Println(1, a)
+	a = NewA()
+	fmt.Println(2, a)
+	a = NewA()
+	fmt.Println(3, a)
+	a = NewA()
+	fmt.Println(a)
+	a = NewA()
+	fmt.Println(a)
+	a = NewA()
+	fmt.Println(a)
+	a = NewA()
+	fmt.Println(a)
+	a = NewA()
+	fmt.Println(a)
+	a = NewA()
+	fmt.Println(a)
 }
