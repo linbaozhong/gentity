@@ -40,15 +40,16 @@ func TestPut(t *testing.T) {
 
 	obj := NewA()
 	apool.Put(obj)
+	apool.Put(obj)
 	obj1 := NewA()
-	obj1.Name = "hello"
-	// fmt.Println(apool.Len(), "长度")
+	//obj1.Name = "hello"
+	fmt.Println(apool.Len(), "长度")
 	obj2 := NewA()
-	obj2.Name = "linbaozhong"
+	//obj2.Name = "linbaozhong"
 	obj3 := NewA()
-	// apool.Put(obj1)
-	// apool.Put(obj2)
-	// fmt.Println(apool.Len(), "长度")
+	apool.Put(obj1)
+	apool.Put(obj2)
+	fmt.Println(apool.Len(), "长度")
 	obj1 = nil
 	obj2 = nil
 	obj3 = nil
@@ -58,6 +59,6 @@ func TestPut(t *testing.T) {
 	// apool.Put(obj3)
 	// fmt.Println(apool.Len(), "长度")
 
-	time.Sleep(time.Minute * 5)
+	time.Sleep(time.Minute * 2)
 	fmt.Println(apool.Len(), "长度")
 }

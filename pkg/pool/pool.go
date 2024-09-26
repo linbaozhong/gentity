@@ -24,16 +24,17 @@ const timeout = time.Minute
 
 // Pool 是一个通用的对象池
 type Pool struct {
-	mu sync.Mutex
+	mu sync.RWMutex
 	// 存储对象的map，key是对象的类型，value是对象的切片
-	pool    []*element
+	pool    []element
 	timeout time.Duration
 
-	once    sync.Once
-	chclean chan bool
-	ticker  *time.Ticker
+	once sync.Once
 
 	New func() any
+
+	cleanCh <-chan time.Time // 用于触发清理的通道
+	doneCh  chan bool        // 用于停止清理循环的通道
 }
 
 type element struct {
@@ -44,24 +45,29 @@ type element struct {
 func (p *Pool) init() {
 	p.once.Do(func() {
 		p.timeout = timeout
+		p.cleanCh = time.After(p.timeout)
+		p.doneCh = make(chan bool)
 		go p.startCleaner()
 	})
 }
 
 // Get 从池中获取一个对象
 func (p *Pool) Get() any {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+
+	p.init()
 
 	// 如果池中没有对象，可以在这里创建一个新的对象
 	if len(p.pool) == 0 {
-		return p.New()
+		if p.New != nil {
+			return p.New()
+		}
+		return nil
 	}
 
 	el := p.pool[len(p.pool)-1]
 	p.pool = p.pool[:len(p.pool)-1]
-
-	p.chclean <- true
 
 	return el.obj
 }
@@ -79,17 +85,19 @@ func (p *Pool) Put(obj any) {
 		}
 	}
 
-	el := &element{
+	el := element{
 		obj: obj,
 		t:   time.Now().Add(p.timeout),
 	}
-	p.pool = append(p.pool, el)
 
-	p.chclean <- true
+	p.pool = append(p.pool, el)
 }
 
 // Len 返回栈中元素的数量
 func (p *Pool) Len() int {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+
 	return len(p.pool)
 }
 
@@ -110,19 +118,22 @@ func (p *Pool) cleanup() {
 		}
 	}
 	p.pool = p.pool[:i]
-
-	p.ticker.Reset(p.timeout)
 }
 
 // startCleaner 启动协程定期清理超时元素
 func (p *Pool) startCleaner() {
-	p.ticker = time.NewTicker(p.timeout)
 	for {
 		select {
-		case <-p.ticker.C:
+		case <-p.cleanCh:
 			p.cleanup()
-		default:
-
+			// 重新设置清理信号
+			p.cleanCh = time.After(p.timeout)
+		case <-p.doneCh:
+			return
 		}
 	}
+}
+
+func (p *Pool) Stop() {
+	p.doneCh <- true
 }
