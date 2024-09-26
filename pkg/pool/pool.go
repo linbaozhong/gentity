@@ -81,7 +81,7 @@ func (p *Pool) Put(obj any) {
 
 	el := &element{
 		obj: obj,
-		t:   time.Now().Add(p.timeout * 2),
+		t:   time.Now().Add(p.timeout),
 	}
 	p.pool = append(p.pool, el)
 
