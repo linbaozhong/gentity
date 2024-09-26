@@ -26,52 +26,63 @@ type A struct {
 
 var pool = sync.Pool{
 	New: func() interface{} {
-		fmt.Println("New")
-		return A{}
+		fmt.Print("New \t")
+		return &A{}
 	},
 }
 
 func NewA() *A {
-	obj := pool.Get().(A)
-	return &obj
+	obj := pool.Get().(*A)
+	// time.Sleep(time.Millisecond)
+	// obj.Name = time.Now().String()
+	fmt.Print("\t\t")
+
+	return obj
 }
 func Dispose(x *A) {
+	pool.Put(x)
 	x = nil
-	//fmt.Println(x == nil)
 }
 func (a *A) Free() {
-	if a == nil {
-		return
-	}
-	a.Name = ""
 	Dispose(a)
-	pool.Put(*a)
 }
 
 func TestType(t *testing.T) {
 	a := NewA()
+	a.Name = "hello"
 	fmt.Println(a)
 	a.Free()
+	fmt.Println(1)
 	a.Free()
+	fmt.Println(2)
 	a.Free()
-	a.Free()
+	fmt.Println(3)
 	a.Name = "world"
+	a.Free()
+	b := NewA()
+	fmt.Println(1, b, &b)
+	c := NewA()
+	fmt.Println(2, c, &c)
+	d := NewA()
+	fmt.Println(3, d, &d)
 	a = NewA()
-	fmt.Println(1, a)
+	fmt.Println(a, &a)
 	a = NewA()
-	fmt.Println(2, a)
+	fmt.Println(a, &a)
 	a = NewA()
-	fmt.Println(3, a)
+	fmt.Println(a, &a)
 	a = NewA()
-	fmt.Println(a)
+	fmt.Println(a, &a)
 	a = NewA()
-	fmt.Println(a)
+	fmt.Println(a, &a)
 	a = NewA()
-	fmt.Println(a)
-	a = NewA()
-	fmt.Println(a)
-	a = NewA()
-	fmt.Println(a)
-	a = NewA()
-	fmt.Println(a)
+	fmt.Println(a, &a)
+}
+
+func TestNil(t *testing.T) {
+	var a = new(A)
+	fmt.Println(a == nil)
+	a.Name = "hello"
+	a = nil
+	fmt.Println(a == nil)
 }
