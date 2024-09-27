@@ -7,14 +7,13 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"sync"
 	"time"
 )
 
 const CompanyTableName = "company"
 
 var (
-	companyPool = sync.Pool{
+	companyPool = ace.Pool{
 		New: func() interface{} {
 			return &Company{}
 		},

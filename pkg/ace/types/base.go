@@ -16,8 +16,11 @@ package types
 
 import (
 	"fmt"
+	"sync/atomic"
 	"time"
 )
+
+var atomic_uint64 uint64
 
 type (
 	AceString  string
@@ -31,7 +34,21 @@ type (
 	AceFloat32 float32
 	AceBool    bool
 	AceTime    time.Time
+
+	AceModel struct {
+		ace_uuid uint64 `json:"-"` // 内部留用，禁止外部赋值
+	}
+	AceModeler interface {
+		UUID() uint64
+	}
 )
+
+func (a *AceModel) UUID() uint64 {
+	if a.ace_uuid == 0 {
+		a.ace_uuid = atomic.AddUint64(&atomic_uint64, 1)
+	}
+	return a.ace_uuid
+}
 
 func (s *AceString) Scan(src any) error {
 	switch v := src.(type) {
