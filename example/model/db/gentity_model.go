@@ -3,14 +3,14 @@
 package db
 
 import (
-	"github.com/linbaozhong/gentity/pkg/ace/types"
+	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 	"time"
 )
 
 // tablename company
 // cache time.Minute time.Minute 1000
 type Company struct {
-	types.AceModel
+	atype.AceModel
 	Id               uint64    `json:"id,omitempty" db:"'id' pk"`                              // 授权方企业本地id
 	Platform         string    `json:"platform,omitempty" db:"'platform'"`                     // 授权方企业的平台方
 	CorpId           string    `json:"corp_id,omitempty" db:"'corp_id'"`                       // 平台授权企业id
@@ -36,7 +36,7 @@ type Company struct {
 // tablename biz
 // cache time.Minute time.Minute 1000
 type Biz struct {
-	types.AceModel
+	atype.AceModel
 	Id               uint64    `json:"id,omitempty" db:"'id' pk"`                              // 授权方企业本地id
 	Platform         string    `json:"platform,omitempty" db:"'platform'"`                     // 授权方企业的平台方
 	CorpId           string    `json:"corp_id,omitempty" db:"'corp_id'"`                       // 平台授权企业id

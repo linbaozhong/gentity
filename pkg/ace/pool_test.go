@@ -17,11 +17,15 @@ package ace
 import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
+	"runtime"
+	"sync"
 	"testing"
+	"time"
 )
 
 var (
-	apool = &Pool{New: func() types.AceModeler {
+	appplMap sync.Map
+	apool    = &sync.Pool{New: func() any {
 		return &Object{}
 	}}
 )
@@ -31,31 +35,45 @@ type Object struct {
 	Name string
 }
 
+func (o *Object) Free() {
+	uuid := o.UUID()
+	if _, ok := appplMap.Load(uuid); ok {
+		return
+	}
+
+	appplMap.Store(uuid, struct{}{})
+	apool.Put(o)
+}
+
 func NewA() *Object {
-	obj := apool.Get().(*Object)
-	return obj
+	o := apool.Get().(*Object)
+	uuid := o.UUID()
+	appplMap.Delete(uuid)
+	return o
 }
 
 func TestPut(t *testing.T) {
 
 	obj := NewA()
-	apool.Put(obj)
-	apool.Put(obj)
-	obj1 := NewA()
-	// obj1.Name = "hello"
-	fmt.Println(apool.Len(), "长度")
-	obj2 := NewA()
-	apool.Put(obj1)
-	apool.Put(obj2)
-	// obj2.Name = "linbaozhong"
-	fmt.Println(apool.Len(), "长度")
-	obj3 := NewA()
-	fmt.Println(obj1, obj2, obj3)
-	// fmt.Println(reflect.ValueOf(obj).Pointer(), reflect.ValueOf(obj2).Pointer())
-	// apool.Put(obj2)
-	// apool.Put(obj3)
-	// fmt.Println(apool.Len(), "长度")
+	runtime.SetFinalizer(obj, func(obj *Object) {
+		fmt.Println("finalizer")
+	})
 
-	// time.Sleep(time.Minute * 2)
-	fmt.Println(apool.Len(), "长度")
+	obj = nil
+
+	runtime.GC()
+
+	time.Sleep(time.Second * 2)
+	fmt.Println("Main function has finished.")
+
+	// obj.Free()
+	// obj.Free()
+	//
+	// obj1 := NewA()
+	// obj2 := NewA()
+	// obj1.Free()
+	// obj2.Free()
+	//
+	// obj3 := NewA()
+	// fmt.Println(obj1, obj2, obj3)
 }

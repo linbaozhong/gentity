@@ -7,21 +7,50 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/usertbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"sync"
 	"time"
 )
 
 const UserTableName = "user"
 
 var (
-	userPool = ace.Pool{
-		New: func() interface{} {
-			return &User{}
+	userMap  sync.Map
+	userPool = &sync.Pool{
+		New: func() any {
+			obj := &User{}
+			obj.UUID()
+			return obj
 		},
 	}
 )
 
+func init() {
+	go func() {
+		ticker := time.NewTicker(2 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ace.Context.Done():
+				return
+			case <-ticker.C:
+				now := time.Now().Add(-5 * time.Minute)
+				userMap.Range(func(key, tm any) bool {
+					if t, ok := tm.(time.Time); ok {
+						if now.After(t) {
+							userMap.Delete(key)
+						}
+					}
+					return true
+				})
+			}
+		}
+	}()
+}
+
 func NewUser() *User {
 	obj := userPool.Get().(*User)
+	userMap.Delete(obj.UUID())
 	return obj
 }
 
@@ -30,9 +59,16 @@ func (p *User) Free() {
 	if p == nil {
 		return
 	}
+
+	uuid := p.UUID()
+	if _, ok := userMap.Load(uuid); ok {
+		return
+	}
+
 	p.reset()
+
 	userPool.Put(p)
-	ace.Dispose(p)
+	userMap.Store(uuid, struct{}{})
 }
 
 // reset

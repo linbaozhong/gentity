@@ -79,7 +79,6 @@ func (d *Deleter) Free() {
 	d.command.Reset()
 
 	deletePool.Put(d)
-	Dispose(d)
 }
 
 func (d *Deleter) String() string {

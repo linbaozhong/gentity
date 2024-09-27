@@ -7,8 +7,8 @@
 package {{.PackageName}}
 
 import (
-	"database/sql"
 	"sync"
+	"database/sql"
 	{{- if .HasTime }}
 	"time"
 	{{- end}}
@@ -20,15 +20,43 @@ import (
 const {{$structName}}TableName = "{{.TableName}}"
 
 var (
-	{{lower .StructName}}Pool = sync.Pool{
-		New: func() interface{} {
-			return &{{.StructName}}{}
+	{{lower .StructName}}Map sync.Map
+	{{lower .StructName}}Pool = &sync.Pool {
+		New: func() any {
+			obj := &{{.StructName}}{}
+			obj.UUID()
+			return obj
 		},
 	}
 )
 
+func init() {
+	go func() {
+		ticker := time.NewTicker(2 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ace.Context.Done():
+				return
+			case <-ticker.C:
+				now := time.Now().Add(-5*time.Minute)
+				{{lower .StructName}}Map.Range(func(key, tm any) bool {
+					if t, ok := tm.(time.Time); ok {
+						if now.After(t) {
+							{{lower .StructName}}Map.Delete(key)
+						}
+					}
+					return true
+				})
+			}
+		}
+	}()
+}
+
 func New{{.StructName}}() *{{.StructName}} {
 	obj := {{lower .StructName}}Pool.Get().(*{{.StructName}})
+	{{lower .StructName}}Map.Delete(obj.UUID())
 	return obj
 }
 
@@ -37,9 +65,16 @@ func (p *{{.StructName}}) Free() {
 	if p == nil {
 		return
 	}
+
+	uuid := p.UUID()
+	if _, ok := {{lower .StructName}}Map.Load(uuid); ok {
+		return
+	}
+
 	p.reset()
+
 	{{lower .StructName}}Pool.Put(p)
-	ace.Dispose(p)
+	{{lower .StructName}}Map.Store(uuid, struct{}{})
 }
 
 // reset

@@ -100,7 +100,6 @@ func (s *Selector) Free() {
 	s.command.Reset()
 
 	selectPool.Put(s)
-	Dispose(s)
 }
 
 func (s *Selector) String() string {

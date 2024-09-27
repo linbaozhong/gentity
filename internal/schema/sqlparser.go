@@ -51,11 +51,13 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 	buf.WriteString("package " + packageName + "\n\n")
 	buf.WriteString("import (\n")
 	buf.WriteString("	\"time\" \n")
+	buf.WriteString("	atype \"github.com/linbaozhong/gentity/pkg/ace/types\" \n")
 	buf.WriteString(") \n\n")
 	for _, table := range schema {
 		buf.WriteString("// tablename " + table.Name + "\n")
 		buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + util.ParseField(table.Name) + " struct {\n")
+		buf.WriteString("\tatype.AceModel\n")
 		for _, col := range table.ColumnsX {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size, col.Unsigned))
 			buf.WriteString("\t`json:\"" + col.Name + ",omitempty\" db:\"'" + col.Name + "'") //
@@ -78,12 +80,14 @@ func DB2Struct(tables map[string][]sqlparser.Column, packageName string) ([]byte
 	buf.WriteString("package " + packageName + "\n\n")
 	buf.WriteString("import (\n")
 	buf.WriteString("	\"time\" \n")
+	buf.WriteString("	atype \"github.com/linbaozhong/gentity/pkg/ace/types\" \n")
 	buf.WriteString(") \n\n")
 
 	for table, columns := range tables {
 		buf.WriteString("// tablename " + table + "\n")
 		buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + util.ParseField(table) + " struct {\n")
+		buf.WriteString("\tatype.AceModel\n")
 		for _, col := range columns {
 			buf.WriteString("\t" + util.ParseField(col.Name) + "\t" + util.ParseFieldType(col.Type, col.Size, col.Unsigned))
 			buf.WriteString("\t`json:\"" + col.Name + ",omitempty\" db:\"'" + col.Name + "'") //

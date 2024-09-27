@@ -66,6 +66,11 @@ const (
 	CacheTypeSyncMap cacheType = "sync"
 )
 
+var (
+	Context   context.Context
+	ctxCancel context.CancelFunc
+)
+
 // Connect
 func Connect(driverName, dns string) (*DB, error) {
 	dialect.Register(driverName)
@@ -86,7 +91,16 @@ func Connect(driverName, dns string) (*DB, error) {
 	obj.mapper = mapper()
 	obj.debug = false
 
+	// 初始化全局的context，使其支持取消
+	Context, ctxCancel = context.WithCancel(context.Background())
+
 	return obj, e
+}
+
+// Close
+func (s *DB) Close() error {
+	ctxCancel()
+	return s.DB.Close()
 }
 
 // Mapper
@@ -124,8 +138,6 @@ func (s *DB) Cache(name string) cachego.Cache {
 	v, _, _ := s.sg.Do(name, func() (any, error) {
 		var v cachego.Cache
 		switch s.cacheType {
-		// case CacheTypeSyncMap:
-		// 	v = syc.New(syc.WithPrefix(name))
 		case CacheTypeMemory:
 			if opts, ok := s.cacheOpts.(string); ok {
 				v = memcached.New(memcache.New(opts), memcached.WithPrefix(name))
@@ -134,6 +146,8 @@ func (s *DB) Cache(name string) cachego.Cache {
 			if opts, ok := s.cacheOpts.(*rd.Options); ok {
 				v = redis.New(rd.NewClient(opts), redis.WithPrefix(name))
 			}
+		default: // CacheTypeSyncMap
+			v = syc.New() // sync.Map 不需要前缀
 		}
 		if v == nil {
 			v = syc.New() // sync.Map 不需要前缀
@@ -181,8 +195,4 @@ func (s *DB) D(tableName string) *Deleter {
 
 func (s *DB) R(tableName string) *Selector {
 	return newSelect(s, tableName)
-}
-
-func Dispose(obj any) {
-	obj = nil
 }

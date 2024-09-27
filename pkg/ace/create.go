@@ -80,7 +80,6 @@ func (c *Creator) Free() {
 	c.params = c.params[:0]
 
 	createPool.Put(c)
-	Dispose(c)
 }
 
 func (c *Creator) String() string {

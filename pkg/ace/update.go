@@ -91,7 +91,6 @@ func (u *Updater) Free() {
 	u.params = u.params[:0]
 
 	updatePool.Put(u)
-	Dispose(u)
 }
 
 func (u *Updater) String() string {
