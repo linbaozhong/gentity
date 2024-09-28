@@ -59,6 +59,7 @@ func (p *Company) reset() {
 	p.State = 0
 	p.StateTime = time.Time{}
 	p.CreatedTime = time.Time{}
+
 }
 
 func (p *Company) TableName() string {
