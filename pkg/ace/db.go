@@ -3,14 +3,13 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
+	"github.com/linbaozhong/gentity/pkg/cachego/memcached"
+	"github.com/linbaozhong/gentity/pkg/cachego/redis"
 	syc "github.com/linbaozhong/gentity/pkg/cachego/sync"
 	"golang.org/x/sync/singleflight"
 	"sync"
-
-	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/linbaozhong/gentity/pkg/cachego/memcached"
-	"github.com/linbaozhong/gentity/pkg/cachego/redis"
 
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/cachego"
@@ -72,7 +71,7 @@ var (
 )
 
 // Connect
-func Connect(driverName, dns string) (*DB, error) {
+func Connect(ctx context.Context, driverName, dns string) (*DB, error) {
 	dialect.Register(driverName)
 	db, e := sql.Open(driverName, dns)
 	if e != nil {
@@ -92,7 +91,20 @@ func Connect(driverName, dns string) (*DB, error) {
 	obj.debug = false
 
 	// 初始化全局的context，使其支持取消
-	Context, ctxCancel = context.WithCancel(context.Background())
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	Context, ctxCancel = context.WithCancel(ctx)
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				obj.Close()
+				return
+			}
+		}
+	}()
 
 	return obj, e
 }

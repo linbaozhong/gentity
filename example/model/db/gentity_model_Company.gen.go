@@ -7,50 +7,22 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"sync"
+	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"time"
 )
 
 const CompanyTableName = "company"
 
 var (
-	companyMap  sync.Map
-	companyPool = &sync.Pool{
-		New: func() any {
-			obj := &Company{}
-			obj.UUID()
-			return obj
-		},
-	}
+	companyPool = pool.New(ace.Context, func() any {
+		obj := &Company{}
+		obj.UUID()
+		return obj
+	})
 )
-
-func init() {
-	go func() {
-		ticker := time.NewTicker(2 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ace.Context.Done():
-				return
-			case <-ticker.C:
-				now := time.Now().Add(-5 * time.Minute)
-				companyMap.Range(func(key, tm any) bool {
-					if t, ok := tm.(time.Time); ok {
-						if now.After(t) {
-							companyMap.Delete(key)
-						}
-					}
-					return true
-				})
-			}
-		}
-	}()
-}
 
 func NewCompany() *Company {
 	obj := companyPool.Get().(*Company)
-	companyMap.Delete(obj.UUID())
 	return obj
 }
 
@@ -60,15 +32,9 @@ func (p *Company) Free() {
 		return
 	}
 
-	uuid := p.UUID()
-	if _, ok := companyMap.Load(uuid); ok {
-		return
-	}
-
 	p.reset()
 
 	companyPool.Put(p)
-	companyMap.Store(uuid, struct{}{})
 }
 
 // reset
@@ -93,7 +59,6 @@ func (p *Company) reset() {
 	p.State = 0
 	p.StateTime = time.Time{}
 	p.CreatedTime = time.Time{}
-
 }
 
 func (p *Company) TableName() string {
