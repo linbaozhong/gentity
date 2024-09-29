@@ -32,13 +32,11 @@ func (p *User) Free() {
 		return
 	}
 
-	p.reset()
-
 	userPool.Put(p)
 }
 
 // reset
-func (p *User) reset() {
+func (p *User) Reset() {
 	p.ID = 0
 	p.Name = ""
 	p.Avatar = ""

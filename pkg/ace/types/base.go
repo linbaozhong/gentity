@@ -40,6 +40,7 @@ type (
 	}
 	AceModeler interface {
 		UUID() uint64
+		Reset()
 	}
 )
 
