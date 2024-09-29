@@ -41,7 +41,7 @@ func (p *{{.StructName}}) Free() {
 	{{lower .StructName}}Pool.Put(p)
 }
 
-// reset
+// Reset
 func (p *{{.StructName}}) Reset() {
 	{{range $key, $value := .Columns}}p.{{index $value 0}} = {{getTypeValue $value}}
 	{{end}}
