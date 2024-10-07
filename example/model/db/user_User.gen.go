@@ -35,7 +35,7 @@ func (p *User) Free() {
 	userPool.Put(p)
 }
 
-// reset
+// Reset
 func (p *User) Reset() {
 	p.ID = 0
 	p.Name = ""

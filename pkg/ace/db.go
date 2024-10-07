@@ -66,7 +66,7 @@ const (
 )
 
 var (
-	Context   context.Context
+	Context   = context.Background()
 	ctxCancel context.CancelFunc
 )
 

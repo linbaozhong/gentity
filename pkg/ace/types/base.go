@@ -51,6 +51,9 @@ func (a *AceModel) UUID() uint64 {
 	return a.ace_uuid
 }
 
+func (p *AceModel) Lock()   {}
+func (p *AceModel) Unlock() {}
+
 func (s *AceString) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:

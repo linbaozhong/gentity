@@ -35,6 +35,7 @@ func New(ctx context.Context, fn func() any, opts ...opt) *objPool {
 		expire:   2 * time.Minute, // 默认对象过期时间为2分钟。
 		interval: time.Minute,     // 默认清理间隔为1分钟。
 	}
+
 	// 应用可选配置。
 	for _, opt := range opts {
 		opt(p)

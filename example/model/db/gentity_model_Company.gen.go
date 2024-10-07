@@ -35,7 +35,7 @@ func (p *Company) Free() {
 	companyPool.Put(p)
 }
 
-// reset
+// Reset
 func (p *Company) Reset() {
 	p.Id = 0
 	p.Platform = ""
