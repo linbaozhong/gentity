@@ -55,7 +55,9 @@ type (
 		cacheMap  sync.Map
 		sg        singleflight.Group
 	}
-
+	Tx struct {
+		*sql.Tx
+	}
 	cacheType string
 )
 
@@ -171,14 +173,14 @@ func (s *DB) Cache(name string) cachego.Cache {
 }
 
 // Transaction 事务处理
-func (s *DB) Transaction(ctx context.Context, f func(tx *sql.Tx) (any, error)) (any, error) {
+func (s *DB) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any, error) {
 	tx, e := s.BeginTx(ctx, nil)
 	if e != nil {
 		return nil, e
 	}
 
 	var result any
-	result, e = f(tx)
+	result, e = f(&Tx{tx})
 	if e != nil {
 		if e = tx.Rollback(); e != nil {
 			log.Error(e)
@@ -207,4 +209,29 @@ func (s *DB) D(tableName string) *Deleter {
 
 func (s *DB) R(tableName string) *Selector {
 	return newSelect(s, tableName)
+}
+
+func (t *Tx) Mapper() *reflectx.Mapper {
+	return mapper()
+}
+func (t *Tx) C(tableName string) *Creator {
+	return newCreate(t, tableName)
+}
+func (t *Tx) U(tableName string) *Updater {
+	return NewUpdate(t, tableName)
+}
+func (t *Tx) D(tableName string) *Deleter {
+	return newDelete(t, tableName)
+}
+func (t *Tx) R(tableName string) *Selector {
+	return newSelect(t, tableName)
+}
+func (t *Tx) Cache(name string) cachego.Cache {
+	return nil
+}
+func (t *Tx) Debug() bool {
+	return false
+}
+func (t *Tx) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
+	return t.Tx, nil
 }
