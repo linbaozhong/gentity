@@ -124,7 +124,7 @@ func (p *{{.TableName}}Dao) InsertOne(ctx context.Context, bean *{{.PackageName}
 	return n > 0, err
 }
 
-// InsertBatch 批量插入,返回 RowsAffected
+// InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 // cols: 要插入的列名
 func (p *{{.TableName}}Dao) InsertBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (int64, error) {
 	lens := len(beans)
@@ -169,7 +169,7 @@ func (p *{{.TableName}}Dao) UpdateById(ctx context.Context,{{index .PrimaryKey 1
     )
 }
 
-// UpdateBatch
+// UpdateBatch 批量更新,禁止在事务中使用
 // cols: 要更新的列名
 func (p *{{.TableName}}Dao) UpdateBatch(ctx context.Context, beans []*{{.PackageName}}.{{.StructName}}, cols ...dialect.Field) (bool, error) {
 	lens := len(beans)
