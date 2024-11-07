@@ -173,44 +173,40 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 	// c.params = append(c.params, _vals...)
 	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 
-	//
-	tx, err := c.db.BeginTx(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	stmt, err := tx.PrepareContext(ctx, c.command.String())
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
-
-	c.params = _vals
-	result, err := stmt.ExecContext(ctx, _vals...)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	for i := 1; i < lens; i++ {
-		bean := beans[i]
-		if bean == nil {
-			return nil, dialect.ErrBeanEmpty
-		}
-		// c.command.WriteString(",")
-		_, _vals = bean.AssignValues(c.affect...)
-		// c.params = append(c.params, _vals...)
-		// c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
-		c.params = _vals
-		result, err = stmt.ExecContext(ctx, _vals...)
+	// 启动事务批量执行Create
+	ret, err := c.db.Transaction(ctx, func(tx *Tx) (any, error) {
+		stmt, err := tx.PrepareContext(ctx, c.command.String())
 		if err != nil {
-			tx.Rollback()
 			return nil, err
 		}
-		bean.AssignPrimaryKeyValues(result)
+		defer stmt.Close()
+
+		c.params = _vals
+		result, err := stmt.ExecContext(ctx, _vals...)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := 1; i < lens; i++ {
+			bean := beans[i]
+			if bean == nil {
+				return nil, dialect.ErrBeanEmpty
+			}
+			_, _vals = bean.AssignValues(c.affect...)
+			c.params = _vals
+			result, err = stmt.ExecContext(ctx, _vals...)
+			if err != nil {
+				return nil, err
+			}
+			bean.AssignPrimaryKeyValues(result)
+		}
+		return result, nil
+	})
+	if err != nil {
+		return nil, err
 	}
-	err = tx.Commit()
-	// fmt.Println(c.command.String(), c.params)
-	// return c.db.ExecContext(ctx, c.command.String(), c.params...)
-	return result, err
+	if result, ok := ret.(sql.Result); ok {
+		return result, nil
+	}
+	return nil, err
 }

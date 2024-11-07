@@ -31,7 +31,8 @@ type (
 
 	Executer interface {
 		Mapper() *reflectx.Mapper
-		BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
+		// BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
+		Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
 		PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
 		QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
@@ -57,6 +58,10 @@ type (
 	}
 	Tx struct {
 		*sql.Tx
+		mapper      *reflectx.Mapper
+		cache       func(name string) cachego.Cache
+		transaction func(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
+		debug       bool // 如果是调试模式，则打印sql命令及错误
 	}
 	cacheType string
 )
@@ -65,11 +70,6 @@ const (
 	CacheTypeMemory  cacheType = "memory"
 	CacheTypeRedis   cacheType = "redis"
 	CacheTypeSyncMap cacheType = "sync"
-)
-
-var (
-	Context   = context.Background()
-	ctxCancel context.CancelFunc
 )
 
 // Connect
@@ -96,7 +96,6 @@ func Connect(ctx context.Context, driverName, dns string) (*DB, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	Context, ctxCancel = context.WithCancel(ctx)
 
 	go func() {
 		for {
@@ -113,7 +112,6 @@ func Connect(ctx context.Context, driverName, dns string) (*DB, error) {
 
 // Close
 func (s *DB) Close() error {
-	ctxCancel()
 	return s.DB.Close()
 }
 
@@ -180,7 +178,7 @@ func (s *DB) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any,
 	}
 
 	var result any
-	result, e = f(&Tx{tx})
+	result, e = f(&Tx{tx, s.mapper, s.Cache, s.Transaction, s.debug})
 	if e != nil {
 		if e = tx.Rollback(); e != nil {
 			log.Error(e)
@@ -212,7 +210,7 @@ func (s *DB) R(tableName string) *Selector {
 }
 
 func (t *Tx) Mapper() *reflectx.Mapper {
-	return mapper()
+	return t.mapper
 }
 func (t *Tx) C(tableName string) *Creator {
 	return newCreate(t, tableName)
@@ -227,11 +225,12 @@ func (t *Tx) R(tableName string) *Selector {
 	return newSelect(t, tableName)
 }
 func (t *Tx) Cache(name string) cachego.Cache {
-	return nil
+	return t.cache(name)
 }
 func (t *Tx) Debug() bool {
-	return false
+	return t.debug
 }
-func (t *Tx) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
-	return t.Tx, nil
+
+func (t *Tx) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any, error) {
+	return t.transaction(ctx, f)
 }

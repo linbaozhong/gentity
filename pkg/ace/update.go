@@ -308,68 +308,44 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 		u.command.WriteString(" WHERE " + u.where.String())
 	}
 	u.params = append(u.params, u.whereParams...)
-	//
-	tx, err := u.db.BeginTx(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
 
-	stmt, err := tx.PrepareContext(ctx, u.command.String())
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
-
-	result, err := stmt.ExecContext(ctx, u.params...)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	for i := 1; i < lens; i++ {
-		bean := beans[i]
-		if bean == nil {
-			return nil, dialect.ErrBeanEmpty
-		}
-		_, vals = bean.AssignValues(u.affect...)
-		u.params = u.params[:0]
-		u.params = append(u.params, vals...)
-		//
-		_, values = bean.AssignKeys()
-		u.params = append(u.params, values)
-
-		result, err = stmt.ExecContext(ctx, u.params...)
+	// 启动事务批量执行更新
+	ret, err := u.db.Transaction(ctx, func(tx *Tx) (any, error) {
+		stmt, err := tx.PrepareContext(ctx, u.command.String())
 		if err != nil {
-			tx.Rollback()
+			return nil, err
+		}
+		defer stmt.Close()
+
+		result, err := stmt.ExecContext(ctx, u.params...)
+		if err != nil {
 			return nil, err
 		}
 
-	}
-	err = tx.Commit()
-	return result, err
+		for i := 1; i < lens; i++ {
+			bean := beans[i]
+			if bean == nil {
+				return nil, dialect.ErrBeanEmpty
+			}
+			_, vals = bean.AssignValues(u.affect...)
+			u.params = u.params[:0]
+			u.params = append(u.params, vals...)
+			//
+			_, values = bean.AssignKeys()
+			u.params = append(u.params, values)
 
-	// for n, bean := range beans {
-	//	if n > 0 {
-	//		u.command.WriteString(";")
-	//	}
-	//	cols, params := bean.AssignValues(u.affect...)
-	//	u.params = append(u.params, params...)
-	//	//
-	//	keys, values := bean.AssignKeys()
-	//	for i := 0; i < len(keys); i++ {
-	//		u.Where(keys[i].Eq(values[i]))
-	//	}
-	//	for i, col := range cols {
-	//		if i > 0 {
-	//			u.command.WriteString(",")
-	//		}
-	//		u.command.WriteString(col + " = ?")
-	//	}
-	//	// WHERE
-	//	if u.where.Len() > 0 {
-	//		u.command.WriteString(" WHERE " + u.where.String())
-	//	}
-	//	u.params = append(u.params, u.whereParams...)
-	// }
-	// return u.db.ExecContext(ctx, u.command.String(), u.params...)
+			result, err = stmt.ExecContext(ctx, u.params...)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return result, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if result, ok := ret.(sql.Result); ok {
+		return result, nil
+	}
+	return nil, err
 }
