@@ -154,7 +154,37 @@ func (c *Creator) Exec(ctx context.Context) (sql.Result, error) {
 }
 
 // Struct
-func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
+func (c *Creator) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
+	defer c.Free()
+
+	if c.err != nil {
+		return nil, c.err
+	}
+
+	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
+
+	var _cols []string
+	_cols, c.params = bean.AssignValues(c.affect...)
+	_colLens := len(_cols)
+	c.command.WriteString(strings.Join(_cols, ","))
+	c.command.WriteString(") VALUES ")
+	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
+
+	stmt, err := c.db.PrepareContext(ctx, c.command.String())
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := stmt.ExecContext(ctx, c.params...)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// Struct 执行批量插入，请不要在事务中使用
+func (c *Creator) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
 
 	if c.err != nil {
@@ -168,11 +198,11 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 
 	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
 
-	_cols, _vals := beans[0].AssignValues(c.affect...)
+	var _cols []string
+	_cols, c.params = beans[0].AssignValues(c.affect...)
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
-	// c.params = append(c.params, _vals...)
 	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 
 	// 启动事务批量执行Create
@@ -185,8 +215,7 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 			defer stmt.Close()
 		}
 
-		c.params = _vals
-		result, err := stmt.ExecContext(ctx, _vals...)
+		result, err := stmt.ExecContext(ctx, c.params...)
 		if err != nil {
 			return nil, err
 		}
@@ -196,9 +225,8 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 			if bean == nil {
 				return nil, dialect.ErrBeanEmpty
 			}
-			_, _vals = bean.AssignValues(c.affect...)
-			c.params = _vals
-			result, err = stmt.ExecContext(ctx, _vals...)
+			_, c.params = bean.AssignValues(c.affect...)
+			result, err = stmt.ExecContext(ctx, c.params...)
 			if err != nil {
 				return nil, err
 			}

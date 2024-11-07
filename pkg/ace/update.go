@@ -280,7 +280,50 @@ func (u *Updater) Exec(ctx context.Context) (sql.Result, error) {
 }
 
 // Struct
-func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
+func (u *Updater) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
+	defer u.Free()
+
+	if u.err != nil {
+		return nil, u.err
+	}
+
+	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
+	cols, vals := bean.AssignValues(u.affect...)
+	for i, col := range cols {
+		if i > 0 {
+			u.command.WriteString(",")
+		}
+		u.command.WriteString(col + " = ?")
+	}
+	u.params = append(u.params, vals...)
+	//
+	keys, values := bean.AssignKeys()
+	u.Where(keys.Eq(values))
+
+	// WHERE
+	if u.where.Len() > 0 {
+		u.command.WriteString(" WHERE " + u.where.String())
+	}
+	u.params = append(u.params, u.whereParams...)
+
+	stmt, err := u.db.PrepareContext(ctx, u.command.String())
+	if err != nil {
+		return nil, err
+	}
+	if u.db.IsDB() {
+		defer stmt.Close()
+	}
+
+	result, err := stmt.ExecContext(ctx, u.params...)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// Struct 执行更新,请不要在事务中使用
+func (u *Updater) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
 	if u.err != nil {
