@@ -39,6 +39,7 @@ type (
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 		Debug() bool
 		Cache(string) cachego.Cache
+		IsDB() bool
 		C(tableName string) *Creator
 		D(tableName string) *Deleter
 		U(tableName string) *Updater
@@ -192,6 +193,9 @@ func (s *DB) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any,
 
 	return result, nil
 }
+func (s *DB) IsDB() bool {
+	return true
+}
 
 func (s *DB) C(tableName string) *Creator {
 	return newCreate(s, tableName)
@@ -230,7 +234,9 @@ func (t *Tx) Cache(name string) cachego.Cache {
 func (t *Tx) Debug() bool {
 	return t.debug
 }
-
+func (t *Tx) IsDB() bool {
+	return false
+}
 func (t *Tx) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any, error) {
 	return t.transaction(ctx, f)
 }

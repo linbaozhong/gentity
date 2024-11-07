@@ -417,7 +417,9 @@ func (s *Selector) query(ctx context.Context) (*sql.Rows, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
 
 	row, err := stmt.QueryContext(ctx, s.whereParams...)
 	return row, err
@@ -446,7 +448,9 @@ func (s *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
 
 	return stmt.QueryRowContext(ctx, s.whereParams...), nil
 }
@@ -601,7 +605,9 @@ func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64,
 	if err != nil {
 		return 0, err
 	}
-	defer stmt.Close()
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
 
 	row := stmt.QueryRowContext(ctx, s.whereParams...)
 	var count int64
@@ -636,7 +642,9 @@ func (s *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialec
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
 
 	row := stmt.QueryRowContext(ctx, s.whereParams...)
 	var sum = make([]any, len(cols))

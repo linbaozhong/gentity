@@ -271,7 +271,9 @@ func (u *Updater) Exec(ctx context.Context) (sql.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
+	if u.db.IsDB() {
+		defer stmt.Close()
+	}
 
 	u.params = append(u.params, u.whereParams...)
 	return stmt.ExecContext(ctx, u.params...)
@@ -315,7 +317,9 @@ func (u *Updater) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 		if err != nil {
 			return nil, err
 		}
-		defer stmt.Close()
+		if u.db.IsDB() {
+			defer stmt.Close()
+		}
 
 		result, err := stmt.ExecContext(ctx, u.params...)
 		if err != nil {

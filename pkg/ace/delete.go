@@ -202,7 +202,9 @@ func (d *Deleter) Exec(ctx context.Context) (sql.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
+	if d.db.IsDB() {
+		defer stmt.Close()
+	}
 
 	return stmt.ExecContext(ctx, d.whereParams...)
 }

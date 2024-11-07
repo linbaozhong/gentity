@@ -144,7 +144,9 @@ func (c *Creator) Exec(ctx context.Context) (sql.Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
+	if c.db.IsDB() {
+		defer stmt.Close()
+	}
 
 	// fmt.Println(c.command.String(), c.params)
 	// return c.db.ExecContext(ctx, c.command.String(), c.params...)
@@ -179,7 +181,9 @@ func (c *Creator) Struct(ctx context.Context, beans ...dialect.Modeler) (sql.Res
 		if err != nil {
 			return nil, err
 		}
-		defer stmt.Close()
+		if c.db.IsDB() {
+			defer stmt.Close()
+		}
 
 		c.params = _vals
 		result, err := stmt.ExecContext(ctx, _vals...)
