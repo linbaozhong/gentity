@@ -7,58 +7,59 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"time"
+	//"github.com/linbaozhong/gentity/pkg/ace/pool"
 )
 
 const CompanyTableName = "company"
 
-var (
-	companyPool = pool.New(ace.Context, func() any {
-		obj := &Company{}
-		obj.UUID()
-		return obj
-	})
-)
+//var (
+//	companyPool = pool.New(ace.Context,func() any {
+//		obj := &Company{}
+//		obj.UUID()
+//		return obj
+//	})
+//)
 
 func NewCompany() *Company {
-	obj := companyPool.Get().(*Company)
-	return obj
+	//	obj := companyPool.Get().(*Company)
+	//	return obj
+	return &Company{}
 }
 
 // Free
-func (p *Company) Free() {
-	if p == nil {
-		return
-	}
-
-	companyPool.Put(p)
-}
+//func (p *Company) Free() {
+//	if p == nil {
+//		return
+//	}
+//
+//	companyPool.Put(p)
+//}
 
 // Reset
-func (p *Company) Reset() {
-	p.Id = 0
-	p.Platform = ""
-	p.CorpId = ""
-	p.CorpType = 0
-	p.FullCorpName = ""
-	p.CorpType2 = 0
-	p.CorpName = ""
-	p.Industry = ""
-	p.IsAuthenticated = false
-	p.LicenseCode = ""
-	p.CorpLogoUrl = ""
-	p.InviteUrl = ""
-	p.InviteCode = ""
-	p.IsEcologicalCorp = false
-	p.AuthLevel = 0
-	p.AuthChannel = ""
-	p.AuthChannelType = ""
-	p.State = 0
-	p.StateTime = time.Time{}
-	p.CreatedTime = time.Time{}
-
-}
+//func (p *Company) Reset() {
+//	p.Id = 0
+//	p.Platform = ""
+//	p.CorpId = ""
+//	p.CorpType = 0
+//	p.FullCorpName = ""
+//	p.CorpType2 = 0
+//	p.CorpName = ""
+//	p.Industry = ""
+//	p.IsAuthenticated = false
+//	p.LicenseCode = ""
+//	p.CorpLogoUrl = ""
+//	p.InviteUrl = ""
+//	p.InviteCode = ""
+//	p.IsEcologicalCorp = false
+//	p.AuthLevel = 0
+//	p.AuthChannel = ""
+//	p.AuthChannelType = ""
+//	p.State = 0
+//	p.StateTime = time.Time{}
+//	p.CreatedTime = time.Time{}
+//
+//}
 
 func (p *Company) TableName() string {
 	return CompanyTableName

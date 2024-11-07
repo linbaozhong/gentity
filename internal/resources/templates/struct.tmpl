@@ -20,7 +20,7 @@ import (
 const {{$structName}}TableName = "{{.TableName}}"
 
 var (
-	{{lower .StructName}}Pool = pool.New(ace.Context,func() any {
+	{{lower .StructName}}Pool = pool.New(func() any {
 		obj := &{{.StructName}}{}
 		obj.UUID()
 		return obj
@@ -30,6 +30,7 @@ var (
 func New{{.StructName}}() *{{.StructName}} {
 	obj := {{lower .StructName}}Pool.Get().(*{{.StructName}})
 	return obj
+//	return &{{.StructName}}{}
 }
 
 // Free

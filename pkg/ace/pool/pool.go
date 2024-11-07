@@ -2,7 +2,6 @@
 package pool
 
 import (
-	"context"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"sync"
 	"time"
@@ -10,7 +9,7 @@ import (
 
 // objPool 是对象池的结构体，它管理对象的创建、存储和过期。
 type objPool struct {
-	ctx context.Context // 上下文，用于控制对象池的生命周期。
+	// ctx context.Context // 上下文，用于控制对象池的生命周期。
 
 	pool *sync.Pool // 底层的对象池，用于存储和管理对象。
 	// keys 用于跟踪对象的唯一标识符，防止重复对象被放入池中。
@@ -27,9 +26,9 @@ type objPool struct {
 type opt func(*objPool)
 
 // New 创建并返回一个新的对象池。fn 是一个函数，用于创建新对象。
-func New(ctx context.Context, fn func() any, opts ...opt) *objPool {
+func New(fn func() any, opts ...opt) *objPool {
 	p := &objPool{
-		ctx:      ctx,
+		// ctx:      ctx,
 		pool:     &sync.Pool{New: fn},
 		keys:     &sync.Map{},
 		expire:   2 * time.Minute, // 默认对象过期时间为2分钟。
@@ -105,11 +104,11 @@ func (p *objPool) Put(obj types.AceModeler) {
 func (p *objPool) cleanup() {
 	for {
 		select {
-		case <-p.ctx.Done(): // 如果上下文被取消，停止定时器并退出清理goroutine。
-			p.cleanTimer.Stop()
-			p.keys = nil
-			p.pool = nil
-			return
+		// case <-p.ctx.Done(): // 如果上下文被取消，停止定时器并退出清理goroutine。
+		// 	p.cleanTimer.Stop()
+		// 	p.keys = nil
+		// 	p.pool = nil
+		// 	return
 		case <-p.cleanTimer.C:
 			// 计算过期时间点。
 			expired := time.Now().Add(-p.expire)

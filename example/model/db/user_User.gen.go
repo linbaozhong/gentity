@@ -7,45 +7,46 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/usertbl"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"time"
+	//"github.com/linbaozhong/gentity/pkg/ace/pool"
 )
 
 const UserTableName = "user"
 
-var (
-	userPool = pool.New(ace.Context, func() any {
-		obj := &User{}
-		obj.UUID()
-		return obj
-	})
-)
+//var (
+//	userPool = pool.New(ace.Context,func() any {
+//		obj := &User{}
+//		obj.UUID()
+//		return obj
+//	})
+//)
 
 func NewUser() *User {
-	obj := userPool.Get().(*User)
-	return obj
+	//	obj := userPool.Get().(*User)
+	//	return obj
+	return &User{}
 }
 
 // Free
-func (p *User) Free() {
-	if p == nil {
-		return
-	}
-
-	userPool.Put(p)
-}
+//func (p *User) Free() {
+//	if p == nil {
+//		return
+//	}
+//
+//	userPool.Put(p)
+//}
 
 // Reset
-func (p *User) Reset() {
-	p.ID = 0
-	p.Name = ""
-	p.Avatar = ""
-	p.Nickname = ""
-	p.Status = 0
-	p.IsAllow = false
-	p.CreatedTime = time.Time{}
-
-}
+//func (p *User) Reset() {
+//	p.ID = 0
+//	p.Name = ""
+//	p.Avatar = ""
+//	p.Nickname = ""
+//	p.Status = 0
+//	p.IsAllow = false
+//	p.CreatedTime = time.Time{}
+//
+//}
 
 func (p *User) TableName() string {
 	return UserTableName
