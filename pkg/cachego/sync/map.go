@@ -114,7 +114,7 @@ func (sm *syncMap) FetchMulti(ctx context.Context, keys ...string) ([][]byte, er
 		if b, err := sm.Fetch(ctx, sm.getKey(key)); err == nil {
 			vals = append(vals, b)
 		} else {
-			return nil, err
+			vals = append(vals, nil)
 		}
 	}
 
