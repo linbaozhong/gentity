@@ -5,16 +5,16 @@ package db
 import (
 	"database/sql"
 	"github.com/linbaozhong/gentity/example/model/define/table/usertbl"
-	"time"
-	//"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"time"
 )
 
 const UserTableName = "user"
 
 var (
-	userPool = pool.New(func() any {
+	userPool = pool.New(ace.Context, func() any {
 		obj := &User{}
 		obj.UUID()
 		return obj

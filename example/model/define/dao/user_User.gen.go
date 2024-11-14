@@ -105,7 +105,7 @@ func (p *userDao) InsertOne(ctx context.Context, bean *db.User, cols ...dialect.
 	return n > 0, err
 }
 
-// InsertBatch 批量插入,返回 RowsAffected
+// InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 // cols: 要插入的列名
 func (p *userDao) InsertBatch(ctx context.Context, beans []*db.User, cols ...dialect.Field) (int64, error) {
 	lens := len(beans)
@@ -118,7 +118,7 @@ func (p *userDao) InsertBatch(ctx context.Context, beans []*db.User, cols ...dia
 	}
 	result, err := p.C().
 		Cols(cols...).
-		Struct(ctx, args...)
+		StructBatch(ctx, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -150,7 +150,7 @@ func (p *userDao) UpdateById(ctx context.Context, id uint64, sets ...dialect.Set
 	)
 }
 
-// UpdateBatch
+// UpdateBatch 批量更新,禁止在事务中使用
 // cols: 要更新的列名
 func (p *userDao) UpdateBatch(ctx context.Context, beans []*db.User, cols ...dialect.Field) (bool, error) {
 	lens := len(beans)
@@ -163,7 +163,7 @@ func (p *userDao) UpdateBatch(ctx context.Context, beans []*db.User, cols ...dia
 	}
 	result, err := p.U().
 		Cols(cols...).
-		Struct(ctx, args...)
+		StructBatch(ctx, args...)
 	if err != nil {
 		return false, err
 	}

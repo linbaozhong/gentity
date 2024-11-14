@@ -12,7 +12,7 @@ import (
 	"time"
 	{{- end}}
 	"{{.ModulePath}}/define/table/{{ $tablename }}tbl"
-	//"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 )
@@ -20,7 +20,7 @@ import (
 const {{$structName}}TableName = "{{.TableName}}"
 
 var (
-	{{lower .StructName}}Pool = pool.New(func() any {
+	{{lower .StructName}}Pool = pool.New(ace.Context,func() any {
 		obj := &{{.StructName}}{}
 		obj.UUID()
 		return obj

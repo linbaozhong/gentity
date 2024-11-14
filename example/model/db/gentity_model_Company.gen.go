@@ -5,16 +5,16 @@ package db
 import (
 	"database/sql"
 	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
-	"time"
-	//"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"time"
 )
 
 const CompanyTableName = "company"
 
 var (
-	companyPool = pool.New(func() any {
+	companyPool = pool.New(ace.Context, func() any {
 		obj := &Company{}
 		obj.UUID()
 		return obj

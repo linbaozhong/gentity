@@ -2,6 +2,7 @@
 package pool
 
 import (
+	"context"
 	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"sync"
 	"time"
@@ -26,7 +27,7 @@ type objPool struct {
 type opt func(*objPool)
 
 // New 创建并返回一个新的对象池。fn 是一个函数，用于创建新对象。
-func New(fn func() any, opts ...opt) *objPool {
+func New(ctx context.Context, fn func() any, opts ...opt) *objPool {
 	p := &objPool{
 		// ctx:      ctx,
 		pool:     &sync.Pool{New: fn},
@@ -42,7 +43,7 @@ func New(fn func() any, opts ...opt) *objPool {
 	// 创建定时器，用于定期清理过期对象。
 	p.cleanTimer = time.NewTimer(p.interval)
 	// 启动后台goroutine执行清理任务。
-	go p.cleanup()
+	go p.cleanup(ctx)
 
 	return p
 }
@@ -101,14 +102,14 @@ func (p *objPool) Put(obj types.AceModeler) {
 }
 
 // cleanup 是一个定时运行的清理任务，用于删除过期对象。
-func (p *objPool) cleanup() {
+func (p *objPool) cleanup(ctx context.Context) {
 	for {
 		select {
-		// case <-p.ctx.Done(): // 如果上下文被取消，停止定时器并退出清理goroutine。
-		// 	p.cleanTimer.Stop()
-		// 	p.keys = nil
-		// 	p.pool = nil
-		// 	return
+		case <-ctx.Done(): // 如果上下文被取消，停止定时器并退出清理goroutine。
+			p.cleanTimer.Stop()
+			p.keys = nil
+			p.pool = nil
+			return
 		case <-p.cleanTimer.C:
 			// 计算过期时间点。
 			expired := time.Now().Add(-p.expire)

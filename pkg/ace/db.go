@@ -17,6 +17,11 @@ import (
 	rd "github.com/redis/go-redis/v9"
 )
 
+var (
+	// 全局context，用于支持外部调用。最好在程序启动时引用，否则可能造成panic。
+	Context, Cancel = context.WithCancel(context.Background())
+)
+
 type (
 	Cruder interface {
 		// C Create 命令体
@@ -102,7 +107,7 @@ func Connect(ctx context.Context, driverName, dns string) (*DB, error) {
 		for {
 			select {
 			case <-ctx.Done():
-				obj.Close()
+				obj.DB.Close()
 				return
 			}
 		}
@@ -111,10 +116,10 @@ func Connect(ctx context.Context, driverName, dns string) (*DB, error) {
 	return obj, e
 }
 
-// Close
-func (s *DB) Close() error {
-	return s.DB.Close()
-}
+// // Close
+// func (s *DB) Close() error {
+// 	return s.DB.Close()
+// }
 
 // Mapper
 func (s *DB) Mapper() *reflectx.Mapper {

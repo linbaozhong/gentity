@@ -3,33 +3,14 @@
 package db
 
 import (
-	"sync/atomic"
+	atype "github.com/linbaozhong/gentity/pkg/ace/types"
 	"time"
 )
-
-var nocopy_uint64 uint64
-
-// noCopy 用于防止嵌入它的结构体被复制。
-// 它实现了Locker接口的Lock和Unlock方法，但这些方法什么都不做。
-type noCopy struct {
-	nocopy_uuid uint64 `json:"-"` // 内部留用，禁止外部赋值
-}
-
-// UUID 只是为了实现接口方法，外部不建议调用。
-func (a *noCopy) UUID() uint64 {
-	if a.nocopy_uuid == 0 {
-		a.nocopy_uuid = atomic.AddUint64(&nocopy_uint64, 1)
-	}
-	return a.nocopy_uuid
-}
-
-func (p *noCopy) Lock()   {}
-func (p *noCopy) Unlock() {}
 
 // tablename company
 // cache time.Minute time.Minute 1000
 type Company struct {
-	noCopy
+	atype.AceModel
 	Id               uint64    `json:"id,omitempty" db:"'id' pk"`                              // 授权方企业本地id
 	Platform         string    `json:"platform,omitempty" db:"'platform'"`                     // 授权方企业的平台方
 	CorpId           string    `json:"corp_id,omitempty" db:"'corp_id'"`                       // 平台授权企业id
@@ -55,7 +36,7 @@ type Company struct {
 // tablename biz
 // cache time.Minute time.Minute 1000
 type Biz struct {
-	noCopy
+	atype.AceModel
 	Id               uint64    `json:"id,omitempty" db:"'id' pk"`                              // 授权方企业本地id
 	Platform         string    `json:"platform,omitempty" db:"'platform'"`                     // 授权方企业的平台方
 	CorpId           string    `json:"corp_id,omitempty" db:"'corp_id'"`                       // 平台授权企业id

@@ -15,12 +15,13 @@
 package db
 
 import (
+	"github.com/linbaozhong/gentity/pkg/ace/types"
 	"time"
 )
 
 // tablename user
 type User struct {
-	noCopy
+	types.AceModel
 	ID          uint64    `json:"id" db:"'id' pk auto"`
 	Name        string    `json:"name" db:"name"`
 	Avatar      string    `json:"avatar" db:"avatar"`
