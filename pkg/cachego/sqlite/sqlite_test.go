@@ -21,11 +21,15 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	cc := New(WithPrefix("abc"))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// e := cc.Save(ctx, "bbb", "123", time.Second*10)
+	cc := New(ctx,
+		WithName("a"),
+		WithPrefix("abc"),
+	)
+
+	// e := cc.Save(ctx, "bbb", "456", time.Second*10)
 	// if e != nil {
 	// 	t.Fatal(e)
 	// }

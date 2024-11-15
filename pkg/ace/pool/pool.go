@@ -19,8 +19,8 @@ type objPool struct {
 	expire time.Duration
 	// interval 定义清理过程的运行间隔。
 	interval time.Duration
-	// cleanTimer 定时器，用于定期执行清理任务。
-	cleanTimer *time.Timer
+	// // cleanTimer 定时器，用于定期执行清理任务。
+	// cleanTimer *time.Timer
 }
 
 // opt 是一个函数，用于配置对象池。
@@ -40,8 +40,6 @@ func New(ctx context.Context, fn func() any, opts ...opt) *objPool {
 	for _, opt := range opts {
 		opt(p)
 	}
-	// 创建定时器，用于定期清理过期对象。
-	p.cleanTimer = time.NewTimer(p.interval)
 	// 启动后台goroutine执行清理任务。
 	go p.cleanup(ctx)
 
@@ -103,14 +101,17 @@ func (p *objPool) Put(obj types.AceModeler) {
 
 // cleanup 是一个定时运行的清理任务，用于删除过期对象。
 func (p *objPool) cleanup(ctx context.Context) {
+	// 创建定时器，用于定期清理过期对象。
+	cleanTimer := time.NewTimer(p.interval)
+	defer cleanTimer.Stop()
+
 	for {
 		select {
-		case <-ctx.Done(): // 如果上下文被取消，停止定时器并退出清理goroutine。
-			p.cleanTimer.Stop()
+		case <-ctx.Done(): // 如果上下文被取消，退出并清理goroutine。
 			p.keys = nil
 			p.pool = nil
 			return
-		case <-p.cleanTimer.C:
+		case <-cleanTimer.C:
 			// 计算过期时间点。
 			expired := time.Now().Add(-p.expire)
 			p.keys.Range(func(key, value any) bool {
@@ -121,7 +122,7 @@ func (p *objPool) cleanup(ctx context.Context) {
 				return true
 			})
 			// 重置定时器。
-			p.cleanTimer.Reset(p.interval)
+			cleanTimer.Reset(p.interval)
 		}
 	}
 }
