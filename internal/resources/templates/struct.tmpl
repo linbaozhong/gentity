@@ -30,7 +30,6 @@ var (
 func New{{.StructName}}() *{{.StructName}} {
 	obj := {{lower .StructName}}Pool.Get().(*{{.StructName}})
 	return obj
-//	return &{{.StructName}}{}
 }
 
 // Free

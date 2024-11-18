@@ -263,7 +263,7 @@ func (p *companyDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Fie
 		return obj, has, nil
 	}
 
-	v, e, _ := p.sg.Do(conv.Any2String(id), func() (interface{}, error) {
+	v, e, _ := p.sg.Do(conv.Any2String(id), func() (any, error) {
 		obj, has, e = p.Get4Cols(ctx, cols, companytbl.PrimaryKey.Eq(id))
 		if has {
 			e = p.setCache(ctx, obj)
