@@ -108,7 +108,7 @@ func (r *redis) FetchMulti(ctx context.Context, keys ...string) ([][]byte, error
 
 	vals := make([][]byte, 0, len(items))
 	for _, i := range items {
-		val, err := conv.Interface2Bytes(i)
+		val, err := conv.Any2Bytes(i)
 		if err != nil {
 			return nil, err
 		}

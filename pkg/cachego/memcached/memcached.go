@@ -125,7 +125,7 @@ func (m *memcached) Flush(ctx context.Context) error {
 
 // Save a value in Memcached storage by key
 func (m *memcached) Save(ctx context.Context, key string, value any, lifeTime time.Duration) error {
-	val, err := conv.Interface2Bytes(value)
+	val, err := conv.Any2Bytes(value)
 	if err != nil {
 		return err
 	}

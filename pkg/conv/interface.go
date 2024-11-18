@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func Interface2Time(s any, def ...time.Time) time.Time {
+func Any2Time(s any, def ...time.Time) time.Time {
 	switch t := s.(type) {
 	case time.Time:
 		return t
@@ -21,7 +21,7 @@ func Interface2Time(s any, def ...time.Time) time.Time {
 	}
 }
 
-func Interface2Int(s any, def ...int) int {
+func Any2Int(s any, def ...int) int {
 	switch v := s.(type) {
 	case uint64:
 		return int(v)
@@ -57,7 +57,7 @@ func Interface2Int(s any, def ...int) int {
 	}
 }
 
-func Interface2Uint8(s any, def ...uint8) uint8 {
+func Any2Uint8(s any, def ...uint8) uint8 {
 	switch v := s.(type) {
 	case uint64:
 		return uint8(v)
@@ -93,7 +93,7 @@ func Interface2Uint8(s any, def ...uint8) uint8 {
 	}
 }
 
-func Interface2Uint16(s any, def ...uint16) uint16 {
+func Any2Uint16(s any, def ...uint16) uint16 {
 	switch v := s.(type) {
 	case uint64:
 		return uint16(v)
@@ -128,7 +128,7 @@ func Interface2Uint16(s any, def ...uint16) uint16 {
 		return 0
 	}
 }
-func Interface2Uint(s any, def ...uint) uint {
+func Any2Uint(s any, def ...uint) uint {
 	switch v := s.(type) {
 	case uint64:
 		return uint(v)
@@ -164,7 +164,7 @@ func Interface2Uint(s any, def ...uint) uint {
 	}
 }
 
-func Interface2Uint32(s any, def ...uint32) uint32 {
+func Any2Uint32(s any, def ...uint32) uint32 {
 	switch v := s.(type) {
 	case uint64:
 		return uint32(v)
@@ -200,7 +200,7 @@ func Interface2Uint32(s any, def ...uint32) uint32 {
 	}
 }
 
-func Interface2Int32(s any, def ...int32) int32 {
+func Any2Int32(s any, def ...int32) int32 {
 	switch v := s.(type) {
 	case uint64:
 		return int32(v)
@@ -236,7 +236,7 @@ func Interface2Int32(s any, def ...int32) int32 {
 	}
 }
 
-func Interface2Int64(s any, def ...int64) int64 {
+func Any2Int64(s any, def ...int64) int64 {
 	if b, ok := s.(int64); ok {
 		return b
 	}
@@ -273,7 +273,7 @@ func Interface2Int64(s any, def ...int64) int64 {
 	}
 }
 
-func Interface2Uint64(s any, def ...uint64) uint64 {
+func Any2Uint64(s any, def ...uint64) uint64 {
 	switch v := s.(type) {
 	case uint64:
 		return v
@@ -309,7 +309,7 @@ func Interface2Uint64(s any, def ...uint64) uint64 {
 	}
 }
 
-func Interface2Int8(s any, def ...int8) int8 {
+func Any2Int8(s any, def ...int8) int8 {
 	switch v := s.(type) {
 	case uint64:
 		return int8(v)
@@ -344,7 +344,7 @@ func Interface2Int8(s any, def ...int8) int8 {
 		return 0
 	}
 }
-func Interface2Int16(s any, def ...int16) int16 {
+func Any2Int16(s any, def ...int16) int16 {
 	switch v := s.(type) {
 	case uint64:
 		return int16(v)
@@ -380,7 +380,7 @@ func Interface2Int16(s any, def ...int16) int16 {
 	}
 }
 
-func Interface2Float32(s any, def ...float32) float32 {
+func Any2Float32(s any, def ...float32) float32 {
 	switch v := s.(type) {
 	case float64:
 		return float32(v)
@@ -416,7 +416,7 @@ func Interface2Float32(s any, def ...float32) float32 {
 	}
 }
 
-func Interface2Float64(s any, def ...float64) float64 {
+func Any2Float64(s any, def ...float64) float64 {
 	switch v := s.(type) {
 	case float64:
 		return v
@@ -452,7 +452,7 @@ func Interface2Float64(s any, def ...float64) float64 {
 	}
 }
 
-func Interface2String(s any) string {
+func Any2String(s any) string {
 	if ss, ok := s.(Stringer); ok {
 		return ss.String()
 	}
@@ -489,7 +489,7 @@ func Interface2String(s any) string {
 		if s.(time.Time).IsZero() {
 			return ""
 		}
-		return Interface2Time(s).Format(time.DateTime)
+		return Any2Time(s).Format(time.DateTime)
 	case bool:
 		return strconv.FormatBool(v)
 	default:
@@ -501,34 +501,12 @@ func Interface2String(s any) string {
 	}
 }
 
-func Interface2Bool(s any, def ...bool) bool {
+func Any2Bool(s any, def ...bool) bool {
 	switch v := s.(type) {
 	case bool:
 		return v
-	case int64:
-		return v > 0
-	case int32:
-		return v > 0
-	case int16:
-		return v > 0
-	case int8:
-		return v > 0
-	case int:
-		return v > 0
-	case uint:
-		return v > 0
-	case uint64:
-		return v > 0
-	case uint32:
-		return v > 0
-	case uint16:
-		return v > 0
-	case uint8:
-		return v > 0
-	case float32:
-		return v > 0
-	case float64:
-		return v > 0
+	case int64, int32, int16, int8, int, uint, uint64, uint32, uint16, uint8, float32, float64:
+		return v != 0
 	case string:
 		return String2Bool(v, def...)
 	default:
@@ -539,20 +517,20 @@ func Interface2Bool(s any, def ...bool) bool {
 	}
 }
 
-// Interface2Bytes
-func Interface2Bytes(s any) ([]byte, error) {
+// Any2Bytes
+func Any2Bytes(s any) ([]byte, error) {
 	switch v := s.(type) {
 	case []byte:
 		return v, nil
 	case string:
 		return String2Bytes(v), nil
 	case uint64, uint32, uint16, uint8, int64, int32, int16, int8, float32, float64, bool, int, uint:
-		return String2Bytes(Interface2String(v)), nil
+		return String2Bytes(Any2String(v)), nil
 	case time.Time:
 		if s.(time.Time).IsZero() {
 			return []byte{}, nil
 		}
-		return String2Bytes(Interface2Time(s).Format(time.DateTime)), nil
+		return String2Bytes(Any2Time(s).Format(time.DateTime)), nil
 	default:
 		return types.JSON.Marshal(v)
 	}

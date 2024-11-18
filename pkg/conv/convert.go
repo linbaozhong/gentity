@@ -11,8 +11,8 @@ import (
 	"strings"
 )
 
-// Interface2StringSlice any转[]string
-func Interface2StringSlice(s any, def ...[]string) []string {
+// Any2StringSlice any转[]string
+func Any2StringSlice(s any, def ...[]string) []string {
 	if b, ok := s.([]string); ok {
 		return b
 	}
@@ -22,8 +22,8 @@ func Interface2StringSlice(s any, def ...[]string) []string {
 	return []string{}
 }
 
-// Interface2IntSlice any转[]int
-func Interface2IntSlice(s any, def ...[]int) []int {
+// Any2IntSlice any转[]int
+func Any2IntSlice(s any, def ...[]int) []int {
 	if b, ok := s.([]int); ok {
 		return b
 	}
@@ -33,8 +33,8 @@ func Interface2IntSlice(s any, def ...[]int) []int {
 	return []int{}
 }
 
-// Interface2StringMap any转map[string]any
-func Interface2StringMap(s any, def ...map[string]any) map[string]any {
+// Any2StringMap any转map[string]any
+func Any2StringMap(s any, def ...map[string]any) map[string]any {
 	if b, ok := s.(map[string]any); ok {
 		return b
 	}

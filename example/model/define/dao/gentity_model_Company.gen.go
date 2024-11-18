@@ -263,7 +263,7 @@ func (p *companyDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Fie
 		return obj, has, nil
 	}
 
-	v, e, _ := p.sg.Do(conv.Interface2String(id), func() (interface{}, error) {
+	v, e, _ := p.sg.Do(conv.Any2String(id), func() (interface{}, error) {
 		obj, has, e = p.Get4Cols(ctx, cols, companytbl.PrimaryKey.Eq(id))
 		if has {
 			e = p.setCache(ctx, obj)
@@ -385,7 +385,7 @@ func (p *companyDao) Exists(ctx context.Context, cond ...dialect.Condition) (boo
 // onUpdate
 func (p *companyDao) onUpdate(ctx context.Context, ids ...uint64) error {
 	for _, id := range ids {
-		if err := p.cache.Delete(ctx, cachego.GetIdHashKey(conv.Interface2String(id))); err != nil {
+		if err := p.cache.Delete(ctx, cachego.GetIdHashKey(conv.Any2String(id))); err != nil {
 			return err
 		}
 	}
@@ -395,7 +395,7 @@ func (p *companyDao) onUpdate(ctx context.Context, ids ...uint64) error {
 
 // getCache
 func (p *companyDao) getCache(ctx context.Context, id uint64) (*db.Company, bool, error) {
-	s, err := p.cache.Fetch(ctx, cachego.GetIdHashKey(conv.Interface2String(id)))
+	s, err := p.cache.Fetch(ctx, cachego.GetIdHashKey(conv.Any2String(id)))
 	if err != nil {
 		return nil, false, err
 	}
@@ -416,5 +416,5 @@ func (p *companyDao) setCache(ctx context.Context, obj *db.Company) error {
 	if err != nil {
 		return err
 	}
-	return p.cache.Save(ctx, cachego.GetIdHashKey(conv.Interface2String(obj.Id)), string(s), time.Minute)
+	return p.cache.Save(ctx, cachego.GetIdHashKey(conv.Any2String(obj.Id)), string(s), time.Minute)
 }

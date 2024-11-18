@@ -134,7 +134,7 @@ func (sm *syncMap) Save(ctx context.Context, key string, value any, lifeTime tim
 	if lifeTime > 0 {
 		duration = time.Now().Unix() + int64(lifeTime.Seconds())
 	}
-	b, err := conv.Interface2Bytes(value)
+	b, err := conv.Any2Bytes(value)
 	if err != nil {
 		return err
 	}
