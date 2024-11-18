@@ -82,7 +82,7 @@ func New(ctx context.Context, opts ...option) cachego.Cache {
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		cacheDB.Exec("PRAGMA synchronous = OFF")
 		obj.db = cacheDB
 		obj.storage(context.Background(), obj.name)
 	})
