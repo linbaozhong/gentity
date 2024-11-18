@@ -17,7 +17,7 @@ package conv
 import "testing"
 
 func TestAny2Bytes(t *testing.T) {
-	var s interface{} = 123.34
+	var s any = 123.34
 
 	t.Log(Any2Bytes(s))
 	t.Log(Any2Bytes(s))

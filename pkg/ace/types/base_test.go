@@ -25,7 +25,7 @@ type A struct {
 }
 
 var pool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		fmt.Print("New \t")
 		return &A{}
 	},

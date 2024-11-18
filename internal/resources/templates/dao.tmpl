@@ -275,7 +275,7 @@ func (p *{{.TableName}}Dao) GetByID(ctx context.Context,{{index .PrimaryKey 1}} 
 		return obj,has,nil
 	}
 
-	v, e, _ := p.sg.Do(conv.Any2String({{index .PrimaryKey 1}}), func() (interface{}, error) {
+	v, e, _ := p.sg.Do(conv.Any2String({{index .PrimaryKey 1}}), func() (any, error) {
 		obj, has, e = p.Get4Cols(ctx, cols, {{$tablename}}tbl.PrimaryKey.Eq({{index .PrimaryKey 1}}))
 		if has {
 			e = p.setCache(ctx, obj)
