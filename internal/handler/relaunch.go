@@ -46,6 +46,15 @@ var (
 	gentity . .\database.sql`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
+			// 如果path="init"，则初始化api模板
+			if path == "init" {
+				if len(args) > 1 {
+					generateApi(args[1])
+				} else {
+					showError("The project name is not entered")
+				}
+				return
+			}
 			// struct全路径
 			fullpath, err = filepath.Abs(path)
 			if err != nil {
