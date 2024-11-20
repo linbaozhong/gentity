@@ -1,6 +1,7 @@
 package log
 
 import (
+	"context"
 	"github.com/gookit/slog"
 	"github.com/gookit/slog/handler"
 	"github.com/gookit/slog/rotatefile"
@@ -11,7 +12,7 @@ import (
 
 var level slog.Level
 
-func RegisterLogger(production bool) {
+func RegisterLogger(ctx context.Context, production bool) {
 	_ = os.Mkdir("logs", os.ModePerm)
 
 	slog.Configure(func(l *slog.SugaredLogger) {
@@ -39,6 +40,17 @@ func RegisterLogger(production bool) {
 		level = slog.TraceLevel
 	}
 	slog.SetLogLevel(level)
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				slog.Close()
+				return
+			default:
+			}
+		}
+	}()
 }
 
 func Trace(args ...any) {

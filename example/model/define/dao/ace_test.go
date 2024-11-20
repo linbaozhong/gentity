@@ -33,7 +33,7 @@ var (
 
 func init() {
 	var err error
-	dbx, err = ace.Connect("mysql",
+	dbx, err = ace.Connect(ace.Context, "mysql",
 		"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
 	if err != nil {
 		log.Fatal(err)
@@ -42,7 +42,7 @@ func init() {
 	dbx.SetMaxIdleConns(25)
 	dbx.SetDebug(true)
 	dbx.SetCache(ace.CacheTypeSyncMap, 0)
-	log.RegisterLogger(false)
+	log.RegisterLogger(ace.Context, false)
 }
 
 func TestCreateSet(t *testing.T) {
@@ -70,7 +70,7 @@ func TestCreateCols(t *testing.T) {
 		obj.IsAuthenticated,
 		obj.State,
 		obj.CreatedTime,
-	).Struct(context.Background(), &db.Company{
+	).StructBatch(context.Background(), &db.Company{
 		FullCorpName:     "m1",
 		IsEcologicalCorp: false,
 		State:            0,
