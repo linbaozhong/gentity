@@ -6,12 +6,12 @@ import (
 )
 
 func Init() api.Application {
-	app := api.NewApplication("Seven Reminder", "0.1")
+	app := api.NewApplication("{{.ModulePath}}", "0.1")
 
 	app.Use(api.Recovery())
 	app.Use(api.Logger())
 
-	v1 := api.NewParty(app, "/seven")
+	v1 := api.NewParty(app, "/v1")
 	// 注册路由
 	l := len(api.Instances)
 	for i := 0; i < l; i++ {
