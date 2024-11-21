@@ -10,7 +10,12 @@ go get -u github.com/linbaozhong/gentity@latest
 ```
 go install github.com/linbaozhong/gentity/cmd/gentity@latest
 ```
-## 定义一个struct，添加注释 tablename 数据库表名
+## 生成 API 项目
+```
+gentity init [项目名称]
+```
+## 生成ORM代码
+#### 定义一个struct，添加注释 tablename 数据库表名
 ```go
 // tablename user
 type User struct {
@@ -24,35 +29,41 @@ type User struct {
 注释：
 - `db:"'id' pk auto"` 表示数据库字段名，主键，自增
 - `db:"created_time <-"` 表示数据库字段名，只读。 `<-`: 只读;`->`: 只写;`-`:不可读写
-## 生成代码
-### 用法：
+#### 用法：
 ```
 gentity model路径 [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "数据库连接字符串"] [flags]
 ```
-### 示例
+#### 示例
+1. 在当前目录，遍历结构体(struct)文件，并生成对应的ORM代码
 ```
 gentity
-
+```
+2. 在 .\db 目录，遍历结构体(struct)文件，生成对应的ORM代码
+```
 gentity .\db
-
+```
+3. 在 .\db 目录，使用指定的数据库驱动，根据数据库表结构生成结构体(struct)文件和对应的ORM代码
+```
 gentity .\db mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
-
+```
+4. 在当前目录，使用指定数据库驱动 Create Statement 文件，生成结构体(struct)文件和对应的ORM代码
+```
 gentity . mysql .\database.sql
 ```
-##### 1. 进入model目录
+###### 1. 进入model目录
 ```
 cd model
 gentity
 ```
-##### 2. 或者指定model目录
+###### 2. 或者指定model目录
 ```
 gentity ./model
 ```
-##### 3. 指定数据库驱动、包含 Create Table 的 SQL文件，先在当前目录生成struct文件，再生成相应的ORM文件
+###### 3. 指定数据库驱动、包含 Create Table 的 SQL文件，先在当前目录生成struct文件，再生成相应的ORM文件
 ```
 gentity . mysql ./database.sql
 ```
-##### 4. 指定数据库驱动、连接字符串，先在当前目录生成struct文件，再生成相应的ORM文件
+###### 4. 指定数据库驱动、连接字符串，先在当前目录生成struct文件，再生成相应的ORM文件
 ```
 gentity . mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 ```
@@ -72,26 +83,23 @@ import (
 ```go
 var (
 	dbx *ace.DB
-    tt  = model.UserTbl
 )
 ```
 3. 初始化连接
 ```go
-var err error
-db, err = ace.Connect("mysql", "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
-if err != nil {
-	panic(err)
-}
-defer db.Close()
-
-db.SetMaxOpenConns(50)
-db.SetMaxIdleConns(25)
-db.SetDebug(true)
-log.RegisterLogger(false)
+	var err error
+	dbx, err = ace.Connect(ace.Context, "mysql",
+		"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbx.SetMaxOpenConns(50)
+	dbx.SetMaxIdleConns(25)
+	dbx.SetDebug(true)
+	dbx.SetCache(ace.CacheTypeSyncMap, 0)
 ```
 4. 使用
 ```go
-
 func TestCreateSet(t *testing.T) {
 	defer dbx.Close()
 	x := Company(dbx).C()
@@ -117,7 +125,7 @@ func TestCreateCols(t *testing.T) {
 		obj.IsAuthenticated,
 		obj.State,
 		obj.CreatedTime,
-	).Struct(context.Background(), &db.Company{
+	).StructBatch(context.Background(), &db.Company{
 		FullCorpName:     "m1",
 		IsEcologicalCorp: false,
 		State:            0,
@@ -230,7 +238,6 @@ func TestUpdateCols(t *testing.T) {
 	}
 	t.Log(result.LastInsertId())
 	t.Log(result.RowsAffected())
-
 }
 
 func TestUpdate(t *testing.T) {
@@ -284,13 +291,5 @@ func TestSelect(t *testing.T) {
 	for _, o := range obj {
 		t.Log(o)
 	}
-}
-
-func TestGenStruct(t *testing.T) {
-	buf, err := schema.SqlFile2Struct("../../../data.sql", "db")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(string(buf))
 }
 ```

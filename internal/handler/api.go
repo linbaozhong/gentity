@@ -16,6 +16,7 @@ package handler
 
 import (
 	"github.com/linbaozhong/gentity/internal/resources"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,6 +33,7 @@ func generateApi(name string) error {
 				showError(err)
 				return err
 			}
+			log.Printf("The application directory %s is created successfully. \n", name)
 		} else {
 			showError(err)
 			return err
@@ -72,6 +74,18 @@ func generateApi(name string) error {
 		return err
 	}
 
+	err = apiModel(name)
+	if err != nil {
+		showError(err)
+		return err
+	}
+
+	err = apiConstant(name)
+	if err != nil {
+		showError(err)
+		return err
+	}
+
 	err = apiServiceInit(name)
 	if err != nil {
 		showError(err)
@@ -84,14 +98,17 @@ func generateApi(name string) error {
 		return err
 	}
 
+	log.Printf("go mod tidy ... \n")
 	return exec.Command("go", "mod", "tidy").Run()
 }
 
 func apiInitModule(name string) error {
+	log.Printf("Initialize the new go.mod file. \n")
 	return exec.Command("go", "mod", "init", name).Run()
 }
 
 func apiCmd(name string) error {
+	log.Printf("Create the main.go application entry file. \n")
 	err := os.Mkdir("cmd", os.ModePerm)
 	if err != nil {
 		return err
@@ -123,14 +140,15 @@ func apiCmd(name string) error {
 }
 
 func apiHandler(name string) error {
+	log.Printf("Create new api handler file. \n")
 	err := os.MkdirAll("internal/handler", os.ModePerm)
 	if err != nil {
 		return err
 	}
-	_, err = os.Stat("internal/handler/app_handler.go")
+	_, err = os.Stat("internal/handler/user_handler.go")
 	if err != nil {
 		if os.IsNotExist(err) {
-			f, err := os.OpenFile("internal/handler/app_handler.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			f, err := os.OpenFile("internal/handler/user_handler.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 			if err != nil {
 				return err
 			}
@@ -145,12 +163,13 @@ func apiHandler(name string) error {
 			})
 		}
 	} else {
-		showError("internal/handler/app_handler.go already exists")
+		showError("internal/handler/user_handler.go already exists")
 	}
 	return nil
 }
 
 func apiRouter(name string) error {
+	log.Printf("Create new api route file. \n")
 	err := os.MkdirAll("internal/router", os.ModePerm)
 	if err != nil {
 		return err
@@ -178,6 +197,7 @@ func apiRouter(name string) error {
 	return nil
 }
 func apiServiceInit(name string) error {
+	log.Printf("Create new api service file. \n")
 	const parent = "internal/service"
 	err := os.MkdirAll(parent, os.ModePerm)
 	if err != nil {
@@ -207,15 +227,15 @@ func apiServiceInit(name string) error {
 }
 
 func apiService(name string) error {
-	const parent = "internal/service/app"
+	const parent = "internal/service/user"
 	err := os.MkdirAll(parent, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	_, err = os.Stat(parent + "/app_service.go")
+	_, err = os.Stat(parent + "/user_service.go")
 	if err != nil {
 		if os.IsNotExist(err) {
-			f, err := os.OpenFile(parent+"/app_service.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			f, err := os.OpenFile(parent+"/user_service.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 			if err != nil {
 				return err
 			}
@@ -230,7 +250,67 @@ func apiService(name string) error {
 			})
 		}
 	} else {
-		showError("internal/service/app/app_service.go already exists")
+		showError("internal/service/user/user_service.go already exists")
+	}
+	return nil
+}
+
+func apiModel(name string) error {
+	log.Printf("Create new api model file. \n")
+	const parent = "internal/model/dto"
+	err := os.MkdirAll(parent, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	_, err = os.Stat(parent + "/user.go")
+	if err != nil {
+		if os.IsNotExist(err) {
+			f, err := os.OpenFile(parent+"/user.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			tmpl := template.New("")
+			_, err = tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_model_dto.tmpl")
+			return tmpl.ExecuteTemplate(f, "api_internal_model_dto.tmpl", struct {
+				ModulePath string
+			}{
+				ModulePath: name,
+			})
+		}
+	} else {
+		showError(parent + "/user.go already exists")
+	}
+	return nil
+}
+
+func apiConstant(name string) error {
+	log.Printf("Create new api constant file. \n")
+	const parent = "internal/constant"
+	err := os.MkdirAll(parent, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	_, err = os.Stat(parent + "/error.go")
+	if err != nil {
+		if os.IsNotExist(err) {
+			f, err := os.OpenFile(parent+"/error.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			tmpl := template.New("")
+			_, err = tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_constant.tmpl")
+			return tmpl.ExecuteTemplate(f, "api_internal_constant.tmpl", struct {
+				ModulePath string
+			}{
+				ModulePath: name,
+			})
+		}
+	} else {
+		showError(parent + "/error.go already exists")
 	}
 	return nil
 }
