@@ -34,20 +34,10 @@ type User struct {
 gentity model路径 [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "数据库连接字符串"] [flags]
 ```
 #### 示例
-1. 在当前目录，遍历结构体(struct)文件，并生成对应的ORM代码
 ```
 gentity
-```
-2. 在 .\db 目录，遍历结构体(struct)文件，生成对应的ORM代码
-```
 gentity .\db
-```
-3. 在 .\db 目录，使用指定的数据库驱动，根据数据库表结构生成结构体(struct)文件和对应的ORM代码
-```
 gentity .\db mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
-```
-4. 在当前目录，使用指定数据库驱动 Create Statement 文件，生成结构体(struct)文件和对应的ORM代码
-```
 gentity . mysql .\database.sql
 ```
 ###### 1. 进入model目录
