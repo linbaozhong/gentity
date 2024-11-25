@@ -8,7 +8,7 @@ go get -u github.com/linbaozhong/gentity@latest
 ```
 ## 安装命令
 ```
-go install github.com/linbaozhong/gentity/cmd/gentity@latest
+go install github.com/linbaozhong/gentity@latest
 ```
 ## 生成 API 项目
 ```
