@@ -18,7 +18,7 @@ import (
 	"context"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/linbaozhong/gentity/example/model/db"
-	obj "github.com/linbaozhong/gentity/example/model/define/table/companytbl"
+	obj "github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
 	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"

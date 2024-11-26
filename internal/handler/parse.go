@@ -141,7 +141,7 @@ func parseFile(filename, pkgPath string) error {
 		}
 
 		// 写table文件
-		err = tempData.writeTable(filepath.Join(tablePath, tempData.TableName+"tbl"))
+		err = tempData.writeTable(filepath.Join(tablePath, "tbl"+tempData.TableName))
 		if err != nil {
 			showError(err.Error())
 			return err
