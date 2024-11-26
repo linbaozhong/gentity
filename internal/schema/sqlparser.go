@@ -67,7 +67,7 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 
 	for _, table := range schema {
 		buf.WriteString("// tablename " + table.Name + "\n")
-		buf.WriteString("// cache time.Minute time.Minute 1000 \n")
+		// buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + util.ParseField(table.Name) + " struct {\n")
 		buf.WriteString("\tatype.AceModel\n")
 		// buf.WriteString("\tnoCopy\n")
@@ -109,7 +109,7 @@ func DB2Struct(tables map[string][]sqlparser.Column, packageName string) ([]byte
 
 	for table, columns := range tables {
 		buf.WriteString("// tablename " + table + "\n")
-		buf.WriteString("// cache time.Minute time.Minute 1000 \n")
+		// buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + util.ParseField(table) + " struct {\n")
 		buf.WriteString("\tatype.AceModel\n")
 		// buf.WriteString("\tnoCopy\n")

@@ -8,7 +8,6 @@ import (
 )
 
 // tablename company
-// cache time.Minute time.Minute 1000
 type Company struct {
 	atype.AceModel
 	Id               uint64    `json:"id,omitempty" db:"'id' pk"`                              // 授权方企业本地id
@@ -34,7 +33,6 @@ type Company struct {
 }
 
 // tablename biz
-// cache time.Minute time.Minute 1000
 type Biz struct {
 	atype.AceModel
 	Id               uint64    `json:"id,omitempty" db:"'id' pk"`                              // 授权方企业本地id
