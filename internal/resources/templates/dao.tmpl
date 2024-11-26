@@ -17,7 +17,7 @@ import (
 	"context"
 	"database/sql"
 	"{{.ModulePath}}/{{.PackageName}}"
-	"{{.ModulePath}}/define/table/{{$tablename}}tbl"
+	"{{.ModulePath}}/define/table/tbl{{$tablename}}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
@@ -165,7 +165,7 @@ func (p *{{.TableName}}Dao) Update(ctx context.Context, sets []dialect.Setter, c
 func (p *{{.TableName}}Dao) UpdateById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, sets ...dialect.Setter) (bool, error) {
     return p.Update(ctx,
         sets,
-       	{{$tablename}}tbl.PrimaryKey.Eq({{index .PrimaryKey 1}}),
+       	tbl{{$tablename}}.PrimaryKey.Eq({{index .PrimaryKey 1}}),
     )
 }
 
@@ -205,7 +205,7 @@ func (p *{{.TableName}}Dao) Delete(ctx context.Context, cond ...dialect.Conditio
 // DeleteById
 func (p *{{.TableName}}Dao) DeleteById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (bool, error) {
     return p.Delete(ctx,
-        {{$tablename}}tbl.PrimaryKey.Eq({{index .PrimaryKey 1}}),
+        tbl{{$tablename}}.PrimaryKey.Eq({{index .PrimaryKey 1}}),
 	)
 }
 
@@ -213,7 +213,7 @@ func (p *{{.TableName}}Dao) DeleteById(ctx context.Context, {{index .PrimaryKey 
 func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{.PackageName}}.{{.StructName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols({{$tablename}}tbl.ReadableFields...)
+		c.Cols(tbl{{$tablename}}.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -241,7 +241,7 @@ func (p *{{.TableName}}Dao) Get4Cols(ctx context.Context, cols []dialect.Field, 
 func (p *{{.TableName}}Dao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{.StructName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols({{$tablename}}tbl.ReadableFields...)
+		c.Cols(tbl{{$tablename}}.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -276,7 +276,7 @@ func (p *{{.TableName}}Dao) GetByID(ctx context.Context,{{index .PrimaryKey 1}} 
 	}
 
 	v, e, _ := p.sg.Do(conv.Any2String({{index .PrimaryKey 1}}), func() (any, error) {
-		obj, has, e = p.Get4Cols(ctx, cols, {{$tablename}}tbl.PrimaryKey.Eq({{index .PrimaryKey 1}}))
+		obj, has, e = p.Get4Cols(ctx, cols, tbl{{$tablename}}.PrimaryKey.Eq({{index .PrimaryKey 1}}))
 		if has {
 			e = p.setCache(ctx, obj)
 		}
@@ -288,7 +288,7 @@ func (p *{{.TableName}}Dao) GetByID(ctx context.Context,{{index .PrimaryKey 1}} 
 
 	return nil,false,e
 {{- else}}
-	return p.Get4Cols(ctx, cols, {{$tablename}}tbl.PrimaryKey.Eq({{index .PrimaryKey 1}}))
+	return p.Get4Cols(ctx, cols, tbl{{$tablename}}.PrimaryKey.Eq({{index .PrimaryKey 1}}))
 {{- end}}
 }
 
@@ -325,7 +325,7 @@ func (p *{{.TableName}}Dao) Find(ctx context.Context, pageIndex, pageSize uint, 
 
 // IDs
 func (p *{{.TableName}}Dao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols({{$tablename}}tbl.PrimaryKey)
+	c := p.R().Cols(tbl{{$tablename}}.PrimaryKey)
 	rows, err := c.Where(cond...).
 	    Limit(dialect.MaxLimit).
 	    Query(ctx)
@@ -380,7 +380,7 @@ func (p *{{.TableName}}Dao) Sum(ctx context.Context, cols []dialect.Field, cond 
 
 // Exists
 func (p *{{.TableName}}Dao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	c := p.R().Cols({{$tablename}}tbl.PrimaryKey).Where(cond...)
+	c := p.R().Cols(tbl{{$tablename}}.PrimaryKey).Where(cond...)
 	row, err := c.QueryRow(ctx)
     if err != nil {
         return false, err

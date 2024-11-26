@@ -36,9 +36,9 @@ gentity model路径 [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "
 #### 示例
 ```
 gentity
-gentity .\db
-gentity .\db mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
-gentity . mysql .\database.sql
+gentity .\do
+gentity .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+gentity .\do mysql .\database.sql
 ```
 ###### 1. 进入model目录
 ```

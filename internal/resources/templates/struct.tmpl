@@ -11,7 +11,7 @@ import (
 	{{- if .HasTime }}
 	"time"
 	{{- end}}
-	"{{.ModulePath}}/define/table/{{ $tablename }}tbl"
+	"{{.ModulePath}}/define/table/tbl{{ $tablename }}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
@@ -54,14 +54,14 @@ func (p *{{.StructName}}) TableName() string {
 
 func (p *{{.StructName}}) AssignPtr(args ...dialect.Field) ([]any) {
 	if len(args) == 0 {
-		args = {{ $tablename }}tbl.ReadableFields
+		args = tbl{{ $tablename }}.ReadableFields
 	}
 
     vals := make([]any, 0, len(args))
     for _, col := range args {
         switch col {
         {{- range $key, $value := .Columns}}
-        case {{$tablename}}tbl.{{ index $value 0 }}:
+        case tbl{{$tablename}}.{{ index $value 0 }}:
             vals = append(vals, &p.{{ index $value 0 }})
         {{- end}}
         }
@@ -75,7 +75,7 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]*{{.Str
 	{{.TableName}}s := make([]*{{.StructName}}, 0)
 
 	if len(args) == 0 {
-		args = {{$tablename}}tbl.ReadableFields
+		args = tbl{{$tablename}}.ReadableFields
 	}
 
 	for rows.Next() {
@@ -104,18 +104,18 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 	)
 
 	if len(args) == 0 {
-		args = {{$tablename}}tbl.WritableFields
+		args = tbl{{$tablename}}.WritableFields
 		lens = len(args)
 		cols = make([]string, 0, lens)
 		vals = make([]any, 0, lens)
 		for _, arg := range args {
 			switch arg {
 			{{- range $key, $value := .Columns}}
-			case {{$tablename}}tbl.{{ index $value 0 }}:
+			case tbl{{$tablename}}.{{ index $value 0 }}:
 				if p.{{ index $value 0 }}{{getZeroValue $value}} {
 					continue
 				}
-				cols = append(cols, {{$tablename}}tbl.{{ index $value 0 }}.Quote())
+				cols = append(cols, tbl{{$tablename}}.{{ index $value 0 }}.Quote())
 				vals = append(vals, p.{{ index $value 0 }})
 			{{- end}}
 			}
@@ -128,8 +128,8 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 	for _, arg := range args {
 		switch arg {
 		{{- range $key, $value := .Columns}}
-		case {{$tablename}}tbl.{{ index $value 0 }}:
-			cols = append(cols, {{$tablename}}tbl.{{ index $value 0 }}.Quote())
+		case tbl{{$tablename}}.{{ index $value 0 }}:
+			cols = append(cols, tbl{{$tablename}}.{{ index $value 0 }}.Quote())
 			vals = append(vals, p.{{ index $value 0 }})
 		{{- end}}
 		}
@@ -139,7 +139,7 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 
 //
 func (p *{{.StructName}}) AssignKeys() (dialect.Field, any) {
-	return {{$tablename}}tbl.PrimaryKey,p.{{index .PrimaryKey 0}}
+	return tbl{{$tablename}}.PrimaryKey,p.{{index .PrimaryKey 0}}
 }
 
 

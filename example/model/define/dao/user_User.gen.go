@@ -6,7 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/linbaozhong/gentity/example/model/db"
-	"github.com/linbaozhong/gentity/example/model/define/table/usertbl"
+	"github.com/linbaozhong/gentity/example/model/define/table/tbluser"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
@@ -146,7 +146,7 @@ func (p *userDao) Update(ctx context.Context, sets []dialect.Setter, cond ...dia
 func (p *userDao) UpdateById(ctx context.Context, id uint64, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
 		sets,
-		usertbl.PrimaryKey.Eq(id),
+		tbluser.PrimaryKey.Eq(id),
 	)
 }
 
@@ -186,7 +186,7 @@ func (p *userDao) Delete(ctx context.Context, cond ...dialect.Condition) (bool, 
 // DeleteById
 func (p *userDao) DeleteById(ctx context.Context, id uint64) (bool, error) {
 	return p.Delete(ctx,
-		usertbl.PrimaryKey.Eq(id),
+		tbluser.PrimaryKey.Eq(id),
 	)
 }
 
@@ -194,7 +194,7 @@ func (p *userDao) DeleteById(ctx context.Context, id uint64) (bool, error) {
 func (p *userDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*db.User, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols(usertbl.ReadableFields...)
+		c.Cols(tbluser.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -222,7 +222,7 @@ func (p *userDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...di
 func (p *userDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*db.User, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols(usertbl.ReadableFields...)
+		c.Cols(tbluser.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -250,7 +250,7 @@ func (p *userDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols 
 
 // GetByID 按主键读取一个user对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *userDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.User, bool, error) {
-	return p.Get4Cols(ctx, cols, usertbl.PrimaryKey.Eq(id))
+	return p.Get4Cols(ctx, cols, tbluser.PrimaryKey.Eq(id))
 }
 
 // Get 按条件读取一个user对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -285,7 +285,7 @@ func (p *userDao) Find(ctx context.Context, pageIndex, pageSize uint, cond ...di
 
 // IDs
 func (p *userDao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols(usertbl.PrimaryKey)
+	c := p.R().Cols(tbluser.PrimaryKey)
 	rows, err := c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		Query(ctx)
@@ -340,7 +340,7 @@ func (p *userDao) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect
 
 // Exists
 func (p *userDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	c := p.R().Cols(usertbl.PrimaryKey).Where(cond...)
+	c := p.R().Cols(tbluser.PrimaryKey).Where(cond...)
 	row, err := c.QueryRow(ctx)
 	if err != nil {
 		return false, err

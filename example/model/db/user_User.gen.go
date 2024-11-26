@@ -4,7 +4,7 @@ package db
 
 import (
 	"database/sql"
-	"github.com/linbaozhong/gentity/example/model/define/table/usertbl"
+	"github.com/linbaozhong/gentity/example/model/define/table/tbluser"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
@@ -53,25 +53,25 @@ func (p *User) TableName() string {
 
 func (p *User) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
-		args = usertbl.ReadableFields
+		args = tbluser.ReadableFields
 	}
 
 	vals := make([]any, 0, len(args))
 	for _, col := range args {
 		switch col {
-		case usertbl.ID:
+		case tbluser.ID:
 			vals = append(vals, &p.ID)
-		case usertbl.Name:
+		case tbluser.Name:
 			vals = append(vals, &p.Name)
-		case usertbl.Avatar:
+		case tbluser.Avatar:
 			vals = append(vals, &p.Avatar)
-		case usertbl.Nickname:
+		case tbluser.Nickname:
 			vals = append(vals, &p.Nickname)
-		case usertbl.Status:
+		case tbluser.Status:
 			vals = append(vals, &p.Status)
-		case usertbl.IsAllow:
+		case tbluser.IsAllow:
 			vals = append(vals, &p.IsAllow)
-		case usertbl.CreatedTime:
+		case tbluser.CreatedTime:
 			vals = append(vals, &p.CreatedTime)
 		}
 	}
@@ -84,7 +84,7 @@ func (p *User) Scan(rows *sql.Rows, args ...dialect.Field) ([]*User, bool, error
 	users := make([]*User, 0)
 
 	if len(args) == 0 {
-		args = usertbl.ReadableFields
+		args = tbluser.ReadableFields
 	}
 
 	for rows.Next() {
@@ -113,53 +113,53 @@ func (p *User) AssignValues(args ...dialect.Field) ([]string, []any) {
 	)
 
 	if len(args) == 0 {
-		args = usertbl.WritableFields
+		args = tbluser.WritableFields
 		lens = len(args)
 		cols = make([]string, 0, lens)
 		vals = make([]any, 0, lens)
 		for _, arg := range args {
 			switch arg {
-			case usertbl.ID:
+			case tbluser.ID:
 				if p.ID == 0 {
 					continue
 				}
-				cols = append(cols, usertbl.ID.Quote())
+				cols = append(cols, tbluser.ID.Quote())
 				vals = append(vals, p.ID)
-			case usertbl.Name:
+			case tbluser.Name:
 				if p.Name == "" {
 					continue
 				}
-				cols = append(cols, usertbl.Name.Quote())
+				cols = append(cols, tbluser.Name.Quote())
 				vals = append(vals, p.Name)
-			case usertbl.Avatar:
+			case tbluser.Avatar:
 				if p.Avatar == "" {
 					continue
 				}
-				cols = append(cols, usertbl.Avatar.Quote())
+				cols = append(cols, tbluser.Avatar.Quote())
 				vals = append(vals, p.Avatar)
-			case usertbl.Nickname:
+			case tbluser.Nickname:
 				if p.Nickname == "" {
 					continue
 				}
-				cols = append(cols, usertbl.Nickname.Quote())
+				cols = append(cols, tbluser.Nickname.Quote())
 				vals = append(vals, p.Nickname)
-			case usertbl.Status:
+			case tbluser.Status:
 				if p.Status == 0 {
 					continue
 				}
-				cols = append(cols, usertbl.Status.Quote())
+				cols = append(cols, tbluser.Status.Quote())
 				vals = append(vals, p.Status)
-			case usertbl.IsAllow:
+			case tbluser.IsAllow:
 				if p.IsAllow == false {
 					continue
 				}
-				cols = append(cols, usertbl.IsAllow.Quote())
+				cols = append(cols, tbluser.IsAllow.Quote())
 				vals = append(vals, p.IsAllow)
-			case usertbl.CreatedTime:
+			case tbluser.CreatedTime:
 				if p.CreatedTime.IsZero() {
 					continue
 				}
-				cols = append(cols, usertbl.CreatedTime.Quote())
+				cols = append(cols, tbluser.CreatedTime.Quote())
 				vals = append(vals, p.CreatedTime)
 			}
 		}
@@ -170,26 +170,26 @@ func (p *User) AssignValues(args ...dialect.Field) ([]string, []any) {
 	vals = make([]any, 0, lens)
 	for _, arg := range args {
 		switch arg {
-		case usertbl.ID:
-			cols = append(cols, usertbl.ID.Quote())
+		case tbluser.ID:
+			cols = append(cols, tbluser.ID.Quote())
 			vals = append(vals, p.ID)
-		case usertbl.Name:
-			cols = append(cols, usertbl.Name.Quote())
+		case tbluser.Name:
+			cols = append(cols, tbluser.Name.Quote())
 			vals = append(vals, p.Name)
-		case usertbl.Avatar:
-			cols = append(cols, usertbl.Avatar.Quote())
+		case tbluser.Avatar:
+			cols = append(cols, tbluser.Avatar.Quote())
 			vals = append(vals, p.Avatar)
-		case usertbl.Nickname:
-			cols = append(cols, usertbl.Nickname.Quote())
+		case tbluser.Nickname:
+			cols = append(cols, tbluser.Nickname.Quote())
 			vals = append(vals, p.Nickname)
-		case usertbl.Status:
-			cols = append(cols, usertbl.Status.Quote())
+		case tbluser.Status:
+			cols = append(cols, tbluser.Status.Quote())
 			vals = append(vals, p.Status)
-		case usertbl.IsAllow:
-			cols = append(cols, usertbl.IsAllow.Quote())
+		case tbluser.IsAllow:
+			cols = append(cols, tbluser.IsAllow.Quote())
 			vals = append(vals, p.IsAllow)
-		case usertbl.CreatedTime:
-			cols = append(cols, usertbl.CreatedTime.Quote())
+		case tbluser.CreatedTime:
+			cols = append(cols, tbluser.CreatedTime.Quote())
 			vals = append(vals, p.CreatedTime)
 		}
 	}
@@ -197,7 +197,7 @@ func (p *User) AssignValues(args ...dialect.Field) ([]string, []any) {
 }
 
 func (p *User) AssignKeys() (dialect.Field, any) {
-	return usertbl.PrimaryKey, p.ID
+	return tbluser.PrimaryKey, p.ID
 }
 
 func (p *User) AssignPrimaryKeyValues(result sql.Result) error {

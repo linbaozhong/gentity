@@ -6,7 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/linbaozhong/gentity/example/model/db"
-	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
+	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
@@ -146,7 +146,7 @@ func (p *companyDao) Update(ctx context.Context, sets []dialect.Setter, cond ...
 func (p *companyDao) UpdateById(ctx context.Context, id uint64, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
 		sets,
-		companytbl.PrimaryKey.Eq(id),
+		tblcompany.PrimaryKey.Eq(id),
 	)
 }
 
@@ -186,7 +186,7 @@ func (p *companyDao) Delete(ctx context.Context, cond ...dialect.Condition) (boo
 // DeleteById
 func (p *companyDao) DeleteById(ctx context.Context, id uint64) (bool, error) {
 	return p.Delete(ctx,
-		companytbl.PrimaryKey.Eq(id),
+		tblcompany.PrimaryKey.Eq(id),
 	)
 }
 
@@ -194,7 +194,7 @@ func (p *companyDao) DeleteById(ctx context.Context, id uint64) (bool, error) {
 func (p *companyDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*db.Company, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols(companytbl.ReadableFields...)
+		c.Cols(tblcompany.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -222,7 +222,7 @@ func (p *companyDao) Get4Cols(ctx context.Context, cols []dialect.Field, cond ..
 func (p *companyDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*db.Company, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols(companytbl.ReadableFields...)
+		c.Cols(tblcompany.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -250,7 +250,7 @@ func (p *companyDao) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 
 // GetByID 按主键读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *companyDao) GetByID(ctx context.Context, id uint64, cols ...dialect.Field) (*db.Company, bool, error) {
-	return p.Get4Cols(ctx, cols, companytbl.PrimaryKey.Eq(id))
+	return p.Get4Cols(ctx, cols, tblcompany.PrimaryKey.Eq(id))
 }
 
 // Get 按条件读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -285,7 +285,7 @@ func (p *companyDao) Find(ctx context.Context, pageIndex, pageSize uint, cond ..
 
 // IDs
 func (p *companyDao) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols(companytbl.PrimaryKey)
+	c := p.R().Cols(tblcompany.PrimaryKey)
 	rows, err := c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		Query(ctx)
@@ -340,7 +340,7 @@ func (p *companyDao) Sum(ctx context.Context, cols []dialect.Field, cond ...dial
 
 // Exists
 func (p *companyDao) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	c := p.R().Cols(companytbl.PrimaryKey).Where(cond...)
+	c := p.R().Cols(tblcompany.PrimaryKey).Where(cond...)
 	row, err := c.QueryRow(ctx)
 	if err != nil {
 		return false, err
