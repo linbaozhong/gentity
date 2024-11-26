@@ -22,7 +22,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
-type {{$structName}}er interface {
+type {{$tablename}}er interface {
 	dialect.Daoer
 	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
@@ -64,7 +64,7 @@ type dao{{$structName}} struct {
 {{- end}}
 }
 
-func {{$structName}}(exec ace.Executer) {{$structName}}er {
+func {{$structName}}(exec ace.Executer) {{$tablename}}er {
 	obj := &dao{{$structName}}{}
 	obj.db = exec
 {{- if .HasCache}}
@@ -73,22 +73,22 @@ func {{$structName}}(exec ace.Executer) {{$structName}}er {
 	return obj
 }
 
-// C Create {{ .TableName }}
+// C Create {{$tablename}}
 func (p *dao{{$structName}}) C() *ace.Creator {
 	return p.db.C({{.PackageName}}.{{$structName}}TableName)
 }
 
-// R Read {{ .TableName }}
+// R Read {{$tablename}}
 func (p *dao{{$structName}}) R() *ace.Selector{
 	return p.db.R({{.PackageName}}.{{$structName}}TableName)
 }
 
-// U Update {{ .TableName }}
+// U Update {{$tablename}}
 func (p *dao{{$structName}}) U() *ace.Updater{
 	return p.db.U({{.PackageName}}.{{$structName}}TableName)
 }
 
-// D Delete {{ .TableName }}
+// D Delete {{$tablename}}
 func (p *dao{{$structName}}) D() *ace.Deleter{
 	return p.db.D({{.PackageName}}.{{$structName}}TableName)
 }
