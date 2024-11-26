@@ -12,31 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sqlite
+package util
 
 import (
-	"context"
+	"github.com/dchest/siphash"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"testing"
-	"time"
 )
 
-func TestCache(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+func TestHashKey(t *testing.T) {
+	prefix := "test"
+	t.Log(MemHashString(prefix))
+	t.Log(MemHashString(prefix + "abc"))
+	t.Log(MemHashString(prefix + "123"))
+	t.Log(MemHashString(prefix + "eter"))
+	t.Log(MemHashString(prefix + "4579"))
+}
 
-	cc := New(ctx,
-		WithName("a"),
-		WithPrefix("abc"),
-	)
+func BenchmarkHash(b *testing.B) {
+	buf := conv.String2Bytes("testtesttesttesttest")
+	for i := 0; i < b.N; i++ {
+		siphash.New(buf).Sum64()
+	}
+}
 
-	e := cc.Save(ctx, "bbb", "456", time.Second*10)
-	if e != nil {
-		t.Fatal(e)
+func BenchmarkMemHash(b *testing.B) {
+	buf := conv.String2Bytes("testtesttesttesttest")
+	for i := 0; i < b.N; i++ {
+		MemHash(buf)
 	}
-	v, e := cc.Fetch(ctx, "bbb")
-	if e != nil {
-		t.Fatal(e)
-	}
-	t.Log(conv.Bytes2String(v))
 }

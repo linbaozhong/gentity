@@ -21,6 +21,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/log"
 	_ "github.com/mattn/go-sqlite3"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -51,7 +52,6 @@ var (
 func WithName(name string) option {
 	return func(o *sqlite) {
 		o.name = name
-		o.storage(context.Background(), o.name)
 	}
 }
 
@@ -71,25 +71,30 @@ func WithInterval(d time.Duration) option {
 
 // New 创建一个sqlite缓存实例
 func New(ctx context.Context, opts ...option) cachego.Cache {
+	cacheOnce.Do(func() {
+		var err error
+		err = os.MkdirAll("./cache", 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+		cacheDB, err = sql.Open("sqlite3", "file:cache/cache.db?cache=shared&mode=rwc&_journal_mode=WAL")
+		if err != nil {
+			log.Fatal(err)
+		}
+		cacheDB.Exec("PRAGMA synchronous = OFF")
+	})
+
 	obj := &sqlite{
 		db:       cacheDB,
 		name:     cacheTableName,
 		interval: cacheCleanupInterval,
 	}
-	cacheOnce.Do(func() {
-		var err error
-		cacheDB, err = sql.Open("sqlite3", "file:cache.db?cache=shared&mode=rwc&_journal_mode=WAL")
-		if err != nil {
-			log.Fatal(err)
-		}
-		cacheDB.Exec("PRAGMA synchronous = OFF")
-		obj.db = cacheDB
-		obj.storage(context.Background(), obj.name)
-	})
 
 	for _, opt := range opts {
 		opt(obj)
 	}
+
+	obj.storage(ctx, obj.name)
 
 	go obj.cleanup(ctx)
 

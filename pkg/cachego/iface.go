@@ -16,11 +16,9 @@ package cachego
 
 import (
 	"context"
-	"encoding/binary"
-	"encoding/hex"
 	"errors"
-	"github.com/dchest/siphash"
-	"github.com/linbaozhong/gentity/pkg/conv"
+	"github.com/linbaozhong/gentity/pkg/util"
+	"strconv"
 	"time"
 )
 
@@ -41,10 +39,7 @@ type Cache interface {
 
 // HashKey 使用SipHash算法生成key
 func HashKey(prefix, key string) string {
-	hashBytes := make([]byte, 8)
-	binary.LittleEndian.PutUint64(hashBytes, siphash.New(conv.String2Bytes(key)).Sum64())
-
-	return prefix + hex.EncodeToString(hashBytes)
+	return prefix + strconv.FormatUint(util.MemHashString(key), 10)
 }
 
 // 生成综合条件cond缓存key

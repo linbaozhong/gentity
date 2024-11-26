@@ -12,31 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sqlite
+package util
 
 import (
-	"context"
 	"github.com/linbaozhong/gentity/pkg/conv"
-	"testing"
-	"time"
+	"unsafe"
 )
 
-func TestCache(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+//go:noescape
+//go:linkname memhash runtime.memhash
+func memhash(p unsafe.Pointer, h, s uintptr) uintptr
 
-	cc := New(ctx,
-		WithName("a"),
-		WithPrefix("abc"),
-	)
+type stringStruct struct {
+	str unsafe.Pointer
+	len int
+}
 
-	e := cc.Save(ctx, "bbb", "456", time.Second*10)
-	if e != nil {
-		t.Fatal(e)
-	}
-	v, e := cc.Fetch(ctx, "bbb")
-	if e != nil {
-		t.Fatal(e)
-	}
-	t.Log(conv.Bytes2String(v))
+func MemHashString(s string) uint64 {
+	return MemHash(conv.String2Bytes(s))
+}
+
+// MemHash
+func MemHash(b []byte) uint64 {
+	s := *(*stringStruct)(unsafe.Pointer(&b))
+	return uint64(memhash(s.str, 0, uintptr(s.len)))
 }
