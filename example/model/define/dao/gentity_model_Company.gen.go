@@ -385,7 +385,7 @@ func (p *companyDao) Exists(ctx context.Context, cond ...dialect.Condition) (boo
 // onUpdate
 func (p *companyDao) onUpdate(ctx context.Context, ids ...uint64) error {
 	for _, id := range ids {
-		if err := p.cache.Delete(ctx, cachego.GetIdHashKey(conv.Any2String(id))); err != nil {
+		if err := p.cache.Delete(ctx, cachego.GetIdHashKey(id)); err != nil {
 			return err
 		}
 	}
@@ -395,7 +395,7 @@ func (p *companyDao) onUpdate(ctx context.Context, ids ...uint64) error {
 
 // getCache
 func (p *companyDao) getCache(ctx context.Context, id uint64) (*db.Company, bool, error) {
-	s, err := p.cache.Fetch(ctx, cachego.GetIdHashKey(conv.Any2String(id)))
+	s, err := p.cache.Fetch(ctx, cachego.GetIdHashKey(id))
 	if err != nil {
 		return nil, false, err
 	}
@@ -416,5 +416,5 @@ func (p *companyDao) setCache(ctx context.Context, obj *db.Company) error {
 	if err != nil {
 		return err
 	}
-	return p.cache.Save(ctx, cachego.GetIdHashKey(conv.Any2String(obj.Id)), string(s), time.Minute)
+	return p.cache.Save(ctx, cachego.GetIdHashKey(obj.Id), string(s), time.Minute)
 }

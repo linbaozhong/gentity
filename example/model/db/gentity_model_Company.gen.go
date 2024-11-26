@@ -24,7 +24,6 @@ var (
 func NewCompany() *Company {
 	obj := companyPool.Get().(*Company)
 	return obj
-	//	return &Company{}
 }
 
 // Free

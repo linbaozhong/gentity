@@ -24,7 +24,6 @@ var (
 func NewUser() *User {
 	obj := userPool.Get().(*User)
 	return obj
-	//	return &User{}
 }
 
 // Free

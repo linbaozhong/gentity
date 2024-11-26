@@ -17,6 +17,7 @@ package cachego
 import (
 	"context"
 	"errors"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"strconv"
 	"time"
@@ -38,21 +39,21 @@ type Cache interface {
 }
 
 // HashKey 使用SipHash算法生成key
-func HashKey(prefix, key string) string {
-	return prefix + strconv.FormatUint(util.MemHashString(key), 10)
+func HashKey(prefix string, key any) string {
+	return prefix + strconv.FormatUint(util.MemHashString(conv.Any2String(key)), 10)
 }
 
 // 生成综合条件cond缓存key
-func GetHashKey(key string) string {
+func GetHashKey(key any) string {
 	return HashKey("c:", key)
 }
 
 // 生成id缓存key
-func GetIdHashKey(key string) string {
+func GetIdHashKey(key any) string {
 	return HashKey("i:", key)
 }
 
 // 生成ids缓存key
-func GetIdsHashKey(key string) string {
+func GetIdsHashKey(key any) string {
 	return HashKey("s:", key)
 }
