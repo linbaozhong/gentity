@@ -32,6 +32,8 @@ type (
 	}
 
 	syncMap struct {
+		mu sync.Mutex
+
 		storage *sync.Map
 		prefix  string // key前缀
 	}
@@ -79,8 +81,11 @@ func (sm *syncMap) Contains(ctx context.Context, key string) bool {
 	return ok
 }
 
-// ContainsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (sm *syncMap) ContainsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+// ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
+func (sm *syncMap) ExistsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+
 	if sm.Contains(ctx, key) {
 		return false
 	}

@@ -20,6 +20,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
@@ -29,6 +30,8 @@ type (
 	option func(o *memcached)
 
 	memcached struct {
+		mu sync.Mutex
+
 		driver *memcache.Client
 		prefix string // key前缀
 	}
@@ -56,8 +59,11 @@ func (m *memcached) Contains(ctx context.Context, key string) bool {
 	return err == nil
 }
 
-// ContainsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (m *memcached) ContainsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+// ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
+func (m *memcached) ExistsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	if m.Contains(ctx, key) {
 		return false
 	}

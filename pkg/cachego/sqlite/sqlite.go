@@ -35,6 +35,8 @@ type (
 		interval time.Duration // 空闲时长后清理
 		name     string        // 缓存名称
 		prefix   string        // key前缀
+
+		mu sync.Mutex
 	}
 )
 
@@ -115,12 +117,16 @@ func (s *sqlite) Contains(ctx context.Context, key string) bool {
 	if expires > time.Now().Unix() {
 		return true
 	}
+	// 到期删除
 	s.Delete(ctx, key)
 	return false
 }
 
-// ContainsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (s *sqlite) ContainsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+// ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
+func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	if s.Contains(ctx, key) {
 		return false
 	}
@@ -129,7 +135,7 @@ func (s *sqlite) ContainsOrSave(ctx context.Context, key string, value any, life
 		return false
 	}
 	n, _ := result.RowsAffected()
-	return n >= 0
+	return n > 0
 }
 
 func (s *sqlite) Delete(ctx context.Context, key string) error {

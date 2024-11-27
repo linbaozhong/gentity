@@ -55,8 +55,8 @@ func (r *redis) Contains(ctx context.Context, key string) bool {
 	return i > 0
 }
 
-// ContainsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (r *redis) ContainsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+// ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
+func (r *redis) ExistsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
 	return r.driver.SetNX(ctx, r.getKey(key), value, lifeTime).Val()
 }
 

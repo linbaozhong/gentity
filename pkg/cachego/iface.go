@@ -30,7 +30,7 @@ var (
 
 type Cache interface {
 	Contains(ctx context.Context, key string) bool
-	ContainsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool
+	ExistsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool
 	Delete(ctx context.Context, key string) error
 	PrefixDelete(ctx context.Context, prefix string) error
 	Fetch(ctx context.Context, key string) ([]byte, error)
