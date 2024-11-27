@@ -79,6 +79,14 @@ func (sm *syncMap) Contains(ctx context.Context, key string) bool {
 	return ok
 }
 
+// ContainsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
+func (sm *syncMap) ContainsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+	if sm.Contains(ctx, key) {
+		return false
+	}
+	return sm.Save(ctx, key, value, lifeTime) == nil
+}
+
 // Delete the cached key from SyncMap storage
 func (sm *syncMap) Delete(ctx context.Context, key string) error {
 	sm.storage.Delete(sm.getKey(key))

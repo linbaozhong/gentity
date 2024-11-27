@@ -99,6 +99,12 @@ var (
 			if err != nil {
 				showError(err)
 			}
+			// 写入daoBase
+			err = writeDaoBase(daoPath)
+			if err != nil {
+				showError(err)
+			}
+
 			// 遍历结构体目录中的文件，生成dao层代码
 			dirs, err := os.ReadDir(path)
 			if err != nil {

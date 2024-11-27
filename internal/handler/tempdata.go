@@ -38,7 +38,7 @@ type TempData struct {
 	CacheList   string // list缓存时长
 	CacheLimit  string // list缓存长度
 	Columns     [][]string
-	//Keys        [][]string
+	// Keys        [][]string
 	PrimaryKey []string
 	// PrimaryKeyName string // struct pk属性名
 	HasPrimaryKey bool
@@ -58,9 +58,27 @@ func getBaseFilename(filename string) string {
 	return f[:pos]
 }
 
-// func (d *TempData) tableFilename(parent string) string {
-// 	return filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".go")
-// }
+func writeDaoBase(parent string) error {
+	err := os.MkdirAll(parent, os.ModePerm)
+	if err != nil {
+		showError(err)
+		return err
+	}
+
+	fileName := filepath.Join(parent, "gentity_model.gen.go")
+
+	funcMap := template.FuncMap{
+		"lower": strings.ToLower,
+	}
+	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
+		tmpl := template.New("").Funcs(funcMap)
+		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/dao_base.tmpl")
+		if err != nil {
+			return err
+		}
+		return tmpl.ExecuteTemplate(ioWriter, "dao_base.tmpl", nil)
+	})
+}
 
 func (d *TempData) writeToModel(fileName string) error {
 	funcMap := template.FuncMap{
@@ -146,7 +164,7 @@ func (d *TempData) writeToModel(fileName string) error {
 		tmpl := template.New("").Funcs(funcMap)
 		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/struct.tmpl")
 		if err != nil {
-			showError(err)
+			return err
 		}
 		return tmpl.ExecuteTemplate(ioWriter, "struct.tmpl", d)
 	})
@@ -156,7 +174,7 @@ func (d *TempData) writeToModel(fileName string) error {
 func (d *TempData) writeTable(parent string) error {
 	err := os.MkdirAll(parent, os.ModePerm)
 	if err != nil {
-		showError(err)
+		// showError(err)
 		return err
 	}
 
@@ -168,7 +186,7 @@ func (d *TempData) writeTable(parent string) error {
 		tmpl := template.New("").Funcs(funcMap)
 		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/table.tmpl")
 		if err != nil {
-			showError(err)
+			return err
 		}
 		return tmpl.ExecuteTemplate(ioWriter, "table.tmpl", d)
 	})
@@ -178,11 +196,11 @@ func (d *TempData) writeTable(parent string) error {
 func (d *TempData) writeBuild(parent string) error {
 	err := os.MkdirAll(parent, os.ModePerm)
 	if err != nil {
-		showError(err)
+		// showError(err)
 		return err
 	}
 
-	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".gen.go") // d.tableFilename(parent)
+	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".gen.go")
 
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
@@ -191,7 +209,8 @@ func (d *TempData) writeBuild(parent string) error {
 		tmpl := template.New("").Funcs(funcMap)
 		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/dao.tmpl")
 		if err != nil {
-			showError(err)
+			// showError(err)
+			return err
 		}
 		return tmpl.ExecuteTemplate(ioWriter, "dao.tmpl", d)
 	})
@@ -201,7 +220,7 @@ func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(io
 	if fi, err := os.Stat(fullFilename); err == nil {
 		if !fi.IsDir() {
 			if err := os.Remove(fullFilename); err != nil {
-				showError(err.Error())
+				// showError(err)
 				return err
 			}
 		}
@@ -209,26 +228,26 @@ func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(io
 
 	f, err := os.OpenFile(fullFilename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 	if err != nil {
-		showError(err.Error())
+		// showError(err.Error())
 		return err
 	}
 	defer f.Close()
 	var buf bytes.Buffer
 	err = fn(&buf, funcMap)
 	if err != nil {
-		showError(err.Error())
+		// showError(err.Error())
 		return err
 	}
 
 	formatted, err := format.Source(buf.Bytes())
 	if err != nil {
-		showError(err.Error())
+		// showError(err.Error())
 		return err
 	}
 	_, err = f.Write(formatted)
-	//_, err = f.Write(buf.Bytes())
+	// _, err = f.Write(buf.Bytes())
 	if err != nil {
-		showError(err.Error())
+		// showError(err.Error())
 		return err
 	}
 	return err

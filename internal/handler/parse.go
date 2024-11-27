@@ -31,6 +31,7 @@ func parseFile(filename, pkgPath string) error {
 	fset := token.NewFileSet()
 	var src any
 	var structFullName = filepath.Join(fullpath, filename)
+
 	f, err := parser.ParseFile(fset, structFullName, src, parser.ParseComments)
 	if err != nil {
 		showError(err)
@@ -45,6 +46,9 @@ func parseFile(filename, pkgPath string) error {
 	if err != nil {
 		showError(err)
 		return err
+	}
+	if len(file.Structures) == 0 {
+		return nil
 	}
 
 	for _, im := range file.Imports {

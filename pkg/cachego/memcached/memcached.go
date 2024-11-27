@@ -56,6 +56,14 @@ func (m *memcached) Contains(ctx context.Context, key string) bool {
 	return err == nil
 }
 
+// ContainsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
+func (m *memcached) ContainsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+	if m.Contains(ctx, key) {
+		return false
+	}
+	return m.Save(ctx, key, value, lifeTime) == nil
+}
+
 // Delete the cached key from Memcached storage
 func (m *memcached) Delete(ctx context.Context, key string) error {
 	return m.driver.Delete(m.getKey(key))

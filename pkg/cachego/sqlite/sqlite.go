@@ -112,7 +112,24 @@ func (s *sqlite) Contains(ctx context.Context, key string) bool {
 		return false
 	}
 
-	return true
+	if expires > time.Now().Unix() {
+		return true
+	}
+	s.Delete(ctx, key)
+	return false
+}
+
+// ContainsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
+func (s *sqlite) ContainsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+	if s.Contains(ctx, key) {
+		return false
+	}
+	result, err := s.db.ExecContext(ctx, "INSERT INTO "+s.name+"(value, expire,key) VALUES(?, ?, ?)", value, time.Now().Unix()+int64(lifeTime.Seconds()), s.getKey(key))
+	if err != nil {
+		return false
+	}
+	n, _ := result.RowsAffected()
+	return n >= 0
 }
 
 func (s *sqlite) Delete(ctx context.Context, key string) error {
