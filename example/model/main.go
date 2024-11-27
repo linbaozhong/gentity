@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	//dbx,_:=ace.Connect(ace.Context,"mysql","")
 	b := db.NewCompany()
 	b.FullCorpName = "test1"
 	a := *b

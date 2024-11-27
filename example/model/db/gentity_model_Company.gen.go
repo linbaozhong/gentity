@@ -4,7 +4,7 @@ package db
 
 import (
 	"database/sql"
-	"github.com/linbaozhong/gentity/example/model/define/table/companytbl"
+	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
@@ -66,51 +66,51 @@ func (p *Company) TableName() string {
 
 func (p *Company) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
-		args = companytbl.ReadableFields
+		args = tblcompany.ReadableFields
 	}
 
 	vals := make([]any, 0, len(args))
 	for _, col := range args {
 		switch col {
-		case companytbl.Id:
+		case tblcompany.Id:
 			vals = append(vals, &p.Id)
-		case companytbl.Platform:
+		case tblcompany.Platform:
 			vals = append(vals, &p.Platform)
-		case companytbl.CorpId:
+		case tblcompany.CorpId:
 			vals = append(vals, &p.CorpId)
-		case companytbl.CorpType:
+		case tblcompany.CorpType:
 			vals = append(vals, &p.CorpType)
-		case companytbl.FullCorpName:
+		case tblcompany.FullCorpName:
 			vals = append(vals, &p.FullCorpName)
-		case companytbl.CorpType2:
+		case tblcompany.CorpType2:
 			vals = append(vals, &p.CorpType2)
-		case companytbl.CorpName:
+		case tblcompany.CorpName:
 			vals = append(vals, &p.CorpName)
-		case companytbl.Industry:
+		case tblcompany.Industry:
 			vals = append(vals, &p.Industry)
-		case companytbl.IsAuthenticated:
+		case tblcompany.IsAuthenticated:
 			vals = append(vals, &p.IsAuthenticated)
-		case companytbl.LicenseCode:
+		case tblcompany.LicenseCode:
 			vals = append(vals, &p.LicenseCode)
-		case companytbl.CorpLogoUrl:
+		case tblcompany.CorpLogoUrl:
 			vals = append(vals, &p.CorpLogoUrl)
-		case companytbl.InviteUrl:
+		case tblcompany.InviteUrl:
 			vals = append(vals, &p.InviteUrl)
-		case companytbl.InviteCode:
+		case tblcompany.InviteCode:
 			vals = append(vals, &p.InviteCode)
-		case companytbl.IsEcologicalCorp:
+		case tblcompany.IsEcologicalCorp:
 			vals = append(vals, &p.IsEcologicalCorp)
-		case companytbl.AuthLevel:
+		case tblcompany.AuthLevel:
 			vals = append(vals, &p.AuthLevel)
-		case companytbl.AuthChannel:
+		case tblcompany.AuthChannel:
 			vals = append(vals, &p.AuthChannel)
-		case companytbl.AuthChannelType:
+		case tblcompany.AuthChannelType:
 			vals = append(vals, &p.AuthChannelType)
-		case companytbl.State:
+		case tblcompany.State:
 			vals = append(vals, &p.State)
-		case companytbl.StateTime:
+		case tblcompany.StateTime:
 			vals = append(vals, &p.StateTime)
-		case companytbl.CreatedTime:
+		case tblcompany.CreatedTime:
 			vals = append(vals, &p.CreatedTime)
 		}
 	}
@@ -123,7 +123,7 @@ func (p *Company) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Company, bool,
 	companys := make([]*Company, 0)
 
 	if len(args) == 0 {
-		args = companytbl.ReadableFields
+		args = tblcompany.ReadableFields
 	}
 
 	for rows.Next() {
@@ -152,131 +152,131 @@ func (p *Company) AssignValues(args ...dialect.Field) ([]string, []any) {
 	)
 
 	if len(args) == 0 {
-		args = companytbl.WritableFields
+		args = tblcompany.WritableFields
 		lens = len(args)
 		cols = make([]string, 0, lens)
 		vals = make([]any, 0, lens)
 		for _, arg := range args {
 			switch arg {
-			case companytbl.Id:
+			case tblcompany.Id:
 				if p.Id == 0 {
 					continue
 				}
-				cols = append(cols, companytbl.Id.Quote())
+				cols = append(cols, tblcompany.Id.Quote())
 				vals = append(vals, p.Id)
-			case companytbl.Platform:
+			case tblcompany.Platform:
 				if p.Platform == "" {
 					continue
 				}
-				cols = append(cols, companytbl.Platform.Quote())
+				cols = append(cols, tblcompany.Platform.Quote())
 				vals = append(vals, p.Platform)
-			case companytbl.CorpId:
+			case tblcompany.CorpId:
 				if p.CorpId == "" {
 					continue
 				}
-				cols = append(cols, companytbl.CorpId.Quote())
+				cols = append(cols, tblcompany.CorpId.Quote())
 				vals = append(vals, p.CorpId)
-			case companytbl.CorpType:
+			case tblcompany.CorpType:
 				if p.CorpType == 0 {
 					continue
 				}
-				cols = append(cols, companytbl.CorpType.Quote())
+				cols = append(cols, tblcompany.CorpType.Quote())
 				vals = append(vals, p.CorpType)
-			case companytbl.FullCorpName:
+			case tblcompany.FullCorpName:
 				if p.FullCorpName == "" {
 					continue
 				}
-				cols = append(cols, companytbl.FullCorpName.Quote())
+				cols = append(cols, tblcompany.FullCorpName.Quote())
 				vals = append(vals, p.FullCorpName)
-			case companytbl.CorpType2:
+			case tblcompany.CorpType2:
 				if p.CorpType2 == 0 {
 					continue
 				}
-				cols = append(cols, companytbl.CorpType2.Quote())
+				cols = append(cols, tblcompany.CorpType2.Quote())
 				vals = append(vals, p.CorpType2)
-			case companytbl.CorpName:
+			case tblcompany.CorpName:
 				if p.CorpName == "" {
 					continue
 				}
-				cols = append(cols, companytbl.CorpName.Quote())
+				cols = append(cols, tblcompany.CorpName.Quote())
 				vals = append(vals, p.CorpName)
-			case companytbl.Industry:
+			case tblcompany.Industry:
 				if p.Industry == "" {
 					continue
 				}
-				cols = append(cols, companytbl.Industry.Quote())
+				cols = append(cols, tblcompany.Industry.Quote())
 				vals = append(vals, p.Industry)
-			case companytbl.IsAuthenticated:
+			case tblcompany.IsAuthenticated:
 				if p.IsAuthenticated == false {
 					continue
 				}
-				cols = append(cols, companytbl.IsAuthenticated.Quote())
+				cols = append(cols, tblcompany.IsAuthenticated.Quote())
 				vals = append(vals, p.IsAuthenticated)
-			case companytbl.LicenseCode:
+			case tblcompany.LicenseCode:
 				if p.LicenseCode == "" {
 					continue
 				}
-				cols = append(cols, companytbl.LicenseCode.Quote())
+				cols = append(cols, tblcompany.LicenseCode.Quote())
 				vals = append(vals, p.LicenseCode)
-			case companytbl.CorpLogoUrl:
+			case tblcompany.CorpLogoUrl:
 				if p.CorpLogoUrl == "" {
 					continue
 				}
-				cols = append(cols, companytbl.CorpLogoUrl.Quote())
+				cols = append(cols, tblcompany.CorpLogoUrl.Quote())
 				vals = append(vals, p.CorpLogoUrl)
-			case companytbl.InviteUrl:
+			case tblcompany.InviteUrl:
 				if p.InviteUrl == "" {
 					continue
 				}
-				cols = append(cols, companytbl.InviteUrl.Quote())
+				cols = append(cols, tblcompany.InviteUrl.Quote())
 				vals = append(vals, p.InviteUrl)
-			case companytbl.InviteCode:
+			case tblcompany.InviteCode:
 				if p.InviteCode == "" {
 					continue
 				}
-				cols = append(cols, companytbl.InviteCode.Quote())
+				cols = append(cols, tblcompany.InviteCode.Quote())
 				vals = append(vals, p.InviteCode)
-			case companytbl.IsEcologicalCorp:
+			case tblcompany.IsEcologicalCorp:
 				if p.IsEcologicalCorp == false {
 					continue
 				}
-				cols = append(cols, companytbl.IsEcologicalCorp.Quote())
+				cols = append(cols, tblcompany.IsEcologicalCorp.Quote())
 				vals = append(vals, p.IsEcologicalCorp)
-			case companytbl.AuthLevel:
+			case tblcompany.AuthLevel:
 				if p.AuthLevel == 0 {
 					continue
 				}
-				cols = append(cols, companytbl.AuthLevel.Quote())
+				cols = append(cols, tblcompany.AuthLevel.Quote())
 				vals = append(vals, p.AuthLevel)
-			case companytbl.AuthChannel:
+			case tblcompany.AuthChannel:
 				if p.AuthChannel == "" {
 					continue
 				}
-				cols = append(cols, companytbl.AuthChannel.Quote())
+				cols = append(cols, tblcompany.AuthChannel.Quote())
 				vals = append(vals, p.AuthChannel)
-			case companytbl.AuthChannelType:
+			case tblcompany.AuthChannelType:
 				if p.AuthChannelType == "" {
 					continue
 				}
-				cols = append(cols, companytbl.AuthChannelType.Quote())
+				cols = append(cols, tblcompany.AuthChannelType.Quote())
 				vals = append(vals, p.AuthChannelType)
-			case companytbl.State:
+			case tblcompany.State:
 				if p.State == 0 {
 					continue
 				}
-				cols = append(cols, companytbl.State.Quote())
+				cols = append(cols, tblcompany.State.Quote())
 				vals = append(vals, p.State)
-			case companytbl.StateTime:
+			case tblcompany.StateTime:
 				if p.StateTime.IsZero() {
 					continue
 				}
-				cols = append(cols, companytbl.StateTime.Quote())
+				cols = append(cols, tblcompany.StateTime.Quote())
 				vals = append(vals, p.StateTime)
-			case companytbl.CreatedTime:
+			case tblcompany.CreatedTime:
 				if p.CreatedTime.IsZero() {
 					continue
 				}
-				cols = append(cols, companytbl.CreatedTime.Quote())
+				cols = append(cols, tblcompany.CreatedTime.Quote())
 				vals = append(vals, p.CreatedTime)
 			}
 		}
@@ -287,65 +287,65 @@ func (p *Company) AssignValues(args ...dialect.Field) ([]string, []any) {
 	vals = make([]any, 0, lens)
 	for _, arg := range args {
 		switch arg {
-		case companytbl.Id:
-			cols = append(cols, companytbl.Id.Quote())
+		case tblcompany.Id:
+			cols = append(cols, tblcompany.Id.Quote())
 			vals = append(vals, p.Id)
-		case companytbl.Platform:
-			cols = append(cols, companytbl.Platform.Quote())
+		case tblcompany.Platform:
+			cols = append(cols, tblcompany.Platform.Quote())
 			vals = append(vals, p.Platform)
-		case companytbl.CorpId:
-			cols = append(cols, companytbl.CorpId.Quote())
+		case tblcompany.CorpId:
+			cols = append(cols, tblcompany.CorpId.Quote())
 			vals = append(vals, p.CorpId)
-		case companytbl.CorpType:
-			cols = append(cols, companytbl.CorpType.Quote())
+		case tblcompany.CorpType:
+			cols = append(cols, tblcompany.CorpType.Quote())
 			vals = append(vals, p.CorpType)
-		case companytbl.FullCorpName:
-			cols = append(cols, companytbl.FullCorpName.Quote())
+		case tblcompany.FullCorpName:
+			cols = append(cols, tblcompany.FullCorpName.Quote())
 			vals = append(vals, p.FullCorpName)
-		case companytbl.CorpType2:
-			cols = append(cols, companytbl.CorpType2.Quote())
+		case tblcompany.CorpType2:
+			cols = append(cols, tblcompany.CorpType2.Quote())
 			vals = append(vals, p.CorpType2)
-		case companytbl.CorpName:
-			cols = append(cols, companytbl.CorpName.Quote())
+		case tblcompany.CorpName:
+			cols = append(cols, tblcompany.CorpName.Quote())
 			vals = append(vals, p.CorpName)
-		case companytbl.Industry:
-			cols = append(cols, companytbl.Industry.Quote())
+		case tblcompany.Industry:
+			cols = append(cols, tblcompany.Industry.Quote())
 			vals = append(vals, p.Industry)
-		case companytbl.IsAuthenticated:
-			cols = append(cols, companytbl.IsAuthenticated.Quote())
+		case tblcompany.IsAuthenticated:
+			cols = append(cols, tblcompany.IsAuthenticated.Quote())
 			vals = append(vals, p.IsAuthenticated)
-		case companytbl.LicenseCode:
-			cols = append(cols, companytbl.LicenseCode.Quote())
+		case tblcompany.LicenseCode:
+			cols = append(cols, tblcompany.LicenseCode.Quote())
 			vals = append(vals, p.LicenseCode)
-		case companytbl.CorpLogoUrl:
-			cols = append(cols, companytbl.CorpLogoUrl.Quote())
+		case tblcompany.CorpLogoUrl:
+			cols = append(cols, tblcompany.CorpLogoUrl.Quote())
 			vals = append(vals, p.CorpLogoUrl)
-		case companytbl.InviteUrl:
-			cols = append(cols, companytbl.InviteUrl.Quote())
+		case tblcompany.InviteUrl:
+			cols = append(cols, tblcompany.InviteUrl.Quote())
 			vals = append(vals, p.InviteUrl)
-		case companytbl.InviteCode:
-			cols = append(cols, companytbl.InviteCode.Quote())
+		case tblcompany.InviteCode:
+			cols = append(cols, tblcompany.InviteCode.Quote())
 			vals = append(vals, p.InviteCode)
-		case companytbl.IsEcologicalCorp:
-			cols = append(cols, companytbl.IsEcologicalCorp.Quote())
+		case tblcompany.IsEcologicalCorp:
+			cols = append(cols, tblcompany.IsEcologicalCorp.Quote())
 			vals = append(vals, p.IsEcologicalCorp)
-		case companytbl.AuthLevel:
-			cols = append(cols, companytbl.AuthLevel.Quote())
+		case tblcompany.AuthLevel:
+			cols = append(cols, tblcompany.AuthLevel.Quote())
 			vals = append(vals, p.AuthLevel)
-		case companytbl.AuthChannel:
-			cols = append(cols, companytbl.AuthChannel.Quote())
+		case tblcompany.AuthChannel:
+			cols = append(cols, tblcompany.AuthChannel.Quote())
 			vals = append(vals, p.AuthChannel)
-		case companytbl.AuthChannelType:
-			cols = append(cols, companytbl.AuthChannelType.Quote())
+		case tblcompany.AuthChannelType:
+			cols = append(cols, tblcompany.AuthChannelType.Quote())
 			vals = append(vals, p.AuthChannelType)
-		case companytbl.State:
-			cols = append(cols, companytbl.State.Quote())
+		case tblcompany.State:
+			cols = append(cols, tblcompany.State.Quote())
 			vals = append(vals, p.State)
-		case companytbl.StateTime:
-			cols = append(cols, companytbl.StateTime.Quote())
+		case tblcompany.StateTime:
+			cols = append(cols, tblcompany.StateTime.Quote())
 			vals = append(vals, p.StateTime)
-		case companytbl.CreatedTime:
-			cols = append(cols, companytbl.CreatedTime.Quote())
+		case tblcompany.CreatedTime:
+			cols = append(cols, tblcompany.CreatedTime.Quote())
 			vals = append(vals, p.CreatedTime)
 		}
 	}
@@ -353,7 +353,7 @@ func (p *Company) AssignValues(args ...dialect.Field) ([]string, []any) {
 }
 
 func (p *Company) AssignKeys() (dialect.Field, any) {
-	return companytbl.PrimaryKey, p.Id
+	return tblcompany.PrimaryKey, p.Id
 }
 
 func (p *Company) AssignPrimaryKeyValues(result sql.Result) error {
