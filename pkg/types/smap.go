@@ -8,7 +8,7 @@ import (
 import "github.com/json-iterator/go"
 
 var (
-	JSON = jsoniter.ConfigCompatibleWithStandardLibrary
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 type Smap map[string]any
@@ -41,7 +41,7 @@ func (p Smap) MarshalJSON() ([]byte, error) {
 		}
 		m[k] = v
 	}
-	return JSON.Marshal(m)
+	return json.Marshal(m)
 }
 
 func (p Smap) ConvertFrom(m map[string]any) Smap {

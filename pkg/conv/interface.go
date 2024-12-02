@@ -2,9 +2,13 @@ package conv
 
 import (
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/types"
+	jsoniter "github.com/json-iterator/go"
 	"strconv"
 	"time"
+)
+
+var (
+	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 func Any2Time(s any, def ...time.Time) time.Time {
@@ -493,7 +497,7 @@ func Any2String(s any) string {
 	case bool:
 		return strconv.FormatBool(v)
 	default:
-		b, e := types.JSON.Marshal(v)
+		b, e := json.Marshal(v)
 		if e != nil {
 			return fmt.Sprintf("%+v", v)
 		}
@@ -532,6 +536,6 @@ func Any2Bytes(s any) ([]byte, error) {
 		}
 		return String2Bytes(Any2Time(s).Format(time.DateTime)), nil
 	default:
-		return types.JSON.Marshal(v)
+		return json.Marshal(v)
 	}
 }

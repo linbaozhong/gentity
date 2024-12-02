@@ -1,7 +1,6 @@
 package conv
 
 import (
-	"github.com/linbaozhong/gentity/pkg/types"
 	"time"
 	"unsafe"
 )
@@ -43,7 +42,7 @@ func Bytes2Any(b []byte, r any) error {
 	case time.Time:
 		r, err = time.Parse(time.DateTime, Bytes2String(b))
 	default:
-		return types.JSON.Unmarshal(b, r)
+		return json.Unmarshal(b, r)
 	}
 	return err
 }
