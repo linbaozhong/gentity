@@ -24,8 +24,12 @@ import (
 )
 
 func generateApi(name string) error {
-	dir := filepath.Join(filepath.Dir(os.Args[0]), name)
-	_, err := os.Stat(dir)
+	dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	dir = filepath.Join(dir, name)
+	_, err = os.Stat(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			err = os.Mkdir(dir, os.ModePerm)
