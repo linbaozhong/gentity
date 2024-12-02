@@ -37,31 +37,3 @@ func (j *JsonResult) Free() {
 	j.Info = ""
 	resultPool.Put(j)
 }
-
-//
-// // SetCode 为响应数据设置code和msg,msg省略,取constant中定义的msg
-// func (j *JsonResult) SetCode(e error, msg ...string) *JsonResult {
-// 	if err, ok := e.(Error); ok {
-// 		j.Code = err.Code
-// 		j.Info = err.Info
-// 	}
-//
-// 	if len(msg) > 0 {
-// 		j.Message = msg[0]
-// 		return j
-// 	}
-// 	if e != nil {
-// 		j.Message = e.Error()
-// 	}
-// 	return j
-// }
-//
-// func (j *JsonResult) SetData(d any) *JsonResult {
-// 	j.Data = d
-// 	return j
-// }
-//
-// func (j *JsonResult) SetInfo(info string) *JsonResult {
-// 	j.Info = info
-// 	return j
-// }
