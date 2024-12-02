@@ -2,13 +2,14 @@ package types
 
 import (
 	"bytes"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"strconv"
 )
 
 type ID int64
 
 func (i ID) MarshalJSON() ([]byte, error) {
-	return []byte(`"` + i.String() + `"`), nil
+	return conv.String2Bytes(`"` + strconv.FormatInt(int64(i), 10) + `"`), nil
 }
 
 func (i *ID) UnmarshalJSON(b []byte) error {
@@ -29,7 +30,12 @@ func (i ID) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// Uint64
+// int64
 func (i ID) Int64() int64 {
 	return int64(i)
+}
+
+// Uint64
+func (i ID) Uint64() uint64 {
+	return uint64(i)
 }

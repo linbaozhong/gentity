@@ -17,8 +17,6 @@ package api
 import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/types"
-
-	"github.com/kataras/iris/v12"
 )
 
 func Fail(c Context, e error, args ...any) {
@@ -34,17 +32,6 @@ func Fail(c Context, e error, args ...any) {
 		j.Message = e.Error()
 	} else {
 		j.Info = fmt.Sprintf("%s", args[0])
-	}
-	c.JSON(j)
-}
-func FailWithParam(c Context, key string, message string) {
-	j := types.NewResult()
-	defer j.Free()
-
-	j.Code = Param_Invalid.Code
-	j.Data = iris.Map{
-		"key":     key,
-		"message": message,
 	}
 	c.JSON(j)
 }
