@@ -237,7 +237,7 @@ func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field,
 		return nil,false, err
 	}
 }
-//
+
 // Find4Cols 分页获取{{.TableName}}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{$structName}}, bool, error) {
 	c := p.R()
