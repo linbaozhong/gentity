@@ -90,16 +90,16 @@ func ParseFieldType(tp string, size int, unsigned bool) string {
 
 func ParseFieldAceType(tp string, size int, unsigned bool) string {
 	switch strings.ToUpper(tp) {
-	case "INT":
-		if unsigned {
-			return "types.AceUint"
-		}
-		return "types.Money"
 	case "BIGINT":
 		if unsigned {
 			return "types.BigInt"
 		}
-		return "types.AceInt64"
+		return "types.Money"
+	case "INT":
+		if unsigned {
+			return "types.AceUint"
+		}
+		return "types.AceInt"
 	case "MEDIUMINT":
 		if unsigned {
 			return "types.AceUint32"

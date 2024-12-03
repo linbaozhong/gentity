@@ -8,14 +8,13 @@ package {{.PackageName}}
 
 import (
 	"database/sql"
-	{{- if .HasTime }}
-	"time"
-	{{- end}}
 	"{{.ModulePath}}/define/table/tbl{{ $tablename }}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	{{- if .HasTime }}
 	"github.com/linbaozhong/gentity/pkg/types"
+	{{- end}}
 )
 
 const {{$structName}}TableName = "{{.TableName}}"
