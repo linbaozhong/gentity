@@ -7,26 +7,26 @@ import (
 )
 
 var (
-	Id               = dialect.Field{Name: "id", Table: "company", Type: "uint64"}
-	Platform         = dialect.Field{Name: "platform", Table: "company", Type: "string"}
-	CorpId           = dialect.Field{Name: "corp_id", Table: "company", Type: "string"}
-	CorpType         = dialect.Field{Name: "corp_type", Table: "company", Type: "int8"}
-	FullCorpName     = dialect.Field{Name: "full_corp_name", Table: "company", Type: "string"}
-	CorpType2        = dialect.Field{Name: "corp_type2", Table: "company", Type: "int8"}
-	CorpName         = dialect.Field{Name: "corp_name", Table: "company", Type: "string"}
-	Industry         = dialect.Field{Name: "industry", Table: "company", Type: "string"}
-	IsAuthenticated  = dialect.Field{Name: "is_authenticated", Table: "company", Type: "bool"}
-	LicenseCode      = dialect.Field{Name: "license_code", Table: "company", Type: "string"}
-	CorpLogoUrl      = dialect.Field{Name: "corp_logo_url", Table: "company", Type: "string"}
-	InviteUrl        = dialect.Field{Name: "invite_url", Table: "company", Type: "string"}
-	InviteCode       = dialect.Field{Name: "invite_code", Table: "company", Type: "string"}
-	IsEcologicalCorp = dialect.Field{Name: "is_ecological_corp", Table: "company", Type: "bool"}
-	AuthLevel        = dialect.Field{Name: "auth_level", Table: "company", Type: "int8"}
-	AuthChannel      = dialect.Field{Name: "auth_channel", Table: "company", Type: "string"}
-	AuthChannelType  = dialect.Field{Name: "auth_channel_type", Table: "company", Type: "string"}
-	State            = dialect.Field{Name: "state", Table: "company", Type: "int8"}
-	StateTime        = dialect.Field{Name: "state_time", Table: "company", Type: "time.Time"}
-	CreatedTime      = dialect.Field{Name: "created_time", Table: "company", Type: "time.Time"}
+	Id               = dialect.Field{Name: "id", Json: "id", Table: "company", Type: "types.BigInt"}
+	Platform         = dialect.Field{Name: "platform", Json: "platform", Table: "company", Type: "types.AceString"}
+	CorpId           = dialect.Field{Name: "corp_id", Json: "corp_id", Table: "company", Type: "types.AceString"}
+	CorpType         = dialect.Field{Name: "corp_type", Json: "corp_type", Table: "company", Type: "types.AceInt8"}
+	FullCorpName     = dialect.Field{Name: "full_corp_name", Json: "full_corp_name", Table: "company", Type: "types.AceString"}
+	CorpType2        = dialect.Field{Name: "corp_type2", Json: "corp_type2", Table: "company", Type: "types.AceInt8"}
+	CorpName         = dialect.Field{Name: "corp_name", Json: "corp_name", Table: "company", Type: "types.AceString"}
+	Industry         = dialect.Field{Name: "industry", Json: "industry", Table: "company", Type: "types.AceString"}
+	IsAuthenticated  = dialect.Field{Name: "is_authenticated", Json: "is_authenticated", Table: "company", Type: "types.AceBool"}
+	LicenseCode      = dialect.Field{Name: "license_code", Json: "license_code", Table: "company", Type: "types.AceString"}
+	CorpLogoUrl      = dialect.Field{Name: "corp_logo_url", Json: "corp_logo_url", Table: "company", Type: "types.AceString"}
+	InviteUrl        = dialect.Field{Name: "invite_url", Json: "invite_url", Table: "company", Type: "types.AceString"}
+	InviteCode       = dialect.Field{Name: "invite_code", Json: "invite_code", Table: "company", Type: "types.AceString"}
+	IsEcologicalCorp = dialect.Field{Name: "is_ecological_corp", Json: "is_ecological_corp", Table: "company", Type: "types.AceBool"}
+	AuthLevel        = dialect.Field{Name: "auth_level", Json: "auth_level", Table: "company", Type: "types.AceInt8"}
+	AuthChannel      = dialect.Field{Name: "auth_channel", Json: "auth_channel", Table: "company", Type: "types.AceString"}
+	AuthChannelType  = dialect.Field{Name: "auth_channel_type", Json: "auth_channel_type", Table: "company", Type: "types.AceString"}
+	State            = dialect.Field{Name: "state", Json: "state", Table: "company", Type: "types.AceInt8"}
+	StateTime        = dialect.Field{Name: "state_time", Json: "state_time", Table: "company", Type: "types.AceTime"}
+	CreatedTime      = dialect.Field{Name: "created_time", Json: "created_time", Table: "company", Type: "types.AceTime"}
 	// 主键
 	PrimaryKey = Id
 

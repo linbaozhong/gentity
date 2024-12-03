@@ -4,55 +4,39 @@ package db
 
 import (
 	atype "github.com/linbaozhong/gentity/pkg/ace/types"
-	"time"
+	"github.com/linbaozhong/gentity/pkg/types"
 )
 
-// tablename company
-type Company struct {
+// tablename app
+type App struct {
 	atype.AceModel
-	Id               uint64    `json:"id,omitempty" db:"'id' pk"`                              // 授权方企业本地id
-	Platform         string    `json:"platform,omitempty" db:"'platform'"`                     // 授权方企业的平台方
-	CorpId           string    `json:"corp_id,omitempty" db:"'corp_id'"`                       // 平台授权企业id
-	CorpType         int8      `json:"corp_type,omitempty" db:"'corp_type'"`                   // 企业类型
-	FullCorpName     string    `json:"full_corp_name,omitempty" db:"'full_corp_name'"`         // 企业全称
-	CorpType2        int8      `json:"corp_type2,omitempty" db:"'corp_type2'"`                 // 0 是普通组织\n1 是项目\n2是圈子\n3没有业务表现形式\n4是自建班级群\n10是敏捷组织\n11是培训群敏捷组织
-	CorpName         string    `json:"corp_name,omitempty" db:"'corp_name'"`                   // 企业简称
-	Industry         string    `json:"industry,omitempty" db:"'industry'"`                     // 行业类型
-	IsAuthenticated  bool      `json:"is_authenticated,omitempty" db:"'is_authenticated'"`     // 是否认证
-	LicenseCode      string    `json:"license_code,omitempty" db:"'license_code'"`             // 序列号
-	CorpLogoUrl      string    `json:"corp_logo_url,omitempty" db:"'corp_logo_url'"`           // 企业logo
-	InviteUrl        string    `json:"invite_url,omitempty" db:"'invite_url'"`                 // 企业邀请链接
-	InviteCode       string    `json:"invite_code,omitempty" db:"'invite_code'"`               // 邀请码，只有自己邀请的企业才会返回邀请码，可用该邀请码统计不同渠道的拉新，否则值为空字符串
-	IsEcologicalCorp bool      `json:"is_ecological_corp,omitempty" db:"'is_ecological_corp'"` //
-	AuthLevel        int8      `json:"auth_level,omitempty" db:"'auth_level'"`                 // 企业认证等级：\n\n0：未认证\n1：高级认证\n2：中级认证\n3：初级认证
-	AuthChannel      string    `json:"auth_channel,omitempty" db:"'auth_channel'"`             // 渠道码
-	AuthChannelType  string    `json:"auth_channel_type,omitempty" db:"'auth_channel_type'"`   // 渠道类型。为了避免渠道码重复，可与渠道码共同确认渠道。可能为空，非空时当前只有满天星类型，值为STAR_ACTIVITY
-	State            int8      `json:"state,omitempty" db:"'state'"`                           // 系统状态：-1：已删除；0：禁用；1：可用
-	StateTime        time.Time `json:"state_time,omitempty" db:"'state_time'"`                 // 系统状态时间
-	CreatedTime      time.Time `json:"created_time,omitempty" db:"'created_time'"`             // 创建时间
+	Id      types.AceInt    `json:"id,omitempty" db:"'id' pk auto"`   //
+	Arch    types.AceString `json:"arch,omitempty" db:"'arch'"`       // 操作系统架构
+	Version types.AceString `json:"version,omitempty" db:"'version'"` // 版本号
+	Url     types.AceString `json:"url,omitempty" db:"'url'"`         // 应用下载地址
+	State   types.AceInt8   `json:"state,omitempty" db:"'state'"`     //
+	Force   types.AceInt8   `json:"force,omitempty" db:"'force'"`     //
+	Ctime   types.AceTime   `json:"ctime,omitempty" db:"'ctime'"`     //
 }
 
-// tablename biz
-type Biz struct {
+// tablename user
+type User struct {
 	atype.AceModel
-	Id               uint64    `json:"id,omitempty" db:"'id' pk"`                              // 授权方企业本地id
-	Platform         string    `json:"platform,omitempty" db:"'platform'"`                     // 授权方企业的平台方
-	CorpId           string    `json:"corp_id,omitempty" db:"'corp_id'"`                       // 平台授权企业id
-	CorpType         int8      `json:"corp_type,omitempty" db:"'corp_type'"`                   // 企业类型
-	FullCorpName     string    `json:"full_corp_name,omitempty" db:"'full_corp_name'"`         // 企业全称
-	CorpType2        int8      `json:"corp_type2,omitempty" db:"'corp_type2'"`                 // 0 是普通组织\n1 是项目\n2是圈子\n3没有业务表现形式\n4是自建班级群\n10是敏捷组织\n11是培训群敏捷组织
-	CorpName         string    `json:"corp_name,omitempty" db:"'corp_name'"`                   // 企业简称
-	Industry         string    `json:"industry,omitempty" db:"'industry'"`                     // 行业类型
-	IsAuthenticated  bool      `json:"is_authenticated,omitempty" db:"'is_authenticated'"`     // 是否认证
-	LicenseCode      string    `json:"license_code,omitempty" db:"'license_code'"`             // 序列号
-	CorpLogoUrl      string    `json:"corp_logo_url,omitempty" db:"'corp_logo_url'"`           // 企业logo
-	InviteUrl        string    `json:"invite_url,omitempty" db:"'invite_url'"`                 // 企业邀请链接
-	InviteCode       string    `json:"invite_code,omitempty" db:"'invite_code'"`               // 邀请码，只有自己邀请的企业才会返回邀请码，可用该邀请码统计不同渠道的拉新，否则值为空字符串
-	IsEcologicalCorp bool      `json:"is_ecological_corp,omitempty" db:"'is_ecological_corp'"` //
-	AuthLevel        int8      `json:"auth_level,omitempty" db:"'auth_level'"`                 // 企业认证等级：\n\n0：未认证\n1：高级认证\n2：中级认证\n3：初级认证
-	AuthChannel      string    `json:"auth_channel,omitempty" db:"'auth_channel'"`             // 渠道码
-	AuthChannelType  string    `json:"auth_channel_type,omitempty" db:"'auth_channel_type'"`   // 渠道类型。为了避免渠道码重复，可与渠道码共同确认渠道。可能为空，非空时当前只有满天星类型，值为STAR_ACTIVITY
-	State            int8      `json:"state,omitempty" db:"'state'"`                           // 系统状态：-1：已删除；0：禁用；1：可用
-	StateTime        time.Time `json:"state_time,omitempty" db:"'state_time'"`                 // 系统状态时间
-	CreatedTime      time.Time `json:"created_time,omitempty" db:"'created_time'"`             // 创建时间
+	Id    types.AceInt64  `json:"id,omitempty" db:"'id' pk auto"` //
+	Uuid  types.AceString `json:"uuid,omitempty" db:"'uuid'"`     // 用户识别码
+	Ctime types.AceTime   `json:"ctime,omitempty" db:"'ctime'"`   //
+}
+
+// tablename user_log
+type UserLog struct {
+	atype.AceModel
+	Id         types.AceInt64  `json:"id,omitempty" db:"'id' pk auto"`           //
+	UserId     types.AceInt64  `json:"user_id,omitempty" db:"'user_id'"`         //
+	LoginTime  types.AceTime   `json:"login_time,omitempty" db:"'login_time'"`   // 登录时间
+	Device     types.AceString `json:"device,omitempty" db:"'device'"`           // 登录终端参数
+	Os         types.AceString `json:"os,omitempty" db:"'os'"`                   //
+	OsVersion  types.AceString `json:"os_version,omitempty" db:"'os_version'"`   //
+	AppName    types.AceString `json:"app_name,omitempty" db:"'app_name'"`       //
+	AppVersion types.AceString `json:"app_version,omitempty" db:"'app_version'"` //
+	Ip         types.AceString `json:"ip,omitempty" db:"'ip'"`                   // ip地址
 }

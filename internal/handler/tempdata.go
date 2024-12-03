@@ -88,14 +88,16 @@ func (d *TempData) writeToModel(fileName string) error {
 				return `""`
 			}
 			var ret any
-			switch t[2] {
-			case "string":
+			switch t[3] {
+			case "string", "types.AceString":
 				ret = `""`
-			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64":
+			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
+				"types.AceUint", "types.AceUint8", "types.AceUint16", "types.AceUint32", "types.AceUint64",
+				"types.AceInt", "types.AceInt8", "types.AceInt16", "types.AceInt32", "types.AceInt64", "types.AceFloat32", "types.AceFloat64":
 				ret = 0
-			case "time.Time":
-				ret = `time.Time{}`
-			case "bool":
+			case "time.Time", "types.AceTime":
+				ret = `types.AceTime{}` // `time.Time{}`
+			case "bool", "types.AceBool":
 				ret = `false`
 			default:
 				ret = 0
@@ -107,16 +109,18 @@ func (d *TempData) writeToModel(fileName string) error {
 				return `""`
 			}
 			var ret any
-			switch t[2] {
-			case "string":
+			switch t[3] {
+			case "string", "types.AceString":
 				ret = ` == ""`
-			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":
+			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
+				"types.AceUint", "types.AceUint8", "types.AceUint16", "types.AceUint32", "types.AceUint64",
+				"types.AceInt", "types.AceInt8", "types.AceInt16", "types.AceInt32", "types.AceInt64":
 				ret = ` == 0`
-			case "float32", "float64":
+			case "float32", "float64", "types.AceFloat32", "types.AceFloat64":
 				ret = ` == 0.0`
-			case "time.Time":
+			case "time.Time", "types.AceTime":
 				ret = `.IsZero()`
-			case "bool":
+			case "bool", "types.AceBool":
 				ret = ` == false`
 			default:
 				ret = ` == 0`
@@ -124,7 +128,7 @@ func (d *TempData) writeToModel(fileName string) error {
 			return ret
 		},
 		"getSqlValue": func(t []string) any {
-			switch t[2] {
+			switch t[3] {
 			case "string":
 				return "sql.NullString"
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":
@@ -140,7 +144,7 @@ func (d *TempData) writeToModel(fileName string) error {
 			}
 		},
 		"getSqlType": func(t []string) any {
-			switch t[2] {
+			switch t[3] {
 			case "string":
 				return "String"
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":

@@ -60,7 +60,7 @@ func ParseFieldType(tp string, size int, unsigned bool) string {
 			return "uint32"
 		}
 		return "int32"
-	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT":
+	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
 		return "string"
 	case "TINYINT":
 		if size == 1 {
@@ -78,6 +78,46 @@ func ParseFieldType(tp string, size int, unsigned bool) string {
 		return "float64"
 	case "TIMESTAMP", "DATETIME", "DATE", "TIME":
 		return "time.Time"
+	default:
+		return "any" // 对于未明确映射的类型，使用接口类型作为占位符
+	}
+}
+
+func ParseFieldAceType(tp string, size int, unsigned bool) string {
+	switch strings.ToUpper(tp) {
+	case "INT":
+		if unsigned {
+			return "types.AceUint"
+		}
+		return "types.AceInt"
+	case "BIGINT":
+		if unsigned {
+			return "types.BigInt"
+		}
+		return "types.AceInt64"
+	case "SMALLINT":
+		if unsigned {
+			return "types.AceUint32"
+		}
+		return "types.AceInt32"
+	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
+		return "types.AceString"
+	case "TINYINT":
+		if size == 1 {
+			return "types.AceBool"
+		}
+		if unsigned {
+			return "types.AceUint8"
+		}
+		return "types.AceInt8"
+	case "BIT":
+		return "types.AceBool"
+	case "FLOAT":
+		return "types.AceFloat32"
+	case "DOUBLE":
+		return "types.AceFloat64"
+	case "TIMESTAMP", "DATETIME", "DATE", "TIME":
+		return "types.AceTime"
 	default:
 		return "any" // 对于未明确映射的类型，使用接口类型作为占位符
 	}

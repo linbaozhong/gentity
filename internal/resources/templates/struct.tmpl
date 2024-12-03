@@ -15,6 +15,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/types"
 )
 
 const {{$structName}}TableName = "{{.TableName}}"
@@ -150,7 +151,7 @@ func (p *{{.StructName}}) AssignPrimaryKeyValues(result sql.Result) error {
 	if err != nil {
         return err
     }
-    p.{{index .PrimaryKey 0}} = {{index .PrimaryKey 2}}(id)
+    p.{{index .PrimaryKey 0}} = {{index .PrimaryKey 3}}(id)
     {{- end}}
     return nil
 }

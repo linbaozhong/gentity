@@ -21,6 +21,7 @@ import (
 type (
 	Field struct {
 		Name  string
+		Json  string
 		Table string
 		Type  string
 	}

@@ -89,16 +89,17 @@ func parseFile(filename, pkgPath string) error {
 			var _namejson = make([]string, 5)
 			for k, v := range field.Tags {
 				if k == "json" {
-					_namejson[0] = v[0] // json_name
+					_namejson[2] = v[0] // json_name
 				} else if k == "db" {
 					_namejson[1], pk, rw = parseTagsForDB(v) // column_name
-				} else if k == "default" {
-					_namejson[3] = v[0]
+					// } else if k == "default" {
+					// 	_namejson[3] = v[0]
 				}
 			}
+			_namejson[0] = field.Name
 			_namejson[4] = rw
-			_namejson[2] = field.Type.String()
-			switch _namejson[2] {
+			_namejson[3] = field.Type.String()
+			switch _namejson[3] {
 			case "time.Time":
 				tempData.HasTime = true
 			case "string":
@@ -110,22 +111,12 @@ func parseFile(filename, pkgPath string) error {
 			}
 
 			if _namejson[1] == "" {
-				if _namejson[0] == "" {
+				if _namejson[2] == "" {
 					_namejson[1] = getFieldName(field.Name)
 				} else {
-					_namejson[1] = _namejson[0]
+					_namejson[1] = _namejson[2]
 				}
 			}
-			// _namejson[0] = json_name
-			// if _namejson[0] == "" {
-			//	if _namejson[1] == "" {
-			//		_namejson[0] = getFieldName(field.Name)
-			//	} else {
-			//		_namejson[0] = _namejson[1]
-			//	}
-			// }
-			// _namejson[0] = field.Name 暂时
-			_namejson[0] = field.Name
 
 			tempData.Columns = append(tempData.Columns, _namejson)
 			if pk != "" {
@@ -133,7 +124,7 @@ func parseFile(filename, pkgPath string) error {
 				// tempData.Keys = append(tempData.Keys, _namejson)
 				tempData.PrimaryKey = _namejson
 			}
-			if _namejson[0] == "state" {
+			if _namejson[1] == "state" {
 				tempData.HasState = true
 			}
 		}

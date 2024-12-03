@@ -20,6 +20,7 @@ import (
 	"{{.ModulePath}}/define/table/tbl{{$tablename}}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/types"
 )
 
 type {{$tablename}}er interface {
@@ -32,12 +33,12 @@ type {{$tablename}}er interface {
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*{{.PackageName}}.{{$structName}}, cols ...dialect.Field) (int64, error)
     // UpdateById 按主键更新一条数据
-	UpdateById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, sets ...dialect.Setter) (bool, error)
+	UpdateById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新多条数据
 	// cols: 要更新的列名
 	UpdateBatch(ctx context.Context, beans []*{{.PackageName}}.{{$structName}}, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
-    DeleteById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (bool, error)
+    DeleteById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{$structName}}, bool, error)
 	// Find 分页查询，返回一个slice
@@ -45,7 +46,7 @@ type {{$tablename}}er interface {
 	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{.PackageName}}.{{$structName}}, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, cols ...dialect.Field) (*{{.PackageName}}.{{$structName}}, bool, error)
+	GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, cols ...dialect.Field) (*{{.PackageName}}.{{$structName}}, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...dialect.Condition) (*{{.PackageName}}.{{$structName}}, bool, error)
 	// GetFirstCell 按条件读取第一行的第一个字段
@@ -162,7 +163,7 @@ func (p *dao{{$structName}}) Update(ctx context.Context, sets []dialect.Setter, 
 }
 
 // UpdateById
-func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, sets ...dialect.Setter) (bool, error) {
+func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, sets ...dialect.Setter) (bool, error) {
     return p.Update(ctx,
         sets,
        	tbl{{$tablename}}.PrimaryKey.Eq({{index .PrimaryKey 1}}),
@@ -203,7 +204,7 @@ func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Conditi
 }
 
 // DeleteById
-func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (bool, error) {
+func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 3}}) (bool, error) {
     return p.Delete(ctx,
         tbl{{$tablename}}.PrimaryKey.Eq({{index .PrimaryKey 1}}),
 	)
@@ -268,7 +269,7 @@ func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize 
 }
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *dao{{$structName}}) GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 2}}, cols ...dialect.Field) (*{{.PackageName}}.{{$structName}}, bool, error) {
+func (p *dao{{$structName}}) GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, cols ...dialect.Field) (*{{.PackageName}}.{{$structName}}, bool, error) {
 {{- if .HasCache}}
 	obj,has,e:=p.getCache(ctx, {{index .PrimaryKey 1}})
 	if has{
@@ -336,7 +337,7 @@ func (p *dao{{$structName}}) IDs(ctx context.Context, cond ...dialect.Condition)
 
 	ids := make([]any, 0, dialect.PageSize)
 	for rows.Next() {
-	    var {{ index .PrimaryKey 1 }} {{index .PrimaryKey 2}}
+	    var {{ index .PrimaryKey 1 }} {{index .PrimaryKey 3}}
 		if err = rows.Scan(&{{index .PrimaryKey 1}}); err != nil {
 			return nil, err
 		}
@@ -386,7 +387,7 @@ func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Conditi
         return false, err
     }
 
-	var {{ index .PrimaryKey 1 }} {{index .PrimaryKey 2}}
+	var {{ index .PrimaryKey 1 }} {{index .PrimaryKey 3}}
     err = row.Scan(&{{index .PrimaryKey 1}})
     switch err {
     case sql.ErrNoRows:
@@ -400,7 +401,7 @@ func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Conditi
 
 {{- if .HasCache}}
 // onUpdate
-func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{index .PrimaryKey 2}}) error {
+func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{index .PrimaryKey 3}}) error {
 	for _, id := range ids {
 		if err := p.cache.Delete(ctx, GetIdHashKey(id)); err != nil {
 			return err
@@ -411,7 +412,7 @@ func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{index .Prima
 }
 
 // getCache
-func (p *dao{{$structName}}) getCache(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 2}}) (*{{.PackageName}}.{{$structName}}, bool, error) {
+func (p *dao{{$structName}}) getCache(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 3}}) (*{{.PackageName}}.{{$structName}}, bool, error) {
 	s,err := p.cache.Fetch(ctx, GetIdHashKey({{index .PrimaryKey 1}}))
 	if err != nil {
 		return nil, false, err

@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -22,6 +23,39 @@ func (m *Money) UnmarshalJSON(b []byte) error {
 		*m = Money(i)
 	}
 	return e
+}
+
+func (i *Money) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*i = 0
+		return nil
+	case int64:
+		*i = Money(v)
+		return nil
+	case int:
+		*i = Money(v)
+		return nil
+	case int32:
+		*i = Money(v)
+		return nil
+	case int16:
+		*i = Money(v)
+		return nil
+	case int8:
+		*i = Money(v)
+		return nil
+	default:
+		return fmt.Errorf("unsupported scan type for Money: %T", src)
+	}
+}
+
+func (i *Money) Int() int {
+	return int(*i)
+}
+
+func (i *Money) Int64() int64 {
+	return int64(*i)
 }
 
 // Yuan 金额分精确到元

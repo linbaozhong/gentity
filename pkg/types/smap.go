@@ -23,14 +23,6 @@ func NewSmap(size ...int) Smap {
 func (p Smap) MarshalJSON() ([]byte, error) {
 	m := make(map[string]any)
 	for k, v := range p {
-		// if vv, ok := v.(ID); ok {
-		// 	m[k] = vv.String()
-		// 	continue
-		// }
-		// if vv, ok := v.(Money); ok {
-		// 	m[k] = vv.Yuan()
-		// 	continue
-		// }
 		if vv, ok := v.([]byte); ok {
 			m[k] = conv.Bytes2String(vv)
 			continue
