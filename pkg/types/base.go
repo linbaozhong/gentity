@@ -535,8 +535,8 @@ func (b *AceBool) Bool() bool {
 	return bool(*b)
 }
 
-func (b AceBool) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatBool(bool(b))), nil
+func (b *AceBool) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatBool(bool(*b))), nil
 }
 
 func (b *AceBool) UnmarshalJSON(bs []byte) error {
@@ -572,11 +572,11 @@ func (t *AceTime) Scan(src any) error {
 	}
 }
 
-func (t AceTime) String() string {
+func (t *AceTime) String() string {
 	return t.Format(time.DateTime)
 }
 
-func (t AceTime) MarshalJSON() ([]byte, error) {
+func (t *AceTime) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(`"` + t.String() + `"`), nil
 }
 
@@ -588,7 +588,6 @@ func (t *AceTime) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := time.Parse(time.DateTime, c)
-
 	*t = AceTime{tem}
 	return e
 }

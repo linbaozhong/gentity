@@ -16,6 +16,7 @@ package types
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -41,13 +42,14 @@ func TestBase(t *testing.T) {
 	a.Ctime = AceTime{
 		time.Now(),
 	}
-
+	t.Log(a.Force.ToCNY())
+	//m := NewSmap(3).Set("id", a.Id).Set("arch", a.Arch).Set("version", a.Version).Set("force", a.Force)
 	b, e := json.Marshal(a)
 	if e != nil {
 		t.Error(e)
 	}
 	s := string(b)
-
+	//t.Log(m)
 	t.Log(s)
 	//
 	var a2 App
@@ -60,7 +62,13 @@ func TestBase(t *testing.T) {
 
 func TestError(t *testing.T) {
 	e1 := NewError(1, "error")
-
-	t.Log(e1.SetInfo("haha"))
+	e2 := e1.SetInfo("haha")
+	t.Log(e2)
 	t.Log(e1)
+}
+
+func TestConv(t *testing.T) {
+	s := "as12"
+	i, e := strconv.ParseInt(s, 10, 64)
+	t.Log(i, e)
 }

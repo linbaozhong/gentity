@@ -31,15 +31,14 @@ func (e Error) SetInfo(i any) Error {
 	if i == nil {
 		return e
 	}
-	ee := e
 	if err, ok := i.(error); ok {
-		ee.Info = err.Error()
+		e.Info = err.Error()
 	} else if s, ok := i.(string); ok {
-		ee.Info = s
+		e.Info = s
 	} else {
-		ee.Info = fmt.Sprint(i)
+		e.Info = fmt.Sprint(i)
 	}
-	return ee
+	return e
 }
 
 func NewError(code int, message string) Error {

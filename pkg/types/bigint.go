@@ -10,35 +10,34 @@ import (
 type BigInt int64
 
 func (i BigInt) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(`"` + strconv.FormatInt(int64(i), 10) + `"`), nil
+	return conv.String2Bytes(`"` + i.String() + `"`), nil
 }
 
 func (i *BigInt) UnmarshalJSON(b []byte) error {
-	c := string(bytes.Trim(b, "\""))
+	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
 		*i = BigInt(0)
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-
 	*i = BigInt(tem)
 	return e
 }
 
 // String
-func (i BigInt) String() string {
-	return strconv.FormatInt(int64(i), 10)
+func (i *BigInt) String() string {
+	return strconv.FormatInt(int64(*i), 10)
 }
 
 // int64
-func (i BigInt) Int64() int64 {
-	return int64(i)
+func (i *BigInt) Int64() int64 {
+	return int64(*i)
 }
 
 // Uint64
-func (i BigInt) Uint64() uint64 {
-	return uint64(i)
+func (i *BigInt) Uint64() uint64 {
+	return uint64(*i)
 }
 
 func (i *BigInt) Scan(src any) error {
