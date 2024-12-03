@@ -92,10 +92,10 @@ var (
 ```go
 func TestCreateSet(t *testing.T) {
 	defer dbx.Close()
-	x := Company(dbx).C()
+	x := dao.Company(dbx).C()
 	result, err := x.Set(
-		obj.CorpName.Set("aaaaaa"),
-		obj.IsAuthenticated.Set(true),
+		tblcompany.CorpName.Set("aaaaaa"),
+		tblcompany.IsAuthenticated.Set(true),
 	).Exec(context.Background())
 
 	t.Log(x)
@@ -109,12 +109,12 @@ func TestCreateSet(t *testing.T) {
 
 func TestCreateCols(t *testing.T) {
 	defer dbx.Close()
-	x := Company(dbx).C()
+	x := dao.Company(dbx).C()
 	result, err := x.Cols(
-		obj.CorpName,
-		obj.IsAuthenticated,
-		obj.State,
-		obj.CreatedTime,
+		tblcompany.CorpName,
+		tblcompany.IsAuthenticated,
+		tblcompany.State,
+		tblcompany.CreatedTime,
 	).StructBatch(context.Background(), &db.Company{
 		FullCorpName:     "m1",
 		IsEcologicalCorp: false,
@@ -144,7 +144,7 @@ func TestCreateCols(t *testing.T) {
 func TestInsert(t *testing.T) {
 	defer dbx.Close()
 	//
-	id, err := Company(dbx).InsertOne(context.Background(), &db.Company{
+	id, err := dao.Company(dbx).InsertOne(context.Background(), &db.Company{
 		FullCorpName:     "x1",
 		IsEcologicalCorp: false,
 		State:            0,
@@ -156,7 +156,7 @@ func TestInsert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	n, err := Company(dbx).InsertBatch(context.Background(), []*db.Company{{
+	n, err := dao.Company(dbx).InsertBatch(context.Background(), []*db.Company{{
 		FullCorpName:     "x1",
 		IsEcologicalCorp: false,
 		State:            0,
@@ -182,15 +182,15 @@ func TestInsert(t *testing.T) {
 
 func TestUpdateSet(t *testing.T) {
 	defer dbx.Close()
-	x := Company(dbx).U()
+	x := dao.Company(dbx).U()
 	result, err := x.
 		Set(
-			obj.CorpName.Set("ttt"),
-			obj.IsAuthenticated.Set(true),
+			tblcompany.CorpName.Set("ttt"),
+			tblcompany.IsAuthenticated.Set(true),
 		).
-		SetExpr(obj.State.Incr()).
+		SetExpr(tblcompany.State.Incr()).
 		Where(
-			obj.Id.Eq(1),
+			tblcompany.Id.Eq(1),
 		).
 		Exec(context.Background())
 
@@ -205,14 +205,14 @@ func TestUpdateSet(t *testing.T) {
 func TestUpdateCols(t *testing.T) {
 	defer dbx.Close()
 
-	x := Company(dbx).U()
+	x := dao.Company(dbx).U()
 	result, err := x.Cols(
-		obj.FullCorpName,
-		obj.IsEcologicalCorp,
-		obj.State,
-		obj.CreatedTime,
+		tblcompany.FullCorpName,
+		tblcompany.IsEcologicalCorp,
+		tblcompany.State,
+		tblcompany.CreatedTime,
 	).Where(
-		obj.Id.Eq(1),
+		tblcompany.Id.Eq(1),
 	).Struct(context.Background(), &db.Company{
 		Id:               2,
 		FullCorpName:     "ccc",
@@ -233,7 +233,7 @@ func TestUpdateCols(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	defer dbx.Close()
 
-	ok, err := Company(dbx).UpdateBatch(context.Background(), []*db.Company{&db.Company{
+	ok, err := dao.Company(dbx).UpdateBatch(context.Background(), []*db.Company{&db.Company{
 		Id:               2,
 		FullCorpName:     "ccc",
 		IsEcologicalCorp: false,
@@ -251,9 +251,9 @@ func TestUpdate(t *testing.T) {
 func TestDelete(t *testing.T) {
 	defer dbx.Close()
 
-	x := Company(dbx).D()
+	x := dao.Company(dbx).D()
 	result, err := x.Where(
-		obj.Id.Eq(1),
+		tblcompany.Id.Eq(1),
 	).Exec(context.Background())
 	t.Log(x)
 
@@ -266,12 +266,12 @@ func TestDelete(t *testing.T) {
 
 func TestSelect(t *testing.T) {
 	defer dbx.Close()
-	obj, _, err := Company(dbx).Find4Cols(context.Background(), 0, 0, []dialect.Field{
-		obj.Id,
-		obj.FullCorpName,
-		obj.State,
+	obj, _, err := dao.Company(dbx).Find4Cols(context.Background(), 0, 0, []dialect.Field{
+		tblcompany.Id,
+		tblcompany.FullCorpName,
+		tblcompany.State,
 	},
-		obj.Id.Eq(2),
+		tblcompany.Id.Eq(2),
 	)
 
 	if err != nil {
