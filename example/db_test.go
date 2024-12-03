@@ -34,7 +34,6 @@ func TestName(t *testing.T) {
 		tblapp.Id,
 		tblapp.Arch,
 		tblapp.Version,
-		tblapp.Ctime,
 	},
 		tblapp.Id.Eq(2),
 	)
@@ -45,7 +44,6 @@ func TestName(t *testing.T) {
 	// t.Log(obj)
 	for _, o := range obj {
 		t.Log(fmt.Sprintf("%+v", o))
-		t.Log(o.Ctime.String())
 	}
 
 }

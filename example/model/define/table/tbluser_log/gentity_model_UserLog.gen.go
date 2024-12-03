@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	Id         = dialect.Field{Name: "id", Json: "id", Table: "user_log", Type: "types.AceInt64"}
-	UserId     = dialect.Field{Name: "user_id", Json: "user_id", Table: "user_log", Type: "types.AceInt64"}
+	Id         = dialect.Field{Name: "id", Json: "id", Table: "user_log", Type: "types.BigInt"}
+	UserId     = dialect.Field{Name: "user_id", Json: "user_id", Table: "user_log", Type: "types.BigInt"}
 	LoginTime  = dialect.Field{Name: "login_time", Json: "login_time", Table: "user_log", Type: "types.AceTime"}
 	Device     = dialect.Field{Name: "device", Json: "device", Table: "user_log", Type: "types.AceString"}
 	Os         = dialect.Field{Name: "os", Json: "os", Table: "user_log", Type: "types.AceString"}

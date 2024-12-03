@@ -55,13 +55,16 @@ func ParseFieldType(tp string, size int, unsigned bool) string {
 			return "uint64"
 		}
 		return "int64"
-	case "SMALLINT":
+	case "MEDIUMINT":
 		if unsigned {
 			return "uint32"
 		}
-		return "int32"
-	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
-		return "string"
+		return "uint32"
+	case "SMALLINT":
+		if unsigned {
+			return "uint16"
+		}
+		return "int16"
 	case "TINYINT":
 		if size == 1 {
 			return "bool"
@@ -70,6 +73,8 @@ func ParseFieldType(tp string, size int, unsigned bool) string {
 			return "uint8"
 		}
 		return "int8"
+	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
+		return "string"
 	case "BIT":
 		return "bool"
 	case "FLOAT":
@@ -89,19 +94,22 @@ func ParseFieldAceType(tp string, size int, unsigned bool) string {
 		if unsigned {
 			return "types.AceUint"
 		}
-		return "types.AceInt"
+		return "types.Money"
 	case "BIGINT":
 		if unsigned {
 			return "types.BigInt"
 		}
 		return "types.AceInt64"
-	case "SMALLINT":
+	case "MEDIUMINT":
 		if unsigned {
 			return "types.AceUint32"
 		}
 		return "types.AceInt32"
-	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
-		return "types.AceString"
+	case "SMALLINT":
+		if unsigned {
+			return "types.AceUint16"
+		}
+		return "types.AceInt16"
 	case "TINYINT":
 		if size == 1 {
 			return "types.AceBool"
@@ -110,6 +118,8 @@ func ParseFieldAceType(tp string, size int, unsigned bool) string {
 			return "types.AceUint8"
 		}
 		return "types.AceInt8"
+	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
+		return "types.AceString"
 	case "BIT":
 		return "types.AceBool"
 	case "FLOAT":

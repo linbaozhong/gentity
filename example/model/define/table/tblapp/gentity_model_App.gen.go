@@ -7,24 +7,23 @@ import (
 )
 
 var (
-	Id      = dialect.Field{Name: "id", Json: "id", Table: "app", Type: "types.AceInt"}
+	Id      = dialect.Field{Name: "id", Json: "id", Table: "app", Type: "types.BigInt"}
 	Arch    = dialect.Field{Name: "arch", Json: "arch", Table: "app", Type: "types.AceString"}
 	Version = dialect.Field{Name: "version", Json: "version", Table: "app", Type: "types.AceString"}
 	Url     = dialect.Field{Name: "url", Json: "url", Table: "app", Type: "types.AceString"}
 	State   = dialect.Field{Name: "state", Json: "state", Table: "app", Type: "types.AceInt8"}
 	Force   = dialect.Field{Name: "force", Json: "force", Table: "app", Type: "types.AceInt8"}
-	Ctime   = dialect.Field{Name: "ctime", Json: "ctime", Table: "app", Type: "types.AceTime"}
 	// 主键
 	PrimaryKey = Id
 
 	// 可写列
 	WritableFields = []dialect.Field{
+		Id,
 		Arch,
 		Version,
 		Url,
 		State,
 		Force,
-		Ctime,
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{
@@ -34,6 +33,5 @@ var (
 		Url,
 		State,
 		Force,
-		Ctime,
 	}
 )

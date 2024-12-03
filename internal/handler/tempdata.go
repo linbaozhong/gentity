@@ -93,7 +93,8 @@ func (d *TempData) writeToModel(fileName string) error {
 				ret = `""`
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
 				"types.AceUint", "types.AceUint8", "types.AceUint16", "types.AceUint32", "types.AceUint64",
-				"types.AceInt", "types.AceInt8", "types.AceInt16", "types.AceInt32", "types.AceInt64", "types.AceFloat32", "types.AceFloat64":
+				"types.AceInt", "types.AceInt8", "types.AceInt16", "types.AceInt32", "types.AceInt64", "types.AceFloat32",
+				"types.AceFloat64", "types.Bigint", "types.Money":
 				ret = 0
 			case "time.Time", "types.AceTime":
 				ret = `types.AceTime{}` // `time.Time{}`
@@ -114,7 +115,7 @@ func (d *TempData) writeToModel(fileName string) error {
 				ret = ` == ""`
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
 				"types.AceUint", "types.AceUint8", "types.AceUint16", "types.AceUint32", "types.AceUint64",
-				"types.AceInt", "types.AceInt8", "types.AceInt16", "types.AceInt32", "types.AceInt64":
+				"types.AceInt", "types.AceInt8", "types.AceInt16", "types.AceInt32", "types.AceInt64", "types.Bigint", "types.Money":
 				ret = ` == 0`
 			case "float32", "float64", "types.AceFloat32", "types.AceFloat64":
 				ret = ` == 0.0`

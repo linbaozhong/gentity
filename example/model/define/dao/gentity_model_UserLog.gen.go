@@ -22,12 +22,12 @@ type user_loger interface {
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*db.UserLog, cols ...dialect.Field) (int64, error)
 	// UpdateById 按主键更新一条数据
-	UpdateById(ctx context.Context, id types.AceInt64, sets ...dialect.Setter) (bool, error)
+	UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新多条数据
 	// cols: 要更新的列名
 	UpdateBatch(ctx context.Context, beans []*db.UserLog, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
-	DeleteById(ctx context.Context, id types.AceInt64) (bool, error)
+	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*db.UserLog, bool, error)
 	// Find 分页查询，返回一个slice
@@ -35,7 +35,7 @@ type user_loger interface {
 	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*db.UserLog, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, id types.AceInt64, cols ...dialect.Field) (*db.UserLog, bool, error)
+	GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.UserLog, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...dialect.Condition) (*db.UserLog, bool, error)
 	// GetFirstCell 按条件读取第一行的第一个字段
@@ -144,7 +144,7 @@ func (p *daoUserLog) Update(ctx context.Context, sets []dialect.Setter, cond ...
 }
 
 // UpdateById
-func (p *daoUserLog) UpdateById(ctx context.Context, id types.AceInt64, sets ...dialect.Setter) (bool, error) {
+func (p *daoUserLog) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
 		sets,
 		tbluser_log.PrimaryKey.Eq(id),
@@ -185,7 +185,7 @@ func (p *daoUserLog) Delete(ctx context.Context, cond ...dialect.Condition) (boo
 }
 
 // DeleteById
-func (p *daoUserLog) DeleteById(ctx context.Context, id types.AceInt64) (bool, error) {
+func (p *daoUserLog) DeleteById(ctx context.Context, id types.BigInt) (bool, error) {
 	return p.Delete(ctx,
 		tbluser_log.PrimaryKey.Eq(id),
 	)
@@ -250,7 +250,7 @@ func (p *daoUserLog) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 }
 
 // GetByID 按主键读取一个user_log对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoUserLog) GetByID(ctx context.Context, id types.AceInt64, cols ...dialect.Field) (*db.UserLog, bool, error) {
+func (p *daoUserLog) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.UserLog, bool, error) {
 	return p.Get4Cols(ctx, cols, tbluser_log.PrimaryKey.Eq(id))
 }
 
@@ -297,7 +297,7 @@ func (p *daoUserLog) IDs(ctx context.Context, cond ...dialect.Condition) ([]any,
 
 	ids := make([]any, 0, dialect.PageSize)
 	for rows.Next() {
-		var id types.AceInt64
+		var id types.BigInt
 		if err = rows.Scan(&id); err != nil {
 			return nil, err
 		}
@@ -347,7 +347,7 @@ func (p *daoUserLog) Exists(ctx context.Context, cond ...dialect.Condition) (boo
 		return false, err
 	}
 
-	var id types.AceInt64
+	var id types.BigInt
 	err = row.Scan(&id)
 	switch err {
 	case sql.ErrNoRows:

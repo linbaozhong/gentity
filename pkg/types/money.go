@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type Money int64
+type Money int
 
 func (m Money) MarshalJSON() ([]byte, error) {
 	yuan := strconv.FormatFloat((float64(m) / 100), 'f', -1, 64)

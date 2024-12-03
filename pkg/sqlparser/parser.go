@@ -8,16 +8,17 @@ import (
 
 // Column describe column detail information
 type Column struct {
-	Name     string
-	Type     string
-	Default  any
-	Size     int
-	Unsigned bool
-	Key      string
-	Extra    string
-	AutoIncr bool
-	Comment  string
-	Nullable bool
+	Name       string
+	Type       string
+	ColumnType string
+	Default    any
+	Size       int
+	Unsigned   bool
+	Key        string
+	Extra      string
+	AutoIncr   bool
+	Comment    string
+	Nullable   bool
 }
 
 // Constraint holds foreign key constraint

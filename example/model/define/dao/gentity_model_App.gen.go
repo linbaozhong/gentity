@@ -22,12 +22,12 @@ type apper interface {
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*db.App, cols ...dialect.Field) (int64, error)
 	// UpdateById 按主键更新一条数据
-	UpdateById(ctx context.Context, id types.AceInt, sets ...dialect.Setter) (bool, error)
+	UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新多条数据
 	// cols: 要更新的列名
 	UpdateBatch(ctx context.Context, beans []*db.App, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
-	DeleteById(ctx context.Context, id types.AceInt) (bool, error)
+	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*db.App, bool, error)
 	// Find 分页查询，返回一个slice
@@ -35,7 +35,7 @@ type apper interface {
 	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*db.App, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, id types.AceInt, cols ...dialect.Field) (*db.App, bool, error)
+	GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.App, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...dialect.Condition) (*db.App, bool, error)
 	// GetFirstCell 按条件读取第一行的第一个字段
@@ -144,7 +144,7 @@ func (p *daoApp) Update(ctx context.Context, sets []dialect.Setter, cond ...dial
 }
 
 // UpdateById
-func (p *daoApp) UpdateById(ctx context.Context, id types.AceInt, sets ...dialect.Setter) (bool, error) {
+func (p *daoApp) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
 		sets,
 		tblapp.PrimaryKey.Eq(id),
@@ -185,7 +185,7 @@ func (p *daoApp) Delete(ctx context.Context, cond ...dialect.Condition) (bool, e
 }
 
 // DeleteById
-func (p *daoApp) DeleteById(ctx context.Context, id types.AceInt) (bool, error) {
+func (p *daoApp) DeleteById(ctx context.Context, id types.BigInt) (bool, error) {
 	return p.Delete(ctx,
 		tblapp.PrimaryKey.Eq(id),
 	)
@@ -250,7 +250,7 @@ func (p *daoApp) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols [
 }
 
 // GetByID 按主键读取一个app对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoApp) GetByID(ctx context.Context, id types.AceInt, cols ...dialect.Field) (*db.App, bool, error) {
+func (p *daoApp) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.App, bool, error) {
 	return p.Get4Cols(ctx, cols, tblapp.PrimaryKey.Eq(id))
 }
 
@@ -297,7 +297,7 @@ func (p *daoApp) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, err
 
 	ids := make([]any, 0, dialect.PageSize)
 	for rows.Next() {
-		var id types.AceInt
+		var id types.BigInt
 		if err = rows.Scan(&id); err != nil {
 			return nil, err
 		}
@@ -347,7 +347,7 @@ func (p *daoApp) Exists(ctx context.Context, cond ...dialect.Condition) (bool, e
 		return false, err
 	}
 
-	var id types.AceInt
+	var id types.BigInt
 	err = row.Scan(&id)
 	switch err {
 	case sql.ErrNoRows:
