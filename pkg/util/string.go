@@ -45,30 +45,25 @@ func ParseField(fieldName string) string {
 
 func ParseFieldType(tp string, size int, unsigned bool) string {
 	switch strings.ToUpper(tp) {
-	case "INT":
-		if unsigned {
-			return "uint"
-		}
-		return "int"
 	case "BIGINT":
 		if unsigned {
 			return "uint64"
 		}
 		return "int64"
-	case "MEDIUMINT":
+	case "INT", "MEDIUMINT":
 		if unsigned {
 			return "uint32"
 		}
-		return "uint32"
+		return "int32"
 	case "SMALLINT":
 		if unsigned {
 			return "uint16"
 		}
 		return "int16"
 	case "TINYINT":
-		if size == 1 {
-			return "bool"
-		}
+		//if size == 1 {
+		//	return "bool"
+		//}
 		if unsigned {
 			return "uint8"
 		}
@@ -95,12 +90,7 @@ func ParseFieldAceType(tp string, size int, unsigned bool) string {
 			return "types.BigInt"
 		}
 		return "types.Money"
-	case "INT":
-		if unsigned {
-			return "types.AceUint"
-		}
-		return "types.AceInt"
-	case "MEDIUMINT":
+	case "INT", "MEDIUMINT":
 		if unsigned {
 			return "types.AceUint32"
 		}
@@ -111,9 +101,9 @@ func ParseFieldAceType(tp string, size int, unsigned bool) string {
 		}
 		return "types.AceInt16"
 	case "TINYINT":
-		if size == 1 {
-			return "types.AceBool"
-		}
+		//if size == 1 {
+		//	return "types.AceBool"
+		//}
 		if unsigned {
 			return "types.AceUint8"
 		}
