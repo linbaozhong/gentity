@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"strconv"
@@ -40,6 +41,10 @@ func (i *BigInt) Uint64() uint64 {
 	return uint64(*i)
 }
 
+func (i *BigInt) Uint() uint {
+	return uint(*i)
+}
+
 func (i *BigInt) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
@@ -53,6 +58,6 @@ func (i *BigInt) Scan(src any) error {
 	}
 }
 
-func (i *BigInt) Uint() uint {
-	return uint(*i)
+func (i BigInt) Value() (driver.Value, error) {
+	return int64(i), nil
 }

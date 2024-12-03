@@ -34,7 +34,7 @@ type (
 	AceInt16   int16
 	AceInt8    int8
 	AceInt     int
-	AceByte    byte
+	AceByte    []byte
 	AceFloat64 float64
 	AceFloat32 float32
 	AceBool    bool
@@ -48,19 +48,18 @@ type (
 func (b *AceByte) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
-		*b = 0
-		return nil
-	case int64:
-		*b = AceByte(v)
-		return nil
+		*b = []byte{}
+	case []byte:
+		*b = v
 	default:
 		return fmt.Errorf("unsupported scan type for AceByte: %T", src)
 	}
+	return nil
 }
 
-func (b *AceByte) Byte() byte {
-	return byte(*b)
-}
+//func (b AceByte) Value() (driver.Value, error) {
+//	return b, nil
+//}
 
 // ////////////////////////////
 // AceString
@@ -68,18 +67,19 @@ func (s *AceString) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*s = ""
-		return nil
 	case []byte:
-		*s = AceString(v)
-		return nil
+		*s = AceString(conv.Bytes2String(v))
 	case string:
 		*s = AceString(v)
-		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for AceString: %T", src)
 	}
+	return nil
 }
 
+//	func (s AceString) Value() (driver.Value, error) {
+//		return s, nil
+//	}
 func (s *AceString) String() string {
 	return string(*s)
 }
@@ -109,6 +109,9 @@ func (i8 *AceInt8) Scan(src any) error {
 	}
 }
 
+//	func (i8 AceInt8) Value() (driver.Value, error) {
+//		return i8, nil
+//	}
 func (i8 *AceInt8) Int8() int8 {
 	return int8(*i8)
 }

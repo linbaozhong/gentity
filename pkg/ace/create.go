@@ -148,8 +148,6 @@ func (c *Creator) Exec(ctx context.Context) (sql.Result, error) {
 		defer stmt.Close()
 	}
 
-	// fmt.Println(c.command.String(), c.params)
-	// return c.db.ExecContext(ctx, c.command.String(), c.params...)
 	return stmt.ExecContext(ctx, c.params...)
 }
 

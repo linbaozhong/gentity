@@ -1,6 +1,7 @@
 package types
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"strconv"
 	"strings"
@@ -48,6 +49,9 @@ func (i *Money) Scan(src any) error {
 	default:
 		return fmt.Errorf("unsupported scan type for Money: %T", src)
 	}
+}
+func (i Money) Value() (driver.Value, error) {
+	return int64(i), nil
 }
 
 func (i *Money) Int() int {
