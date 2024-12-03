@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-type BigInt int64
+type BigInt uint64
 
 func (i BigInt) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(`"` + i.String() + `"`), nil
@@ -27,22 +27,22 @@ func (i *BigInt) UnmarshalJSON(b []byte) error {
 }
 
 // String
-func (i *BigInt) String() string {
-	return strconv.FormatInt(int64(*i), 10)
+func (i BigInt) String() string {
+	return strconv.FormatInt(int64(i), 10)
 }
 
 // int64
-func (i *BigInt) Int64() int64 {
-	return int64(*i)
+func (i BigInt) Int64() int64 {
+	return int64(i)
 }
 
 // Uint64
-func (i *BigInt) Uint64() uint64 {
-	return uint64(*i)
+func (i BigInt) Uint64() uint64 {
+	return uint64(i)
 }
 
-func (i *BigInt) Uint() uint {
-	return uint(*i)
+func (i BigInt) Uint() uint {
+	return uint(i)
 }
 
 func (i *BigInt) Scan(src any) error {

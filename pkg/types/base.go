@@ -80,8 +80,8 @@ func (s *AceString) Scan(src any) error {
 //	func (s AceString) Value() (driver.Value, error) {
 //		return s, nil
 //	}
-func (s *AceString) String() string {
-	return string(*s)
+func (s AceString) String() string {
+	return string(s)
 }
 
 func (s AceString) MarshalJSON() ([]byte, error) {
@@ -112,8 +112,8 @@ func (i8 *AceInt8) Scan(src any) error {
 //	func (i8 AceInt8) Value() (driver.Value, error) {
 //		return i8, nil
 //	}
-func (i8 *AceInt8) Int8() int8 {
-	return int8(*i8)
+func (i8 AceInt8) Int8() int8 {
+	return int8(i8)
 }
 
 func (i8 AceInt8) MarshalJSON() ([]byte, error) {
@@ -147,8 +147,8 @@ func (i16 *AceInt16) Scan(src any) error {
 	}
 }
 
-func (i16 *AceInt16) Int16() int16 {
-	return int16(*i16)
+func (i16 AceInt16) Int16() int16 {
+	return int16(i16)
 }
 
 func (i16 AceInt16) MarshalJSON() ([]byte, error) {
@@ -182,8 +182,8 @@ func (i32 *AceInt32) Scan(src any) error {
 	}
 }
 
-func (i32 *AceInt32) Int32() int32 {
-	return int32(*i32)
+func (i32 AceInt32) Int32() int32 {
+	return int32(i32)
 }
 
 func (i32 AceInt32) MarshalJSON() ([]byte, error) {
@@ -217,8 +217,8 @@ func (i64 *AceInt64) Scan(src any) error {
 	}
 }
 
-func (i64 *AceInt64) Int64() int64 {
-	return int64(*i64)
+func (i64 AceInt64) Int64() int64 {
+	return int64(i64)
 }
 
 func (i64 AceInt64) MarshalJSON() ([]byte, error) {
@@ -252,8 +252,8 @@ func (i *AceInt) Scan(src any) error {
 	}
 }
 
-func (i *AceInt) Int() int {
-	return int(*i)
+func (i AceInt) Int() int {
+	return int(i)
 }
 
 func (i AceInt) MarshalJSON() ([]byte, error) {
@@ -287,8 +287,8 @@ func (i8 *AceUint8) Scan(src any) error {
 	}
 }
 
-func (i8 *AceUint8) Uint8() uint8 {
-	return uint8(*i8)
+func (i8 AceUint8) Uint8() uint8 {
+	return uint8(i8)
 }
 
 func (i8 AceUint8) MarshalJSON() ([]byte, error) {
@@ -322,8 +322,8 @@ func (i16 *AceUint16) Scan(src any) error {
 	}
 }
 
-func (i16 *AceUint16) Uint16() uint16 {
-	return uint16(*i16)
+func (i16 AceUint16) Uint16() uint16 {
+	return uint16(i16)
 }
 
 func (i16 AceUint16) MarshalJSON() ([]byte, error) {
@@ -357,8 +357,8 @@ func (i32 *AceUint32) Scan(src any) error {
 	}
 }
 
-func (i32 *AceUint32) Uint32() uint32 {
-	return uint32(*i32)
+func (i32 AceUint32) Uint32() uint32 {
+	return uint32(i32)
 }
 
 func (i32 AceUint32) MarshalJSON() ([]byte, error) {
@@ -392,8 +392,8 @@ func (i64 *AceUint64) Scan(src any) error {
 	}
 }
 
-func (i64 *AceUint64) Int64() uint64 {
-	return uint64(*i64)
+func (i64 AceUint64) Uint64() uint64 {
+	return uint64(i64)
 }
 
 func (i64 AceUint64) MarshalJSON() ([]byte, error) {
@@ -427,8 +427,8 @@ func (i *AceUint) Scan(src any) error {
 	}
 }
 
-func (i *AceUint) Uint() uint {
-	return uint(*i)
+func (i AceUint) Uint() uint {
+	return uint(i)
 }
 
 func (i AceUint) MarshalJSON() ([]byte, error) {
@@ -462,8 +462,8 @@ func (f32 *AceFloat32) Scan(src any) error {
 	}
 }
 
-func (f32 *AceFloat32) Float32() float32 {
-	return float32(*f32)
+func (f32 AceFloat32) Float32() float32 {
+	return float32(f32)
 }
 
 func (f32 AceFloat32) MarshalJSON() ([]byte, error) {
@@ -497,8 +497,8 @@ func (f64 *AceFloat64) Scan(src any) error {
 	}
 }
 
-func (f64 *AceFloat64) Float64() float64 {
-	return float64(*f64)
+func (f64 AceFloat64) Float64() float64 {
+	return float64(f64)
 }
 
 func (f64 AceFloat64) MarshalJSON() ([]byte, error) {
@@ -534,12 +534,12 @@ func (b *AceBool) Scan(src any) error {
 	}
 }
 
-func (b *AceBool) Bool() bool {
-	return bool(*b)
+func (b AceBool) Bool() bool {
+	return bool(b)
 }
 
-func (b *AceBool) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatBool(bool(*b))), nil
+func (b AceBool) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatBool(bool(b))), nil
 }
 
 func (b *AceBool) UnmarshalJSON(bs []byte) error {
@@ -575,11 +575,11 @@ func (t *AceTime) Scan(src any) error {
 	}
 }
 
-func (t *AceTime) String() string {
+func (t AceTime) String() string {
 	return t.Format(time.DateTime)
 }
 
-func (t *AceTime) MarshalJSON() ([]byte, error) {
+func (t AceTime) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(`"` + t.String() + `"`), nil
 }
 

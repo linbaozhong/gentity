@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type Money int
+type Money int64
 
 func (m Money) MarshalJSON() ([]byte, error) {
 	yuan := strconv.FormatFloat((float64(m) / 100), 'f', -1, 64)
@@ -54,30 +54,30 @@ func (i Money) Value() (driver.Value, error) {
 	return int64(i), nil
 }
 
-func (i *Money) Int() int {
-	return int(*i)
+func (i Money) Int() int {
+	return int(i)
 }
 
-func (i *Money) Int64() int64 {
-	return int64(*i)
+func (i Money) Int64() int64 {
+	return int64(i)
 }
 
 // Yuan 金额分精确到元
-func (m *Money) Yuan() float64 {
-	return float64(*m) / 100
+func (m Money) Yuan() float64 {
+	return float64(m) / 100
 }
 
 // 金额分小写转中文大写金额
-func (m *Money) ToCNY() string {
-	if *m == 0 {
+func (m Money) ToCNY() string {
+	if m == 0 {
 		return "零元整"
 	}
-	if *m < 0 {
-		var mm Money = *m * -1
+	if m < 0 {
+		var mm Money = m * -1
 		return "负" + mm.ToCNY()
 	}
 
-	numstr := []rune(strconv.Itoa(int(*m)))
+	numstr := []rune(strconv.Itoa(int(m)))
 	numlen := len(numstr)
 	moneyUnit := []string{"仟", "佰", "拾", "亿", "仟", "佰", "拾", "万", "仟", "佰", "拾", "元", "角", "分"}
 	unit := moneyUnit[len(moneyUnit)-numlen:]
