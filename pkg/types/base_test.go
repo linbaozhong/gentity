@@ -40,7 +40,7 @@ func TestBase(t *testing.T) {
 	a.Force = 11256
 	a.Ctime = Now()
 	t.Log()
-	
+
 	// m := NewSmap(3).Set("id", a.Id).Set("arch", a.Arch).Set("version", a.Version).Set("force", a.Force)
 	b, e := json.Marshal(a)
 	if e != nil {
