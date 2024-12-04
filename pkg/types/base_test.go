@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
-	"time"
 )
 
 type App struct {
@@ -39,17 +38,16 @@ func TestBase(t *testing.T) {
 	a.Url = "https://www.baidu.com"
 	a.State = 1
 	a.Force = 11256
-	a.Ctime = AceTime{
-		time.Now(),
-	}
-	t.Log(a.Force.ToCNY())
-	//m := NewSmap(3).Set("id", a.Id).Set("arch", a.Arch).Set("version", a.Version).Set("force", a.Force)
+	a.Ctime = Now()
+	t.Log()
+	
+	// m := NewSmap(3).Set("id", a.Id).Set("arch", a.Arch).Set("version", a.Version).Set("force", a.Force)
 	b, e := json.Marshal(a)
 	if e != nil {
 		t.Error(e)
 	}
 	s := string(b)
-	//t.Log(m)
+	// t.Log(m)
 	t.Log(s)
 	//
 	var a2 App

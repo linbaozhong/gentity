@@ -38,7 +38,8 @@ type (
 	AceFloat64 float64
 	AceFloat32 float32
 	AceBool    bool
-	AceTime    struct {
+	// AceTime    time.Time
+	AceTime struct {
 		time.Time
 	}
 )
@@ -57,9 +58,9 @@ func (b *AceByte) Scan(src any) error {
 	return nil
 }
 
-//func (b AceByte) Value() (driver.Value, error) {
+// func (b AceByte) Value() (driver.Value, error) {
 //	return b, nil
-//}
+// }
 
 // ////////////////////////////
 // AceString
@@ -562,6 +563,7 @@ func (t *AceTime) Scan(src any) error {
 		return nil
 	case time.Time:
 		*t = AceTime{v}
+		// *t = AceTime(v)
 		return nil
 	case []byte:
 		t2, err := time.Parse(time.DateTime, string(v))
@@ -569,14 +571,19 @@ func (t *AceTime) Scan(src any) error {
 			return err
 		}
 		*t = AceTime{t2}
+		// *t = AceTime(t2)
 		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for AceTime: %T", src)
 	}
 }
-
+func Now() AceTime {
+	return AceTime{time.Now()}
+	// return AceTime(time.Now())
+}
 func (t AceTime) String() string {
 	return t.Format(time.DateTime)
+	// return time.Time(t).Format(time.DateTime)
 }
 
 func (t AceTime) MarshalJSON() ([]byte, error) {
@@ -592,5 +599,6 @@ func (t *AceTime) UnmarshalJSON(b []byte) error {
 	}
 	tem, e := time.Parse(time.DateTime, c)
 	*t = AceTime{tem}
+	// *t = AceTime(tem)
 	return e
 }
