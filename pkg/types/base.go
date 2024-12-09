@@ -566,7 +566,7 @@ func (t *AceTime) Scan(src any) error {
 		// *t = AceTime(v)
 		return nil
 	case []byte:
-		t2, err := time.Parse(time.DateTime, string(v))
+		t2, err := time.Parse(time.DateTime, conv.Bytes2String(v))
 		if err != nil {
 			return err
 		}
@@ -591,7 +591,7 @@ func (t AceTime) MarshalJSON() ([]byte, error) {
 }
 
 func (t *AceTime) UnmarshalJSON(b []byte) error {
-	c := string(bytes.Trim(b, "\""))
+	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
 		*t = AceTime{}

@@ -81,6 +81,7 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 			if col.AutoIncr {
 				buf.WriteString(" auto")
 			}
+			buf.WriteString(util.ParseFieldSize(col.Type, col.Size, col.Unsigned))
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.TrimSpace(col.Comment)))
 		}
 		buf.WriteString("} \n\n")
@@ -124,6 +125,7 @@ func DB2Struct(tables map[string][]sqlparser.Column, packageName string) ([]byte
 			if col.AutoIncr {
 				buf.WriteString(" auto")
 			}
+			buf.WriteString(util.ParseFieldSize(col.Type, col.Size, col.Unsigned))
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.ReplaceAll(col.Comment, "\n", "")))
 		}
 		buf.WriteString("} \n\n")

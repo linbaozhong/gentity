@@ -15,6 +15,7 @@
 package util
 
 import (
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -61,9 +62,9 @@ func ParseFieldType(tp string, size int, unsigned bool) string {
 		}
 		return "int16"
 	case "TINYINT":
-		//if size == 1 {
+		// if size == 1 {
 		//	return "bool"
-		//}
+		// }
 		if unsigned {
 			return "uint8"
 		}
@@ -101,9 +102,9 @@ func ParseFieldAceType(tp string, size int, unsigned bool) string {
 		}
 		return "types.AceInt16"
 	case "TINYINT":
-		//if size == 1 {
+		// if size == 1 {
 		//	return "types.AceBool"
-		//}
+		// }
 		if unsigned {
 			return "types.AceUint8"
 		}
@@ -120,5 +121,41 @@ func ParseFieldAceType(tp string, size int, unsigned bool) string {
 		return "types.AceTime"
 	default:
 		return "any" // 对于未明确映射的类型，使用接口类型作为占位符
+	}
+}
+func ParseFieldSize(tp string, size int, unsigned bool) string {
+	switch strings.ToUpper(tp) {
+	case "BIGINT":
+		if unsigned {
+			return ""
+		}
+		return ""
+	case "INT", "MEDIUMINT":
+		if unsigned {
+			return ""
+		}
+		return ""
+	case "SMALLINT":
+		if unsigned {
+			return ""
+		}
+		return ""
+	case "TINYINT":
+		if unsigned {
+			return ""
+		}
+		return ""
+	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
+		return " size " + strconv.Itoa(size)
+	case "BIT":
+		return ""
+	case "FLOAT":
+		return ""
+	case "DOUBLE":
+		return ""
+	case "TIMESTAMP", "DATETIME", "DATE", "TIME":
+		return ""
+	default:
+		return "" // 对于未明确映射的类型，使用接口类型作为占位符
 	}
 }
