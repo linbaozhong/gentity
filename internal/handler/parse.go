@@ -100,6 +100,8 @@ func parseFile(filename, pkgPath string) error {
 			_namejson[4] = rw
 			_namejson[3] = field.Type.String()
 			switch _namejson[3] {
+			case "types.Time":
+				tempData.HasTime = true
 			case "time.Time":
 				tempData.HasTime = true
 			case "string":
