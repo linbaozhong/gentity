@@ -249,7 +249,7 @@ func (s *Scanner) scanIdent() (tok Token, lit string) {
 		return INT, buf.String()
 	case "BIGINT":
 		return BIGINT, buf.String()
-	case "FLOAT":
+	case "FLOAT", "DECIMAL":
 		return FLOAT, buf.String()
 	case "DOUBLE":
 		return DOUBLE, buf.String()

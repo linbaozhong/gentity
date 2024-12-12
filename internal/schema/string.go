@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package util
+package schema
 
 import (
+	"github.com/linbaozhong/gentity/pkg/sqlparser"
 	"strconv"
 	"strings"
 	"unicode"
@@ -44,38 +45,35 @@ func ParseField(fieldName string) string {
 	return upper.String()
 }
 
-func ParseFieldType(tp string, size int, unsigned bool) string {
-	switch strings.ToUpper(tp) {
+func ParseFieldType(col *sqlparser.Column) string {
+	switch strings.ToUpper(col.Type) {
 	case "BIGINT":
-		if unsigned {
+		if col.Unsigned {
 			return "uint64"
 		}
 		return "int64"
 	case "INT", "MEDIUMINT":
-		if unsigned {
+		if col.Unsigned {
 			return "uint32"
 		}
 		return "int32"
 	case "SMALLINT":
-		if unsigned {
+		if col.Unsigned {
 			return "uint16"
 		}
 		return "int16"
 	case "TINYINT":
-		// if size == 1 {
-		//	return "bool"
-		// }
-		if unsigned {
+		if col.Unsigned {
 			return "uint8"
 		}
 		return "int8"
 	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
 		return "string"
-	case "BIT":
+	case "BIT", "BOOLEAN":
 		return "bool"
 	case "FLOAT":
 		return "float32"
-	case "DOUBLE":
+	case "DOUBLE", "DECIMAL", "NUMERIC":
 		return "float64"
 	case "TIMESTAMP", "DATETIME", "DATE", "TIME":
 		return "time.Time"
@@ -84,78 +82,71 @@ func ParseFieldType(tp string, size int, unsigned bool) string {
 	}
 }
 
-func ParseFieldAceType(tp string, size int, unsigned bool) string {
-	switch strings.ToUpper(tp) {
+func ParseFieldAceType(col *sqlparser.Column) string {
+	switch strings.ToUpper(col.Type) {
 	case "BIGINT":
-		if unsigned {
+		if col.Unsigned {
 			return "types.BigInt"
 		}
 		return "types.Money"
 	case "INT", "MEDIUMINT":
-		if unsigned {
-			return "types.AceUint32"
+		if col.Unsigned {
+			return "types.Uint32"
 		}
-		return "types.AceInt32"
+		return "types.Int32"
 	case "SMALLINT":
-		if unsigned {
-			return "types.AceUint16"
+		if col.Unsigned {
+			return "types.Uint16"
 		}
-		return "types.AceInt16"
+		return "types.Int16"
 	case "TINYINT":
-		// if size == 1 {
-		//	return "types.AceBool"
-		// }
-		if unsigned {
-			return "types.AceUint8"
+		if col.Unsigned {
+			return "types.Uint8"
 		}
-		return "types.AceInt8"
+		return "types.Int8"
 	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
-		return "types.AceString"
-	case "BIT":
-		return "types.AceBool"
+		return "types.String"
+	case "BIT", "BOOLEAN":
+		return "types.Bool"
 	case "FLOAT":
-		return "types.AceFloat32"
-	case "DOUBLE":
-		return "types.AceFloat64"
+		return "types.Float32"
+	case "DOUBLE", "DECIMAL", "NUMERIC":
+		return "types.Float64"
 	case "TIMESTAMP", "DATETIME", "DATE", "TIME":
-		return "types.AceTime"
+		return "types.Time"
 	default:
 		return "any" // 对于未明确映射的类型，使用接口类型作为占位符
 	}
 }
-func ParseFieldSize(tp string, size int, unsigned bool) string {
-	switch strings.ToUpper(tp) {
-	case "BIGINT":
-		if unsigned {
-			return ""
-		}
-		return ""
-	case "INT", "MEDIUMINT":
-		if unsigned {
-			return ""
-		}
-		return ""
-	case "SMALLINT":
-		if unsigned {
-			return ""
-		}
-		return ""
-	case "TINYINT":
-		if unsigned {
-			return ""
-		}
-		return ""
+func ParseFieldSize(col *sqlparser.Column) string {
+	switch strings.ToUpper(col.Type) {
 	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
-		return " size " + strconv.Itoa(size)
-	case "BIT":
-		return ""
-	case "FLOAT":
-		return ""
-	case "DOUBLE":
-		return ""
-	case "TIMESTAMP", "DATETIME", "DATE", "TIME":
-		return ""
+		return " size(" + strconv.Itoa(col.Size) + ")"
+	// case "BIGINT":
+	// 	return ""
+	// case "INT", "MEDIUMINT":
+	// 	return ""
+	// case "SMALLINT":
+	// 	return ""
+	// case "TINYINT":
+	// 	return ""
+	// case "BIT":
+	// 	return ""
+	// case "FLOAT":
+	// 	return ""
+	// case "DOUBLE":
+	// 	return ""
+	// case "DECIMAL", "NUMERIC":
+	// 	return ""
+	// case "TIMESTAMP", "DATETIME", "DATE", "TIME":
+	// 	return ""
 	default:
+		if col.Precision > 0 {
+			if col.Scale > 0 {
+				return " size(" + strconv.Itoa(col.Precision) + "," + strconv.Itoa(col.Scale) + ")"
+			}
+			return " size(" + strconv.Itoa(col.Precision) + ")"
+		}
 		return "" // 对于未明确映射的类型，使用接口类型作为占位符
 	}
 }

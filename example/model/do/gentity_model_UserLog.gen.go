@@ -39,13 +39,14 @@ func (p *UserLog) Free() {
 func (p *UserLog) Reset() {
 	p.Id = 0
 	p.UserId = 0
-	p.LoginTime = types.AceTime{}
+	p.LoginTime = types.Time{}
 	p.Device = ""
 	p.Os = ""
 	p.OsVersion = ""
 	p.AppName = ""
 	p.AppVersion = ""
 	p.Ip = ""
+	p.Test = 0
 
 }
 
@@ -79,6 +80,8 @@ func (p *UserLog) AssignPtr(args ...dialect.Field) []any {
 			vals = append(vals, &p.AppVersion)
 		case tbluser_log.Ip:
 			vals = append(vals, &p.Ip)
+		case tbluser_log.Test:
+			vals = append(vals, &p.Test)
 		}
 	}
 
@@ -179,6 +182,12 @@ func (p *UserLog) AssignValues(args ...dialect.Field) ([]string, []any) {
 				}
 				cols = append(cols, tbluser_log.Ip.Quote())
 				vals = append(vals, p.Ip)
+			case tbluser_log.Test:
+				if p.Test == 0.0 {
+					continue
+				}
+				cols = append(cols, tbluser_log.Test.Quote())
+				vals = append(vals, p.Test)
 			}
 		}
 		return cols, vals
@@ -215,6 +224,9 @@ func (p *UserLog) AssignValues(args ...dialect.Field) ([]string, []any) {
 		case tbluser_log.Ip:
 			cols = append(cols, tbluser_log.Ip.Quote())
 			vals = append(vals, p.Ip)
+		case tbluser_log.Test:
+			cols = append(cols, tbluser_log.Test.Quote())
+			vals = append(vals, p.Test)
 		}
 	}
 	return cols, vals

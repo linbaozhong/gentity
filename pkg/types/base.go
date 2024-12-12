@@ -16,6 +16,7 @@ package types
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"strconv"
@@ -23,105 +24,101 @@ import (
 )
 
 type (
-	AceString  string
-	AceUint64  uint64
-	AceUint32  uint32
-	AceUint16  uint16
-	AceUint8   uint8
-	AceUint    uint
-	AceInt64   int64
-	AceInt32   int32
-	AceInt16   int16
-	AceInt8    int8
-	AceInt     int
-	AceByte    []byte
-	AceFloat64 float64
-	AceFloat32 float32
-	AceBool    bool
-	// AceTime    time.Time
-	AceTime struct {
+	String  string
+	Uint64  uint64
+	Uint32  uint32
+	Uint16  uint16
+	Uint8   uint8
+	Uint    uint
+	Int64   int64
+	Int32   int32
+	Int16   int16
+	Int8    int8
+	Int     int
+	Bytes   []byte
+	Float64 float64
+	Float32 float32
+	Bool    bool
+	Time    struct {
 		time.Time
 	}
 )
 
 // ////////////////////////////
-// AceByte
-func (b *AceByte) Scan(src any) error {
+// Byte
+func (b *Bytes) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*b = []byte{}
 	case []byte:
 		*b = v
 	default:
-		return fmt.Errorf("unsupported scan type for AceByte: %T", src)
+		return fmt.Errorf("unsupported scan type for Byte: %T", src)
 	}
 	return nil
 }
 
-// func (b AceByte) Value() (driver.Value, error) {
-//	return b, nil
-// }
+func (b Bytes) String() string {
+	return conv.Bytes2String(b)
+}
 
 // ////////////////////////////
-// AceString
-func (s *AceString) Scan(src any) error {
+// String
+func (s *String) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*s = ""
 	case []byte:
-		*s = AceString(conv.Bytes2String(v))
+		*s = String(conv.Bytes2String(v))
 	case string:
-		*s = AceString(v)
+		*s = String(v)
 	default:
-		return fmt.Errorf("unsupported scan type for AceString: %T", src)
+		return fmt.Errorf("unsupported scan type for String: %T", src)
 	}
 	return nil
 }
 
-//	func (s AceString) Value() (driver.Value, error) {
-//		return s, nil
-//	}
-func (s AceString) String() string {
+func (s String) String() string {
 	return string(s)
 }
 
-func (s AceString) MarshalJSON() ([]byte, error) {
+func (s String) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(`"` + string(s) + `"`), nil
 }
 
-func (s *AceString) UnmarshalJSON(b []byte) error {
+func (s *String) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
-	*s = AceString(c)
+	*s = String(c)
 	return nil
 }
 
 // /////////////////////////////
-// AceInt8
-func (i8 *AceInt8) Scan(src any) error {
+// Int8
+func (i8 *Int8) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i8 = 0
 		return nil
 	case int64:
-		*i8 = AceInt8(v)
+		*i8 = Int8(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceInt8: %T", src)
+		return fmt.Errorf("unsupported scan type for Int8: %T", src)
 	}
 }
 
-//	func (i8 AceInt8) Value() (driver.Value, error) {
-//		return i8, nil
-//	}
-func (i8 AceInt8) Int8() int8 {
+func (i8 Int8) Int8() int8 {
 	return int8(i8)
 }
 
-func (i8 AceInt8) MarshalJSON() ([]byte, error) {
+func (i8 Int8) String() string {
+	return strconv.FormatInt(int64(i8), 10)
+}
+func (i8 Int8) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i8), 10)), nil
 }
 
-func (i8 *AceInt8) UnmarshalJSON(b []byte) error {
+func (i8 *Int8) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -129,34 +126,37 @@ func (i8 *AceInt8) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i8 = AceInt8(tem)
+	*i8 = Int8(tem)
 	return e
 }
 
 // /////////////////////////////
-// AceInt16
-func (i16 *AceInt16) Scan(src any) error {
+// Int16
+func (i16 *Int16) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i16 = 0
 		return nil
 	case int64:
-		*i16 = AceInt16(v)
+		*i16 = Int16(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceInt16: %T", src)
+		return fmt.Errorf("unsupported scan type for Int16: %T", src)
 	}
 }
 
-func (i16 AceInt16) Int16() int16 {
+func (i16 Int16) Int16() int16 {
 	return int16(i16)
 }
 
-func (i16 AceInt16) MarshalJSON() ([]byte, error) {
+func (i16 Int16) String() string {
+	return strconv.FormatInt(int64(i16), 10)
+}
+func (i16 Int16) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i16), 10)), nil
 }
 
-func (i16 *AceInt16) UnmarshalJSON(b []byte) error {
+func (i16 *Int16) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -164,34 +164,37 @@ func (i16 *AceInt16) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i16 = AceInt16(tem)
+	*i16 = Int16(tem)
 	return e
 }
 
 // ///////////////////////////////
-// AceInt32
-func (i32 *AceInt32) Scan(src any) error {
+// Int32
+func (i32 *Int32) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i32 = 0
 		return nil
 	case int64:
-		*i32 = AceInt32(v)
+		*i32 = Int32(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceInt32: %T", src)
+		return fmt.Errorf("unsupported scan type for Int32: %T", src)
 	}
 }
 
-func (i32 AceInt32) Int32() int32 {
+func (i32 Int32) Int32() int32 {
 	return int32(i32)
 }
 
-func (i32 AceInt32) MarshalJSON() ([]byte, error) {
+func (i32 Int32) String() string {
+	return strconv.FormatInt(int64(i32), 10)
+}
+func (i32 Int32) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i32), 10)), nil
 }
 
-func (i32 *AceInt32) UnmarshalJSON(b []byte) error {
+func (i32 *Int32) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -199,34 +202,37 @@ func (i32 *AceInt32) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i32 = AceInt32(tem)
+	*i32 = Int32(tem)
 	return e
 }
 
 // /////////////////////////////////////
-// AceInt64
-func (i64 *AceInt64) Scan(src any) error {
+// Int64
+func (i64 *Int64) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i64 = 0
 		return nil
 	case int64:
-		*i64 = AceInt64(v)
+		*i64 = Int64(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceInt64: %T", src)
+		return fmt.Errorf("unsupported scan type for Int64: %T", src)
 	}
 }
 
-func (i64 AceInt64) Int64() int64 {
+func (i64 Int64) Int64() int64 {
 	return int64(i64)
 }
 
-func (i64 AceInt64) MarshalJSON() ([]byte, error) {
+func (i64 Int64) String() string {
+	return strconv.FormatInt(int64(i64), 10)
+}
+func (i64 Int64) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i64), 10)), nil
 }
 
-func (i64 *AceInt64) UnmarshalJSON(b []byte) error {
+func (i64 *Int64) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -234,34 +240,37 @@ func (i64 *AceInt64) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i64 = AceInt64(tem)
+	*i64 = Int64(tem)
 	return e
 }
 
 // ///////////////////////////////////////
-// AceInt
-func (i *AceInt) Scan(src any) error {
+// Int
+func (i *Int) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i = 0
 		return nil
 	case int64:
-		*i = AceInt(v)
+		*i = Int(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceInt: %T", src)
+		return fmt.Errorf("unsupported scan type for Int: %T", src)
 	}
 }
 
-func (i AceInt) Int() int {
+func (i Int) Int() int {
 	return int(i)
 }
 
-func (i AceInt) MarshalJSON() ([]byte, error) {
+func (i Int) String() string {
+	return strconv.FormatInt(int64(i), 10)
+}
+func (i Int) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i), 10)), nil
 }
 
-func (i *AceInt) UnmarshalJSON(b []byte) error {
+func (i *Int) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -269,34 +278,38 @@ func (i *AceInt) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i = AceInt(tem)
+	*i = Int(tem)
 	return e
 }
 
 // /////////////////////////////
-// AceUint8
-func (i8 *AceUint8) Scan(src any) error {
+// Uint8
+func (i8 *Uint8) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i8 = 0
 		return nil
 	case int64:
-		*i8 = AceUint8(v)
+		*i8 = Uint8(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceUint8: %T", src)
+		return fmt.Errorf("unsupported scan type for Uint8: %T", src)
 	}
 }
 
-func (i8 AceUint8) Uint8() uint8 {
+func (i8 Uint8) Uint8() uint8 {
 	return uint8(i8)
 }
 
-func (i8 AceUint8) MarshalJSON() ([]byte, error) {
+func (i8 Uint8) String() string {
+	return strconv.FormatUint(uint64(i8), 10)
+}
+
+func (i8 Uint8) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i8), 10)), nil
 }
 
-func (i8 *AceUint8) UnmarshalJSON(b []byte) error {
+func (i8 *Uint8) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -304,34 +317,38 @@ func (i8 *AceUint8) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i8 = AceUint8(tem)
+	*i8 = Uint8(tem)
 	return e
 }
 
 // /////////////////////////////
-// AceUint16
-func (i16 *AceUint16) Scan(src any) error {
+// Uint16
+func (i16 *Uint16) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i16 = 0
 		return nil
 	case int64:
-		*i16 = AceUint16(v)
+		*i16 = Uint16(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceInt16: %T", src)
+		return fmt.Errorf("unsupported scan type for Int16: %T", src)
 	}
 }
 
-func (i16 AceUint16) Uint16() uint16 {
+func (i16 Uint16) Uint16() uint16 {
 	return uint16(i16)
 }
 
-func (i16 AceUint16) MarshalJSON() ([]byte, error) {
+func (i16 Uint16) String() string {
+	return strconv.FormatUint(uint64(i16), 10)
+}
+
+func (i16 Uint16) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i16), 10)), nil
 }
 
-func (i16 *AceUint16) UnmarshalJSON(b []byte) error {
+func (i16 *Uint16) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -339,34 +356,38 @@ func (i16 *AceUint16) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i16 = AceUint16(tem)
+	*i16 = Uint16(tem)
 	return e
 }
 
 // ///////////////////////////////
-// AceUint32
-func (i32 *AceUint32) Scan(src any) error {
+// Uint32
+func (i32 *Uint32) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i32 = 0
 		return nil
 	case int64:
-		*i32 = AceUint32(v)
+		*i32 = Uint32(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceUint32: %T", src)
+		return fmt.Errorf("unsupported scan type for Uint32: %T", src)
 	}
 }
 
-func (i32 AceUint32) Uint32() uint32 {
+func (i32 Uint32) Uint32() uint32 {
 	return uint32(i32)
 }
 
-func (i32 AceUint32) MarshalJSON() ([]byte, error) {
+func (i32 Uint32) String() string {
+	return strconv.FormatUint(uint64(i32), 10)
+}
+
+func (i32 Uint32) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i32), 10)), nil
 }
 
-func (i32 *AceUint32) UnmarshalJSON(b []byte) error {
+func (i32 *Uint32) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -374,34 +395,38 @@ func (i32 *AceUint32) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i32 = AceUint32(tem)
+	*i32 = Uint32(tem)
 	return e
 }
 
 // /////////////////////////////////////
-// AceUint64
-func (i64 *AceUint64) Scan(src any) error {
+// Uint64
+func (i64 *Uint64) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i64 = 0
 		return nil
 	case int64:
-		*i64 = AceUint64(v)
+		*i64 = Uint64(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceUint64: %T", src)
+		return fmt.Errorf("unsupported scan type for Uint64: %T", src)
 	}
 }
 
-func (i64 AceUint64) Uint64() uint64 {
+func (i64 Uint64) Uint64() uint64 {
 	return uint64(i64)
 }
 
-func (i64 AceUint64) MarshalJSON() ([]byte, error) {
+func (i64 Uint64) String() string {
+	return strconv.FormatUint(uint64(i64), 10)
+}
+
+func (i64 Uint64) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i64), 10)), nil
 }
 
-func (i64 *AceUint64) UnmarshalJSON(b []byte) error {
+func (i64 *Uint64) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -409,34 +434,38 @@ func (i64 *AceUint64) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i64 = AceUint64(tem)
+	*i64 = Uint64(tem)
 	return e
 }
 
 // ///////////////////////////////////////
-// AceUint
-func (i *AceUint) Scan(src any) error {
+// Uint
+func (i *Uint) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*i = 0
 		return nil
 	case int64:
-		*i = AceUint(v)
+		*i = Uint(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceUint: %T", src)
+		return fmt.Errorf("unsupported scan type for Uint: %T", src)
 	}
 }
 
-func (i AceUint) Uint() uint {
+func (i Uint) Uint() uint {
 	return uint(i)
 }
 
-func (i AceUint) MarshalJSON() ([]byte, error) {
+func (i Uint) String() string {
+	return strconv.FormatUint(uint64(i), 10)
+}
+
+func (i Uint) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatInt(int64(i), 10)), nil
 }
 
-func (i *AceUint) UnmarshalJSON(b []byte) error {
+func (i *Uint) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -444,34 +473,38 @@ func (i *AceUint) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	tem, e := strconv.ParseInt(c, 10, 64)
-	*i = AceUint(tem)
+	*i = Uint(tem)
 	return e
 }
 
 // //////////////////////////////////////
-// AceFloat32
-func (f32 *AceFloat32) Scan(src any) error {
+// Float32
+func (f32 *Float32) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*f32 = 0
 		return nil
 	case float64:
-		*f32 = AceFloat32(v)
+		*f32 = Float32(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceFloat32: %T", src)
+		return fmt.Errorf("unsupported scan type for Float32: %T", src)
 	}
 }
 
-func (f32 AceFloat32) Float32() float32 {
+func (f32 Float32) Float32() float32 {
 	return float32(f32)
 }
 
-func (f32 AceFloat32) MarshalJSON() ([]byte, error) {
+func (f32 Float32) String() string {
+	return strconv.FormatFloat(float64(f32), 'f', -1, 32)
+}
+
+func (f32 Float32) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatFloat(float64(f32), 'f', -1, 32)), nil
 }
 
-func (f32 *AceFloat32) UnmarshalJSON(b []byte) error {
+func (f32 *Float32) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
@@ -479,126 +512,139 @@ func (f32 *AceFloat32) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 	f, e := strconv.ParseFloat(c, 32)
-	*f32 = AceFloat32(f)
+	*f32 = Float32(f)
 	return e
 }
 
 // ///////////////////////////
-// AceFloat64
-func (f64 *AceFloat64) Scan(src any) error {
+// Float64
+func (f64 *Float64) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*f64 = 0
 		return nil
 	case float64:
-		*f64 = AceFloat64(v)
+		*f64 = Float64(v)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceFloat64: %T", src)
+		return fmt.Errorf("unsupported scan type for Float64: %T", src)
 	}
 }
 
-func (f64 AceFloat64) Float64() float64 {
+func (f64 Float64) Float64() float64 {
 	return float64(f64)
 }
 
-func (f64 AceFloat64) MarshalJSON() ([]byte, error) {
+func (f64 Float64) String() string {
+	return strconv.FormatFloat(float64(f64), 'f', -1, 64)
+}
+
+func (f64 Float64) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatFloat(float64(f64), 'f', -1, 64)), nil
 }
 
-func (f64 *AceFloat64) UnmarshalJSON(b []byte) error {
+func (f64 *Float64) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 	if c == "" {
 		*f64 = 0
 		return nil
 	}
 	f, e := strconv.ParseFloat(c, 64)
-	*f64 = AceFloat64(f)
+	*f64 = Float64(f)
 	return e
 }
 
 // //////////////////////////////////
-// AceBool
-func (b *AceBool) Scan(src any) error {
+// Bool
+func (b *Bool) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
 		*b = false
 		return nil
 	case bool:
-		*b = AceBool(v)
+		*b = Bool(v)
 		return nil
 	case int64:
 		*b = v != 0
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceBool: %T", src)
+		return fmt.Errorf("unsupported scan type for Bool: %T", src)
 	}
 }
 
-func (b AceBool) Bool() bool {
+func (b Bool) Bool() bool {
 	return bool(b)
 }
 
-func (b AceBool) MarshalJSON() ([]byte, error) {
+func (b Bool) String() string {
+	return strconv.FormatBool(b.Bool())
+}
+func (b Bool) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(strconv.FormatBool(bool(b))), nil
 }
 
-func (b *AceBool) UnmarshalJSON(bs []byte) error {
+func (b *Bool) UnmarshalJSON(bs []byte) error {
 	c := conv.Bytes2String(bytes.Trim(bs, "\""))
 	if c == "" {
 		*b = false
 		return nil
 	}
 	tem, e := strconv.ParseBool(c)
-	*b = AceBool(tem)
+	*b = Bool(tem)
 	return e
 }
 
 // //////////////////////////////////
-// AceTime
-func (t *AceTime) Scan(src any) error {
+// Time
+func (t *Time) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
-		*t = AceTime{}
+		*t = Time{}
 		return nil
 	case time.Time:
-		*t = AceTime{v}
-		// *t = AceTime(v)
+		*t = Time{v}
+		// *t = Time(v)
 		return nil
 	case []byte:
 		t2, err := time.Parse(time.DateTime, conv.Bytes2String(v))
 		if err != nil {
 			return err
 		}
-		*t = AceTime{t2}
-		// *t = AceTime(t2)
+		*t = Time{t2}
+		// *t = Time(t2)
 		return nil
 	default:
-		return fmt.Errorf("unsupported scan type for AceTime: %T", src)
+		return fmt.Errorf("unsupported scan type for Time: %T", src)
 	}
 }
-func Now() AceTime {
-	return AceTime{time.Now()}
-	// return AceTime(time.Now())
-}
-func (t AceTime) String() string {
-	return t.Format(time.DateTime)
-	// return time.Time(t).Format(time.DateTime)
+func (t Time) Value() (driver.Value, error) {
+	return t.Time, nil
 }
 
-func (t AceTime) MarshalJSON() ([]byte, error) {
+func (t Time) Now() Time {
+	return Time{time.Now()}
+}
+
+func Now() Time {
+	return Time{time.Now()}
+}
+func (t Time) String() string {
+	return t.Format(time.DateTime)
+}
+
+func (t Time) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(`"` + t.String() + `"`), nil
 }
 
-func (t *AceTime) UnmarshalJSON(b []byte) error {
+func (t *Time) UnmarshalJSON(b []byte) error {
 	c := conv.Bytes2String(bytes.Trim(b, "\""))
 
 	if c == "" {
-		*t = AceTime{}
+		*t = Time{}
 		return nil
 	}
 	tem, e := time.Parse(time.DateTime, c)
-	*t = AceTime{tem}
-	// *t = AceTime(tem)
+	*t = Time{tem}
+	// *t = Time(tem)
 	return e
 }

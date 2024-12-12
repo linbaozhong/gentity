@@ -9,13 +9,14 @@ import (
 var (
 	Id         = dialect.Field{Name: "id", Json: "id", Table: "user_log", Type: "types.BigInt"}
 	UserId     = dialect.Field{Name: "user_id", Json: "user_id", Table: "user_log", Type: "types.BigInt"}
-	LoginTime  = dialect.Field{Name: "login_time", Json: "login_time", Table: "user_log", Type: "types.AceTime"}
-	Device     = dialect.Field{Name: "device", Json: "device", Table: "user_log", Type: "types.AceString"}
-	Os         = dialect.Field{Name: "os", Json: "os", Table: "user_log", Type: "types.AceString"}
-	OsVersion  = dialect.Field{Name: "os_version", Json: "os_version", Table: "user_log", Type: "types.AceString"}
-	AppName    = dialect.Field{Name: "app_name", Json: "app_name", Table: "user_log", Type: "types.AceString"}
-	AppVersion = dialect.Field{Name: "app_version", Json: "app_version", Table: "user_log", Type: "types.AceString"}
-	Ip         = dialect.Field{Name: "ip", Json: "ip", Table: "user_log", Type: "types.AceString"}
+	LoginTime  = dialect.Field{Name: "login_time", Json: "login_time", Table: "user_log", Type: "types.Time"}
+	Device     = dialect.Field{Name: "device", Json: "device", Table: "user_log", Type: "types.String"}
+	Os         = dialect.Field{Name: "os", Json: "os", Table: "user_log", Type: "types.String"}
+	OsVersion  = dialect.Field{Name: "os_version", Json: "os_version", Table: "user_log", Type: "types.String"}
+	AppName    = dialect.Field{Name: "app_name", Json: "app_name", Table: "user_log", Type: "types.String"}
+	AppVersion = dialect.Field{Name: "app_version", Json: "app_version", Table: "user_log", Type: "types.String"}
+	Ip         = dialect.Field{Name: "ip", Json: "ip", Table: "user_log", Type: "types.String"}
+	Test       = dialect.Field{Name: "test", Json: "test", Table: "user_log", Type: "types.Float64"}
 	// 主键
 	PrimaryKey = Id
 
@@ -29,6 +30,7 @@ var (
 		AppName,
 		AppVersion,
 		Ip,
+		Test,
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{
@@ -41,5 +43,6 @@ var (
 		AppName,
 		AppVersion,
 		Ip,
+		Test,
 	}
 )

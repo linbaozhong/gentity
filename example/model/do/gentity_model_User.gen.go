@@ -39,7 +39,7 @@ func (p *User) Free() {
 func (p *User) Reset() {
 	p.Id = 0
 	p.Uuid = ""
-	p.Ctime = types.AceTime{}
+	p.Ctime = types.Time{}
 
 }
 

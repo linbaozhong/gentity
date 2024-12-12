@@ -21,13 +21,13 @@ import (
 )
 
 type App struct {
-	Id      BigInt     `json:"id,omitempty" db:"'id' pk auto"`   //
-	Arch    AceFloat64 `json:"arch,omitempty" db:"'arch'"`       // 操作系统架构
-	Version AceBool    `json:"version,omitempty" db:"'version'"` // 版本号
-	Url     AceString  `json:"url,omitempty" db:"'url'"`         // 应用下载地址
-	State   AceInt8    `json:"state,omitempty" db:"'state'"`     //
-	Force   Money      `json:"force,omitempty" db:"'force'"`     //
-	Ctime   AceTime    `json:"ctime,omitempty" db:"'ctime'"`     //
+	Id      BigInt  `json:"id,omitempty" db:"'id' pk auto"`   //
+	Arch    Float64 `json:"arch,omitempty" db:"'arch'"`       // 操作系统架构
+	Version Bool    `json:"version,omitempty" db:"'version'"` // 版本号
+	Url     String  `json:"url,omitempty" db:"'url'"`         // 应用下载地址
+	State   Int8    `json:"state,omitempty" db:"'state'"`     //
+	Force   Money   `json:"force,omitempty" db:"'force'"`     //
+	Ctime   Time    `json:"ctime,omitempty" db:"'ctime'"`     //
 }
 
 func TestBase(t *testing.T) {

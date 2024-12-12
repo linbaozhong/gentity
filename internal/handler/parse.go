@@ -123,6 +123,10 @@ func parseFile(filename, pkgPath string) error {
 				tempData.HasPrimaryKey = true
 				// tempData.Keys = append(tempData.Keys, _namejson)
 				tempData.PrimaryKey = _namejson
+				// 主键是否是自增
+				if tempData.PrimaryKey[4] == "<-" {
+					tempData.HasTime = true
+				}
 			}
 			if _namejson[1] == "state" {
 				tempData.HasState = true

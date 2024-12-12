@@ -13,6 +13,8 @@ type Column struct {
 	ColumnType string
 	Default    any
 	Size       int
+	Precision  int // 精度
+	Scale      int // 小数点位数
 	Unsigned   bool
 	Key        string
 	Extra      string
@@ -110,23 +112,34 @@ func (p *Parser) scanIdent() (tok Token, lit string) {
 	return tok, lit
 }
 
-func (p *Parser) scanType() (string, int, error) {
+func (p *Parser) scanType() (string, int, int, error) {
 	tok, lit := p.scanIgnoreWhitespace()
 	if tok >= BIT && tok <= TIMESTAMP {
 		tok1, lit1 := p.scanIgnoreWhitespace()
 		if tok1 != OPEN_PAREN {
 			p.unscan()
-			return Type[tok], 0, nil
+			return Type[tok], 0, 0, nil
 		}
 		tok2, lit2 := p.scanIgnoreWhitespace()
 		tok3, lit3 := p.scanIgnoreWhitespace()
-		if tok2 != SIZE || tok3 != CLOSE_PAREN {
-			return "", 0, fmt.Errorf("found %q, expected type(integer)", lit+lit1+lit2+lit3)
+		var (
+			size  int
+			scale int
+		)
+		if tok3 == COMMA {
+			tok4, lit4 := p.scanIgnoreWhitespace()
+			tok5, lit5 := p.scanIgnoreWhitespace()
+			if tok4 != SIZE || tok5 != CLOSE_PAREN {
+				return "", 0, 0, fmt.Errorf("found %q, expected type(integer)", lit+lit1+lit2+lit3+lit4+lit5)
+			}
+			scale, _ = strconv.Atoi(lit4)
+		} else if tok2 != SIZE || tok3 != CLOSE_PAREN {
+			return "", 0, 0, fmt.Errorf("found %q, expected type(integer)", lit+lit1+lit2+lit3)
 		}
-		size, _ := strconv.Atoi(lit2)
-		return Type[tok], size, nil
+		size, _ = strconv.Atoi(lit2)
+		return Type[tok], size, scale, nil
 	}
-	return "", 0, fmt.Errorf("found %q, expected type", lit)
+	return "", 0, 0, fmt.Errorf("found %q, expected type", lit)
 }
 
 func (p *Parser) scanDefault() (string, error) {
@@ -153,12 +166,14 @@ func (p *Parser) scanColumn() (*Column, error) {
 		return nil, fmt.Errorf("found %q, expected ident", lit)
 	}
 	column.Name = lit
-	t, s, err := p.scanType()
+	t, s, c, err := p.scanType()
 	if err != nil {
 		return nil, err
 	}
 	column.Type = t
 	column.Size = s
+	column.Precision = s
+	column.Scale = c
 
 	for {
 		tok, lit = p.scanIgnoreWhitespace()

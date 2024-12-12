@@ -8,8 +8,8 @@ import (
 
 var (
 	Id    = dialect.Field{Name: "id", Json: "id", Table: "user", Type: "types.BigInt"}
-	Uuid  = dialect.Field{Name: "uuid", Json: "uuid", Table: "user", Type: "types.AceString"}
-	Ctime = dialect.Field{Name: "ctime", Json: "ctime", Table: "user", Type: "types.AceTime"}
+	Uuid  = dialect.Field{Name: "uuid", Json: "uuid", Table: "user", Type: "types.String"}
+	Ctime = dialect.Field{Name: "ctime", Json: "ctime", Table: "user", Type: "types.Time"}
 	// 主键
 	PrimaryKey = Id
 

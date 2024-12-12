@@ -89,16 +89,16 @@ func (d *TempData) writeToModel(fileName string) error {
 			}
 			var ret any
 			switch t[3] {
-			case "string", "types.AceString":
+			case "string", "types.String":
 				ret = `""`
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
-				"types.AceUint", "types.AceUint8", "types.AceUint16", "types.AceUint32", "types.AceUint64",
-				"types.AceInt", "types.AceInt8", "types.AceInt16", "types.AceInt32", "types.AceInt64", "types.AceFloat32",
-				"types.AceFloat64", "types.Bigint", "types.Money":
+				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
+				"types.Float64", "types.Bigint", "types.Money":
 				ret = 0
-			case "time.Time", "types.AceTime":
-				ret = `types.AceTime{}` // `time.Time{}`
-			case "bool", "types.AceBool":
+			case "time.Time", "types.Time":
+				ret = `types.Time{}` // `time.Time{}`
+			case "bool", "types.Bool":
 				ret = `false`
 			default:
 				ret = 0
@@ -111,17 +111,17 @@ func (d *TempData) writeToModel(fileName string) error {
 			}
 			var ret any
 			switch t[3] {
-			case "string", "types.AceString":
+			case "string", "types.String":
 				ret = ` == ""`
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
-				"types.AceUint", "types.AceUint8", "types.AceUint16", "types.AceUint32", "types.AceUint64",
-				"types.AceInt", "types.AceInt8", "types.AceInt16", "types.AceInt32", "types.AceInt64", "types.Bigint", "types.Money":
+				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Bigint", "types.Money":
 				ret = ` == 0`
-			case "float32", "float64", "types.AceFloat32", "types.AceFloat64":
+			case "float32", "float64", "types.Float32", "types.Float64":
 				ret = ` == 0.0`
-			case "time.Time", "types.AceTime":
+			case "time.Time", "types.Time":
 				ret = `.IsZero()`
-			case "bool", "types.AceBool":
+			case "bool", "types.Bool":
 				ret = ` == false`
 			default:
 				ret = ` == 0`

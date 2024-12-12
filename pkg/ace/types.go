@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package ace
 
 import (
 	"sync/atomic"
@@ -21,22 +21,22 @@ import (
 var atomic_uint64 uint64
 
 type (
-	AceModel struct {
+	Model struct {
 		ace_uuid uint64 `json:"-"` // 内部留用，禁止外部赋值
 	}
 
-	AceModeler interface {
+	Modeler interface {
 		UUID() uint64
 		Reset()
 	}
 )
 
-func (a *AceModel) UUID() uint64 {
+func (a *Model) UUID() uint64 {
 	if a.ace_uuid == 0 {
 		a.ace_uuid = atomic.AddUint64(&atomic_uint64, 1)
 	}
 	return a.ace_uuid
 }
 
-func (p *AceModel) Lock()   {}
-func (p *AceModel) Unlock() {}
+func (p *Model) Lock()   {}
+func (p *Model) Unlock() {}

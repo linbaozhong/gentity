@@ -7,7 +7,7 @@ import (
 )
 
 type Driverer interface {
-	GetTables(db *DB, dbName string) (map[string][]sqlparser.Column, error)
+	GetTables(db *DB, dbName string) (map[string][]*sqlparser.Column, error)
 }
 
 type mysql struct {
@@ -15,18 +15,18 @@ type mysql struct {
 
 var Mysql mysql
 
-func (mysql) GetTables(db *DB, dbName string) (map[string][]sqlparser.Column, error) {
-	rows, err := db.Query(`SELECT table_name,column_name,column_default,data_type,column_type,ifnull(character_maximum_length,0),column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema = ?`, dbName)
+func (mysql) GetTables(db *DB, dbName string) (map[string][]*sqlparser.Column, error) {
+	rows, err := db.Query(`SELECT table_name,column_name,column_default,data_type,column_type,ifnull(character_maximum_length,0),ifnull(numeric_precision,0),ifnull(numeric_scale,0),column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema = ?`, dbName)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	ms := make(map[string][]sqlparser.Column)
+	ms := make(map[string][]*sqlparser.Column)
 	for rows.Next() {
 		var tableName string
-		col := sqlparser.Column{}
-		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.ColumnType, &col.Size, &col.Key, &col.Extra, &col.Comment)
+		col := &sqlparser.Column{}
+		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.ColumnType, &col.Size, &col.Precision, &col.Scale, &col.Key, &col.Extra, &col.Comment)
 		if strings.ToUpper(col.Extra) == dialect.AutoInc {
 			col.AutoIncr = true
 		}
@@ -36,7 +36,7 @@ func (mysql) GetTables(db *DB, dbName string) (map[string][]sqlparser.Column, er
 		if cols, ok := ms[tableName]; ok {
 			ms[tableName] = append(cols, col)
 		} else {
-			ms[tableName] = []sqlparser.Column{col}
+			ms[tableName] = []*sqlparser.Column{col}
 		}
 	}
 	if err = rows.Err(); err != nil {

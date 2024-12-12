@@ -3,7 +3,7 @@ package pool
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/ace/types"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"sync"
 	"time"
 )
@@ -68,8 +68,8 @@ func (p *objPool) Get() any {
 	if obj == nil {
 		return p.pool.New()
 	}
-	// 尝试将对象断言为types.AceModeler类型。
-	if m, ok := obj.(types.AceModeler); ok {
+	// 尝试将对象断言为types.Modeler类型。
+	if m, ok := obj.(ace.Modeler); ok {
 		// 如果对象类型正确，重置其状态，并从keys中删除对应的UUID。
 		p.keys.Delete(m.UUID())
 		m.Reset()
@@ -80,7 +80,7 @@ func (p *objPool) Get() any {
 }
 
 // Put 将对象放回对象池中。如果对象已存在（基于UUID），则不放入。
-func (p *objPool) Put(obj types.AceModeler) {
+func (p *objPool) Put(obj ace.Modeler) {
 	// 忽略nil对象。
 	if obj == nil {
 		return
