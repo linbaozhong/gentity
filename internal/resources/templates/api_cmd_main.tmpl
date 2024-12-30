@@ -26,7 +26,7 @@ func main() {
 		port = ":" + port
 	}
 
-	log.RegisterLogger(false)
+	log.RegisterLogger(ace.Context,false)
 	log.Info(fmt.Sprintf("%s %s %s 服务已开启", "{{.ModulePath}} Api", "0.1", port))
 	// 启动API服务
 	app := router.Init()

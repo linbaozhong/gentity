@@ -16,7 +16,6 @@ var (
 	AppName    = dialect.Field{Name: "app_name", Json: "app_name", Table: "user_log", Type: "types.String"}
 	AppVersion = dialect.Field{Name: "app_version", Json: "app_version", Table: "user_log", Type: "types.String"}
 	Ip         = dialect.Field{Name: "ip", Json: "ip", Table: "user_log", Type: "types.String"}
-	Test       = dialect.Field{Name: "test", Json: "test", Table: "user_log", Type: "types.Float64"}
 	// 主键
 	PrimaryKey = Id
 
@@ -30,7 +29,6 @@ var (
 		AppName,
 		AppVersion,
 		Ip,
-		Test,
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{
@@ -43,6 +41,5 @@ var (
 		AppName,
 		AppVersion,
 		Ip,
-		Test,
 	}
 )
