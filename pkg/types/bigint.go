@@ -21,14 +21,14 @@ func (i *BigInt) UnmarshalJSON(b []byte) error {
 		*i = BigInt(0)
 		return nil
 	}
-	tem, e := strconv.ParseInt(c, 10, 64)
+	tem, e := strconv.ParseUint(c, 10, 64)
 	*i = BigInt(tem)
 	return e
 }
 
 // String
 func (i BigInt) String() string {
-	return strconv.FormatInt(int64(i), 10)
+	return strconv.FormatUint(i.Uint64(), 10)
 }
 
 // int64

@@ -31,20 +31,22 @@ func Post[A, B any](
 	fn func(ctx context.Context, req *A, resp *B) error,
 ) {
 	var req A
+	iface.Initiate(&req)
 	if e := ctx.ReadJSON(&req); e != nil {
-		log.Error(e)
 		Fail(ctx, Param_Invalid)
+		log.Error(e)
 		return
 	}
 	if e := iface.Validate(&req); e != nil {
 		Fail(ctx, e)
+		log.Error(e)
 		return
 	}
 
 	var resp B
 	if e := fn(ctx, &req, &resp); e != nil {
-		log.Error(e)
 		Fail(ctx, e)
+		log.Error(e)
 		return
 	}
 	Ok(ctx, resp)
@@ -55,20 +57,22 @@ func Get[A, B any](
 	fn func(ctx context.Context, req *A, resp *B) error,
 ) {
 	var req A
+	iface.Initiate(&req)
 	if e := ctx.ReadQuery(&req); e != nil {
-		log.Error(e)
 		Fail(ctx, Param_Invalid)
+		log.Error(e)
 		return
 	}
 	if e := iface.Validate(&req); e != nil {
 		Fail(ctx, e)
+		log.Error(e)
 		return
 	}
 
 	var resp B
 	if e := fn(ctx, &req, &resp); e != nil {
-		log.Error(e)
 		Fail(ctx, e)
+		log.Error(e)
 		return
 	}
 	Ok(ctx, resp)

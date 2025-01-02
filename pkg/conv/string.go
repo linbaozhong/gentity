@@ -46,7 +46,7 @@ func String2Int64Ptr(s string, def ...int64) *int64 {
 }
 
 func String2Uint64(s string, def ...uint64) uint64 {
-	if i, e := strconv.ParseUint(strings.TrimSpace(s), 10, 64); e == nil {
+	if i, e := strconv.ParseUint(strings.TrimSpace(s), 0, 64); e == nil {
 		return i
 	}
 	if len(def) > 0 {
@@ -57,7 +57,7 @@ func String2Uint64(s string, def ...uint64) uint64 {
 
 // String2Uint32 字符串转uint32
 func String2Uint32(s string, def ...uint32) uint32 {
-	if i, e := strconv.ParseUint(strings.TrimSpace(s), 10, 32); e == nil {
+	if i, e := strconv.ParseUint(strings.TrimSpace(s), 0, 32); e == nil {
 		return uint32(i)
 	}
 	if len(def) > 0 {
@@ -68,7 +68,7 @@ func String2Uint32(s string, def ...uint32) uint32 {
 
 // String2Uint 字符串转uint
 func String2Uint(s string, def ...uint) uint {
-	if i, e := strconv.ParseUint(strings.TrimSpace(s), 10, 64); e == nil {
+	if i, e := strconv.ParseUint(strings.TrimSpace(s), 0, 64); e == nil {
 		return uint(i)
 	}
 	if len(def) > 0 {
@@ -78,7 +78,7 @@ func String2Uint(s string, def ...uint) uint {
 }
 
 func String2Uint16(s string, def ...uint16) uint16 {
-	if i, e := strconv.ParseUint(strings.TrimSpace(s), 10, 16); e == nil {
+	if i, e := strconv.ParseUint(strings.TrimSpace(s), 0, 16); e == nil {
 		return uint16(i)
 	}
 	if len(def) > 0 {
@@ -89,7 +89,7 @@ func String2Uint16(s string, def ...uint16) uint16 {
 
 // String2Uint8 字符串转uint
 func String2Uint8(s string, def ...uint8) uint8 {
-	if i, e := strconv.ParseUint(strings.TrimSpace(s), 10, 8); e == nil {
+	if i, e := strconv.ParseUint(strings.TrimSpace(s), 0, 8); e == nil {
 		return uint8(i)
 	}
 	if len(def) > 0 {
@@ -111,7 +111,7 @@ func String2Int(s string, def ...int) int {
 
 // String2Int8 字符串转int8
 func String2Int8(s string, def ...int8) int8 {
-	if b, e := strconv.ParseInt(strings.TrimSpace(s), 10, 8); e == nil {
+	if b, e := strconv.ParseInt(strings.TrimSpace(s), 0, 8); e == nil {
 		return int8(b)
 	}
 	if len(def) > 0 {
@@ -122,7 +122,7 @@ func String2Int8(s string, def ...int8) int8 {
 
 // String2Int16 字符串转int16
 func String2Int16(s string, def ...int16) int16 {
-	if b, e := strconv.ParseInt(strings.TrimSpace(s), 10, 16); e == nil {
+	if b, e := strconv.ParseInt(strings.TrimSpace(s), 0, 16); e == nil {
 		return int16(b)
 	}
 	if len(def) > 0 {
@@ -133,7 +133,7 @@ func String2Int16(s string, def ...int16) int16 {
 
 // String2Int32 字符串转int32
 func String2Int32(s string, def ...int32) int32 {
-	if b, e := strconv.ParseInt(strings.TrimSpace(s), 10, 32); e == nil {
+	if b, e := strconv.ParseInt(strings.TrimSpace(s), 0, 32); e == nil {
 		return int32(b)
 	}
 	if len(def) > 0 {
@@ -144,7 +144,7 @@ func String2Int32(s string, def ...int32) int32 {
 
 // String2Int64 字符串转int64
 func String2Int64(s string, def ...int64) int64 {
-	if b, e := strconv.ParseInt(strings.TrimSpace(s), 10, 64); e == nil {
+	if b, e := strconv.ParseInt(strings.TrimSpace(s), 0, 64); e == nil {
 		return b
 	}
 	if len(def) > 0 {

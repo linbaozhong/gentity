@@ -1,4 +1,4 @@
-// Copyright © 2023 SnowIM. All rights reserved.
+// Copyright © 2023 Linbaozhong. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,24 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package iface
+package types
 
-type Checker interface {
-	Check() error
-}
-type Initializer interface {
-	Init()
-}
+import (
+	"math"
+	"time"
+)
 
-func Validate(arg any) error {
-	if checker, ok := arg.(Checker); ok {
-		return checker.Check()
-	}
-	return nil
-}
+const (
+	NilString  = "NIL"
+	NilInt     = math.MinInt
+	NilInt8    = math.MinInt8
+	NilInt16   = math.MinInt16
+	NilInt32   = math.MinInt32
+	NilInt64   = math.MinInt64
+	NilUint    = math.MaxUint
+	NilUint8   = math.MaxUint8
+	NilUint16  = math.MaxUint16
+	NilUint32  = math.MaxUint32
+	NilUint64  = math.MaxUint64
+	NilFloat64 = math.MaxFloat64
+	NilFloat32 = math.MaxFloat32
+)
 
-func Initiate(arg any) {
-	if ier, ok := arg.(Initializer); ok {
-		ier.Init()
-	}
-}
+var (
+	NilTime = time.Time{}
+)

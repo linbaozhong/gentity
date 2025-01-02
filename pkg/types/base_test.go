@@ -15,7 +15,7 @@
 package types
 
 import (
-	"fmt"
+	"math"
 	"strconv"
 	"testing"
 )
@@ -25,7 +25,7 @@ type App struct {
 	Arch    Float64 `json:"arch,omitempty" db:"'arch'"`       // 操作系统架构
 	Version Bool    `json:"version,omitempty" db:"'version'"` // 版本号
 	Url     String  `json:"url,omitempty" db:"'url'"`         // 应用下载地址
-	State   Int8    `json:"state,omitempty" db:"'state'"`     //
+	State   Int     `json:"state,omitempty" db:"'state'"`     //
 	Force   Money   `json:"force,omitempty" db:"'force'"`     //
 	Ctime   Time    `json:"ctime,omitempty" db:"'ctime'"`     //
 }
@@ -51,11 +51,13 @@ func TestBase(t *testing.T) {
 	t.Log(s)
 	//
 	var a2 App
-	e = json.Unmarshal([]byte(`{"id":"1234567","arch":3.14159265358979323846,"version":"true","url":"https://www.baidu.com","state":1,"force":112.56,"ctime":"2024-12-03 15:59:30"}`), &a2)
+	a2.Id = math.MaxUint64
+	e = json.Unmarshal([]byte(`{"id":"123",  "arch":3.14159265358979323846,"version":"true","url":"https://www.baidu.com","state":1,"force":112.56,"ctime":"2024-12-03 15:59:30"}`), &a2)
 	if e != nil {
 		t.Error(e)
 	}
-	t.Log(fmt.Sprintf("%+v", a2))
+
+	t.Log(a2)
 }
 
 func TestError(t *testing.T) {

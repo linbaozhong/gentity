@@ -2,7 +2,10 @@ module reader
 
 go 1.23.2
 
-require github.com/linbaozhong/gentity v0.2.26
+require (
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
+	github.com/linbaozhong/gentity v0.2.26
+)
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

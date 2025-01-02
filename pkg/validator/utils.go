@@ -1,4 +1,4 @@
-// Copyright © 2023 SnowIM. All rights reserved.
+// Copyright © 2023 Linbaozhong. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,24 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package iface
+package validator
 
-type Checker interface {
-	Check() error
-}
-type Initializer interface {
-	Init()
-}
+import "regexp"
 
-func Validate(arg any) error {
-	if checker, ok := arg.(Checker); ok {
-		return checker.Check()
-	}
-	return nil
-}
-
-func Initiate(arg any) {
-	if ier, ok := arg.(Initializer); ok {
-		ier.Init()
-	}
+// Matches checks if string matches the pattern (pattern is regular expression)
+// In case of error return false
+func Matches(str, pattern string) bool {
+	match, _ := regexp.MatchString(pattern, str)
+	return match
 }
