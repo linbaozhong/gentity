@@ -26,6 +26,7 @@ import (
 )
 
 var (
+	command  string // 命令: api,dao,db,sql,check
 	path     string // struct文件路径
 	fullpath string // struct文件全路径
 	parent   string // struct文件父级目录
@@ -46,15 +47,18 @@ var (
 	gentity . .\database.sql`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
-			// 如果path="init"，则初始化api模板
-			if path == "init" {
+			switch command {
+			case "api": // 如果command="api"，则初始化api模板
 				if len(args) > 1 {
 					generateApi(args[1])
 				} else {
 					showError("The project name is not entered")
 				}
 				return
+			case "check":
+				return
 			}
+
 			// struct全路径
 			fullpath, err = filepath.Abs(path)
 			if err != nil {
@@ -137,17 +141,18 @@ func showError(msg any) {
 
 func Execute() {
 	lens := len(os.Args)
+	path = "."
 	if lens > 1 {
-		path = os.Args[1]
-		if lens > 3 {
-			driver = os.Args[2]
-			dns = os.Args[3]
-		} else if lens > 2 {
+		command = os.Args[1]
+		if lens > 2 {
+			path = os.Args[2]
 			driver = "mysql"
-			dns = os.Args[2]
+			dns = os.Args[3]
+		} else if lens > 3 {
+			path = os.Args[2]
+			driver = os.Args[3]
+			dns = os.Args[4]
 		}
-	} else {
-		path = "."
 	}
 
 	var err error
@@ -157,3 +162,13 @@ func Execute() {
 		showError(err)
 	}
 }
+
+/*
+gentity api name
+gentity dao
+gentity dao .\do
+gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+gentity dql .\do mysql .\database.sql
+gentity check .\dto
+
+*/

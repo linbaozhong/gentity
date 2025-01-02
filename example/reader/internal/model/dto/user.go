@@ -1,5 +1,6 @@
 package dto
 
+// checker
 type UserRegisterReq struct {
 	UserName string `json:"user_name" url:"user_name" form:"user_name" valid:"required"`
 	Password string `json:"password" url:"password" form:"password" valid:"required"`
@@ -12,8 +13,9 @@ type UserRegisterResp struct {
 	Email    string `json:"email,omitempty"`
 }
 
+// checker
 type GetUserReq struct {
-	UserID uint64 `json:"user_id" url:"user_id" form:"user_id"`
+	UserID uint64 `json:"user_id" url:"user_id" form:"user_id" valid:"required"`
 }
 
 type GetUserResp struct {
