@@ -15,6 +15,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/linbaozhong/gentity/internal/base"
 	"github.com/spf13/cobra"
 	"log"
@@ -30,13 +31,12 @@ var (
 	path     string // struct文件路径
 	fullpath string // struct文件全路径
 	parent   string // struct文件父级目录
-	// definePath string // define文件全路径
+
 	tablePath string // table文件全路径
 	daoPath   string // dao文件全路径
 
 	driver string // 数据库驱动
 	dns    string // 数据库连接字符串
-	// sqlPath string // sql文件路径
 
 	launch = &cobra.Command{
 		Use:   `gentity Struct路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
@@ -47,17 +47,17 @@ var (
 	gentity . .\database.sql`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
-			switch command {
-			case "api": // 如果command="api"，则初始化api模板
-				if len(args) > 1 {
-					generateApi(args[1])
-				} else {
-					showError("The project name is not entered")
-				}
-				return
-			case "check":
-				return
-			}
+			// switch command {
+			// case "api": // 如果command="api"，则初始化api模板
+			// 	if len(args) > 1 {
+			// 		generateApi(args[1])
+			// 	} else {
+			// 		showError("The project name is not entered")
+			// 	}
+			// 	return
+			// case "check":
+			// 	return
+			// }
 
 			// struct全路径
 			fullpath, err = filepath.Abs(path)
@@ -79,6 +79,8 @@ var (
 			if err != nil {
 				showError(err)
 			}
+			fmt.Println(command, path, driver, dns)
+			return
 
 			if len(driver) > 0 && len(dns) > 0 {
 				// 生成结构体
@@ -142,16 +144,17 @@ func showError(msg any) {
 func Execute() {
 	lens := len(os.Args)
 	path = "."
+	driver = "mysql"
 	if lens > 1 {
 		command = os.Args[1]
 		if lens > 2 {
 			path = os.Args[2]
-			driver = "mysql"
-			dns = os.Args[3]
-		} else if lens > 3 {
-			path = os.Args[2]
-			driver = os.Args[3]
-			dns = os.Args[4]
+			if lens > 3 {
+				driver = os.Args[3]
+				if lens > 4 {
+					dns = os.Args[4]
+				}
+			}
 		}
 	}
 
