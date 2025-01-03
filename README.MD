@@ -376,7 +376,9 @@ func TestSelect(t *testing.T) {
 ### 自定义错误信息
 在 valid 注解的参数后面添加：~错误信息
 ### 示例
+注意：一定要要在struct上添加注释：// checker
 ```go
+// checker
 type Post struct {
 	Title    string `valid:"alphanum,required"`
 	Emain    string `valid:"email~email格式错误,required"`
