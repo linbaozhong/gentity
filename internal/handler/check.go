@@ -122,7 +122,7 @@ func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, recei
 		if len(tags) == 1 {
 			tags = append(tags, "Wrong "+tags[0]+" format")
 		}
-		b.WriteString(fmt.Sprintf("	if validator.%s(%s.%s) {\n", fn, receiver, field.Name))
+		b.WriteString(fmt.Sprintf("	if !validator.%s(%s.%s) {\n", fn, receiver, field.Name))
 		b.WriteString(fmt.Sprintf("		return types.NewError(30001, \"%s\")\n", tags[1]))
 		b.WriteString("	}\n")
 		return
@@ -140,7 +140,7 @@ func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, recei
 		}
 		params := strings.Split(tags[0][pos1+1:pos2], "|")
 		if fn, ok := validator.ParamTagMap[tag]; ok {
-			b.WriteString(fmt.Sprintf("	if validator.%s(%s.%s", fn, receiver, field.Name))
+			b.WriteString(fmt.Sprintf("	if !validator.%s(%s.%s", fn, receiver, field.Name))
 			for _, param := range params {
 				b.WriteString(", \"" + param + "\"")
 			}
