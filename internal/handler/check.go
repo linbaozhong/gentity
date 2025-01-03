@@ -23,26 +23,25 @@ import (
 	"github.com/vetcher/go-astra/types"
 	"go/parser"
 	"go/token"
-	"os"
 	"path/filepath"
 	"strings"
 )
 
 const dentityDTO = "gentity_dto.go"
 
-func generateCheck(filename string, pkgPath string) error {
+func generateCheck(filename string, pkgPath string) ([]byte, error) {
 	if filename == dentityDTO {
-		return nil
+		return nil, nil
 	}
 
 	fset := token.NewFileSet()
 	var src any
 	var structFullName = filepath.Join(fullpath, filename)
 
-	f, err := parser.ParseFile(fset, structFullName, src, parser.ParseComments)
+	_, err := parser.ParseFile(fset, structFullName, src, parser.ParseComments)
 	if err != nil {
 		showError(err)
-		return err
+		return nil, err
 	}
 
 	file, err := astra.ParseFile(structFullName,
@@ -50,26 +49,13 @@ func generateCheck(filename string, pkgPath string) error {
 			astra.IgnoreInterfaces|astra.IgnoreTypes|astra.IgnoreMethods)
 	if err != nil {
 		showError(err)
-		return err
+		return nil, err
 	}
 	if len(file.Structures) == 0 {
-		return nil
+		return nil, nil
 	}
-	//
-	dtoFile, err := os.OpenFile(filepath.Join(fullpath, dentityDTO), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	defer dtoFile.Close()
-	//
-	var buf bytes.Buffer
-	buf.WriteString("package " + f.Name.Name + "\n\n")
-	buf.WriteString("import (\n")
-	buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/validator\" \n")
-	buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/types\" \n")
-	buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/conv\" \n")
-	buf.WriteString(") \n\n")
 
+	var buf bytes.Buffer
 	for _, stru := range file.Structures {
 		if !isChecker(stru.Docs) {
 			continue
@@ -109,13 +95,8 @@ func generateCheck(filename string, pkgPath string) error {
 		buf.WriteString("	return nil\n")
 		buf.WriteString("}\n")
 	}
-	_, err = dtoFile.Write(buf.Bytes())
-	if err != nil {
-		showError(err)
-		return err
-	}
 
-	return nil
+	return buf.Bytes(), nil
 }
 
 func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, receiver string) {

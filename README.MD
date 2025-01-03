@@ -308,70 +308,70 @@ func TestSelect(t *testing.T) {
 ## validator
 ### 支持的 struct filed 校验器
 ```
-"email":              IsEmail,
-"url":                IsURL,
-"dialstring":         IsDialString,
-"requrl":             IsRequestURL,
-"requri":             IsRequestURI,
-"alpha":              IsAlpha,
-"utfletter":          IsUTFLetter,
-"alphanum":           IsAlphanumeric,
-"utfletternum":       IsUTFLetterNumeric,
-"numeric":            IsNumeric,
-"utfnumeric":         IsUTFNumeric,
-"utfdigit":           IsUTFDigit,
-"hexadecimal":        IsHexadecimal,
-"hexcolor":           IsHexcolor,
-"rgbcolor":           IsRGBcolor,
-"lowercase":          IsLowerCase,
-"uppercase":          IsUpperCase,
-"int":                IsInt,
-"float":              IsFloat,
-"null":               IsNull,
-"uuid":               IsUUID,
-"uuidv3":             IsUUIDv3,
-"uuidv4":             IsUUIDv4,
-"uuidv5":             IsUUIDv5,
-"creditcard":         IsCreditCard,
-"isbn10":             IsISBN10,
-"isbn13":             IsISBN13,
-"json":               IsJSON,
-"multibyte":          IsMultibyte,
-"ascii":              IsASCII,
-"printableascii":     IsPrintableASCII,
-"fullwidth":          IsFullWidth,
-"halfwidth":          IsHalfWidth,
-"variablewidth":      IsVariableWidth,
-"base64":             IsBase64,
-"datauri":            IsDataURI,
-"ip":                 IsIP,
-"port":               IsPort,
-"ipv4":               IsIPv4,
-"ipv6":               IsIPv6,
-"dns":                IsDNSName,
-"host":               IsHost,
-"mac":                IsMAC,
-"latitude":           IsLatitude,
-"longitude":          IsLongitude,
-"ssn":                IsSSN,
-"semver":             IsSemver,
-"rfc3339":            IsRFC3339,
-"rfc3339WithoutZone": IsRFC3339WithoutZone,
-"ISO3166Alpha2":      IsISO3166Alpha2,
-"ISO3166Alpha3":      IsISO3166Alpha3,
-"ulid":               IsULID,
+"email":              // email
+"url":                // url
+"dialstring":         // dial string
+"requrl":             // request url
+"requri":             // request uri
+"alpha":              // alpha
+"utfletter":          // utf letter
+"alphanum":           
+"utfletternum":       
+"numeric":            
+"utfnumeric":         
+"utfdigit":           
+"hexadecimal":        
+"hexcolor":           
+"rgbcolor":           
+"lowercase":          
+"uppercase":          
+"int":                
+"float":              
+"null":               
+"uuid":               
+"uuidv3":             
+"uuidv4":             
+"uuidv5":             
+"creditcard":         
+"isbn10":             
+"isbn13":             
+"json":               
+"multibyte":          
+"ascii":              
+"printableascii":     
+"fullwidth":          
+"halfwidth":          
+"variablewidth":      
+"base64":             
+"datauri":            
+"ip":                 
+"port":               
+"ipv4":               
+"ipv6":               
+"dns":                
+"host":               
+"mac":                
+"latitude":           
+"longitude":          
+"ssn":                
+"semver":             
+"rfc3339":            
+"rfc3339WithoutZone": 
+"ISO3166Alpha2":      
+"ISO3166Alpha3":      
+"ulid":               
 ```
 ### 校验器可用参数
 ```
-"range(min|max)"                    Range,
-"length(min|max)"                   ByteLength,
-"runelength(min|max)"               RuneLength,
-"stringlength(min|max)"             StringLength,
-"matches(pattern)"                  StringMatches,
-"in(string1|string2|...|stringN)"   IsIn,
-"rsapub(keylength)"                 IsRsaPub,
-"minstringlength(int)               MinStringLength,
-"maxstringlength(int)               MaxStringLength,
+"range(min|max)"                    // 数值范围
+"length(min|max)"                   // 字节长度
+"runelength(min|max)"               // Rune串长度
+"stringlength(min|max)"             // 字符串长度
+"matches(pattern)"                  // 正则表达式
+"in(string1|string2|...|stringN)"   // 枚举
+"rsapub(keylength)"                 // RSA公钥
+"minstringlength(int)               // 字符串最小长度
+"maxstringlength(int)               // 字符串最大长度
 ```
 ### 自定义错误信息
 在 valid 注解的参数后面添加：~错误信息

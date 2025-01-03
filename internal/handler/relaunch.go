@@ -15,6 +15,7 @@
 package handler
 
 import (
+	"bytes"
 	"github.com/linbaozhong/gentity/internal/base"
 	"github.com/spf13/cobra"
 	"log"
@@ -122,21 +123,56 @@ var (
 			if err != nil {
 				showError(err)
 			}
-			for _, dir := range dirs {
-				if dir.IsDir() {
-					continue
-				}
-				var filename = dir.Name() // struct文件名
-				if filepath.Ext(filename) != ".go" {
-					continue
-				}
-				if command == "check" {
-					err = generateCheck(filename, pkgPath)
-				} else {
-					err = parseFile(filename, pkgPath)
-				}
+
+			if command == "check" {
+				var dtoFile *os.File
+				dtoFile, err = os.OpenFile(filepath.Join(fullpath, dentityDTO), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 				if err != nil {
 					showError(err)
+					return
+				}
+				defer dtoFile.Close()
+
+				var buf bytes.Buffer
+				buf.WriteString("package dto \n\n")
+				buf.WriteString("import (\n")
+				buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/validator\" \n")
+				buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/types\" \n")
+				buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/conv\" \n")
+				buf.WriteString(") \n\n")
+				_, err = dtoFile.Write(buf.Bytes())
+				if err != nil {
+					showError(err)
+					return
+				}
+				for _, dir := range dirs {
+					if dir.IsDir() {
+						continue
+					}
+					var filename = dir.Name() // struct文件名
+					if filepath.Ext(filename) != ".go" {
+						continue
+					}
+					var buf []byte
+					buf, err = generateCheck(filename, pkgPath)
+					_, err = dtoFile.Write(buf)
+					if err != nil {
+						showError(err)
+					}
+				}
+			} else {
+				for _, dir := range dirs {
+					if dir.IsDir() {
+						continue
+					}
+					var filename = dir.Name() // struct文件名
+					if filepath.Ext(filename) != ".go" {
+						continue
+					}
+					err = parseFile(filename, pkgPath)
+					if err != nil {
+						showError(err)
+					}
 				}
 			}
 		},
