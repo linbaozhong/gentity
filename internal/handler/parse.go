@@ -17,8 +17,6 @@ package handler
 import (
 	"bytes"
 	"github.com/vetcher/go-astra"
-	"go/parser"
-	"go/token"
 	"path/filepath"
 	"strings"
 	"unicode"
@@ -28,17 +26,14 @@ func parseFile(filename, pkgPath string) error {
 	tempData := new(TempData)
 	tempData.ModulePath = pkgPath
 
-	fset := token.NewFileSet()
-	var src any
 	var structFullName = filepath.Join(fullpath, filename)
-
-	f, err := parser.ParseFile(fset, structFullName, src, parser.ParseComments)
+	astFile, err := getAst(structFullName)
 	if err != nil {
 		showError(err)
 		return err
 	}
 
-	tempData.PackageName = f.Name.Name
+	tempData.PackageName = astFile.Name.Name
 
 	file, err := astra.ParseFile(structFullName,
 		astra.IgnoreVariables|astra.IgnoreConstants|astra.IgnoreFunctions|

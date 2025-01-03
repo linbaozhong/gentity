@@ -21,38 +21,73 @@ import (
 	"github.com/linbaozhong/gentity/pkg/validator"
 	"github.com/vetcher/go-astra"
 	"github.com/vetcher/go-astra/types"
+	"go/ast"
 	"go/parser"
 	"go/token"
+	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 const dentityDTO = "gentity_dto.go"
 
-func generateCheck(filename string, pkgPath string) ([]byte, error) {
-	if filename == dentityDTO {
-		return nil, nil
-	}
+var (
+	astOnce sync.Once
+	dtoFile *os.File
+)
 
-	fset := token.NewFileSet()
+func getAst(structFullName string) (*ast.File, error) {
 	var src any
-	var structFullName = filepath.Join(fullpath, filename)
-
-	_, err := parser.ParseFile(fset, structFullName, src, parser.ParseComments)
+	fset := token.NewFileSet()
+	astFile, err := parser.ParseFile(fset, structFullName, src, parser.ParseComments)
 	if err != nil {
-		showError(err)
 		return nil, err
 	}
+
+	return astFile, nil
+}
+
+func generateCheck(filename string) error {
+	if filename == dentityDTO {
+		return nil
+	}
+
+	var structFullName = filepath.Join(fullpath, filename)
+
+	astOnce.Do(func() {
+		astFile, err := getAst(structFullName)
+		if err != nil {
+			showError(err)
+			return
+		}
+		dtoFile, err = os.OpenFile(filepath.Join(fullpath, dentityDTO), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+		if err != nil {
+			showError(err)
+			return
+		}
+		var buf bytes.Buffer
+		buf.WriteString("package " + astFile.Name.Name + " \n\n")
+		buf.WriteString("import (\n")
+		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/validator\" \n")
+		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/types\" \n")
+		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/conv\" \n")
+		buf.WriteString(") \n\n")
+		_, err = dtoFile.Write(buf.Bytes())
+		if err != nil {
+			showError(err)
+			return
+		}
+	})
 
 	file, err := astra.ParseFile(structFullName,
 		astra.IgnoreVariables|astra.IgnoreConstants|astra.IgnoreFunctions|
 			astra.IgnoreInterfaces|astra.IgnoreTypes|astra.IgnoreMethods)
 	if err != nil {
-		showError(err)
-		return nil, err
+		return err
 	}
 	if len(file.Structures) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	var buf bytes.Buffer
@@ -95,8 +130,8 @@ func generateCheck(filename string, pkgPath string) ([]byte, error) {
 		buf.WriteString("	return nil\n")
 		buf.WriteString("}\n")
 	}
-
-	return buf.Bytes(), nil
+	_, err = dtoFile.Write(buf.Bytes())
+	return err
 }
 
 func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, receiver string) {
