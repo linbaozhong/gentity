@@ -15,13 +15,11 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/linbaozhong/gentity/internal/base"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 )
@@ -39,78 +37,86 @@ var (
 	dns    string // 数据库连接字符串
 
 	launch = &cobra.Command{
-		Use:   `gentity Struct路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
+		Use:   `gentity command Struct路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
 		Short: "ORM 代码生成工具",
-		Example: `	gentity
-	gentity .\db
-	gentity .\db mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
-	gentity . .\database.sql`,
+		Example: `	gentity api project_name
+	gentity dao
+	gentity dao .\do
+	gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+	gentity sql .\do mysql .\database.sql
+	gentity check .\dto`,
 		Run: func(cmd *cobra.Command, args []string) {
-			var err error
-			// switch command {
-			// case "api": // 如果command="api"，则初始化api模板
-			// 	if len(args) > 1 {
-			// 		generateApi(args[1])
-			// 	} else {
-			// 		showError("The project name is not entered")
-			// 	}
-			// 	return
-			// case "check":
-			// 	return
-			// }
-
+			var (
+				err     error
+				pkgPath string
+			)
 			// struct全路径
 			fullpath, err = filepath.Abs(path)
 			if err != nil {
 				showError(err)
-			}
-			// 上一级目录
-			parent = filepath.Dir(fullpath)
-			pos := strings.LastIndex(fullpath, string(os.PathSeparator))
-			if pos > 0 {
-				parent = fullpath[:pos]
+				return
 			}
 			//
-			definePath := filepath.Join(parent, "define")
-			// 包名
-			packageName := fullpath[pos+1:]
-			// 包目录
-			pkgPath, err := base.PkgPath(nil, path)
-			if err != nil {
-				showError(err)
-			}
-			fmt.Println(command, path, driver, dns)
-			return
-
-			if len(driver) > 0 && len(dns) > 0 {
-				// 生成结构体
-				has, _ := regexp.MatchString("@.*:|:.*@", dns)
-				if has {
-					err = db2struct(driver, dns, fullpath, packageName)
+			switch command {
+			case "api": // 如果command="api"，则初始化api模板
+				if len(args) > 1 {
+					generateApi(path)
 				} else {
-					err = sql2struct(driver, dns, fullpath, packageName)
+					showError("The project name is not entered")
 				}
+				return
+			case "dao", "sql", "db":
+				// 上一级目录
+				parent = filepath.Dir(fullpath)
+				pos := strings.LastIndex(fullpath, string(os.PathSeparator))
+				if pos > 0 {
+					parent = fullpath[:pos]
+				}
+				//
+				definePath := filepath.Join(parent, "define")
+				// 包名
+				packageName := fullpath[pos+1:]
+
+				if len(driver) > 0 && len(dns) > 0 {
+					// 生成结构体
+					// has, _ := regexp.MatchString("@.*:|:.*@", dns)
+					if command == "db" {
+						err = db2struct(driver, dns, fullpath, packageName)
+					} else if command == "sql" {
+						err = sql2struct(driver, dns, fullpath, packageName)
+					}
+					if err != nil {
+						showError(err)
+					}
+				}
+				tablePath = filepath.Join(definePath, "table")
+				// 创建生成dao层代码的目录
+				err = os.MkdirAll(tablePath, os.ModePerm)
 				if err != nil {
 					showError(err)
 				}
-			}
-			tablePath = filepath.Join(definePath, "table")
-			// 创建生成dao层代码的目录
-			err = os.MkdirAll(tablePath, os.ModePerm)
-			if err != nil {
-				showError(err)
-			}
-			daoPath = filepath.Join(definePath, "dao")
-			err = os.MkdirAll(daoPath, os.ModePerm)
-			if err != nil {
-				showError(err)
-			}
-			// 写入daoBase
-			err = writeDaoBase(daoPath)
-			if err != nil {
-				showError(err)
+				daoPath = filepath.Join(definePath, "dao")
+				err = os.MkdirAll(daoPath, os.ModePerm)
+				if err != nil {
+					showError(err)
+				}
+				// 写入daoBase
+				err = writeDaoBase(daoPath)
+				if err != nil {
+					showError(err)
+				}
+			case "check":
+			default:
+				showError("The command is not entered")
+				return
 			}
 
+			// 包目录
+			pkgPath, err = base.PkgPath(nil, path)
+			if err != nil {
+				showError(err)
+				return
+			}
 			// 遍历结构体目录中的文件，生成dao层代码
 			dirs, err := os.ReadDir(path)
 			if err != nil {
@@ -121,12 +127,14 @@ var (
 					continue
 				}
 				var filename = dir.Name() // struct文件名
-				// fmt.Println(filename)
 				if filepath.Ext(filename) != ".go" {
 					continue
 				}
-
-				err = parseFile(filename, pkgPath)
+				if command == "check" {
+					err = generateCheck(filename, pkgPath)
+				} else {
+					err = parseFile(filename, pkgPath)
+				}
 				if err != nil {
 					showError(err)
 				}
@@ -167,11 +175,11 @@ func Execute() {
 }
 
 /*
-gentity api name
+gentity api project_name
 gentity dao
 gentity dao .\do
 gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
-gentity dql .\do mysql .\database.sql
+gentity sql .\do mysql .\database.sql
 gentity check .\dto
 
 */

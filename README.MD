@@ -31,31 +31,52 @@ type User struct {
 - `db:"created_time <-"` 表示数据库字段名，只读。 `<-`: 只读;`->`: 只写;`-`:不可读写
 #### 用法：
 ```
-gentity model路径 [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "数据库连接字符串"] [flags]
+gentity command model路径 [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "数据库连接字符串"] [flags]
 ```
 #### 示例
 ```
-gentity
-gentity .\do
-gentity .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
-gentity .\do mysql .\database.sql
+// 生成api框架
+gentity api project_name
+
+// 根据当前目录的struct，生成相应的dao层
+gentity dao
+
+// 根据 .\do 路径的struct，生成相应的dao层
+gentity dao .\do
+
+// 根据指定的数据库引擎名称以及连接字符串在 .\do 路径，生成相应的struct和dao层
+gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+
+// 根据指定的数据库引擎名称以及数据库建表sql文件在 .\do 路径，生成相应的struct和dao层
+gentity sql .\do mysql .\database.sql
+
+// 检查 .\dto 目录下所有request对象，生成相应的 validator 方法
+gentity check .\dto
 ```
 ###### 1. 进入model目录
 ```
 cd model
-gentity
+gentity dao
 ```
 ###### 2. 或者指定model目录
 ```
-gentity ./model
+gentity dao ./model
 ```
 ###### 3. 指定数据库驱动、包含 Create Table 的 SQL文件，先在当前目录生成struct文件，再生成相应的ORM文件
 ```
-gentity . mysql ./database.sql
+gentity sql . mysql ./database.sql
 ```
 ###### 4. 指定数据库驱动、连接字符串，先在当前目录生成struct文件，再生成相应的ORM文件
 ```
-gentity . mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+gentity db . mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+```
+###### 5. 检查 .\dto 目录下所有request对象，生成相应的 validator 方法
+```
+gentity check .\dto
+```
+###### 6. 生成api框架
+```
+gentity api project_name
 ```
 ##### 注意：命令参数的顺序
 ## 创建连接
@@ -282,4 +303,86 @@ func TestSelect(t *testing.T) {
 		t.Log(o)
 	}
 }
+```
+
+## validator
+### 支持的 struct filed 校验器
+```
+"email":              IsEmail,
+"url":                IsURL,
+"dialstring":         IsDialString,
+"requrl":             IsRequestURL,
+"requri":             IsRequestURI,
+"alpha":              IsAlpha,
+"utfletter":          IsUTFLetter,
+"alphanum":           IsAlphanumeric,
+"utfletternum":       IsUTFLetterNumeric,
+"numeric":            IsNumeric,
+"utfnumeric":         IsUTFNumeric,
+"utfdigit":           IsUTFDigit,
+"hexadecimal":        IsHexadecimal,
+"hexcolor":           IsHexcolor,
+"rgbcolor":           IsRGBcolor,
+"lowercase":          IsLowerCase,
+"uppercase":          IsUpperCase,
+"int":                IsInt,
+"float":              IsFloat,
+"null":               IsNull,
+"uuid":               IsUUID,
+"uuidv3":             IsUUIDv3,
+"uuidv4":             IsUUIDv4,
+"uuidv5":             IsUUIDv5,
+"creditcard":         IsCreditCard,
+"isbn10":             IsISBN10,
+"isbn13":             IsISBN13,
+"json":               IsJSON,
+"multibyte":          IsMultibyte,
+"ascii":              IsASCII,
+"printableascii":     IsPrintableASCII,
+"fullwidth":          IsFullWidth,
+"halfwidth":          IsHalfWidth,
+"variablewidth":      IsVariableWidth,
+"base64":             IsBase64,
+"datauri":            IsDataURI,
+"ip":                 IsIP,
+"port":               IsPort,
+"ipv4":               IsIPv4,
+"ipv6":               IsIPv6,
+"dns":                IsDNSName,
+"host":               IsHost,
+"mac":                IsMAC,
+"latitude":           IsLatitude,
+"longitude":          IsLongitude,
+"ssn":                IsSSN,
+"semver":             IsSemver,
+"rfc3339":            IsRFC3339,
+"rfc3339WithoutZone": IsRFC3339WithoutZone,
+"ISO3166Alpha2":      IsISO3166Alpha2,
+"ISO3166Alpha3":      IsISO3166Alpha3,
+"ulid":               IsULID,
+```
+### 校验器可用参数
+```
+"range(min|max)"                    Range,
+"length(min|max)"                   ByteLength,
+"runelength(min|max)"               RuneLength,
+"stringlength(min|max)"             StringLength,
+"matches(pattern)"                  StringMatches,
+"in(string1|string2|...|stringN)"   IsIn,
+"rsapub(keylength)"                 IsRsaPub,
+"minstringlength(int)               MinStringLength,
+"maxstringlength(int)               MaxStringLength,
+```
+### 自定义错误信息
+在 valid 注解的参数后面添加：~错误信息
+### 示例
+```go
+type Post struct {
+	Title    string `valid:"alphanum,required"`
+	Emain    string `valid:"email~email格式错误,required"`
+	Content  string `valid:"maxstringlength(50)"`
+	AuthorIP string `valid:"ipv4"`
+	Date     string `valid:"-"`
+}
+
 ```
