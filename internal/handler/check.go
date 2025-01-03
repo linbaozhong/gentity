@@ -86,15 +86,22 @@ func generateCheck(filename string, pkgPath string) error {
 				if util.SliceContains(v, "-") {
 					continue
 				}
-
+				if len(v) == 0 {
+					continue
+				}
+				//
+				vv := make([]string, len(v))
 				for _, s := range v {
 					tags := strings.Split(s, "~")
-					switch tags[0] {
-					case "required":
+					if tags[0] == "required" {
 						writeRequired(tags, field, &buf, receiver)
-					default:
-						writeDefault(tags, field, &buf, receiver)
+						continue
 					}
+					vv = append(vv, s)
+				}
+				for _, s := range vv {
+					tags := strings.Split(s, "~")
+					writeDefault(tags, field, &buf, receiver)
 				}
 			}
 		}
