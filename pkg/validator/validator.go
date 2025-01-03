@@ -641,7 +641,7 @@ func ByteLength(str string, params ...string) bool {
 	return false
 }
 
-// Range checks string's length
+// Range
 func Range(str string, params ...string) bool {
 	if len(params) == 2 {
 		value, _ := strconv.ParseFloat(str, 64)

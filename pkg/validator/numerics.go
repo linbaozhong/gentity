@@ -19,14 +19,14 @@ import (
 )
 
 // InRangeInt returns true if value lies between left and right border
-func InRangeInt(value, left, right interface{}) bool {
-	value64 := conv.Any2Int64(value)
-	left64 := conv.Any2Int64(left)
-	right64 := conv.Any2Int64(right)
-	if left64 > right64 {
-		left64, right64 = right64, left64
+func InRangeInt(value, left, right int64) bool {
+	// value64 := conv.Any2Int64(value)
+	// left64 := conv.Any2Int64(left)
+	// right64 := conv.Any2Int64(right)
+	if left > right {
+		left, right = right, left
 	}
-	return value64 >= left64 && value64 <= right64
+	return value >= left && value <= right
 }
 
 // InRangeFloat32 returns true if value lies between left and right border
@@ -50,7 +50,7 @@ func InRangeFloat64(value, left, right float64) bool {
 // False if value doesn't lie in range or if it incompatible or not comparable
 func InRange(value interface{}, left interface{}, right interface{}) bool {
 	switch value.(type) {
-	case int:
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		intValue := conv.Any2Int64(value)
 		intLeft := conv.Any2Int64(left)
 		intRight := conv.Any2Int64(right)

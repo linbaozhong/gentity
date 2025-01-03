@@ -67,6 +67,7 @@ func generateCheck(filename string, pkgPath string) error {
 	buf.WriteString("import (\n")
 	buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/validator\" \n")
 	buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/types\" \n")
+	buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/conv\" \n")
 	buf.WriteString(") \n\n")
 
 	for _, stru := range file.Structures {
@@ -122,7 +123,15 @@ func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, recei
 		if len(tags) == 1 {
 			tags = append(tags, "Wrong "+tags[0]+" format")
 		}
-		b.WriteString(fmt.Sprintf("	if !validator.%s(%s.%s) {\n", fn, receiver, field.Name))
+		b.WriteString(fmt.Sprintf("	if !validator.%s(", fn))
+		if field.Type.String() == "string" {
+			b.WriteString(fmt.Sprintf("%s.%s", receiver, field.Name))
+		} else if strings.HasPrefix(field.Type.String(), "types.") {
+			b.WriteString(fmt.Sprintf("%s.%s.String()", receiver, field.Name))
+		} else {
+			b.WriteString(fmt.Sprintf("conv.Any2String(%s.%s)", receiver, field.Name))
+		}
+		b.WriteString(") {\n")
 		b.WriteString(fmt.Sprintf("		return types.NewError(30001, \"%s\")\n", tags[1]))
 		b.WriteString("	}\n")
 		return
@@ -140,7 +149,14 @@ func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, recei
 		}
 		params := strings.Split(tags[0][pos1+1:pos2], "|")
 		if fn, ok := validator.ParamTagMap[tag]; ok {
-			b.WriteString(fmt.Sprintf("	if !validator.%s(%s.%s", fn, receiver, field.Name))
+			b.WriteString(fmt.Sprintf("	if !validator.%s(", fn))
+			if field.Type.String() == "string" {
+				b.WriteString(fmt.Sprintf("%s.%s", receiver, field.Name))
+			} else if strings.HasPrefix(field.Type.String(), "types.") {
+				b.WriteString(fmt.Sprintf("%s.%s.String()", receiver, field.Name))
+			} else {
+				b.WriteString(fmt.Sprintf("conv.Any2String(%s.%s)", receiver, field.Name))
+			}
 			for _, param := range params {
 				b.WriteString(", \"" + param + "\"")
 			}
@@ -157,11 +173,14 @@ func writeRequired(tags []string, field types.StructField, buf *bytes.Buffer, re
 		tags = append(tags, "required")
 	}
 	switch field.Type.String() {
-	case "string":
+	case "string", "types.String":
 		buf.WriteString(fmt.Sprintf("	if %s.%s == \"\" {\n", receiver, field.Name))
 	case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
+		fallthrough
+	case "types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64", "types.Float32", "types.Float64":
 		buf.WriteString(fmt.Sprintf("	if %s.%s == 0 {\n", receiver, field.Name))
 	default:
+		fmt.Println(field.Type.String())
 		buf.WriteString(fmt.Sprintf("	if %s.%s == nil {\n", receiver, field.Name))
 	}
 	buf.WriteString(fmt.Sprintf("		return types.NewError(30001, \"%s is %s\")\n", field.Name, tags[1]))
