@@ -162,7 +162,7 @@ func writeRequired(tags []string, field types.StructField, buf *bytes.Buffer, re
 	case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
 		buf.WriteString(fmt.Sprintf("	if %s.%s == 0 {\n", receiver, field.Name))
 	default:
-
+		buf.WriteString(fmt.Sprintf("	if %s.%s == nil {\n", receiver, field.Name))
 	}
 	buf.WriteString(fmt.Sprintf("		return types.NewError(30001, \"%s is %s\")\n", field.Name, tags[1]))
 	buf.WriteString("	}\n")

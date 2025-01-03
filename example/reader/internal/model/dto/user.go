@@ -2,12 +2,12 @@ package dto
 
 // checker
 type UserRegisterReq struct {
-	UserName string `json:"user_name" url:"user_name" form:"user_name" valid:"required"`
-	Password string `json:"password" url:"password" form:"password" valid:"required"`
-	Email    string `json:"email" url:"email" form:"email" valid:"email~Email格式错误,required"`
-	Content  string `valid:"length(50|100),required"`
-	AuthorIP string `valid:"ipv4"`
-	Date     string `valid:"-"`
+	UserName string   `json:"user_name" url:"user_name" form:"user_name" valid:"required"`
+	Password string   `json:"password" url:"password" form:"password" valid:"required"`
+	Email    []string `json:"email" url:"email" form:"email" valid:"email~Email格式错误,required"`
+	Content  string   `valid:"length(50|100),required"`
+	AuthorIP string   `valid:"ipv4"`
+	Date     string   `valid:"-"`
 }
 
 type UserRegisterResp struct {
