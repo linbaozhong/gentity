@@ -2,10 +2,7 @@ module reader
 
 go 1.23.2
 
-require (
-	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
-	github.com/linbaozhong/gentity v0.2.26
-)
+require github.com/linbaozhong/gentity v0.3.6
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
@@ -18,7 +15,6 @@ require (
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dchest/siphash v1.2.3 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
