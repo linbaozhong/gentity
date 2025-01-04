@@ -1,20 +1,26 @@
 # gentity
-### 根据结构体(struct)文件/数据库表结构文件(.sql)/数据库连接字符串(dns)，生成对应的ORM代码
+
+### 1. 生成api框架
+### 2. 生成 ORM 代码
+* 根据结构体(struct)文件，生成相应的ORM代码
+* 数据库表结构文件(.sql)，生成相应的ORM代码
+* 数据库连接字符串(dns)，生成相应的ORM代码
+### 3. 根据前端传入的request对象，生成相应的validator代码
 
 # 使用方法
-## 将项目git到本地
+### 将项目git到本地
 ```
 go get -u github.com/linbaozhong/gentity@latest
 ```
-## 安装命令
+### 安装命令
 ```
 go install github.com/linbaozhong/gentity@latest
 ```
-## 生成 API 项目
+### 生成 API 项目
 ```
 gentity api [项目名称]
 ```
-## 生成ORM代码
+### 生成ORM代码
 #### 定义一个struct，添加注释 tablename 数据库表名
 ```go
 // tablename user
@@ -382,12 +388,16 @@ func TestSelect(t *testing.T) {
 注意：一定要要在struct上添加注释：// checker
 ```go
 // checker
-type Post struct {
-	Title    string `valid:"alphanum,required"`
-	Emain    string `valid:"email~email格式错误,required"`
-	Content  string `valid:"maxstringlength(50)"`
-	AuthorIP string `valid:"ipv4"`
-	Date     string `valid:"-"`
+type PostRequest struct {
+	Title    string `json:"title" valid:"alphanum,required"`
+	Emain    string `json:"email" valid:"email~email格式错误,required"`
+	Content  string `json:"content" valid:"maxstringlength(50)"`
+	AuthorIP string `json:"author_ip" valid:"ipv4"`
+	Date     string `json:"date" valid:"-"`
+}
+// checker
+type GetRequest struct {
+	ID int `url:"id" valid:"int,required"`
 }
 
 ```

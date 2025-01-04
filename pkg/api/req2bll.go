@@ -26,6 +26,7 @@ var (
 	UnKnown       = types.NewError(610, "未知错误")
 )
 
+// Post请求，并且Content-Type：application/json，req结构体的字段tag为json
 func Post[A, B any](
 	ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error,
@@ -52,6 +53,7 @@ func Post[A, B any](
 	Ok(ctx, resp)
 }
 
+// Get请求，并且req结构体的字段tag为url
 func Get[A, B any](
 	ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error,
