@@ -12,7 +12,7 @@ go install github.com/linbaozhong/gentity@latest
 ```
 ## 生成 API 项目
 ```
-gentity init [项目名称]
+gentity api [项目名称]
 ```
 ## 生成ORM代码
 #### 定义一个struct，添加注释 tablename 数据库表名
@@ -375,6 +375,9 @@ func TestSelect(t *testing.T) {
 ```
 ### 自定义错误信息
 在 valid 注解的参数后面添加：~错误信息
+
+参照下面示例代码 struct 中的 email 字段
+
 ### 示例
 注意：一定要要在struct上添加注释：// checker
 ```go
