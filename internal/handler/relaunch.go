@@ -15,13 +15,17 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/linbaozhong/gentity/internal/base"
 	"github.com/spf13/cobra"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+)
+
+const (
+	version = "0.4.6"
 )
 
 var (
@@ -38,13 +42,14 @@ var (
 
 	launch = &cobra.Command{
 		Use:   `gentity command Struct路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
-		Short: "ORM 代码生成工具",
+		Short: "ORM 代码生成工具. ver." + version,
 		Example: `	gentity api project_name
 	gentity dao
 	gentity dao .\do
 	gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 	gentity sql .\do mysql .\database.sql
-	gentity check .\dto`,
+	gentity check .\dto
+	gentity version`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
 				err     error
@@ -106,6 +111,9 @@ var (
 					showError(err)
 				}
 			case "check":
+			case "version":
+				fmt.Println("ver." + version)
+				return
 			default:
 				showError("The command is not entered")
 				return
@@ -151,7 +159,7 @@ var (
 
 func showError(msg any) {
 	_, file, line, _ := runtime.Caller(1)
-	log.Println("Error:", msg, file, line)
+	fmt.Println("Error:", msg, file, line)
 	os.Exit(1)
 }
 
