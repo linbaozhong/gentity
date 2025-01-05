@@ -26,14 +26,33 @@ var (
 	UnKnown       = types.NewError(610, "未知错误")
 )
 
-// Post请求，并且Content-Type：application/json，req结构体的字段tag为json
+// Post post请求
+// Content-Type：application/json，req结构体的字段tag为json
+// Content-Type: application/x-www-form-urlencoded，req结构体的字段tag为form
+// Content-Type: multipart/form-data，req结构体的字段tag为form
 func Post[A, B any](
 	ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error,
 ) {
-	var req A
+	var (
+		req A
+		e   error
+	)
 	iface.Initiate(&req)
-	if e := ctx.ReadJSON(&req); e != nil {
+	switch ctx.GetContentTypeRequested() {
+	case "application/json":
+		e = ctx.ReadJSON(&req)
+	case "application/x-www-form-urlencoded", "multipart/form-data":
+		e = ctx.ReadForm(&req)
+	default:
+		if ctx.Request().URL.RawQuery == "" {
+			e = ctx.ReadForm(&req)
+		} else {
+			e = ctx.ReadQuery(&req)
+		}
+	}
+
+	if e != nil {
 		Fail(ctx, Param_Invalid)
 		log.Error(e)
 		return
@@ -53,26 +72,39 @@ func Post[A, B any](
 	Ok(ctx, resp)
 }
 
-// Get请求，并且req结构体的字段tag为url
+// Get get请求：
+// 首先尝试读取query，req结构体的字段 tag 为 url 或者 param。
+// 如果query为空，则尝试读取form，req结构体的字段tag为form。
 func Get[A, B any](
 	ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error,
 ) {
-	var req A
+	var (
+		req A
+		e   error
+	)
 	iface.Initiate(&req)
-	if e := ctx.ReadQuery(&req); e != nil {
+
+	if ctx.Request().URL.RawQuery == "" {
+		e = ctx.ReadForm(&req)
+	} else {
+		//e = ctx.ReadQuery(&req)
+		e = ctx.ReadURL(&req)
+	}
+	if e != nil {
 		Fail(ctx, Param_Invalid)
 		log.Error(e)
 		return
 	}
-	if e := iface.Validate(&req); e != nil {
+	//
+	if e = iface.Validate(&req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return
 	}
 
 	var resp B
-	if e := fn(ctx, &req, &resp); e != nil {
+	if e = fn(ctx, &req, &resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return

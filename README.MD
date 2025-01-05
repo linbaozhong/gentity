@@ -37,7 +37,7 @@ type User struct {
 - `db:"created_time <-"` 表示数据库字段名，只读。 `<-`: 只读;`->`: 只写;`-`:不可读写
 #### 用法：
 ```
-gentity command model路径 [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "数据库连接字符串"] [flags]
+gentity command [model路径] [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "数据库连接字符串"] [flags]
 ```
 #### 示例
 ```
@@ -311,8 +311,49 @@ func TestSelect(t *testing.T) {
 }
 ```
 
-## validator
-### 支持的 struct filed 校验器
+## 生成Checker接口
+检查指定目录下所有request对象，生成相应的 validator 方法
+```
+gentity check [dir]
+```
+
+### 示例
+注意：一定要要在struct上添加注释：// checker
+
+#### Post请求
+* 如果 Content-Type：application/json，req结构体的字段tag为json
+* 如果 Content-Type: application/x-www-form-urlencoded，req结构体的字段tag为form
+* 如果 Content-Type: multipart/form-data，req结构体的字段tag为form
+```
+// checker
+type ArticleReq struct {
+	Title    string `json:"title" valid:"alphanum,required"`
+	Emain    string `json:"email" valid:"email~email格式错误,required"`
+	Content  string `json:"content" valid:"maxstringlength(50)"`
+	AuthorIP string `json:"author_ip" valid:"ipv4"`
+	Date     string `json:"date" valid:"-"`
+}
+// checker
+type ChannelReq struct {
+	ID int `form:"id" valid:"int,required"`
+}
+```
+#### Get请求
+* 首先尝试读取query，req结构体的字段 tag 为 url 或者 param。
+* 如果query为空，则尝试读取form，req结构体的字段tag为form。
+```
+// checker
+type ArticleReq struct {
+	ID       int    `param:"id" valid:"int,required"`
+	Title    string `url:"title" valid:"alphanum,required"`
+	Emain    string `url:"email" valid:"email~email格式错误,required"`
+}
+// checker
+type ChannelReq struct {
+	ID int `form:"id" valid:"int,required"`
+}
+```
+### valid 支持的 struct filed 校验器
 ```
 "email":              // email
 "url":                // url
@@ -386,7 +427,7 @@ func TestSelect(t *testing.T) {
 
 ### 示例
 注意：一定要要在struct上添加注释：// checker
-```go
+```
 // checker
 type PostRequest struct {
 	Title    string `json:"title" valid:"alphanum,required"`
