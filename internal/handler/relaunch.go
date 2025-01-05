@@ -41,7 +41,7 @@ var (
 	dns    string // 数据库连接字符串
 
 	launch = &cobra.Command{
-		Use:   `gentity command Struct路径 ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
+		Use:   `gentity command [Struct路径] ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
 		Short: "ORM 代码生成工具. ver." + version,
 		Example: `	gentity api project_name
 	gentity dao
