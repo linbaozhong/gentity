@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"github.com/linbaozhong/gentity/pkg/types"
-	"reader/internal/constant/cst"
 	"sync"
 )
 
@@ -31,11 +29,4 @@ func Open(ctx context.Context) error {
 
 func GetDB() *ace.DB {
 	return db
-}
-
-func GetVisitor(ctx context.Context) types.Visitor {
-	if vis, ok := ctx.Value(cst.VisitorKey).(types.Visitor); ok {
-		return vis
-	}
-	return types.Visitor{}
 }

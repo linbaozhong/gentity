@@ -4,7 +4,7 @@ import "github.com/linbaozhong/gentity/pkg/types"
 
 // checker
 type GetUserReq struct {
-	UserID uint64 `json:"user_id" url:"user_id" form:"user_id" valid:"required"`
+	UserID float64 `json:"user_id" url:"user_id" form:"user_id" valid:"required"`
 }
 
 type GetUserResp struct {

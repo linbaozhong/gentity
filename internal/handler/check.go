@@ -121,13 +121,37 @@ func writeInit(buf *bytes.Buffer, receiver string, stru types.Struct) {
 				if tags[0] == "required" {
 					switch field.Type.String() {
 					case "string", "types.String":
-						buf.WriteString(fmt.Sprintf("	%s.%s = types.Nil \n", receiver, field.Name))
-					case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
-						fallthrough
-					case "types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64", "types.Float32", "types.Float64":
-						buf.WriteString(fmt.Sprintf("	%s.%s = types.Nil \n", receiver, field.Name))
-					default:
-						buf.WriteString(fmt.Sprintf("	%s.%s = nil \n", receiver, field.Name))
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilString \n", receiver, field.Name))
+					case "int", "types.Int":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilInt \n", receiver, field.Name))
+					case "int8", "types.Int8":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilInt8 \n", receiver, field.Name))
+					case "int16", "types.Int16":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilInt16 \n", receiver, field.Name))
+					case "int32", "types.Int32":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilInt32 \n", receiver, field.Name))
+					case "int64", "types.Int64":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilInt64 \n", receiver, field.Name))
+					case "uint", "types.Uint":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilUint \n", receiver, field.Name))
+					case "uint8", "types.Uint8":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilUint8 \n", receiver, field.Name))
+					case "uint16", "types.Uint16":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilUint16 \n", receiver, field.Name))
+					case "uint32", "types.Uint32":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilUint32 \n", receiver, field.Name))
+					case "uint64", "types.Uint64":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilUint64 \n", receiver, field.Name))
+					case "float32", "types.Float32":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilFloat32 \n", receiver, field.Name))
+					case "float64", "types.Float64":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilFloat64 \n", receiver, field.Name))
+					case "time.Time":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilTime \n", receiver, field.Name))
+					case "types.Time":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.Time{} \n", receiver, field.Name))
+					case "types.Bool":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.Bool(-1) \n", receiver, field.Name))
 					}
 					continue
 				}
@@ -222,13 +246,41 @@ func writeRequired(tags []string, field types.StructField, buf *bytes.Buffer, re
 	}
 	switch field.Type.String() {
 	case "string", "types.String":
-		buf.WriteString(fmt.Sprintf("	if len(%s.%s) == 0 {\n", receiver, field.Name))
-	case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
-		fallthrough
-	case "types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64", "types.Float32", "types.Float64":
-		buf.WriteString(fmt.Sprintf("	if %s.%s == 0 {\n", receiver, field.Name))
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilString {\n", receiver, field.Name))
+	case "int", "types.Int":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilInt {\n", receiver, field.Name))
+	case "int8", "types.Int8":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilInt8 {\n", receiver, field.Name))
+	case "int16", "types.Int16":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilInt16 {\n", receiver, field.Name))
+	case "int32", "types.Int32":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilInt32 {\n", receiver, field.Name))
+	case "int64", "types.Int64":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilInt64 {\n", receiver, field.Name))
+	case "uint", "types.Uint":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilUint {\n", receiver, field.Name))
+	case "uint8", "types.Uint8":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilUint8 {\n", receiver, field.Name))
+	case "uint16", "types.Uint16":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilUint16 {\n", receiver, field.Name))
+	case "uint32", "types.Uint32":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilUint32 {\n", receiver, field.Name))
+	case "uint64", "types.Uint64":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilUint64 {\n", receiver, field.Name))
+	case "float32", "types.Float32":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilFloat32 {\n", receiver, field.Name))
+	case "float64", "types.Float64":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilFloat64 {\n", receiver, field.Name))
+	case "time.Time", "types.Time":
+		buf.WriteString(fmt.Sprintf("	if %s.%s.IsZero() {\n", receiver, field.Name))
+	case "types.Bool":
+		buf.WriteString(fmt.Sprintf("	if %s.%s == types.Bool(-1) {\n", receiver, field.Name))
 	default:
-		buf.WriteString(fmt.Sprintf("	if %s.%s == nil {\n", receiver, field.Name))
+		return
+		// case "bool":
+		// 	return
+		// default:
+		// 	buf.WriteString(fmt.Sprintf("	if util.IsStructZeroValue(%s.%s) {\n", receiver, field.Name))
 	}
 	buf.WriteString(fmt.Sprintf("		return types.NewError(30001, \"%s is %s\")\n", field.Name, tags[1]))
 	buf.WriteString("	}\n")

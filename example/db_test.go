@@ -68,7 +68,7 @@ func TestInsert(t *testing.T) {
 
 func TestType(t *testing.T) {
 	var (
-		a types.Bool = true
+		a types.Bool = 1
 		// b types.Time    = time.Now()
 		// c types.BigInt     = 1
 		// d types.String  = "test"

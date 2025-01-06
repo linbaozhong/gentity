@@ -38,8 +38,9 @@ type (
 	Bytes   []byte
 	Float64 float64
 	Float32 float32
-	Bool    bool
-	Time    struct {
+	// Bool    bool
+	Bool int8
+	Time struct {
 		time.Time
 	}
 )
@@ -554,43 +555,103 @@ func (f64 *Float64) UnmarshalJSON(b []byte) error {
 	return e
 }
 
+// // //////////////////////////////////
+// // Bool
+// func (b *Bool) Scan(src any) error {
+// 	switch v := src.(type) {
+// 	case nil:
+// 		*b = false
+// 		return nil
+// 	case bool:
+// 		*b = Bool(v)
+// 		return nil
+// 	case int64:
+// 		*b = v != 0
+// 		return nil
+// 	default:
+// 		return fmt.Errorf("unsupported scan type for Bool: %T", src)
+// 	}
+// }
+//
+// func (b Bool) Bool() bool {
+// 	return bool(b)
+// }
+//
+// func (b Bool) String() string {
+// 	return strconv.FormatBool(b.Bool())
+// }
+// func (b Bool) MarshalJSON() ([]byte, error) {
+// 	return conv.String2Bytes(strconv.FormatBool(bool(b))), nil
+// }
+//
+// func (b *Bool) UnmarshalJSON(bs []byte) error {
+// 	c := conv.Bytes2String(bytes.Trim(bs, "\""))
+// 	if c == "" {
+// 		*b = false
+// 		return nil
+// 	}
+// 	tem, e := strconv.ParseBool(c)
+// 	*b = Bool(tem)
+// 	return e
+// }
+
 // //////////////////////////////////
-// Bool
+// BoolX
 func (b *Bool) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
-		*b = false
+		*b = -1
 		return nil
 	case bool:
-		*b = Bool(v)
+		if v {
+			*b = 1
+		} else {
+			*b = 0
+		}
 		return nil
 	case int64:
-		*b = v != 0
+		if v > 0 {
+			*b = 1
+		} else if v == 0 {
+			*b = 0
+		} else {
+			*b = -1
+		}
 		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for Bool: %T", src)
 	}
 }
 
-func (b Bool) Bool() bool {
-	return bool(b)
+func (b Bool) BoolX() bool {
+	return b > 0
 }
 
 func (b Bool) String() string {
-	return strconv.FormatBool(b.Bool())
+	if b > 0 {
+		return "true"
+	} else if b == 0 {
+		return "false"
+	} else {
+		return "null"
+	}
 }
 func (b Bool) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatBool(bool(b))), nil
+	return conv.String2Bytes(b.String()), nil
 }
 
 func (b *Bool) UnmarshalJSON(bs []byte) error {
 	c := conv.Bytes2String(bytes.Trim(bs, "\""))
-	if c == "" {
-		*b = false
+	if c == "" || c == "null" {
+		*b = -1
 		return nil
 	}
 	tem, e := strconv.ParseBool(c)
-	*b = Bool(tem)
+	if tem {
+		*b = 1
+	} else {
+		*b = 0
+	}
 	return e
 }
 
