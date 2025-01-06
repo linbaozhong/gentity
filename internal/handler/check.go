@@ -98,41 +98,72 @@ func generateCheck(filename string) error {
 		}
 		//
 		receiver := strings.ToLower(stru.Name[0:1])
-		//
-		buf.WriteString(fmt.Sprintf("func (%s *%s) Check() error {\n", receiver, stru.Name))
-		//
-		for _, field := range stru.Fields {
-			for k, v := range field.Tags {
-				if k != "valid" {
-					continue
-				}
-				if util.SliceContains(v, "-") {
-					continue
-				}
-				if len(v) == 0 {
-					continue
-				}
-				//
-				vv := make([]string, len(v))
-				for _, s := range v {
-					tags := strings.Split(s, "~")
-					if tags[0] == "required" {
-						writeRequired(tags, field, &buf, receiver)
-						continue
-					}
-					vv = append(vv, s)
-				}
-				for _, s := range vv {
-					tags := strings.Split(s, "~")
-					writeDefault(tags, field, &buf, receiver)
-				}
-			}
-		}
-		buf.WriteString("	return nil\n")
-		buf.WriteString("}\n")
+		// 生成 Initializer 接口方法
+		writeInit(&buf, receiver, stru)
+		// 生成 checker 接口方法
+		writeCheck(&buf, receiver, stru)
 	}
 	_, err = dtoFile.Write(buf.Bytes())
 	return err
+}
+
+func writeInit(buf *bytes.Buffer, receiver string, stru types.Struct) {
+	buf.WriteString(fmt.Sprintf("func (%s *%s) Init() error {\n", receiver, stru.Name))
+	//
+	for _, field := range stru.Fields {
+		for k, v := range field.Tags {
+			if k != "valid" || len(v) == 0 || util.SliceContains(v, "-") {
+				continue
+			}
+			vv := make([]string, len(v))
+			for _, s := range v {
+				tags := strings.Split(s, "~")
+				if tags[0] == "required" {
+					switch field.Type.String() {
+					case "string", "types.String":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.Nil \n", receiver, field.Name))
+					case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
+						fallthrough
+					case "types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64", "types.Float32", "types.Float64":
+						buf.WriteString(fmt.Sprintf("	%s.%s = types.Nil \n", receiver, field.Name))
+					default:
+						buf.WriteString(fmt.Sprintf("	%s.%s = nil \n", receiver, field.Name))
+					}
+					continue
+				}
+				vv = append(vv, s)
+			}
+		}
+	}
+	buf.WriteString("	return nil\n")
+	buf.WriteString("}\n")
+}
+
+func writeCheck(buf *bytes.Buffer, receiver string, stru types.Struct) {
+	buf.WriteString(fmt.Sprintf("func (%s *%s) Check() error {\n", receiver, stru.Name))
+	//
+	for _, field := range stru.Fields {
+		for k, v := range field.Tags {
+			if k != "valid" || len(v) == 0 || util.SliceContains(v, "-") {
+				continue
+			}
+			vv := make([]string, len(v))
+			for _, s := range v {
+				tags := strings.Split(s, "~")
+				if tags[0] == "required" {
+					writeRequired(tags, field, buf, receiver)
+					continue
+				}
+				vv = append(vv, s)
+			}
+			for _, s := range vv {
+				tags := strings.Split(s, "~")
+				writeDefault(tags, field, buf, receiver)
+			}
+		}
+	}
+	buf.WriteString("	return nil\n")
+	buf.WriteString("}\n")
 }
 
 func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, receiver string) {
@@ -191,13 +222,12 @@ func writeRequired(tags []string, field types.StructField, buf *bytes.Buffer, re
 	}
 	switch field.Type.String() {
 	case "string", "types.String":
-		buf.WriteString(fmt.Sprintf("	if %s.%s == \"\" {\n", receiver, field.Name))
+		buf.WriteString(fmt.Sprintf("	if len(%s.%s) == 0 {\n", receiver, field.Name))
 	case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
 		fallthrough
 	case "types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64", "types.Float32", "types.Float64":
 		buf.WriteString(fmt.Sprintf("	if %s.%s == 0 {\n", receiver, field.Name))
 	default:
-		fmt.Println(field.Type.String())
 		buf.WriteString(fmt.Sprintf("	if %s.%s == nil {\n", receiver, field.Name))
 	}
 	buf.WriteString(fmt.Sprintf("		return types.NewError(30001, \"%s is %s\")\n", field.Name, tags[1]))
