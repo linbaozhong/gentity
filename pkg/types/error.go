@@ -24,6 +24,7 @@ func (e Error) Is(err error) bool {
 	if er, ok := err.(Error); ok {
 		return er.Code == e.Code
 	}
+
 	return false
 }
 

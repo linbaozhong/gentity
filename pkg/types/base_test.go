@@ -15,6 +15,8 @@
 package types
 
 import (
+	"errors"
+	"fmt"
 	"math"
 	"strconv"
 	"testing"
@@ -61,10 +63,12 @@ func TestBase(t *testing.T) {
 }
 
 func TestError(t *testing.T) {
-	e1 := NewError(1, "error")
-	e2 := e1.SetInfo("haha")
-	t.Log(e2)
+	e1 := NewError(1, "error1")
+	e3 := NewError(1, "error1")
+	e2 := fmt.Errorf("error2:,%w", e1)
 	t.Log(e1)
+	t.Log(e2)
+	t.Log(errors.Is(e1, e3))
 }
 
 func TestConv(t *testing.T) {
