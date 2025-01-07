@@ -1,6 +1,7 @@
 package ace
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"github.com/bradfitz/gomemcache/memcache"
@@ -245,4 +246,61 @@ func (t *Tx) IsDB() bool {
 }
 func (t *Tx) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any, error) {
 	return t.transaction(ctx, f)
+}
+
+func Or(fns ...dialect.Condition) dialect.Condition {
+	return func() (string, any) {
+		if len(fns) == 0 {
+			return "", nil
+		}
+		var (
+			buf    bytes.Buffer
+			params = make([]any, 0, len(fns))
+		)
+
+		buf.WriteString(dialect.Operator_or + "(")
+		for i, fn := range fns {
+			cond, val := fn()
+			if i > 0 {
+				buf.WriteString(dialect.Operator_and)
+			}
+			buf.WriteString(cond)
+			if vals, ok := val.([]any); ok {
+				params = append(params, vals...)
+			} else {
+				params = append(params, val)
+			}
+		}
+		buf.WriteString(")")
+
+		return buf.String(), params
+	}
+}
+func And(fns ...dialect.Condition) dialect.Condition {
+	return func() (string, any) {
+		if len(fns) == 0 {
+			return "", nil
+		}
+		var (
+			buf    bytes.Buffer
+			params = make([]any, 0, len(fns))
+		)
+
+		buf.WriteString(dialect.Operator_and + "(")
+		for i, fn := range fns {
+			cond, val := fn()
+			if i > 0 {
+				buf.WriteString(dialect.Operator_or)
+			}
+			buf.WriteString(cond)
+			if vals, ok := val.([]any); ok {
+				params = append(params, vals...)
+			} else {
+				params = append(params, val)
+			}
+		}
+		buf.WriteString(")")
+
+		return buf.String(), params
+	}
 }

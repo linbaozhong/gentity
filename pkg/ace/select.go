@@ -193,16 +193,12 @@ func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
-			if cond[:2] == "OR" {
+			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
 				s.where.WriteString(" ")
 			} else {
 				s.where.WriteString(dialect.Operator_and)
 			}
 		}
-		// if v, ok := val.(error); ok {
-		//	s.err = v
-		//	return s
-		// }
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -226,16 +222,15 @@ func (s *Selector) And(fns ...dialect.Condition) *Selector {
 	} else {
 		s.where.WriteString(dialect.Operator_and + "(")
 	}
-
 	for i, fn := range fns {
-		if i > 0 {
-			s.where.WriteString(dialect.Operator_or)
-		}
 		cond, val := fn()
-		// if v, ok := val.(error); ok {
-		//	s.err = v
-		//	return s
-		// }
+		if i > 0 {
+			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+				s.where.WriteString(" ")
+			} else {
+				s.where.WriteString(dialect.Operator_or)
+			}
+		}
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
@@ -260,14 +255,14 @@ func (s *Selector) Or(fns ...dialect.Condition) *Selector {
 	}
 
 	for i, fn := range fns {
-		if i > 0 {
-			s.where.WriteString(dialect.Operator_and)
-		}
 		cond, val := fn()
-		// if v, ok := val.(error); ok {
-		//	s.err = v
-		//	return s
-		// }
+		if i > 0 {
+			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+				s.where.WriteString(" ")
+			} else {
+				s.where.WriteString(dialect.Operator_and)
+			}
+		}
 		s.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.whereParams = append(s.whereParams, vals...)
