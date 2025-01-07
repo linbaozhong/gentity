@@ -241,6 +241,9 @@ func (d *TempData) writeBuild(parent string) error {
 
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
+		"getReturnValue": func(p, t string) string {
+			return "[]" + p + "." + t
+		},
 	}
 	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)

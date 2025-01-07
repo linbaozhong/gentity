@@ -62,8 +62,6 @@ func parseFile(filename, pkgPath string) error {
 		tempData.CacheList = "time.Minute"
 		tempData.CacheLimit = "1000"
 		tempData.PrimaryKey = nil
-		// tempData.PrimaryKeyName = ""
-		// tempData.Keys = make([][]string, 0, 1)
 		tempData.Columns = make([][]string, 0, 20)
 		tempData.FileName = structFullName
 		tempData.StructName = stru.Name
@@ -91,7 +89,22 @@ func parseFile(filename, pkgPath string) error {
 					if len(ref) > 0 {
 						_ref := strings.Split(ref, "|")
 						if len(_ref) == 2 {
-							tempData.RelationX = []string{field.Name, _ref[0], _ref[1]}
+							var (
+								refKind string
+								refType string
+							)
+							if strings.HasPrefix(field.Type.String(), "[]") {
+								refKind = "slice"
+								refType = field.Type.String()[2:]
+							} else if strings.HasPrefix(field.Type.String(), "*") {
+								refKind = "ptr"
+								refType = field.Type.String()[1:]
+							}
+							tempData.RelationX = []string{field.Name,
+								refType,
+								_ref[0], _ref[1],
+								refKind,
+							}
 						}
 					}
 				}
@@ -142,7 +155,7 @@ func parseFile(filename, pkgPath string) error {
 		}
 
 		// 写table文件
-		err = tempData.writeTable(filepath.Join(tablePath, "tbl"+tempData.TableName))
+		err = tempData.writeTable(filepath.Join(tablePath, "tbl"+strings.ToLower(tempData.StructName)))
 		if err != nil {
 			showError(err.Error())
 			return err
@@ -192,7 +205,7 @@ func parseDocs(tmp *TempData, docs []string) {
 // ref 关系键
 // fk 关系外键
 func parseTagsForDB(matchs []string) (columnName, key, rw, ref string) {
-	s := strings.Split(strings.ToLower(matchs[0]), " ")
+	s := strings.Split(matchs[0], " ")
 	if len(s) == 1 {
 		if strings.HasPrefix(s[0], "ref:") {
 			ref = s[0][4:]
