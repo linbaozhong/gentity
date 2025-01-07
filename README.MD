@@ -298,7 +298,7 @@ func TestSelect(t *testing.T) {
 		tblcompany.FullCorpName,
 		tblcompany.State,
 	},
-		tblcompany.Id.Eq(2),
+		tblcompany.Id.Eq(2),ace.Or(tblcompany.Id.Eq(3),tblcompany.State.Eq(1))
 	)
 
 	if err != nil {
