@@ -20,16 +20,20 @@ var (
 	// 可写列
 	WritableFields = []dialect.Field{
 {{- range $key, $value := .Columns}}
+	{{- if ne (getType $value) "any"}}
 	{{- if or (eq (index $value 4) "->") (eq (index $value 4) "")}}
 	{{index $value 0}},
+	{{- end}}
 	{{- end}}
 {{- end}}
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{
 {{- range $key, $value := .Columns}}
+	{{- if ne (getType $value) "any"}}
 	{{- if or (eq (index $value 4) "<-") (eq (index $value 4) "")}}
 	{{index $value 0}},
+	{{- end}}
 	{{- end}}
 {{- end}}
 	}

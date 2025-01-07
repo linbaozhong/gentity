@@ -40,6 +40,7 @@ func (p *User) Reset() {
 	p.Id = 0
 	p.Uuid = ""
 	p.Ctime = types.Time{}
+	p.UserLogs = p.UserLogs[:0]
 
 }
 
@@ -61,15 +62,17 @@ func (p *User) AssignPtr(args ...dialect.Field) []any {
 			vals = append(vals, &p.Uuid)
 		case tbluser.Ctime:
 			vals = append(vals, &p.Ctime)
+		case tbluser.UserLogs:
+			vals = append(vals, &p.UserLogs)
 		}
 	}
 
 	return vals
 }
 
-func (p *User) Scan(rows *sql.Rows, args ...dialect.Field) ([]*User, bool, error) {
+func (p *User) Scan(rows *sql.Rows, args ...dialect.Field) ([]User, bool, error) {
 	defer rows.Close()
-	users := make([]*User, 0)
+	users := make([]User, 0)
 
 	if len(args) == 0 {
 		args = tbluser.ReadableFields
@@ -82,7 +85,7 @@ func (p *User) Scan(rows *sql.Rows, args ...dialect.Field) ([]*User, bool, error
 		if err != nil {
 			return nil, false, err
 		}
-		users = append(users, p)
+		users = append(users, *p)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, false, err

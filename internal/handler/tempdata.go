@@ -16,7 +16,6 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/linbaozhong/gentity/internal/resources"
 	"go/format"
 	"io"
@@ -40,8 +39,8 @@ type TempData struct {
 	CacheLimit  string // list缓存长度
 	Columns     [][]string
 	// Keys        [][]string
-	PrimaryKey []string
-	// PrimaryKeyName string // struct pk属性名
+	PrimaryKey    []string
+	RelationX     []string // 关系键
 	HasPrimaryKey bool
 	HasState      bool
 	HasCache      bool
@@ -84,11 +83,26 @@ func writeDaoBase(parent string) error {
 func (d *TempData) writeToModel(fileName string) error {
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
+		"getType": func(t []string) any {
+			if len(t) < 3 {
+				return `""`
+			}
+			// fmt.Println("----", t)
+			v := t[3]
+			switch v {
+			case "string", "types.String", "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
+				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
+				"types.Float64", "types.BigInt", "types.Money", "time.Time", "types.Time", "bool", "types.Bool":
+				return v
+			default:
+				return "any"
+			}
+		},
 		"getTypeValue": func(t []string) any {
 			if len(t) < 3 {
 				return `""`
 			}
-			fmt.Println("----", t)
 			v := t[3]
 			switch v {
 			case "string", "types.String":
@@ -104,9 +118,9 @@ func (d *TempData) writeToModel(fileName string) error {
 				return `false`
 			default:
 				if v[:2] == "[]" {
-					return v + "{}"
+					return "p." + t[0] + "[:0]"
 				}
-				return "nil"
+				return v + "{}"
 			}
 		},
 		"getZeroValue": func(t []string) any {
@@ -189,6 +203,21 @@ func (d *TempData) writeTable(parent string) error {
 	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".gen.go") // d.tableFilename(parent)
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
+		"getType": func(t []string) any {
+			if len(t) < 3 {
+				return `""`
+			}
+			v := t[3]
+			switch v {
+			case "string", "types.String", "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
+				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
+				"types.Float64", "types.BigInt", "types.Money", "time.Time", "types.Time", "bool", "types.Bool":
+				return v
+			default:
+				return "any"
+			}
+		},
 	}
 	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)

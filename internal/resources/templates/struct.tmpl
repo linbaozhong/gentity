@@ -70,9 +70,9 @@ func (p *{{.StructName}}) AssignPtr(args ...dialect.Field) ([]any) {
 	return vals
 }
 
-func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]*{{.StructName}}, bool, error) {
+func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]{{.StructName}}, bool, error) {
 	defer rows.Close()
-	{{.TableName}}s := make([]*{{.StructName}}, 0)
+	{{.TableName}}s := make([]{{.StructName}}, 0)
 
 	if len(args) == 0 {
 		args = tbl{{$tablename}}.ReadableFields
@@ -85,7 +85,7 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]*{{.Str
 		if err != nil {
 			return nil, false, err
 		}
-		{{.TableName}}s = append({{.TableName}}s, p)
+		{{.TableName}}s = append({{.TableName}}s, *p)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, false, err
@@ -111,12 +111,14 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 		for _, arg := range args {
 			switch arg {
 			{{- range $key, $value := .Columns}}
+				{{- if ne (getType $value) "any"}}
 			case tbl{{$tablename}}.{{ index $value 0 }}:
 				if p.{{ index $value 0 }}{{getZeroValue $value}} {
 					continue
 				}
 				cols = append(cols, tbl{{$tablename}}.{{ index $value 0 }}.Quote())
 				vals = append(vals, p.{{ index $value 0 }})
+				{{- end}}
 			{{- end}}
 			}
 		}
@@ -128,9 +130,11 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 	for _, arg := range args {
 		switch arg {
 		{{- range $key, $value := .Columns}}
+			{{- if ne (getType $value) "any"}}
 		case tbl{{$tablename}}.{{ index $value 0 }}:
 			cols = append(cols, tbl{{$tablename}}.{{ index $value 0 }}.Quote())
 			vals = append(vals, p.{{ index $value 0 }})
+			{{- end}}
 		{{- end}}
 		}
 	}

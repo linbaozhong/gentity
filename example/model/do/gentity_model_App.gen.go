@@ -75,9 +75,9 @@ func (p *App) AssignPtr(args ...dialect.Field) []any {
 	return vals
 }
 
-func (p *App) Scan(rows *sql.Rows, args ...dialect.Field) ([]*App, bool, error) {
+func (p *App) Scan(rows *sql.Rows, args ...dialect.Field) ([]App, bool, error) {
 	defer rows.Close()
-	apps := make([]*App, 0)
+	apps := make([]App, 0)
 
 	if len(args) == 0 {
 		args = tblapp.ReadableFields
@@ -90,7 +90,7 @@ func (p *App) Scan(rows *sql.Rows, args ...dialect.Field) ([]*App, bool, error) 
 		if err != nil {
 			return nil, false, err
 		}
-		apps = append(apps, p)
+		apps = append(apps, *p)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, false, err

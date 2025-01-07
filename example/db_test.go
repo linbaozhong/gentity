@@ -91,3 +91,13 @@ func TestType(t *testing.T) {
 
 	t.Log(fmt.Sprintf("%s", a))
 }
+
+func TestStruct(t *testing.T) {
+	type Test struct {
+		Id []types.BigInt `json:"id,omitempty" db:"'id' pk size(20)"`
+	}
+
+	var test Test
+
+	t.Log(test.Id[:0])
+}

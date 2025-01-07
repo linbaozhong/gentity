@@ -121,7 +121,7 @@ func ParseFieldAceType(col *sqlparser.Column) string {
 func ParseFieldSize(col *sqlparser.Column) string {
 	switch strings.ToUpper(col.Type) {
 	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
-		return " size(" + strconv.Itoa(col.Size) + ")"
+		return " size:" + strconv.Itoa(col.Size)
 	// case "BIGINT":
 	// 	return ""
 	// case "INT", "MEDIUMINT":
@@ -143,9 +143,9 @@ func ParseFieldSize(col *sqlparser.Column) string {
 	default:
 		if col.Precision > 0 {
 			if col.Scale > 0 {
-				return " size(" + strconv.Itoa(col.Precision) + "," + strconv.Itoa(col.Scale) + ")"
+				return " size:" + strconv.Itoa(col.Precision) + "," + strconv.Itoa(col.Scale)
 			}
-			return " size(" + strconv.Itoa(col.Precision) + ")"
+			return " size:" + strconv.Itoa(col.Precision)
 		}
 		return "" // 对于未明确映射的类型，使用接口类型作为占位符
 	}

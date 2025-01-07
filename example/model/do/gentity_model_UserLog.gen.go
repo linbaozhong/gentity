@@ -46,6 +46,7 @@ func (p *UserLog) Reset() {
 	p.AppName = ""
 	p.AppVersion = ""
 	p.Ip = ""
+	p.User = User{}
 
 }
 
@@ -79,15 +80,17 @@ func (p *UserLog) AssignPtr(args ...dialect.Field) []any {
 			vals = append(vals, &p.AppVersion)
 		case tbluser_log.Ip:
 			vals = append(vals, &p.Ip)
+		case tbluser_log.User:
+			vals = append(vals, &p.User)
 		}
 	}
 
 	return vals
 }
 
-func (p *UserLog) Scan(rows *sql.Rows, args ...dialect.Field) ([]*UserLog, bool, error) {
+func (p *UserLog) Scan(rows *sql.Rows, args ...dialect.Field) ([]UserLog, bool, error) {
 	defer rows.Close()
-	user_logs := make([]*UserLog, 0)
+	user_logs := make([]UserLog, 0)
 
 	if len(args) == 0 {
 		args = tbluser_log.ReadableFields
@@ -100,7 +103,7 @@ func (p *UserLog) Scan(rows *sql.Rows, args ...dialect.Field) ([]*UserLog, bool,
 		if err != nil {
 			return nil, false, err
 		}
-		user_logs = append(user_logs, p)
+		user_logs = append(user_logs, *p)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, false, err

@@ -78,22 +78,27 @@ func parseFile(filename, pkgPath string) error {
 				continue
 			}
 			var (
-				pk string
-				rw string // 禁止读写 -，只读<-，只写->
+				pk  string
+				rw  string // 禁止读写 -，只读<-，只写->
+				ref string // 关系键
 			)
 			var _namejson = make([]string, 5)
 			for k, v := range field.Tags {
 				if k == "json" {
 					_namejson[2] = v[0] // json_name
 				} else if k == "db" {
-					_namejson[1], pk, rw = parseTagsForDB(v) // column_name
-					// } else if k == "default" {
-					// 	_namejson[3] = v[0]
+					_namejson[1], pk, rw, ref = parseTagsForDB(v) // column_name
+					if len(ref) > 0 {
+						_ref := strings.Split(ref, "|")
+						if len(_ref) == 2 {
+							tempData.RelationX = []string{field.Name, _ref[0], _ref[1]}
+						}
+					}
 				}
 			}
 			_namejson[0] = field.Name
-			_namejson[4] = rw
 			_namejson[3] = field.Type.String()
+			_namejson[4] = rw
 			switch _namejson[3] {
 			case "types.Time":
 				tempData.HasTime = true
@@ -120,10 +125,10 @@ func parseFile(filename, pkgPath string) error {
 				tempData.HasPrimaryKey = true
 				// tempData.Keys = append(tempData.Keys, _namejson)
 				tempData.PrimaryKey = _namejson
-				// 主键是否是自增
-				if tempData.PrimaryKey[4] == "<-" {
-					tempData.HasTime = true
-				}
+				// // 主键是否是自增
+				// if tempData.PrimaryKey[4] == "<-" {
+				// 	tempData.HasTime = true
+				// }
 			}
 			if _namejson[1] == "state" {
 				tempData.HasState = true
@@ -181,10 +186,17 @@ func parseDocs(tmp *TempData, docs []string) {
 	}
 }
 
-func parseTagsForDB(matchs []string) (columnName string, key string, rw string) {
+// columnName 列名
+// key 主键
+// rw 读写标志
+// ref 关系键
+// fk 关系外键
+func parseTagsForDB(matchs []string) (columnName, key, rw, ref string) {
 	s := strings.Split(strings.ToLower(matchs[0]), " ")
 	if len(s) == 1 {
-		if s[0] == "-" || s[0] == "->" || s[0] == "<-" {
+		if strings.HasPrefix(s[0], "ref:") {
+			ref = s[0][4:]
+		} else if s[0] == "-" || s[0] == "->" || s[0] == "<-" {
 			rw = s[0]
 		} else {
 			columnName = strings.Replace(s[0], "'", "", -1)
@@ -203,6 +215,10 @@ func parseTagsForDB(matchs []string) (columnName string, key string, rw string) 
 		}
 		if v == "pk" {
 			k = col
+			continue
+		}
+		if strings.HasPrefix(v, "ref:") {
+			ref = v[4:]
 			continue
 		}
 		if v == "-" || v == "->" || v == "<-" {

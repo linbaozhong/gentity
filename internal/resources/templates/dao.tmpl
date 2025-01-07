@@ -40,15 +40,27 @@ type {{$tablename}}er interface {
 	// DeleteById 按主键删除一条数据
     DeleteById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
-	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{$structName}}, bool, error)
+	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{.PackageName}}.{{$structName}}, bool, error)
 	// Find 分页查询，返回一个slice
-	Find(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]*{{.PackageName}}.{{$structName}}, bool, error)
+	Find(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]{{.PackageName}}.{{$structName}}, bool, error)
 	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{.PackageName}}.{{$structName}}, bool, error)
 	// GetByID 按主键查询，返回一个对象
 	GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, cols ...dialect.Field) (*{{.PackageName}}.{{$structName}}, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...dialect.Condition) (*{{.PackageName}}.{{$structName}}, bool, error)
+{{- if eq (len .RelationX) 3}}
+	// Find4Cols 分页查询指定列，返回一个slice
+	Find4ColsX(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{.PackageName}}.{{$structName}}, bool, error)
+	// Find 分页查询，返回一个slice
+	FindX(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]{{.PackageName}}.{{$structName}}, bool, error)
+	// Get4Cols 读取一个对象的指定列
+	Get4ColsX(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{.PackageName}}.{{$structName}}, bool, error)
+	// GetByID 按主键查询，返回一个对象
+	GetByIDX(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, cols ...dialect.Field) (*{{.PackageName}}.{{$structName}}, bool, error)
+	// Get 按条件读取一个对象
+	GetX(ctx context.Context, cond ...dialect.Condition) (*{{.PackageName}}.{{$structName}}, bool, error)
+{{- end}}
 	// GetFirstCell 按条件读取第一行的第一个字段
 	GetFirstCell(ctx context.Context,col dialect.Field, cond ...dialect.Condition) (any, bool, error)
 	//
@@ -238,8 +250,8 @@ func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field,
 	}
 }
 
-// Find4Cols 分页获取{{.TableName}}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]*{{.PackageName}}.{{$structName}}, bool, error) {
+// Find4Cols 分页获取{{.TableName}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{.PackageName}}.{{$structName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
 		c.Cols(tbl{{$tablename}}.ReadableFields...)
@@ -319,7 +331,7 @@ func (p *dao{{$structName}}) GetFirstCell(ctx context.Context,col dialect.Field,
 }
 
 // Find 按条件读取一个{{.TableName}} slice对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *dao{{$structName}}) Find(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]*{{.PackageName}}.{{$structName}}, bool, error) {
+func (p *dao{{$structName}}) Find(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]{{.PackageName}}.{{$structName}}, bool, error) {
 	return p.Find4Cols(ctx, pageIndex, pageSize, []dialect.Field{}, cond...)
 }
 
@@ -437,3 +449,94 @@ func (p *dao{{$structName}}) setCache(ctx context.Context, obj *{{.PackageName}}
 	return p.cache.Save(ctx, GetIdHashKey(obj.{{index .PrimaryKey 0}}), string(s), {{.CacheData}})
 }
 {{end}}
+
+{{- if eq (len .RelationX) 3}}
+
+//////////////
+
+// Find 按条件读取一个user slice对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *dao{{$structName}}) FindX(ctx context.Context, pageIndex, pageSize uint, cond ...dialect.Condition) ([]{{.PackageName}}.{{$structName}}, bool, error) {
+	return p.Find4ColsX(ctx, pageIndex, pageSize, []dialect.Field{}, cond...)
+}
+// Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{.PackageName}}.{{$structName}}, bool, error) {
+	c := p.R()
+	if len(cols) == 0 {
+		c.Cols(tbl{{$tablename}}.ReadableFields...)
+	} else {
+		c.Cols(cols...)
+	}
+
+	row, err := c.Where(cond...).
+		QueryRow(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+
+	obj := {{.PackageName}}.New{{$structName}}()
+
+	err = row.Scan(obj.AssignPtr(cols...)...)
+	switch err {
+	case sql.ErrNoRows:
+		return nil, false, nil
+	case nil:
+		obj.{{index .RelationX 0}} = p.Edges(ctx,[]any{obj.{{index .RelationX 1}}})
+		return obj, true, nil
+	default:
+		return nil, false, err
+	}
+}
+
+func (p *dao{{$structName}}) Edges(ctx context.Context,ids []any)[]do.UserLog{
+	var ret []do.UserLog
+	rs,_,_:={{index .RelationX 0}}(p.db).Find(ctx, 0, 0, tbluser_log.UserId.In(ids...))
+	if rs==nil{
+		return ret
+	}
+	ret = make([]do.UserLog, 0, len(rs))
+	for _, r := range rs {
+		ret = append(ret, *r)
+	}
+	return ret
+}
+
+// Find4Cols 分页获取user} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{.PackageName}}.{{$structName}}, bool, error) {
+	c := p.R()
+	if len(cols) == 0 {
+		c.Cols(tbl{{$tablename}}.ReadableFields...)
+	} else {
+		c.Cols(cols...)
+	}
+	//
+	if pageSize == 0 {
+		pageSize = dialect.PageSize
+	}
+	//
+	rows, err := c.Where(cond...).
+		Limit(pageSize, pageSize*pageIndex).
+		Query(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+	defer rows.Close()
+
+	obj := {{.PackageName}}.New{{$structName}}()
+
+	objs, has, err := obj.Scan(rows, cols...)
+	if has {
+		return objs, true, err
+	}
+	return nil, false, err
+}
+
+// GetByID 按主键读取一个user对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *dao{{$structName}}) GetByIDX(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*{{.PackageName}}.{{$structName}}, bool, error) {
+	return p.Get4ColsX(ctx, cols, tbl{{$tablename}}.PrimaryKey.Eq(id))
+}
+
+// Get 按条件读取一个user对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *dao{{$structName}}) GetX(ctx context.Context, cond ...dialect.Condition) (*{{.PackageName}}.{{$structName}}, bool, error) {
+	return p.Get4ColsX(ctx, []dialect.Field{}, cond...)
+}
+{{- end}}
