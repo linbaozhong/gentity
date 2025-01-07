@@ -16,6 +16,7 @@ package handler
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/linbaozhong/gentity/internal/resources"
 	"go/format"
 	"io"
@@ -87,46 +88,48 @@ func (d *TempData) writeToModel(fileName string) error {
 			if len(t) < 3 {
 				return `""`
 			}
-			var ret any
-			switch t[3] {
+			fmt.Println("----", t)
+			v := t[3]
+			switch v {
 			case "string", "types.String":
-				ret = `""`
+				return `""`
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
 				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
 				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
-				"types.Float64", "types.Bigint", "types.Money":
-				ret = 0
+				"types.Float64", "types.BigInt", "types.Money":
+				return 0
 			case "time.Time", "types.Time":
-				ret = `types.Time{}` // `time.Time{}`
+				return `types.Time{}` // `time.Time{}`
 			case "bool", "types.Bool":
-				ret = `false`
+				return `false`
 			default:
-				ret = 0
+				if v[:2] == "[]" {
+					return v + "{}"
+				}
+				return "nil"
 			}
-			return ret
 		},
 		"getZeroValue": func(t []string) any {
 			if len(t) < 3 {
 				return `""`
 			}
-			var ret any
-			switch t[3] {
+			v := t[3]
+			switch v {
 			case "string", "types.String":
-				ret = ` == ""`
+				return ` == ""`
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
 				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
-				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Bigint", "types.Money":
-				ret = ` == 0`
+				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.BigInt", "types.Money":
+				return ` == 0`
 			case "float32", "float64", "types.Float32", "types.Float64":
-				ret = ` == 0.0`
+				return ` == 0.0`
 			case "time.Time", "types.Time":
-				ret = `.IsZero()`
+				return `.IsZero()`
 			case "bool", "types.Bool":
-				ret = ` == false`
+				return ` == false`
 			default:
-				ret = ` == 0`
+				return ` == 0`
 			}
-			return ret
 		},
 		"getSqlValue": func(t []string) any {
 			switch t[3] {

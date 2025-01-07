@@ -191,10 +191,14 @@ func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 		s.where.WriteString(dialect.Operator_and + "(")
 	}
 	for i, fn := range fns {
-		if i > 0 {
-			s.where.WriteString(dialect.Operator_and)
-		}
 		cond, val := fn()
+		if i > 0 {
+			if cond[:2] == "OR" {
+				s.where.WriteString(" ")
+			} else {
+				s.where.WriteString(dialect.Operator_and)
+			}
+		}
 		// if v, ok := val.(error); ok {
 		//	s.err = v
 		//	return s

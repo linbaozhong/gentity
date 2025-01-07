@@ -66,6 +66,17 @@ func TestInsert(t *testing.T) {
 	t.Log(r.RowsAffected())
 }
 
+func TestSelect(t *testing.T) {
+	defer dbx.Close()
+
+	v, _, e := dao.App(dbx).Find4Cols(context.Background(), 0, 0, nil, tblapp.Id.Eq(1), tblapp.Id.OrEq(2))
+	if e != nil {
+		t.Fatal(e)
+	}
+	t.Log(v)
+	t.Log()
+}
+
 func TestType(t *testing.T) {
 	var (
 		a types.Bool = 1

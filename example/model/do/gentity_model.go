@@ -17,6 +17,8 @@ type UserLog struct {
 	AppName    types.String `json:"app_name,omitempty" db:"'app_name' size(10)"`       //
 	AppVersion types.String `json:"app_version,omitempty" db:"'app_version' size(10)"` //
 	Ip         types.String `json:"ip,omitempty" db:"'ip' size(50)"`                   // ip地址
+
+	// User User `json:"user,omitempty" db:"ref:user_id fk:id"`
 }
 
 // tablename app
@@ -36,4 +38,6 @@ type User struct {
 	Id    types.BigInt `json:"id,omitempty" db:"'id' pk auto size(20)"` //
 	Uuid  types.String `json:"uuid,omitempty" db:"'uuid' size(45)"`     // 用户识别码
 	Ctime types.Time   `json:"ctime,omitempty" db:"'ctime'"`            //
+
+	// UserLogs []UserLog `json:"user_logs,omitempty" db:"ref:id fk:user_id"` //
 }

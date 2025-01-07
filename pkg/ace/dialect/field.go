@@ -141,7 +141,7 @@ func (f Field) Lte(val any) Condition {
 func (f Field) In(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
-		return f.Quote() + " In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ") ", vals
+		return f.Quote() + " In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ")", vals
 	}
 }
 
@@ -149,7 +149,7 @@ func (f Field) In(vals ...any) Condition {
 func (f Field) NotIn(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
-		return f.Quote() + " Not In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ") ", vals
+		return f.Quote() + " Not In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ")", vals
 	}
 }
 
@@ -252,5 +252,108 @@ func (f Field) Min(as ...string) Function {
 	}
 	return func() string {
 		return "IFNULL(Min(" + f.Quote() + "),0) AS " + a
+	}
+}
+
+// /////////////////////
+// OR
+
+// OrEq 等于
+func (f Field) OrEq(val any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " = " + Placeholder, val
+	}
+}
+
+// OrNotEq 不等于
+func (f Field) OrNotEq(val any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " != " + Placeholder, val
+	}
+}
+
+// OrGt 大于
+func (f Field) OrGt(val any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " > " + Placeholder, val
+	}
+}
+
+// OrGte 大于或等于
+func (f Field) OrGte(val any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " >= " + Placeholder, val
+	}
+}
+
+// OrLt 小于
+func (f Field) OrLt(val any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " < " + Placeholder, val
+	}
+}
+
+// OrLte 小于或等于
+func (f Field) OrLte(val any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " <= " + Placeholder, val
+	}
+}
+
+// OrIn 包含
+func (f Field) OrIn(vals ...any) Condition {
+	return func() (string, any) {
+		l := len(vals)
+		return "OR " + f.Quote() + " In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ")", vals
+	}
+}
+
+// OrNotIn 不包含
+func (f Field) OrNotIn(vals ...any) Condition {
+	return func() (string, any) {
+		l := len(vals)
+		return "OR " + f.Quote() + " Not In (" + strings.Repeat(Placeholder+",", l)[:2*l-1] + ")", vals
+	}
+}
+
+// OrBetween 在区间
+func (f Field) OrBetween(vals ...any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " BETWEEN " + Placeholder + " AND " + Placeholder, vals
+	}
+}
+
+// OrLike 匹配
+func (f Field) OrLike(val any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " LIKE CONCAT('%'," + Placeholder + ",'%')", val
+	}
+}
+
+// OrLlike 左匹配
+func (f Field) OrLlike(val any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " LIKE CONCAT('%'," + Placeholder + ")", val
+	}
+}
+
+// OrRlike 右匹配
+func (f Field) OrRlike(val any) Condition {
+	return func() (string, any) {
+		return "OR " + f.Quote() + " LIKE CONCAT(" + Placeholder + ",'%')", val
+	}
+}
+
+// OrNull 或为空
+func (f Field) OrNull(val any) Condition {
+	return func() (string, any) {
+		return "OR ISNULL(" + Placeholder + ")", val
+	}
+}
+
+// OrNotNull 或不为空
+func (f Field) OrNotNull(val any) Condition {
+	return func() (string, any) {
+		return "OR NOT ISNULL(" + Placeholder + ")", val
 	}
 }
