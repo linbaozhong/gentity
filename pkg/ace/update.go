@@ -146,14 +146,14 @@ func (u *Updater) Where(fns ...dialect.Condition) *Updater {
 		u.where.WriteString(dialect.Operator_and + "(")
 	}
 	for i, fn := range fns {
-		if i > 0 {
-			u.where.WriteString(dialect.Operator_and)
-		}
 		cond, val := fn()
-		// if v, ok := val.(error); ok {
-		//	u.err = v
-		//	return u
-		// }
+		if i > 0 {
+			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+				u.where.WriteString(" ")
+			} else {
+				u.where.WriteString(dialect.Operator_and)
+			}
+		}
 		u.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			u.whereParams = append(u.whereParams, vals...)
@@ -179,14 +179,14 @@ func (u *Updater) And(fns ...dialect.Condition) *Updater {
 	}
 
 	for i, fn := range fns {
-		if i > 0 {
-			u.where.WriteString(dialect.Operator_or)
-		}
 		cond, val := fn()
-		// if v, ok := val.(error); ok {
-		//	u.err = v
-		//	return u
-		// }
+		if i > 0 {
+			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+				u.where.WriteString(" ")
+			} else {
+				u.where.WriteString(dialect.Operator_or)
+			}
+		}
 		u.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			u.whereParams = append(u.whereParams, vals...)
@@ -211,14 +211,14 @@ func (u *Updater) Or(fns ...dialect.Condition) *Updater {
 	}
 
 	for i, fn := range fns {
-		if i > 0 {
-			u.where.WriteString(dialect.Operator_and)
-		}
 		cond, val := fn()
-		// if v, ok := val.(error); ok {
-		//	u.err = v
-		//	return u
-		// }
+		if i > 0 {
+			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+				u.where.WriteString(" ")
+			} else {
+				u.where.WriteString(dialect.Operator_and)
+			}
+		}
 		u.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			u.whereParams = append(u.whereParams, vals...)

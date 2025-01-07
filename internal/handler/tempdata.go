@@ -128,7 +128,7 @@ func (d *TempData) writeToModel(fileName string) error {
 			case "bool", "types.Bool":
 				return ` == false`
 			default:
-				return ` == 0`
+				return ` == nil`
 			}
 		},
 		"getSqlValue": func(t []string) any {
