@@ -9,20 +9,20 @@ import (
 
 var (
 {{- range $key, $value := .Columns}}
-	{{ index $value 0 }} = dialect.Field{Name: "{{index $value 1}}",Json: "{{index $value 2}}",Table: "{{ $tablename }}",Type: "{{index $value 3}}"}
+	{{ $value.Name }} = dialect.Field{Name: "{{$value.Col}}",Json: "{{$value.Json}}",Table: "{{ $tablename }}",Type: "{{$value.Type}}"}
 {{- end}}
 
 {{- if .HasPrimaryKey}}
 	// 主键
-	PrimaryKey = {{index .PrimaryKey 0}}
+	PrimaryKey = {{.PrimaryKey.Name}}
 {{- end}}
 
 	// 可写列
 	WritableFields = []dialect.Field{
 {{- range $key, $value := .Columns}}
 	{{- if ne (getType $value) "any"}}
-	{{- if or (eq (index $value 4) "->") (eq (index $value 4) "")}}
-	{{index $value 0}},
+	{{- if or (eq $value.Rw "->") (eq $value.Rw "")}}
+	{{$value.Name}},
 	{{- end}}
 	{{- end}}
 {{- end}}
@@ -31,8 +31,8 @@ var (
 	ReadableFields = []dialect.Field{
 {{- range $key, $value := .Columns}}
 	{{- if ne (getType $value) "any"}}
-	{{- if or (eq (index $value 4) "<-") (eq (index $value 4) "")}}
-	{{index $value 0}},
+	{{- if or (eq $value.Rw "<-") (eq $value.Rw "")}}
+	{{$value.Name}},
 	{{- end}}
 	{{- end}}
 {{- end}}

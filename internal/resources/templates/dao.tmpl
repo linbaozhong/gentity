@@ -3,7 +3,6 @@
 {{- $tablename := .TableName}}
 {{- $structName := .StructName}}
 {{- $tbl := lower .StructName}}
-{{- $ref := (index .RelationX 1)}}
 {{- $package := .PackageName}}
 {{- $structNameLower := lower .StructName}}
 
@@ -21,8 +20,8 @@ import (
 	"database/sql"
 	"{{.ModulePath}}/{{$package}}"
 	"{{.ModulePath}}/define/table/tbl{{$tbl}}"
-{{- if eq (len .RelationX) 5}}
-	"{{.ModulePath}}/define/table/tbl{{lower $ref}}"
+{{- if ne .RelationX.Name ""}}
+	"{{.ModulePath}}/define/table/tbl{{lower .RelationX.Type}}"
 {{- end}}
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
@@ -39,12 +38,12 @@ type {{$tablename}}er interface {
 	// cols: 要插入的列名
 	InsertBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (int64, error)
     // UpdateById 按主键更新一条数据
-	UpdateById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, sets ...dialect.Setter) (bool, error)
+	UpdateById(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新多条数据
 	// cols: 要更新的列名
 	UpdateBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
-    DeleteById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}) (bool, error)
+    DeleteById(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{$package}}.{{$structName}}, bool, error)
 	// Find 分页查询，返回一个slice
@@ -52,10 +51,10 @@ type {{$tablename}}er interface {
 	// Get4Cols 读取一个对象的指定列
 	Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{$package}}.{{$structName}}, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error)
+	GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error)
 	// Get 按条件读取一个对象
 	Get(ctx context.Context, cond ...dialect.Condition) (*{{$package}}.{{$structName}}, bool, error)
-{{- if eq (len .RelationX) 5}}
+{{- if ne .RelationX.Name ""}}
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4ColsX(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{$package}}.{{$structName}}, bool, error)
 	// Find 分页查询，返回一个slice
@@ -63,7 +62,7 @@ type {{$tablename}}er interface {
 	// Get4Cols 读取一个对象的指定列
 	Get4ColsX(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{$package}}.{{$structName}}, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByIDX(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error)
+	GetByIDX(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error)
 	// Get 按条件读取一个对象
 	GetX(ctx context.Context, cond ...dialect.Condition) (*{{$package}}.{{$structName}}, bool, error)
 {{- end}}
@@ -181,10 +180,10 @@ func (p *dao{{$structName}}) Update(ctx context.Context, sets []dialect.Setter, 
 }
 
 // UpdateById
-func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, sets ...dialect.Setter) (bool, error) {
+func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, sets ...dialect.Setter) (bool, error) {
     return p.Update(ctx,
         sets,
-       	tbl{{$tbl}}.PrimaryKey.Eq({{index .PrimaryKey 1}}),
+       	tbl{{$tbl}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
     )
 }
 
@@ -222,9 +221,9 @@ func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Conditi
 }
 
 // DeleteById
-func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 3}}) (bool, error) {
+func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (bool, error) {
     return p.Delete(ctx,
-        tbl{{$tbl}}.PrimaryKey.Eq({{index .PrimaryKey 1}}),
+        tbl{{$tbl}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
 	)
 }
 
@@ -287,15 +286,15 @@ func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize 
 }
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *dao{{$structName}}) GetByID(ctx context.Context,{{index .PrimaryKey 1}} {{index .PrimaryKey 3}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
+func (p *dao{{$structName}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
 {{- if .HasCache}}
-	obj,has,e:=p.getCache(ctx, {{index .PrimaryKey 1}})
+	obj,has,e:=p.getCache(ctx, {{.PrimaryKey.Col}})
 	if has{
 		return obj,has,nil
 	}
 
-	v, e, _ := p.sg.Do(conv.Any2String({{index .PrimaryKey 1}}), func() (any, error) {
-		obj, has, e = p.Get4Cols(ctx, cols, tbl{{$tbl}}.PrimaryKey.Eq({{index .PrimaryKey 1}}))
+	v, e, _ := p.sg.Do(conv.Any2String({{.PrimaryKey.Col}}), func() (any, error) {
+		obj, has, e = p.Get4Cols(ctx, cols, tbl{{$tbl}}.PrimaryKey.Eq({{.PrimaryKey.Col}}))
 		if has {
 			e = p.setCache(ctx, obj)
 		}
@@ -307,7 +306,7 @@ func (p *dao{{$structName}}) GetByID(ctx context.Context,{{index .PrimaryKey 1}}
 
 	return nil,false,e
 {{- else}}
-	return p.Get4Cols(ctx, cols, tbl{{$tbl}}.PrimaryKey.Eq({{index .PrimaryKey 1}}))
+	return p.Get4Cols(ctx, cols, tbl{{$tbl}}.PrimaryKey.Eq({{.PrimaryKey.Col}}))
 {{- end}}
 }
 
@@ -355,11 +354,11 @@ func (p *dao{{$structName}}) IDs(ctx context.Context, cond ...dialect.Condition)
 
 	ids := make([]any, 0, dialect.PageSize)
 	for rows.Next() {
-	    var {{ index .PrimaryKey 1 }} {{index .PrimaryKey 3}}
-		if err = rows.Scan(&{{index .PrimaryKey 1}}); err != nil {
+	    var {{ .PrimaryKey.Col }} {{.PrimaryKey.Type}}
+		if err = rows.Scan(&{{.PrimaryKey.Col}}); err != nil {
 			return nil, err
 		}
-		ids = append(ids, {{index .PrimaryKey 1}})
+		ids = append(ids, {{.PrimaryKey.Col}})
 	}
 
 	return ids, rows.Err()
@@ -405,8 +404,8 @@ func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Conditi
         return false, err
     }
 
-	var {{ index .PrimaryKey 1 }} {{index .PrimaryKey 3}}
-    err = row.Scan(&{{index .PrimaryKey 1}})
+	var {{ .PrimaryKey.Col }} {{.PrimaryKey.Type}}
+    err = row.Scan(&{{.PrimaryKey.Col}})
     switch err {
     case sql.ErrNoRows:
         return false, nil
@@ -419,7 +418,7 @@ func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Conditi
 
 {{- if .HasCache}}
 // onUpdate
-func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{index .PrimaryKey 3}}) error {
+func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.Type}}) error {
 	for _, id := range ids {
 		if err := p.cache.Delete(ctx, GetIdHashKey(id)); err != nil {
 			return err
@@ -430,8 +429,8 @@ func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{index .Prima
 }
 
 // getCache
-func (p *dao{{$structName}}) getCache(ctx context.Context, {{index .PrimaryKey 1}} {{index .PrimaryKey 3}}) (*{{$package}}.{{$structName}}, bool, error) {
-	s,err := p.cache.Fetch(ctx, GetIdHashKey({{index .PrimaryKey 1}}))
+func (p *dao{{$structName}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (*{{$package}}.{{$structName}}, bool, error) {
+	s,err := p.cache.Fetch(ctx, GetIdHashKey({{.PrimaryKey.Col}}))
 	if err != nil {
 		return nil, false, err
 	}
@@ -452,11 +451,11 @@ func (p *dao{{$structName}}) setCache(ctx context.Context, obj *{{$package}}.{{$
 	if err != nil {
 		return err
 	}
-	return p.cache.Save(ctx, GetIdHashKey(obj.{{index .PrimaryKey 0}}), string(s), {{.CacheData}})
+	return p.cache.Save(ctx, GetIdHashKey(obj.{{.PrimaryKey.Name}}), string(s), {{.CacheData}})
 }
 {{end}}
 
-{{- if eq (len .RelationX) 5}}
+{{- if ne .RelationX.Name ""}}
 
 //////////////
 
@@ -486,29 +485,34 @@ func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field
 	case sql.ErrNoRows:
 		return nil, false, nil
 	case nil:
-{{- if eq (index .RelationX 4) "slice"}}
-		obj.{{index .RelationX 0}} = p.edges(ctx,[]any{obj.{{index .RelationX 2}}})
-{{- else if eq (index .RelationX 4) "ptr"}}
-		rs := p.edges(ctx,[]any{obj.{{index .RelationX 2}}})
+		rs := p.edges(ctx,[]any{obj.{{.RelationX.Field}}})
 		if len(rs) > 0{
-			obj.{{index .RelationX 0}} = &rs[0]
-		}
+{{- if eq .RelationX.Kind "slice"}}
+			obj.{{.RelationX.Name}} = rs[obj.{{.RelationX.Field}}]
+{{- else if eq .RelationX.Kind "ptr"}}
+			tmp := rs[obj.{{.RelationX.Field}}][0]
+			obj.{{.RelationX.Name}} = &tmp
 {{- else}}
-		rs := p.edges(ctx,[]any{obj.{{index .RelationX 2}}})
-		if len(rs) > 0{
-			obj.{{index .RelationX 0}} = rs[0]
-		}
+			obj.{{.RelationX.Name}} = rs[obj.{{.RelationX.Field}}][0]
 {{- end}}
+		}
 		return obj, true, nil
 	default:
 		return nil, false, err
 	}
 }
 
-// edges {{ getReturnValue $package $ref }}
-func (p *dao{{$structName}}) edges(ctx context.Context,ids []any) {{ getReturnValue $package $ref }} {
-	rs, _, _ := {{$ref}}(p.db).Find(ctx, 0, 0, tbl{{lower ($ref)}}.{{index .RelationX 3}}.In(ids...))
-	return rs
+// edges
+func (p *dao{{$structName}}) edges(ctx context.Context,ids []any) map[any][]{{$package}}.{{.RelationX.Type}} {
+	rsMap := make(map[any][]{{$package}}.{{.RelationX.Type}}, len(ids))
+	rs, has, _ := {{.RelationX.Type}}(p.db).Find(ctx, 0, 0, tbl{{lower (.RelationX.Type)}}.{{.RelationX.Foreign}}.In(ids...))
+	if !has {
+		return rsMap
+	}
+	for _, r := range rs {
+		rsMap[r.{{.RelationX.Foreign}}] = append(rsMap[r.{{.RelationX.Foreign}}], r)
+	}
+	return rsMap
 }
 
 // Find4Cols 分页获取{{.TableName}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -536,6 +540,27 @@ func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize
 
 	objs, has, err := obj.Scan(rows, cols...)
 	if has {
+		ids := make([]any, 0, len(objs))
+		l := len(objs)
+		for i := 0; i < l; i++ {
+			ids = append(ids, objs[i].{{.RelationX.Field}})
+		}
+		if len(ids) == 0 {
+			return objs, true, err
+		}
+		rs := p.edges(ctx, ids)
+		if len(rs) > 0 {
+			for i := 0; i < l; i++ {
+			{{- if eq .RelationX.Kind "slice"}}
+				objs[i].{{.RelationX.Name}} = rs[objs[i].{{.RelationX.Field}}]
+			{{- else if eq .RelationX.Kind "ptr"}}
+				tmp := rs[objs[i].{{.RelationX.Field}}][0]
+				objs[i].{{.RelationX.Name}} = &tmp
+			{{- else}}
+				objs[i].{{.RelationX.Name}} = rs[objs[i].{{.RelationX.Field}}][0]
+			{{- end}}
+			}
+		}
 		return objs, true, err
 	}
 	return nil, false, err

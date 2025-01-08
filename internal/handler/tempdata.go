@@ -16,6 +16,7 @@ package handler
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/linbaozhong/gentity/internal/resources"
 	"go/format"
 	"io"
@@ -37,16 +38,34 @@ type TempData struct {
 	CacheData   string // 数据缓存时长
 	CacheList   string // list缓存时长
 	CacheLimit  string // list缓存长度
-	Columns     [][]string
+	Columns     []Field
 	// Keys        [][]string
-	PrimaryKey    []string
-	RelationX     []string // 关系键
+	PrimaryKey    Field
+	RelationX     Relation // 关系键
 	HasPrimaryKey bool
 	HasState      bool
 	HasCache      bool
 	HasTime       bool
 	HasString     bool
 	HasConvert    bool
+}
+
+// Field struct 字段
+type Field struct {
+	Name string // 字段名
+	Col  string // 数据库列名
+	Json string // json名
+	Type string // 类型
+	Rw   string // 数据库读写标志
+}
+
+// Relation 关系
+type Relation struct {
+	Name    string // 字段名
+	Type    string // 类型
+	Field   string // 参照字段
+	Foreign string // 外键字段
+	Kind    string // slice，ptr，struct
 }
 
 func getBaseFilename(filename string) string {
@@ -61,6 +80,7 @@ func getBaseFilename(filename string) string {
 func writeDaoBase(parent string) error {
 	err := os.MkdirAll(parent, os.ModePerm)
 	if err != nil {
+		fmt.Println("----")
 		showError(err)
 		return err
 	}
@@ -74,36 +94,36 @@ func writeDaoBase(parent string) error {
 		tmpl := template.New("").Funcs(funcMap)
 		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/dao_base.tmpl")
 		if err != nil {
+			showError(err)
 			return err
 		}
-		return tmpl.ExecuteTemplate(ioWriter, "dao_base.tmpl", nil)
+
+		err = tmpl.ExecuteTemplate(ioWriter, "dao_base.tmpl", nil)
+		if err != nil {
+			showError(err)
+		}
+		return err
 	})
 }
 
+func getType(t Field) string {
+	v := t.Type
+	switch v {
+	case "string", "types.String", "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
+		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+		"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
+		"types.Float64", "types.BigInt", "types.Money", "time.Time", "types.Time", "bool", "types.Bool":
+		return v
+	default:
+		return "any"
+	}
+}
 func (d *TempData) writeToModel(fileName string) error {
 	funcMap := template.FuncMap{
-		"lower": strings.ToLower,
-		"getType": func(t []string) any {
-			if len(t) < 3 {
-				return `""`
-			}
-			// fmt.Println("----", t)
-			v := t[3]
-			switch v {
-			case "string", "types.String", "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
-				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
-				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
-				"types.Float64", "types.BigInt", "types.Money", "time.Time", "types.Time", "bool", "types.Bool":
-				return v
-			default:
-				return "any"
-			}
-		},
-		"getTypeValue": func(t []string) any {
-			if len(t) < 3 {
-				return `""`
-			}
-			v := t[3]
+		"lower":   strings.ToLower,
+		"getType": getType,
+		"getTypeValue": func(t Field) any {
+			v := t.Type
 			switch v {
 			case "string", "types.String":
 				return `""`
@@ -118,16 +138,13 @@ func (d *TempData) writeToModel(fileName string) error {
 				return `false`
 			default:
 				if v[:2] == "[]" {
-					return "p." + t[0] + "[:0]"
+					return "p." + t.Name + "[:0]"
 				}
 				return v + "{}"
 			}
 		},
-		"getZeroValue": func(t []string) any {
-			if len(t) < 3 {
-				return `""`
-			}
-			v := t[3]
+		"getZeroValue": func(t Field) any {
+			v := t.Type
 			switch v {
 			case "string", "types.String":
 				return ` == ""`
@@ -145,8 +162,8 @@ func (d *TempData) writeToModel(fileName string) error {
 				return ` == nil`
 			}
 		},
-		"getSqlValue": func(t []string) any {
-			switch t[3] {
+		"getSqlValue": func(t Field) any {
+			switch t.Type {
 			case "string":
 				return "sql.NullString"
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":
@@ -161,8 +178,8 @@ func (d *TempData) writeToModel(fileName string) error {
 				return "sql.NullInt64"
 			}
 		},
-		"getSqlType": func(t []string) any {
-			switch t[3] {
+		"getSqlType": func(t Field) any {
+			switch t.Type {
 			case "string":
 				return "String"
 			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":
@@ -202,22 +219,8 @@ func (d *TempData) writeTable(parent string) error {
 
 	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_"+d.StructName+".gen.go") // d.tableFilename(parent)
 	funcMap := template.FuncMap{
-		"lower": strings.ToLower,
-		"getType": func(t []string) any {
-			if len(t) < 3 {
-				return `""`
-			}
-			v := t[3]
-			switch v {
-			case "string", "types.String", "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
-				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
-				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
-				"types.Float64", "types.BigInt", "types.Money", "time.Time", "types.Time", "bool", "types.Bool":
-				return v
-			default:
-				return "any"
-			}
-		},
+		"lower":   strings.ToLower,
+		"getType": getType,
 	}
 	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)
@@ -260,7 +263,7 @@ func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(io
 	if fi, err := os.Stat(fullFilename); err == nil {
 		if !fi.IsDir() {
 			if err := os.Remove(fullFilename); err != nil {
-				// showError(err)
+				showError(err)
 				return err
 			}
 		}
@@ -268,26 +271,25 @@ func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(io
 
 	f, err := os.OpenFile(fullFilename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 	if err != nil {
-		// showError(err.Error())
+		showError(err.Error())
 		return err
 	}
 	defer f.Close()
 	var buf bytes.Buffer
 	err = fn(&buf, funcMap)
 	if err != nil {
-		// showError(err.Error())
+		showError(err.Error())
 		return err
 	}
 
-	formatted, err := format.Source(buf.Bytes())
-	if err != nil {
-		// showError(err.Error())
-		return err
+	formatted, _ := format.Source(buf.Bytes())
+	if formatted == nil {
+		_, err = f.Write(buf.Bytes())
+	} else {
+		_, err = f.Write(formatted)
 	}
-	_, err = f.Write(formatted)
-	// _, err = f.Write(buf.Bytes())
 	if err != nil {
-		// showError(err.Error())
+		showError(err.Error())
 		return err
 	}
 	return err

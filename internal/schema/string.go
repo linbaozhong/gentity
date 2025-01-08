@@ -143,7 +143,7 @@ func ParseFieldSize(col *sqlparser.Column) string {
 	default:
 		if col.Precision > 0 {
 			if col.Scale > 0 {
-				return " size:" + strconv.Itoa(col.Precision) + "," + strconv.Itoa(col.Scale)
+				return " size:" + strconv.Itoa(col.Precision) + "|" + strconv.Itoa(col.Scale)
 			}
 			return " size:" + strconv.Itoa(col.Precision)
 		}

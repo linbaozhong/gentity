@@ -61,8 +61,9 @@ func parseFile(filename, pkgPath string) error {
 		tempData.CacheData = "time.Minute"
 		tempData.CacheList = "time.Minute"
 		tempData.CacheLimit = "1000"
-		tempData.PrimaryKey = nil
-		tempData.Columns = make([][]string, 0, 20)
+		tempData.PrimaryKey = Field{}
+		tempData.RelationX = Relation{}
+		tempData.Columns = make([]Field, 0, 20)
 		tempData.FileName = structFullName
 		tempData.StructName = stru.Name
 		// 解析struct文档
@@ -80,39 +81,36 @@ func parseFile(filename, pkgPath string) error {
 				rw  string // 禁止读写 -，只读<-，只写->
 				ref string // 关系键
 			)
-			var _namejson = make([]string, 5)
+			var _namejson = Field{}
 			for k, v := range field.Tags {
 				if k == "json" {
-					_namejson[2] = v[0] // json_name
+					_namejson.Json = v[0] // json_name
 				} else if k == "db" {
-					_namejson[1], pk, rw, ref = parseTagsForDB(v) // column_name
+					_namejson.Col, pk, rw, ref = parseTagsForDB(v) // column_name
 					if len(ref) > 0 {
 						_ref := strings.Split(ref, "|")
 						if len(_ref) == 2 {
-							var (
-								refKind string
-								refType string
-							)
 							if strings.HasPrefix(field.Type.String(), "[]") {
-								refKind = "slice"
-								refType = field.Type.String()[2:]
+								tempData.RelationX.Kind = "slice"
+								tempData.RelationX.Type = field.Type.String()[2:]
 							} else if strings.HasPrefix(field.Type.String(), "*") {
-								refKind = "ptr"
-								refType = field.Type.String()[1:]
+								tempData.RelationX.Kind = "ptr"
+								tempData.RelationX.Type = field.Type.String()[1:]
+							} else {
+								tempData.RelationX.Kind = "struct"
+								tempData.RelationX.Type = field.Type.String()
 							}
-							tempData.RelationX = []string{field.Name,
-								refType,
-								_ref[0], _ref[1],
-								refKind,
-							}
+							tempData.RelationX.Name = field.Name
+							tempData.RelationX.Field = _ref[0]
+							tempData.RelationX.Foreign = _ref[1]
 						}
 					}
 				}
 			}
-			_namejson[0] = field.Name
-			_namejson[3] = field.Type.String()
-			_namejson[4] = rw
-			switch _namejson[3] {
+			_namejson.Name = field.Name
+			_namejson.Type = field.Type.String()
+			_namejson.Rw = rw
+			switch _namejson.Type {
 			case "types.Time":
 				tempData.HasTime = true
 			case "time.Time":
@@ -125,11 +123,11 @@ func parseFile(filename, pkgPath string) error {
 				tempData.HasConvert = true
 			}
 
-			if _namejson[1] == "" {
-				if _namejson[2] == "" {
-					_namejson[1] = getFieldName(field.Name)
+			if _namejson.Col == "" {
+				if _namejson.Json == "" {
+					_namejson.Col = getFieldName(field.Name)
 				} else {
-					_namejson[1] = _namejson[2]
+					_namejson.Col = _namejson.Json
 				}
 			}
 
@@ -143,7 +141,7 @@ func parseFile(filename, pkgPath string) error {
 				// 	tempData.HasTime = true
 				// }
 			}
-			if _namejson[1] == "state" {
+			if _namejson.Col == "state" {
 				tempData.HasState = true
 			}
 		}

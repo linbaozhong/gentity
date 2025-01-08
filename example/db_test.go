@@ -69,7 +69,8 @@ func TestInsert(t *testing.T) {
 func TestSelect(t *testing.T) {
 	defer dbx.Close()
 
-	v, _, e := dao.App(dbx).Find4Cols(context.Background(), 0, 0, nil, tblapp.Id.Eq(1), ace.Or(tblapp.Id.Eq(2), tblapp.Arch.Eq("test")))
+	v, _, e := dao.App(dbx).Find4Cols(context.Background(), 0, 0, nil,
+		tblapp.Id.Eq(1), dao.Or(tblapp.Id.Eq(2), tblapp.Arch.Eq("test")))
 	if e != nil {
 		t.Fatal(e)
 	}

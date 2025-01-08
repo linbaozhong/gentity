@@ -3,12 +3,12 @@
 package dao
 
 import (
-	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/cachego"
 )
 
 var (
-	Or = ace.Or
+	Or  = ace.Or
 	And = ace.And
 )
 
