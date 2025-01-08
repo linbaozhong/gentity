@@ -447,9 +447,14 @@ func (p *daoUser) Find4ColsX(ctx context.Context, pageIndex, pageSize uint, cols
 
 	objs, has, err := obj.Scan(rows, cols...)
 	if has {
-		ids := make([]any, 0, len(objs))
 		l := len(objs)
+		idsMap := make(map[any]struct{}, l)
+		ids := make([]any, 0, l)
 		for i := 0; i < l; i++ {
+			if _, ok := idsMap[objs[i].Id]; ok {
+				continue
+			}
+			idsMap[objs[i].Id] = struct{}{}
 			ids = append(ids, objs[i].Id)
 		}
 		if len(ids) == 0 {

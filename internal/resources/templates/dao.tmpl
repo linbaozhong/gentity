@@ -2,7 +2,6 @@
 
 {{- $tablename := .TableName}}
 {{- $structName := .StructName}}
-{{- $tbl := lower .StructName}}
 {{- $package := .PackageName}}
 {{- $structNameLower := lower .StructName}}
 
@@ -19,7 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"{{.ModulePath}}/{{$package}}"
-	"{{.ModulePath}}/define/table/tbl{{$tbl}}"
+	"{{.ModulePath}}/define/table/tbl{{$structNameLower}}"
 {{- if ne .RelationX.Name ""}}
 	"{{.ModulePath}}/define/table/tbl{{lower .RelationX.Type}}"
 {{- end}}
@@ -183,7 +182,7 @@ func (p *dao{{$structName}}) Update(ctx context.Context, sets []dialect.Setter, 
 func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, sets ...dialect.Setter) (bool, error) {
     return p.Update(ctx,
         sets,
-       	tbl{{$tbl}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
+       	tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
     )
 }
 
@@ -223,7 +222,7 @@ func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Conditi
 // DeleteById
 func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (bool, error) {
     return p.Delete(ctx,
-        tbl{{$tbl}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
+        tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
 	)
 }
 
@@ -231,7 +230,7 @@ func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}}
 func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{$package}}.{{$structName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tbl{{$tbl}}.ReadableFields...)
+		c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -259,7 +258,7 @@ func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field,
 func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{$package}}.{{$structName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tbl{{$tbl}}.ReadableFields...)
+		c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -294,7 +293,7 @@ func (p *dao{{$structName}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.
 	}
 
 	v, e, _ := p.sg.Do(conv.Any2String({{.PrimaryKey.Col}}), func() (any, error) {
-		obj, has, e = p.Get4Cols(ctx, cols, tbl{{$tbl}}.PrimaryKey.Eq({{.PrimaryKey.Col}}))
+		obj, has, e = p.Get4Cols(ctx, cols, tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}))
 		if has {
 			e = p.setCache(ctx, obj)
 		}
@@ -306,7 +305,7 @@ func (p *dao{{$structName}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.
 
 	return nil,false,e
 {{- else}}
-	return p.Get4Cols(ctx, cols, tbl{{$tbl}}.PrimaryKey.Eq({{.PrimaryKey.Col}}))
+	return p.Get4Cols(ctx, cols, tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}))
 {{- end}}
 }
 
@@ -343,7 +342,7 @@ func (p *dao{{$structName}}) Find(ctx context.Context, pageIndex, pageSize uint,
 
 // IDs
 func (p *dao{{$structName}}) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols(tbl{{$tbl}}.PrimaryKey)
+	c := p.R().Cols(tbl{{$structNameLower}}.PrimaryKey)
 	rows, err := c.Where(cond...).
 	    Limit(dialect.MaxLimit).
 	    Query(ctx)
@@ -398,7 +397,7 @@ func (p *dao{{$structName}}) Sum(ctx context.Context, cols []dialect.Field, cond
 
 // Exists
 func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	c := p.R().Cols(tbl{{$tbl}}.PrimaryKey).Where(cond...)
+	c := p.R().Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
 	row, err := c.QueryRow(ctx)
     if err != nil {
         return false, err
@@ -467,7 +466,7 @@ func (p *dao{{$structName}}) FindX(ctx context.Context, pageIndex, pageSize uint
 func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{$package}}.{{$structName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tbl{{$tbl}}.ReadableFields...)
+		c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -519,7 +518,7 @@ func (p *dao{{$structName}}) edges(ctx context.Context,ids []any) map[any][]{{$p
 func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{$package}}.{{$structName}}, bool, error) {
 	c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tbl{{$tbl}}.ReadableFields...)
+		c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
 		c.Cols(cols...)
 	}
@@ -540,9 +539,14 @@ func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize
 
 	objs, has, err := obj.Scan(rows, cols...)
 	if has {
-		ids := make([]any, 0, len(objs))
 		l := len(objs)
+		idsMap := make(map[any]struct{}, l)
+		ids := make([]any, 0, l)
 		for i := 0; i < l; i++ {
+			if _, ok := idsMap[objs[i].{{.RelationX.Field}}]; ok {
+				continue
+			}
+			idsMap[objs[i].{{.RelationX.Field}}] = struct{}{}
 			ids = append(ids, objs[i].{{.RelationX.Field}})
 		}
 		if len(ids) == 0 {
@@ -568,7 +572,7 @@ func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) GetByIDX(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
-	return p.Get4ColsX(ctx, cols, tbl{{$tbl}}.PrimaryKey.Eq(id))
+	return p.Get4ColsX(ctx, cols, tbl{{$structNameLower}}.PrimaryKey.Eq(id))
 }
 
 // Get 按条件读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
