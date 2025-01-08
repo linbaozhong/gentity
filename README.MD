@@ -312,9 +312,11 @@ func TestSelect(t *testing.T) {
 ```
 提示：查询条件ace.Or、ace.And 和 dao.Or、dao.And等同
 5. 实验性查询
-结构体嵌套在生成dao代码时，会自动生成关联查询。
-关联查询的标签为：db:"ref:关联字段|关联表对应字段"
-dao相应查询方法为：FindX、GetX ......
+
+* 结构体嵌套在生成dao代码时，会自动生成关联查询。
+* 关联查询的标签为：db:"ref:关联字段|关联表对应字段"
+* dao相应查询方法为：FindX、GetX ......
+
 例如：
 ```go
 // tablename user_log
