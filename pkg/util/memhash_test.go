@@ -42,3 +42,8 @@ func BenchmarkMemHash(b *testing.B) {
 		MemHash(buf)
 	}
 }
+
+func TestIIF(t *testing.T) {
+	var b = false
+	t.Log(IIF(b, 0.33, 4.0))
+}
