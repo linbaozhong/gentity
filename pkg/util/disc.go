@@ -18,6 +18,7 @@ type iif interface {
 	bool | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64 | string | any
 }
 
+// IIF returns trueValue if condition is true, otherwise returns falseValue.
 func IIF[T iif](condition bool, trueValue, falseValue T) T {
 	if condition {
 		return trueValue
