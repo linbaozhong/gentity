@@ -24,6 +24,7 @@ import (
 {{- end}}
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
@@ -120,6 +121,7 @@ func (p *dao{{$structName}}) Insert(ctx context.Context, sets ...dialect.Setter)
 	    Set(sets...).
 	    Exec(ctx)
 	if err != nil {
+		log.Error(err)
 		return 0, err
 	}
 	return result.LastInsertId()
@@ -132,6 +134,7 @@ func (p *dao{{$structName}}) InsertOne(ctx context.Context, bean *{{$package}}.{
 	    Cols(cols...).
 	    Struct(ctx, bean)
 	if err != nil {
+		log.Error(err)
 		return false, err
 	}
 
@@ -156,6 +159,7 @@ func (p *dao{{$structName}}) InsertBatch(ctx context.Context, beans []*{{$packag
 	    Cols(cols...).
 	    StructBatch(ctx, args...)
 	if err != nil {
+		log.Error(err)
 		return 0, err
 	}
 
@@ -172,6 +176,7 @@ func (p *dao{{$structName}}) Update(ctx context.Context, sets []dialect.Setter, 
 	    Set(sets...).
 	    Exec(ctx)
 	if err != nil {
+		log.Error(err)
 		return false, err
 	}
 	n, err := result.RowsAffected()
@@ -201,6 +206,7 @@ func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$packag
 	    Cols(cols...).
 	    StructBatch(ctx, args...)
 	if err != nil {
+		log.Error(err)
 		return false, err
 	}
 	n, err := result.RowsAffected()
@@ -213,6 +219,7 @@ func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Conditi
 	    Where(cond...).
 	    Exec(ctx)
 	if err != nil {
+		log.Error(err)
 		return false, err
 	}
 	n, err := result.RowsAffected()
@@ -238,6 +245,7 @@ func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field,
 	row, err := c.Where(cond...).
 	    QueryRow(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 
@@ -250,6 +258,7 @@ func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field,
 	case nil:
 		return obj,true, nil
 	default:
+		log.Error(err)
 		return nil,false, err
 	}
 }
@@ -271,6 +280,7 @@ func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize 
 	    Limit(pageSize, pageSize*pageIndex).
 	    Query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 	defer rows.Close()
@@ -279,8 +289,9 @@ func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize 
 
 	objs, has, err := obj.Scan(rows, cols...)
 	if has {
-		return objs, true, err
+		return objs, true, nil
 	}
+	log.Error(err)
 	return nil, false, err
 }
 
@@ -319,6 +330,7 @@ func (p *dao{{$structName}}) GetFirstCell(ctx context.Context,col dialect.Field,
 	c := p.R().Cols(col)
 	row, err := c.Where(cond...).QueryRow(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil,false, err
 	}
 
@@ -330,6 +342,7 @@ func (p *dao{{$structName}}) GetFirstCell(ctx context.Context,col dialect.Field,
     case nil:
         return v,true,nil
     default:
+		log.Error(err)
         return nil,false,err
     }
 }
@@ -347,6 +360,7 @@ func (p *dao{{$structName}}) IDs(ctx context.Context, cond ...dialect.Condition)
 	    Limit(dialect.MaxLimit).
 	    Query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -355,6 +369,7 @@ func (p *dao{{$structName}}) IDs(ctx context.Context, cond ...dialect.Condition)
 	for rows.Next() {
 	    var {{ .PrimaryKey.Col }} {{.PrimaryKey.Type}}
 		if err = rows.Scan(&{{.PrimaryKey.Col}}); err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		ids = append(ids, {{.PrimaryKey.Col}})
@@ -370,6 +385,7 @@ func (p *dao{{$structName}}) Columns(ctx context.Context, col dialect.Field, con
 	    Limit(dialect.MaxLimit).
 	    Query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -378,6 +394,7 @@ func (p *dao{{$structName}}) Columns(ctx context.Context, col dialect.Field, con
 	for rows.Next() {
 		var v any
 		if err = rows.Scan(&v); err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		cols = append(cols, v)
@@ -400,6 +417,7 @@ func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Conditi
 	c := p.R().Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
 	row, err := c.QueryRow(ctx)
     if err != nil {
+		log.Error(err)
         return false, err
     }
 
@@ -420,6 +438,7 @@ func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Conditi
 func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.Type}}) error {
 	for _, id := range ids {
 		if err := p.cache.Delete(ctx, GetIdHashKey(id)); err != nil {
+			log.Error(err)
 			return err
 		}
 	}
@@ -431,6 +450,7 @@ func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.
 func (p *dao{{$structName}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (*{{$package}}.{{$structName}}, bool, error) {
 	s,err := p.cache.Fetch(ctx, GetIdHashKey({{.PrimaryKey.Col}}))
 	if err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 	if len(s)==0 {
@@ -439,6 +459,7 @@ func (p *dao{{$structName}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {
 	obj := {{$package}}.New{{$structName}}()
 	err = json.Unmarshal(s, obj)
 	if err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 	return obj, true,nil
@@ -448,6 +469,7 @@ func (p *dao{{$structName}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {
 func (p *dao{{$structName}}) setCache(ctx context.Context, obj *{{$package}}.{{$structName}}) error {
 	s,err := json.Marshal(obj)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 	return p.cache.Save(ctx, GetIdHashKey(obj.{{.PrimaryKey.Name}}), string(s), {{.CacheData}})
@@ -474,6 +496,7 @@ func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field
 	row, err := c.Where(cond...).
 		QueryRow(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 
@@ -497,6 +520,7 @@ func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field
 		}
 		return obj, true, nil
 	default:
+		log.Error(err)
 		return nil, false, err
 	}
 }
@@ -531,6 +555,7 @@ func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize
 		Limit(pageSize, pageSize*pageIndex).
 		Query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 	defer rows.Close()
@@ -550,7 +575,7 @@ func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize
 			ids = append(ids, objs[i].{{.RelationX.Field}})
 		}
 		if len(ids) == 0 {
-			return objs, true, err
+			return objs, true, nil
 		}
 		rs := p.edges(ctx, ids)
 		if len(rs) > 0 {
@@ -565,8 +590,9 @@ func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize
 			{{- end}}
 			}
 		}
-		return objs, true, err
+		return objs, true, nil
 	}
+	log.Error(err)
 	return nil, false, err
 }
 

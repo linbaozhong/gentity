@@ -9,6 +9,7 @@ import (
 	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
@@ -85,6 +86,7 @@ func (p *daoApp) Insert(ctx context.Context, sets ...dialect.Setter) (int64, err
 		Set(sets...).
 		Exec(ctx)
 	if err != nil {
+		log.Error(err)
 		return 0, err
 	}
 	return result.LastInsertId()
@@ -97,6 +99,7 @@ func (p *daoApp) InsertOne(ctx context.Context, bean *do.App, cols ...dialect.Fi
 		Cols(cols...).
 		Struct(ctx, bean)
 	if err != nil {
+		log.Error(err)
 		return false, err
 	}
 
@@ -121,6 +124,7 @@ func (p *daoApp) InsertBatch(ctx context.Context, beans []*do.App, cols ...diale
 		Cols(cols...).
 		StructBatch(ctx, args...)
 	if err != nil {
+		log.Error(err)
 		return 0, err
 	}
 
@@ -137,6 +141,7 @@ func (p *daoApp) Update(ctx context.Context, sets []dialect.Setter, cond ...dial
 		Set(sets...).
 		Exec(ctx)
 	if err != nil {
+		log.Error(err)
 		return false, err
 	}
 	n, err := result.RowsAffected()
@@ -166,6 +171,7 @@ func (p *daoApp) UpdateBatch(ctx context.Context, beans []*do.App, cols ...diale
 		Cols(cols...).
 		StructBatch(ctx, args...)
 	if err != nil {
+		log.Error(err)
 		return false, err
 	}
 	n, err := result.RowsAffected()
@@ -178,6 +184,7 @@ func (p *daoApp) Delete(ctx context.Context, cond ...dialect.Condition) (bool, e
 		Where(cond...).
 		Exec(ctx)
 	if err != nil {
+		log.Error(err)
 		return false, err
 	}
 	n, err := result.RowsAffected()
@@ -203,6 +210,7 @@ func (p *daoApp) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dia
 	row, err := c.Where(cond...).
 		QueryRow(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 
@@ -215,6 +223,7 @@ func (p *daoApp) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dia
 	case nil:
 		return obj, true, nil
 	default:
+		log.Error(err)
 		return nil, false, err
 	}
 }
@@ -236,6 +245,7 @@ func (p *daoApp) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols [
 		Limit(pageSize, pageSize*pageIndex).
 		Query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 	defer rows.Close()
@@ -244,8 +254,9 @@ func (p *daoApp) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols [
 
 	objs, has, err := obj.Scan(rows, cols...)
 	if has {
-		return objs, true, err
+		return objs, true, nil
 	}
+	log.Error(err)
 	return nil, false, err
 }
 
@@ -264,6 +275,7 @@ func (p *daoApp) GetFirstCell(ctx context.Context, col dialect.Field, cond ...di
 	c := p.R().Cols(col)
 	row, err := c.Where(cond...).QueryRow(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 
@@ -275,6 +287,7 @@ func (p *daoApp) GetFirstCell(ctx context.Context, col dialect.Field, cond ...di
 	case nil:
 		return v, true, nil
 	default:
+		log.Error(err)
 		return nil, false, err
 	}
 }
@@ -291,6 +304,7 @@ func (p *daoApp) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, err
 		Limit(dialect.MaxLimit).
 		Query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -299,6 +313,7 @@ func (p *daoApp) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, err
 	for rows.Next() {
 		var id types.BigInt
 		if err = rows.Scan(&id); err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		ids = append(ids, id)
@@ -314,6 +329,7 @@ func (p *daoApp) Columns(ctx context.Context, col dialect.Field, cond ...dialect
 		Limit(dialect.MaxLimit).
 		Query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -322,6 +338,7 @@ func (p *daoApp) Columns(ctx context.Context, col dialect.Field, cond ...dialect
 	for rows.Next() {
 		var v any
 		if err = rows.Scan(&v); err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		cols = append(cols, v)
@@ -344,6 +361,7 @@ func (p *daoApp) Exists(ctx context.Context, cond ...dialect.Condition) (bool, e
 	c := p.R().Cols(tblapp.PrimaryKey).Where(cond...)
 	row, err := c.QueryRow(ctx)
 	if err != nil {
+		log.Error(err)
 		return false, err
 	}
 
