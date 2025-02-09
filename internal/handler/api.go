@@ -102,8 +102,9 @@ func generateApi(name string) error {
 		return err
 	}
 
-	log.Printf("go mod tidy ... \n")
-	return exec.Command("go", "mod", "tidy").Run()
+	return nil
+	//log.Printf("go mod tidy ... \n")
+	//return exec.Command("go", "mod", "tidy").Run()
 }
 
 func apiInitModule(name string) error {
