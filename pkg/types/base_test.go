@@ -36,7 +36,7 @@ func TestBase(t *testing.T) {
 	a := new(App)
 	a.Id = 1234567
 	a.Arch = 3.14159265358979323846
-	a.Version = true
+	a.Version = Bool(-1)
 	a.Url = "https://www.baidu.com"
 	a.State = 1
 	a.Force = 11256

@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package json
+package gjson
 
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-json-experiment/json/jsontext"
 	"testing"
+	"time"
 )
 
 var (
@@ -47,6 +49,12 @@ type Address struct {
 	City   string `json:"city"`
 	Street string `json:"street"`
 }
+type Custom struct {
+	Name    string   `json:"name"`
+	Age     int      `json:"age"`
+	Address Address  `json:"address"`
+	Hobbies []string `json:"hobbies"`
+}
 
 func TestEncoder(t *testing.T) {
 	user := User{
@@ -65,12 +73,25 @@ func TestEncoder(t *testing.T) {
 	t.Log(string(buf))
 }
 func TestDecoder(t *testing.T) {
-	var u User
-	e := json.Unmarshal([]byte(jsonString), &u)
-	if e != nil {
-		t.Log(e)
+	start := time.Now()
+	for i := 0; i < 500; i++ {
+		var u User
+		e := json.Unmarshal([]byte(jsonString), &u)
+		if e != nil {
+			t.Log(e)
+		}
 	}
-	t.Log(u)
+	t.Log(time.Since(start).Nanoseconds())
+
+	start = time.Now()
+	for i := 0; i < 500; i++ {
+		var c Custom
+		e := json.Unmarshal([]byte(jsonString), &c)
+		if e != nil {
+			t.Log(e)
+		}
+	}
+	t.Log(time.Since(start).Nanoseconds())
 }
 func (u *User) MarshalJSON() ([]byte, error) {
 	fmt.Println("---------------")
@@ -99,6 +120,7 @@ func (u *User) MarshalJSON() ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
+
 func (u *User) UnmarshalJSON(data []byte) error {
 	reader := bytes.NewReader(data)
 	dec := jsontext.NewDecoder(reader)
@@ -186,4 +208,60 @@ func (u *User) UnmarshalJSON(data []byte) error {
 	readUser(u)
 
 	return nil
+}
+
+func (u *Custom) UnmarshalJSON(data []byte) error {
+	ok := ValidBytes(data)
+	if !ok {
+		return errors.New("invalid json")
+	}
+	result := ParseBytes(data)
+
+	var (
+		readUser    func(*Custom, Result)
+		readAddress func(*Address, Result)
+	)
+	readUser = func(user *Custom, result Result) {
+		result.ForEach(func(key, value Result) bool {
+			switch key.Str {
+			case "name":
+				user.Name = value.Str
+			case "age":
+				user.Age = int(value.Int())
+			case "address":
+				readAddress(&user.Address, value)
+			case "hobbies":
+				for _, val := range value.Array() {
+					user.Hobbies = append(user.Hobbies, val.Str)
+				}
+			}
+			return true
+		})
+	}
+	readAddress = func(address *Address, result Result) {
+		result.ForEach(func(key, value Result) bool {
+			switch key.Str {
+			case "city":
+				address.City = value.Str
+			case "street":
+				address.Street = value.Str
+			}
+			return true
+		})
+	}
+
+	readUser(u, result)
+
+	return nil
+}
+
+func TestSlice(t *testing.T) {
+	var slc = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	t.Log(slc, len(slc), cap(slc))
+	slc = slc[:0]
+	t.Log(slc, len(slc), cap(slc))
+
+	slc = append(slc, 11)
+	t.Log(slc, len(slc), cap(slc))
+
 }

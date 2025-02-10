@@ -555,46 +555,6 @@ func (f64 *Float64) UnmarshalJSON(b []byte) error {
 	return e
 }
 
-// // //////////////////////////////////
-// // Bool
-// func (b *Bool) Scan(src any) error {
-// 	switch v := src.(type) {
-// 	case nil:
-// 		*b = false
-// 		return nil
-// 	case bool:
-// 		*b = Bool(v)
-// 		return nil
-// 	case int64:
-// 		*b = v != 0
-// 		return nil
-// 	default:
-// 		return fmt.Errorf("unsupported scan type for Bool: %T", src)
-// 	}
-// }
-//
-// func (b Bool) Bool() bool {
-// 	return bool(b)
-// }
-//
-// func (b Bool) String() string {
-// 	return strconv.FormatBool(b.Bool())
-// }
-// func (b Bool) MarshalJSON() ([]byte, error) {
-// 	return conv.String2Bytes(strconv.FormatBool(bool(b))), nil
-// }
-//
-// func (b *Bool) UnmarshalJSON(bs []byte) error {
-// 	c := conv.Bytes2String(bytes.Trim(bs, "\""))
-// 	if c == "" {
-// 		*b = false
-// 		return nil
-// 	}
-// 	tem, e := strconv.ParseBool(c)
-// 	*b = Bool(tem)
-// 	return e
-// }
-
 // //////////////////////////////////
 // BoolX
 func (b *Bool) Scan(src any) error {
@@ -622,8 +582,11 @@ func (b *Bool) Scan(src any) error {
 		return fmt.Errorf("unsupported scan type for Bool: %T", src)
 	}
 }
+func (b Bool) Value() (driver.Value, error) {
+	return b > 0, nil
+}
 
-func (b Bool) BoolX() bool {
+func (b Bool) Bool() bool {
 	return b > 0
 }
 
@@ -679,7 +642,7 @@ func (t *Time) Scan(src any) error {
 	}
 }
 func (t Time) Value() (driver.Value, error) {
-	return t.Time, nil
+	return t, nil
 }
 
 func (t Time) Now() Time {

@@ -150,7 +150,7 @@ func writeInit(buf *bytes.Buffer, receiver string, stru types.Struct) {
 						buf.WriteString(fmt.Sprintf("	%s.%s = types.NilTime \n", receiver, field.Name))
 					case "types.Time":
 						buf.WriteString(fmt.Sprintf("	%s.%s = types.Time{} \n", receiver, field.Name))
-					case "types.Bool":
+					case "bool", "types.Bool":
 						buf.WriteString(fmt.Sprintf("	%s.%s = types.Bool(-1) \n", receiver, field.Name))
 					}
 					continue
@@ -273,7 +273,7 @@ func writeRequired(tags []string, field types.StructField, buf *bytes.Buffer, re
 		buf.WriteString(fmt.Sprintf("	if %s.%s == types.NilFloat64 {\n", receiver, field.Name))
 	case "time.Time", "types.Time":
 		buf.WriteString(fmt.Sprintf("	if %s.%s.IsZero() {\n", receiver, field.Name))
-	case "types.Bool":
+	case "bool", "types.Bool":
 		buf.WriteString(fmt.Sprintf("	if %s.%s == types.Bool(-1) {\n", receiver, field.Name))
 	default:
 		return
