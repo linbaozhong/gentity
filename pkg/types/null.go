@@ -21,7 +21,7 @@ import (
 
 const (
 	Nil        = math.MaxUint64
-	NilBool    = math.MaxUint64
+	NilBool    = Bool(-1)
 	NilString  = "NULL"
 	NilInt     = math.MinInt
 	NilInt8    = math.MinInt8

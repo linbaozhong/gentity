@@ -254,14 +254,3 @@ func (u *Custom) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
-
-func TestSlice(t *testing.T) {
-	var slc = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	t.Log(slc, len(slc), cap(slc))
-	slc = slc[:0]
-	t.Log(slc, len(slc), cap(slc))
-
-	slc = append(slc, 11)
-	t.Log(slc, len(slc), cap(slc))
-
-}
