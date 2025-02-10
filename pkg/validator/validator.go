@@ -213,6 +213,26 @@ func IsRGBcolor(str string) bool {
 	return rxRGBcolor.MatchString(str)
 }
 
+// HasWhitespace checks if the string contains whitespace characters.
+func HasWhitespace(str string) bool {
+	return rxHasWhitespace.MatchString(str)
+}
+
+// HasUpperCase checks if the string contains upper case characters.
+func HasUpperCase(str string) bool {
+	return rxHasUpperCase.MatchString(str)
+}
+
+// HasLowerCase checks if the string contains lower case characters.
+func HasLowerCase(str string) bool {
+	return rxHasLowerCase.MatchString(str)
+}
+
+// IsWhitespaceOnly checks if the string contains only whitespace characters.
+func IsWhitespaceOnly(str string) bool {
+	return rxHasWhitespaceOnly.MatchString(str)
+}
+
 // IsLowerCase checks if the string is lowercase. Empty string is valid.
 func IsLowerCase(str string) bool {
 	if IsNull(str) {
