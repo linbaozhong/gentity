@@ -1,10 +1,13 @@
 module github.com/linbaozhong/gentity
 
-go 1.22.7
+go 1.23
+
+toolchain go1.23.2
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/dchest/siphash v1.2.3
+	github.com/go-json-experiment/json v0.0.0-20250129011340-4e0381018ad6
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/gookit/slog v0.5.6
 	github.com/jmoiron/sqlx v1.4.0
