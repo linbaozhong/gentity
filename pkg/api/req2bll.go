@@ -38,7 +38,7 @@ func Post[A, B any](
 		req A
 		e   error
 	)
-	iface.Initiate(&req)
+	iface.Initiate(ctx, &req)
 
 	switch ctx.GetContentTypeRequested() {
 	case "application/json":
@@ -84,7 +84,7 @@ func Get[A, B any](
 		req A
 		e   error
 	)
-	iface.Initiate(&req)
+	iface.Initiate(ctx, &req)
 
 	if ctx.Request().URL.RawQuery == "" {
 		e = ctx.ReadForm(&req)
