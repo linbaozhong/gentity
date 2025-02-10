@@ -397,51 +397,55 @@ type ChannelReq struct {
 "requri":             // request uri
 "alpha":              // alpha
 "utfletter":          // utf letter
-"alphanum":           
-"utfletternum":       
-"numeric":            
-"utfnumeric":         
-"utfdigit":           
-"hexadecimal":        
-"hexcolor":           
-"rgbcolor":           
-"lowercase":          
-"uppercase":          
-"int":                
-"float":              
-"null":               
-"uuid":               
-"uuidv3":             
-"uuidv4":             
-"uuidv5":             
-"creditcard":         
-"isbn10":             
-"isbn13":             
-"json":               
-"multibyte":          
-"ascii":              
-"printableascii":     
-"fullwidth":          
-"halfwidth":          
-"variablewidth":      
-"base64":             
-"datauri":            
-"ip":                 
-"port":               
-"ipv4":               
-"ipv6":               
-"dns":                
-"host":               
-"mac":                
-"latitude":           
-"longitude":          
-"ssn":                
-"semver":             
-"rfc3339":            
-"rfc3339WithoutZone": 
-"ISO3166Alpha2":      
-"ISO3166Alpha3":      
-"ulid":               
+"alphanum":           // alpha numeric
+"utfletternum":       // utf letter numeric
+"numeric":            // numeric
+"utfnumeric":         // utf numeric
+"utfdigit":           // utf digit
+"hexadecimal":        // hexadecimal
+"hexcolor":           // hex color
+"rgbcolor":           // rgb color
+"lowercase":          // lowercase
+"uppercase":          // uppercase
+"haslowercase":       // has lowercase
+"hasuppercase":       // has uppercase
+"whitespace":         // whitespace
+"haswhitespace":      // has whitespace
+"int":                // int
+"float":              // float
+"null":               // null
+"uuid":               // uuid
+"uuidv3":             // uuidv3
+"uuidv4":             // uuidv4
+"uuidv5":             // uuidv5
+"creditcard":         // credit card
+"isbn10":             // isbn10
+"isbn13":             // isbn13
+"json":               // json
+"multibyte":          // multi byte
+"ascii":              // ascii
+"printableascii":     // printable ascii
+"fullwidth":          // full width
+"halfwidth":          // half width
+"variablewidth":      // variable width
+"base64":             // base64
+"datauri":            // data uri
+"ip":                 // ip
+"port":               // port
+"ipv4":               // ipv4
+"ipv6":               // ipv6
+"dns":                // dns
+"host":               // host
+"mac":                // mac
+"latitude":           // latitude
+"longitude":          // longitude
+"ssn":                // ssn
+"semver":             // semver
+"rfc3339":            // rfc3339
+"rfc3339WithoutZone": // rfc3339 without zone
+"ISO3166Alpha2":      // ISO3166 Alpha2
+"ISO3166Alpha3":      // ISO3166 Alpha3
+"ulid":               // ulid
 ```
 ### 校验器可用参数
 ```
