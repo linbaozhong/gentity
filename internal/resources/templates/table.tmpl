@@ -9,7 +9,7 @@ import (
 
 var (
 {{- range $key, $value := .Columns}}
-	{{ $value.Name }} = dialect.Field{Name: "{{$value.Col}}",Json: "{{$value.Json.Name}}",OmitEmpty: {{$value.Json.OmitEmpty}},Table: "{{ $tablename }}",Type: "{{$value.Type}}"}
+	{{ $value.Name }} = dialect.Field{Name: "{{$value.Col}}",Json: "{{$value.Json.Name}}",Table: "{{ $tablename }}",Type: "{{$value.Type}}"}
 {{- end}}
 
 {{- if .HasPrimaryKey}}
