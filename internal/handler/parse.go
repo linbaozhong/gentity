@@ -52,9 +52,8 @@ func parseFile(filename, pkgPath string) error {
 
 	for _, stru := range file.Structures {
 		tempData.TableName = ""
+		tempData.HasCustomType = false
 		tempData.HasTime = false
-		tempData.HasString = false
-		tempData.HasConvert = false
 		tempData.HasCache = false
 		tempData.HasPrimaryKey = false
 		tempData.HasState = false
@@ -110,17 +109,12 @@ func parseFile(filename, pkgPath string) error {
 			_namejson.Name = field.Name
 			_namejson.Type = field.Type.String()
 			_namejson.Rw = rw
-			switch _namejson.Type {
-			case "types.Time":
+
+			if strings.HasPrefix(_namejson.Type, "types") {
+				tempData.HasCustomType = true
+			}
+			if _namejson.Type == "time.Time" {
 				tempData.HasTime = true
-			case "time.Time":
-				tempData.HasTime = true
-			case "string":
-				tempData.HasString = true
-			case "int", "int8", "int16", "int32", "int64",
-				"uint", "uint8", "uint16", "uint32", "uint64",
-				"float32", "float64", "bool", "types.Money":
-				tempData.HasConvert = true
 			}
 
 			if _namejson.Col == "" {
@@ -138,7 +132,7 @@ func parseFile(filename, pkgPath string) error {
 				tempData.PrimaryKey = _namejson
 				// // 主键是否是自增
 				// if tempData.PrimaryKey[4] == "<-" {
-				// 	tempData.HasTime = true
+				// 	tempData.HasCustomType = true
 				// }
 			}
 			if _namejson.Col == "state" {

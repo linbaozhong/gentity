@@ -1,14 +1,15 @@
 package types
 
 import (
+	"encoding/json"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"time"
 )
 
-import "github.com/json-iterator/go"
+// import "github.com/json-iterator/go"
 
 var (
-	json = jsoniter.ConfigCompatibleWithStandardLibrary
+// json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 type Smap map[string]any

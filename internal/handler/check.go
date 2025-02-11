@@ -73,6 +73,7 @@ func generateCheck(filename string) error {
 		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/validator\" \n")
 		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/types\" \n")
 		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/conv\" \n")
+		buf.WriteString("	\"net/http\" \n")
 		buf.WriteString(") \n\n")
 		_, err = dtoFile.Write(buf.Bytes())
 		if err != nil {
@@ -193,7 +194,7 @@ func writeCheck(buf *bytes.Buffer, receiver string, stru types.Struct) {
 func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, receiver string) {
 	if fn, ok := validator.TagMap[tags[0]]; ok {
 		if len(tags) == 1 {
-			tags = append(tags, "Wrong "+tags[0]+" format")
+			tags = append(tags, "Wrong "+field.Name+" format")
 		}
 		b.WriteString(fmt.Sprintf("	if !validator.%s(", fn))
 		if field.Type.String() == "string" {
@@ -204,7 +205,7 @@ func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, recei
 			b.WriteString(fmt.Sprintf("conv.Any2String(%s.%s)", receiver, field.Name))
 		}
 		b.WriteString(") {\n")
-		b.WriteString(fmt.Sprintf("		return types.NewError(30001, \"%s\")\n", tags[1]))
+		b.WriteString(fmt.Sprintf("		return types.NewError(http.StatusBadRequest, \"%s\")\n", tags[1]))
 		b.WriteString("	}\n")
 		return
 	}
@@ -233,7 +234,7 @@ func writeDefault(tags []string, field types.StructField, b *bytes.Buffer, recei
 				b.WriteString(", \"" + param + "\"")
 			}
 			b.WriteString(") {\n")
-			b.WriteString(fmt.Sprintf("		return types.NewError(30001, \"%s\")\n", tags[1]))
+			b.WriteString(fmt.Sprintf("		return types.NewError(http.StatusBadRequest, \"%s\")\n", tags[1]))
 			b.WriteString("	}\n")
 			return
 		}
@@ -282,7 +283,7 @@ func writeRequired(tags []string, field types.StructField, buf *bytes.Buffer, re
 		// default:
 		// 	buf.WriteString(fmt.Sprintf("	if util.IsStructZeroValue(%s.%s) {\n", receiver, field.Name))
 	}
-	buf.WriteString(fmt.Sprintf("		return types.NewError(30001, \"%s is %s\")\n", field.Name, tags[1]))
+	buf.WriteString(fmt.Sprintf("		return types.NewError(http.StatusBadRequest, \"%s is %s\")\n", field.Name, tags[1]))
 	buf.WriteString("	}\n")
 }
 

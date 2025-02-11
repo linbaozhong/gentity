@@ -6,13 +6,20 @@
 package {{.PackageName}}
 
 import (
+	"bytes"
 	"database/sql"
+	"errors"
 	"{{.ModulePath}}/define/table/tbl{{ $structNameLower }}"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	{{- if .HasTime }}
+	"github.com/tidwall/gjson"
+	"github.com/linbaozhong/gentity/pkg/log"
+	{{- if .HasCustomType }}
 	"github.com/linbaozhong/gentity/pkg/types"
+	{{- end}}
+	{{- if .HasTime }}
+	"time"
 	{{- end}}
 )
 
@@ -29,6 +36,53 @@ var (
 func New{{.StructName}}() *{{.StructName}} {
 	obj := {{lower .StructName}}Pool.Get().(*{{.StructName}})
 	return obj
+}
+// MarshalJSON
+func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error(r)
+			return
+		}
+	}()
+
+	var buf = bytes.NewBuffer(nil)
+	buf.WriteByte('{')
+	{{- $len := sub (len .Columns) 1}}
+	{{- range $key, $value := .Columns}}
+		{{- if eq $key $len}}
+			buf.WriteString(`"`+tbl{{$structNameLower}}.{{ $value.Name }}.Json+`":`+types.Marshal(p.{{$value.Name}}))
+		{{- else}}
+			buf.WriteString(`"`+tbl{{$structNameLower}}.{{ $value.Name }}.Json+`":`+types.Marshal(p.{{$value.Name}})+`,`)
+		{{- end}}
+	{{- end}}
+	buf.WriteByte('}')
+	return buf.Bytes(), nil
+}
+// UnmarshalJSON
+func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error(r)
+			return
+		}
+	}()
+
+	ok := gjson.ValidBytes(data)
+	if !ok {
+		return errors.New("invalid json")
+	}
+	result := gjson.ParseBytes(data)
+	result.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		{{- range $key, $value := .Columns}}
+			case tbl{{$structNameLower}}.{{ $value.Name }}.Json:
+			p.{{$value.Name}} = {{getUnmarshalValue $value}}
+		{{- end}}
+		}
+		return true
+	})
+	return nil
 }
 
 // Free
@@ -82,11 +136,13 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]{{.Stru
 		vals := p.AssignPtr(args...)
 		err := rows.Scan(vals...)
 		if err != nil {
+			log.Error(err)
 			return nil, false, err
 		}
 		{{.TableName}}s = append({{.TableName}}s, *p)
 	}
 	if err := rows.Err(); err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 	if len({{.TableName}}s) == 0 {
