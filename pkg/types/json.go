@@ -22,7 +22,11 @@ import (
 	"time"
 )
 
-func Unmarshal(b []byte, v any) error {
+func Unmarshal(d string, v any) error {
+	b := conv.String2Bytes(d)
+	if j, ok := v.(json.Unmarshaler); ok {
+		return j.UnmarshalJSON(b)
+	}
 	return json.Unmarshal(b, v)
 }
 

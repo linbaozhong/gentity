@@ -67,13 +67,14 @@ func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 	}
 	result := gjson.ParseBytes(data)
 	result.ForEach(func(key, value gjson.Result) bool {
+		var e error
 		switch key.Str {
 		{{- range $key, $value := .Columns}}
 			case tbl{{$structNameLower}}.{{ $value.Name }}.Json:
-			p.{{$value.Name}} = {{getUnmarshalValue $value}}
+				e = types.Unmarshal(value.Raw, &p.{{$value.Name}})
 		{{- end}}
 		}
-		return true
+		return e == nil
 	})
 	return nil
 }
