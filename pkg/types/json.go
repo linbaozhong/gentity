@@ -18,16 +18,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/conv"
+	"github.com/linbaozhong/gentity/pkg/gjson"
 	"go/types"
 	"time"
 )
 
-func Unmarshal(d string, v any) error {
-	b := conv.String2Bytes(d)
-	if j, ok := v.(json.Unmarshaler); ok {
+func Unmarshal(r gjson.Result, ptr any, args ...any) error {
+	b := conv.String2Bytes(r.Raw)
+	if j, ok := ptr.(json.Unmarshaler); ok {
 		return j.UnmarshalJSON(b)
 	}
-	return json.Unmarshal(b, v)
+	if len(args) > 0 {
+		ptr = args[0]
+		return nil
+	}
+
+	return json.Unmarshal(b, ptr)
 }
 
 func Marshal(s any) string {

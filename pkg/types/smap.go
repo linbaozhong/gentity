@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-// import "github.com/json-iterator/go"
-
-var (
-// json = jsoniter.ConfigCompatibleWithStandardLibrary
-)
-
 type Smap map[string]any
 
 func NewSmap(size ...int) Smap {

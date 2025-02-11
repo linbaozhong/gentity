@@ -13,7 +13,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/tidwall/gjson"
+	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	{{- if .HasCustomType }}
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -71,7 +71,7 @@ func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 		switch key.Str {
 		{{- range $key, $value := .Columns}}
 			case tbl{{$structNameLower}}.{{ $value.Name }}.Json:
-				e = types.Unmarshal(value.Raw, &p.{{$value.Name}})
+				e = types.Unmarshal(value, &p.{{$value.Name}},{{getUnmarshalValue $value}})
 		{{- end}}
 		}
 		return e == nil

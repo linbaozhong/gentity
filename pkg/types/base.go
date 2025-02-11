@@ -78,12 +78,12 @@ func (s *String) Scan(src any) error {
 	return nil
 }
 
-func (s *String) String() string {
-	return string(*s)
+func (s String) String() string {
+	return string(s)
 }
 
-func (s *String) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(`"` + string(*s) + `"`), nil
+func (s String) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(`"` + string(s) + `"`), nil
 }
 
 func (s *String) UnmarshalJSON(b []byte) error {
@@ -107,15 +107,15 @@ func (i8 *Int8) Scan(src any) error {
 	}
 }
 
-func (i8 *Int8) Int8() int8 {
-	return int8(*i8)
+func (i8 Int8) Int8() int8 {
+	return int8(i8)
 }
 
-func (i8 *Int8) String() string {
-	return strconv.FormatInt(int64(*i8), 10)
+func (i8 Int8) String() string {
+	return strconv.FormatInt(int64(i8), 10)
 }
-func (i8 *Int8) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i8), 10)), nil
+func (i8 Int8) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i8), 10)), nil
 }
 
 func (i8 *Int8) UnmarshalJSON(b []byte) error {
@@ -145,15 +145,15 @@ func (i16 *Int16) Scan(src any) error {
 	}
 }
 
-func (i16 *Int16) Int16() int16 {
-	return int16(*i16)
+func (i16 Int16) Int16() int16 {
+	return int16(i16)
 }
 
-func (i16 *Int16) String() string {
-	return strconv.FormatInt(int64(*i16), 10)
+func (i16 Int16) String() string {
+	return strconv.FormatInt(int64(i16), 10)
 }
-func (i16 *Int16) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i16), 10)), nil
+func (i16 Int16) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i16), 10)), nil
 }
 
 func (i16 *Int16) UnmarshalJSON(b []byte) error {
@@ -183,15 +183,15 @@ func (i32 *Int32) Scan(src any) error {
 	}
 }
 
-func (i32 *Int32) Int32() int32 {
-	return int32(*i32)
+func (i32 Int32) Int32() int32 {
+	return int32(i32)
 }
 
-func (i32 *Int32) String() string {
-	return strconv.FormatInt(int64(*i32), 10)
+func (i32 Int32) String() string {
+	return strconv.FormatInt(int64(i32), 10)
 }
-func (i32 *Int32) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i32), 10)), nil
+func (i32 Int32) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i32), 10)), nil
 }
 
 func (i32 *Int32) UnmarshalJSON(b []byte) error {
@@ -221,15 +221,15 @@ func (i64 *Int64) Scan(src any) error {
 	}
 }
 
-func (i64 *Int64) Int64() int64 {
-	return int64(*i64)
+func (i64 Int64) Int64() int64 {
+	return int64(i64)
 }
 
-func (i64 *Int64) String() string {
-	return strconv.FormatInt(int64(*i64), 10)
+func (i64 Int64) String() string {
+	return strconv.FormatInt(int64(i64), 10)
 }
-func (i64 *Int64) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i64), 10)), nil
+func (i64 Int64) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i64), 10)), nil
 }
 
 func (i64 *Int64) UnmarshalJSON(b []byte) error {
@@ -259,15 +259,15 @@ func (i *Int) Scan(src any) error {
 	}
 }
 
-func (i *Int) Int() int {
-	return int(*i)
+func (i Int) Int() int {
+	return int(i)
 }
 
-func (i *Int) String() string {
-	return strconv.FormatInt(int64(*i), 10)
+func (i Int) String() string {
+	return strconv.FormatInt(int64(i), 10)
 }
-func (i *Int) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i), 10)), nil
+func (i Int) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i), 10)), nil
 }
 
 func (i *Int) UnmarshalJSON(b []byte) error {
@@ -297,16 +297,16 @@ func (i8 *Uint8) Scan(src any) error {
 	}
 }
 
-func (i8 *Uint8) Uint8() uint8 {
-	return uint8(*i8)
+func (i8 Uint8) Uint8() uint8 {
+	return uint8(i8)
 }
 
-func (i8 *Uint8) String() string {
-	return strconv.FormatUint(uint64(*i8), 10)
+func (i8 Uint8) String() string {
+	return strconv.FormatUint(uint64(i8), 10)
 }
 
-func (i8 *Uint8) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i8), 10)), nil
+func (i8 Uint8) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i8), 10)), nil
 }
 
 func (i8 *Uint8) UnmarshalJSON(b []byte) error {
@@ -336,16 +336,16 @@ func (i16 *Uint16) Scan(src any) error {
 	}
 }
 
-func (i16 *Uint16) Uint16() uint16 {
-	return uint16(*i16)
+func (i16 Uint16) Uint16() uint16 {
+	return uint16(i16)
 }
 
-func (i16 *Uint16) String() string {
-	return strconv.FormatUint(uint64(*i16), 10)
+func (i16 Uint16) String() string {
+	return strconv.FormatUint(uint64(i16), 10)
 }
 
-func (i16 *Uint16) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i16), 10)), nil
+func (i16 Uint16) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i16), 10)), nil
 }
 
 func (i16 *Uint16) UnmarshalJSON(b []byte) error {
@@ -375,16 +375,16 @@ func (i32 *Uint32) Scan(src any) error {
 	}
 }
 
-func (i32 *Uint32) Uint32() uint32 {
-	return uint32(*i32)
+func (i32 Uint32) Uint32() uint32 {
+	return uint32(i32)
 }
 
-func (i32 *Uint32) String() string {
-	return strconv.FormatUint(uint64(*i32), 10)
+func (i32 Uint32) String() string {
+	return strconv.FormatUint(uint64(i32), 10)
 }
 
-func (i32 *Uint32) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i32), 10)), nil
+func (i32 Uint32) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i32), 10)), nil
 }
 
 func (i32 *Uint32) UnmarshalJSON(b []byte) error {
@@ -414,16 +414,16 @@ func (i64 *Uint64) Scan(src any) error {
 	}
 }
 
-func (i64 *Uint64) Uint64() uint64 {
-	return uint64(*i64)
+func (i64 Uint64) Uint64() uint64 {
+	return uint64(i64)
 }
 
-func (i64 *Uint64) String() string {
-	return strconv.FormatUint(uint64(*i64), 10)
+func (i64 Uint64) String() string {
+	return strconv.FormatUint(uint64(i64), 10)
 }
 
-func (i64 *Uint64) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i64), 10)), nil
+func (i64 Uint64) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i64), 10)), nil
 }
 
 func (i64 *Uint64) UnmarshalJSON(b []byte) error {
@@ -453,16 +453,16 @@ func (i *Uint) Scan(src any) error {
 	}
 }
 
-func (i *Uint) Uint() uint {
-	return uint(*i)
+func (i Uint) Uint() uint {
+	return uint(i)
 }
 
-func (i *Uint) String() string {
-	return strconv.FormatUint(uint64(*i), 10)
+func (i Uint) String() string {
+	return strconv.FormatUint(uint64(i), 10)
 }
 
-func (i *Uint) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(*i), 10)), nil
+func (i Uint) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatInt(int64(i), 10)), nil
 }
 
 func (i *Uint) UnmarshalJSON(b []byte) error {
@@ -492,16 +492,16 @@ func (f32 *Float32) Scan(src any) error {
 	}
 }
 
-func (f32 *Float32) Float32() float32 {
-	return float32(*f32)
+func (f32 Float32) Float32() float32 {
+	return float32(f32)
 }
 
-func (f32 *Float32) String() string {
-	return strconv.FormatFloat(float64(*f32), 'f', -1, 32)
+func (f32 Float32) String() string {
+	return strconv.FormatFloat(float64(f32), 'f', -1, 32)
 }
 
-func (f32 *Float32) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatFloat(float64(*f32), 'f', -1, 32)), nil
+func (f32 Float32) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatFloat(float64(f32), 'f', -1, 32)), nil
 }
 
 func (f32 *Float32) UnmarshalJSON(b []byte) error {
@@ -531,16 +531,16 @@ func (f64 *Float64) Scan(src any) error {
 	}
 }
 
-func (f64 *Float64) Float64() float64 {
-	return float64(*f64)
+func (f64 Float64) Float64() float64 {
+	return float64(f64)
 }
 
-func (f64 *Float64) String() string {
-	return strconv.FormatFloat(float64(*f64), 'f', -1, 64)
+func (f64 Float64) String() string {
+	return strconv.FormatFloat(float64(f64), 'f', -1, 64)
 }
 
-func (f64 *Float64) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatFloat(float64(*f64), 'f', -1, 64)), nil
+func (f64 Float64) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(strconv.FormatFloat(float64(f64), 'f', -1, 64)), nil
 }
 
 func (f64 *Float64) UnmarshalJSON(b []byte) error {
@@ -581,24 +581,24 @@ func (b *Bool) Scan(src any) error {
 		return fmt.Errorf("unsupported scan type for Bool: %T", src)
 	}
 }
-func (b *Bool) Value() (driver.Value, error) {
-	return *b > 0, nil
+func (b Bool) Value() (driver.Value, error) {
+	return b > 0, nil
 }
 
-func (b *Bool) Bool() bool {
-	return *b > 0
+func (b Bool) Bool() bool {
+	return b > 0
 }
 
-func (b *Bool) String() string {
-	if *b > 0 {
+func (b Bool) String() string {
+	if b > 0 {
 		return "true"
-	} else if *b == 0 {
+	} else if b == 0 {
 		return "false"
 	} else {
 		return "null"
 	}
 }
-func (b *Bool) MarshalJSON() ([]byte, error) {
+func (b Bool) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(b.String()), nil
 }
 
@@ -638,22 +638,22 @@ func (t *Time) Scan(src any) error {
 		return fmt.Errorf("unsupported scan type for Time: %T", src)
 	}
 }
-func (t *Time) Value() (driver.Value, error) {
-	return *t, nil
+func (t Time) Value() (driver.Value, error) {
+	return t, nil
 }
 
-func (t *Time) Now() Time {
+func (t Time) Now() Time {
 	return Time{time.Now()}
 }
 
 func Now() Time {
 	return Time{time.Now()}
 }
-func (t *Time) String() string {
+func (t Time) String() string {
 	return t.Format(time.DateTime)
 }
 
-func (t *Time) MarshalJSON() ([]byte, error) {
+func (t Time) MarshalJSON() ([]byte, error) {
 	return conv.String2Bytes(`"` + t.String() + `"`), nil
 }
 
