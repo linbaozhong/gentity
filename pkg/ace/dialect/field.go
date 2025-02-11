@@ -20,11 +20,13 @@ import (
 
 type (
 	Field struct {
-		Name  string
-		Json  string
-		Table string
-		Type  string
+		Name      string
+		Json      string
+		OmitEmpty bool
+		Table     string
+		Type      string
 	}
+
 	Function   func() string
 	Condition  func() (string, any)
 	Setter     func() (Field, any)

@@ -52,11 +52,16 @@ type TempData struct {
 
 // Field struct 字段
 type Field struct {
-	Name string // 字段名
-	Col  string // 数据库列名
-	Json string // json名
-	Type string // 类型
-	Rw   string // 数据库读写标志
+	Name string  // 字段名
+	Col  string  // 数据库列名
+	Json jsonObj // json名
+	Type string  // 类型
+	Rw   string  // 数据库读写标志
+}
+type jsonObj struct {
+	Name      string
+	OmitEmpty bool
+	OmitZero  bool
 }
 
 // Relation 关系
@@ -204,6 +209,25 @@ func (d *TempData) writeToModel(fileName string) error {
 				return ` == false`
 			default:
 				return ` == nil`
+			}
+		},
+		"getNotZeroValue": func(t Field) any {
+			v := t.Type
+			switch v {
+			case "string", "types.String":
+				return `p.` + t.Name + ` != ""`
+			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
+				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.BigInt", "types.Money":
+				return `p.` + t.Name + ` != 0`
+			case "float32", "float64", "types.Float32", "types.Float64":
+				return `p.` + t.Name + ` != 0.0`
+			case "time.Time", "types.Time":
+				return `!p.` + t.Name + `.IsZero()`
+			case "bool", "types.Bool":
+				return `p.` + t.Name + ` != false`
+			default:
+				return `p.` + t.Name + ` != nil`
 			}
 		},
 		"getSqlValue": func(t Field) any {

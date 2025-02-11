@@ -83,7 +83,7 @@ func parseFile(filename, pkgPath string) error {
 			var _namejson = Field{}
 			for k, v := range field.Tags {
 				if k == "json" {
-					_namejson.Json = v[0] // json_name
+					_namejson.Json = parseJson(v) // json_name
 				} else if k == "db" {
 					_namejson.Col, pk, rw, ref = parseTagsForDB(v) // column_name
 					if len(ref) > 0 {
@@ -118,10 +118,10 @@ func parseFile(filename, pkgPath string) error {
 			}
 
 			if _namejson.Col == "" {
-				if _namejson.Json == "" {
+				if _namejson.Json.Name == "" {
 					_namejson.Col = getFieldName(field.Name)
 				} else {
-					_namejson.Col = _namejson.Json
+					_namejson.Col = _namejson.Json.Name
 				}
 			}
 
@@ -169,6 +169,21 @@ func parseFile(filename, pkgPath string) error {
 	}
 
 	return err
+}
+
+func parseJson(keys []string) jsonObj {
+	var json jsonObj
+	for _, key := range keys {
+		switch key {
+		case "omitempty":
+			json.OmitEmpty = true
+		case "omitzero":
+			json.OmitZero = true
+		default:
+			json.Name = key
+		}
+	}
+	return json
 }
 
 func parseDocs(tmp *TempData, docs []string) {

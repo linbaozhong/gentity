@@ -41,14 +41,18 @@ func New{{.StructName}}() *{{.StructName}} {
 func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 	var buf = bytes.NewBuffer(nil)
 	buf.WriteByte('{')
-	{{- $len := sub (len .Columns) 1}}
 	{{- range $key, $value := .Columns}}
-		{{- if eq $key $len}}
-			buf.WriteString(`"`+tbl{{$structNameLower}}.{{ $value.Name }}.Json+`":`+types.Marshal(p.{{$value.Name}}))
-		{{- else}}
+		{{- if $value.Json.OmitEmpty}}
+		if {{getNotZeroValue $value}} {
 			buf.WriteString(`"`+tbl{{$structNameLower}}.{{ $value.Name }}.Json+`":`+types.Marshal(p.{{$value.Name}})+`,`)
+		}
+		{{- else}}
+		buf.WriteString(`"`+tbl{{$structNameLower}}.{{ $value.Name }}.Json+`":`+types.Marshal(p.{{$value.Name}})+`,`)
 		{{- end}}
 	{{- end}}
+	if l := buf.Len(); l > 1 {
+		buf.Truncate(l - 1)
+	}
 	buf.WriteByte('}')
 	return buf.Bytes(), nil
 }
