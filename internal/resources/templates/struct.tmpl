@@ -39,13 +39,6 @@ func New{{.StructName}}() *{{.StructName}} {
 }
 // MarshalJSON
 func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Error(r)
-			return
-		}
-	}()
-
 	var buf = bytes.NewBuffer(nil)
 	buf.WriteByte('{')
 	{{- $len := sub (len .Columns) 1}}

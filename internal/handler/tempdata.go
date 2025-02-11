@@ -159,46 +159,6 @@ func getUnmarshalValue(t Field) string {
 	}
 }
 
-//	func getMarshalValue(t Field) string {
-//		switch t.Type {
-//		case "string":
-//			return `p.` + t.Name + `"`
-//		case "int64":
-//			return `value.Int()`
-//		case "uint64":
-//			return `value.Uint()`
-//		case "int", "int8", "int16", "int32",
-//			"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64":
-//			return t.Type + "(value.Int())"
-//		case "uint", "uint8", "uint16", "uint32",
-//			"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
-//			"types.BigInt", "types.Money":
-//			return t.Type + "(value.Uint())"
-//		case "float32", "types.Float32", "types.Float64":
-//			return t.Type + "(value.Float())"
-//		case "float64":
-//			return "value.Float()"
-//		case "types.String":
-//			return `types.String(value.Str)`
-//		case "time.Time":
-//			return "value.Time()"
-//		case "types.Time":
-//			return "types.Time{Time: value.Time()}"
-//		case "bool":
-//			return "value.Bool()"
-//		case "types.Bool":
-//			return "util.IIF(value.Bool(),types.Bool(1),types.Bool(0))"
-//		default:
-//			return `func(value gjson.Result) ` + t.Type + ` {
-//			var obj ` + t.Type + `
-//			e := types.Unmarshal([]byte(value.Raw), &obj)
-//			if e != nil {
-//				panic(e)
-//			}
-//			return obj
-//		}(value)`
-//		}
-//	}
 func (d *TempData) writeToModel(fileName string) error {
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
@@ -279,7 +239,6 @@ func (d *TempData) writeToModel(fileName string) error {
 			}
 		},
 		"getUnmarshalValue": getUnmarshalValue,
-		// "getMarshalValue":   getMarshalValue,
 	}
 
 	fileName = filepath.Join(fullpath, getBaseFilename(fileName)+"_do_"+d.StructName+".gen.go")
