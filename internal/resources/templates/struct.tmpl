@@ -37,6 +37,7 @@ func New{{.StructName}}() *{{.StructName}} {
 	obj := {{lower .StructName}}Pool.Get().(*{{.StructName}})
 	return obj
 }
+
 // MarshalJSON
 func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 	var buf = bytes.NewBuffer(nil)
@@ -56,6 +57,7 @@ func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 	buf.WriteByte('}')
 	return buf.Bytes(), nil
 }
+
 // UnmarshalJSON
 func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 	defer func() {

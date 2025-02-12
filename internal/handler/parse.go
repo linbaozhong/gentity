@@ -22,52 +22,55 @@ import (
 	"unicode"
 )
 
-func parseFile(filename, pkgPath string) error {
-	tempData := new(TempData)
-	tempData.ModulePath = pkgPath
-
+func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 	var structFullName = filepath.Join(fullpath, filename)
 	astFile, err := getAst(structFullName)
 	if err != nil {
 		showError(err)
-		return err
+		return nil, err
 	}
-
-	tempData.PackageName = astFile.Name.Name
 
 	file, err := astra.ParseFile(structFullName,
 		astra.IgnoreVariables|astra.IgnoreConstants|astra.IgnoreFunctions|
 			astra.IgnoreInterfaces|astra.IgnoreTypes|astra.IgnoreMethods)
 	if err != nil {
 		showError(err)
-		return err
+		return nil, err
 	}
 	if len(file.Structures) == 0 {
-		return nil
+		return nil, nil
 	}
 
+	imps := make([]string, 0, len(file.Imports))
 	for _, im := range file.Imports {
-		tempData.Imports = append(tempData.Imports, im.Package)
+		imps = append(imps, im.Package)
 	}
-
+	// 文件中全部符合条件的struct模板
+	tplsData := make([]TempData, 0, len(file.Structures))
+	// 遍历struct
 	for _, stru := range file.Structures {
-		tempData.TableName = ""
-		tempData.HasCustomType = false
-		tempData.HasTime = false
-		tempData.HasCache = false
-		tempData.HasPrimaryKey = false
-		tempData.HasState = false
-		tempData.CacheData = "time.Minute"
-		tempData.CacheList = "time.Minute"
-		tempData.CacheLimit = "1000"
-		tempData.PrimaryKey = Field{}
-		tempData.RelationX = Relation{}
-		tempData.Columns = make([]Field, 0, 20)
-		tempData.FileName = structFullName
-		tempData.StructName = stru.Name
+		// 如果struct名称为空,或者是一个私有struct,或者field为空,返回
+		if len(stru.Name) == 0 || len(stru.Fields) == 0 /*|| unicode.IsLower(rune(stru.Name[0]))*/ {
+			continue
+		}
+
+		tempData := TempData{
+			ParseTag:    make([]string, 0, 2),
+			ModulePath:  pkgPath,
+			PackageName: astFile.Name.Name,
+			Imports:     imps,
+			StructName:  stru.Name,
+			CacheData:   "time.Minute",
+			CacheList:   "time.Minute",
+			CacheLimit:  "1000",
+			FileName:    structFullName,
+			PrimaryKey:  Field{},
+			RelationX:   Relation{},
+			Columns:     make([]Field, 0, 20),
+		}
 		// 解析struct文档
-		parseDocs(tempData, stru.Docs)
-		if tempData.TableName == "" {
+		parseDocs(&tempData, stru.Docs, tags...)
+		if len(tempData.ParseTag) == 0 {
 			continue
 		}
 
@@ -104,6 +107,8 @@ func parseFile(filename, pkgPath string) error {
 							tempData.RelationX.Foreign = _ref[1]
 						}
 					}
+				} else if k == "valid" {
+					_namejson.Valids = moveToFront(v, "required")
 				}
 			}
 			_namejson.Name = field.Name
@@ -139,36 +144,10 @@ func parseFile(filename, pkgPath string) error {
 				tempData.HasState = true
 			}
 		}
-		// 如果struct名称为空,或者是一个私有struct,或者field为空,返回
-		if len(tempData.StructName) == 0 ||
-			tempData.StructName[:1] == strings.ToLower(tempData.StructName[:1]) ||
-			len(tempData.Columns) == 0 {
-			return nil
-		}
-
-		// 写table文件
-		err = tempData.writeTable(filepath.Join(tablePath, "tbl"+strings.ToLower(tempData.StructName)))
-		if err != nil {
-			showError(err.Error())
-			return err
-		}
-
-		// 写model文件
-		err = tempData.writeToModel(filename)
-		if err != nil {
-			showError(err)
-			return err
-		}
-
-		// 写dal文件
-		err = tempData.writeBuild(daoPath)
-		if err != nil {
-			showError(err.Error())
-			return err
-		}
+		tplsData = append(tplsData, tempData)
 	}
 
-	return err
+	return tplsData, err
 }
 
 func parseJson(keys []string) jsonObj {
@@ -186,13 +165,39 @@ func parseJson(keys []string) jsonObj {
 	return json
 }
 
-func parseDocs(tmp *TempData, docs []string) {
+// moveToFront 函数用于将指定字符串移到切片的第一个位置
+func moveToFront(slice []string, target string) []string {
+	// 遍历切片，查找目标字符串的索引
+	for i, str := range slice {
+		if str == target {
+			// 如果找到目标字符串，将其移动到切片的第一个位置
+			if i > 0 {
+				// 把目标字符串暂存起来
+				temp := slice[i]
+				// 将目标字符串之前的元素依次向后移动一位
+				copy(slice[1:i+1], slice[0:i])
+				// 将目标字符串放到切片的第一个位置
+				slice[0] = temp
+			}
+			break
+		}
+	}
+	return slice
+}
+func parseDocs(tmp *TempData, docs []string, tags ...string) {
 	for _, doc := range docs {
 		doc = strings.TrimLeft(doc, " /")
-		if strings.Contains(doc, "tablename") {
-			tmp.TableName = strings.TrimSpace(strings.TrimLeft(doc, "tablename"))
-			continue
+
+		for _, tag := range tags {
+			if strings.Contains(doc, tag) {
+				tmp.ParseTag = append(tmp.ParseTag, tag)
+				if tag == "tablename" {
+					tmp.TableName = strings.TrimSpace(strings.TrimLeft(doc, tag))
+					break
+				}
+			}
 		}
+
 		if strings.HasPrefix(doc, "cache ") {
 			tmp.HasCache = true
 			cache := strings.Replace(strings.TrimSpace(strings.TrimLeft(doc, "cache")), "  ", " ", -1)

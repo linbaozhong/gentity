@@ -28,18 +28,18 @@ import (
 
 // TempData 表示生成template所需要的数据结构
 type TempData struct {
-	Module      string
-	ModulePath  string
-	FileName    string
-	PackageName string
-	Imports     []string
-	StructName  string
-	TableName   string
-	CacheData   string // 数据缓存时长
-	CacheList   string // list缓存时长
-	CacheLimit  string // list缓存长度
-	Columns     []Field
-	// Keys        [][]string
+	ParseTag      []string
+	Module        string
+	ModulePath    string
+	FileName      string
+	PackageName   string
+	Imports       []string
+	StructName    string
+	TableName     string
+	CacheData     string // 数据缓存时长
+	CacheList     string // list缓存时长
+	CacheLimit    string // list缓存长度
+	Columns       []Field
 	PrimaryKey    Field
 	RelationX     Relation // 关系键
 	HasPrimaryKey bool
@@ -47,16 +47,16 @@ type TempData struct {
 	HasCache      bool
 	HasCustomType bool
 	HasTime       bool
-	// HasConvert    bool
 }
 
 // Field struct 字段
 type Field struct {
-	Name string  // 字段名
-	Col  string  // 数据库列名
-	Json jsonObj // json名
-	Type string  // 类型
-	Rw   string  // 数据库读写标志
+	Name   string   // 字段名
+	Col    string   // 数据库列名
+	Json   jsonObj  // json名
+	Type   string   // 类型
+	Rw     string   // 数据库读写标志
+	Valids []string // 数据校验规则
 }
 type jsonObj struct {
 	Name      string
@@ -164,104 +164,113 @@ func getUnmarshalValue(t Field) string {
 	}
 }
 
+func getTypeValue(t Field) any {
+	v := t.Type
+	switch v {
+	case "string", "types.String":
+		return `""`
+	case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
+		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+		"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
+		"types.Float64", "types.BigInt", "types.Money":
+		return 0
+	case "time.Time", "types.Time":
+		return `types.Time{}` // `time.Time{}`
+	case "bool", "types.Bool":
+		return `false`
+	default:
+		if v[:2] == "[]" {
+			return "p." + t.Name + "[:0]"
+		}
+		return v + "{}"
+	}
+}
+
+func getZeroValue(t Field) any {
+	v := t.Type
+	switch v {
+	case "string", "types.String":
+		return ` == ""`
+	case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
+		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+		"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.BigInt", "types.Money":
+		return ` == 0`
+	case "float32", "float64", "types.Float32", "types.Float64":
+		return ` == 0.0`
+	case "time.Time", "types.Time":
+		return `.IsZero()`
+	case "bool", "types.Bool":
+		return ` == false`
+	default:
+		return ` == nil`
+	}
+}
+
+func getNotZeroValue(t Field) any {
+	v := t.Type
+	switch v {
+	case "string", "types.String":
+		return `p.` + t.Name + ` != ""`
+	case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
+		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+		"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.BigInt", "types.Money":
+		return `p.` + t.Name + ` != 0`
+	case "float32", "float64", "types.Float32", "types.Float64":
+		return `p.` + t.Name + ` != 0.0`
+	case "time.Time", "types.Time":
+		return `!p.` + t.Name + `.IsZero()`
+	case "bool", "types.Bool":
+		return `p.` + t.Name + ` != false`
+	default:
+		return `p.` + t.Name + ` != nil`
+	}
+}
+
+func getSqlValue(t Field) any {
+	switch t.Type {
+	case "string":
+		return "sql.NullString"
+	case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":
+		return "sql.NullInt64"
+	case "float32", "float64":
+		return "sql.NullFloat64"
+	case "time.Time":
+		return "sql.NullTime"
+	case "bool":
+		return "sql.NullBool"
+	default:
+		return "sql.NullInt64"
+	}
+}
+func getSqlType(t Field) any {
+	switch t.Type {
+	case "string":
+		return "String"
+	case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":
+		return "Int64"
+	case "float32", "float64":
+		return "Float64"
+	case "time.Time":
+		return "Time"
+	case "bool":
+		return "Bool"
+	default:
+		return "Int64"
+	}
+}
+
 func (d *TempData) writeToModel(fileName string) error {
 	funcMap := template.FuncMap{
 		"lower": strings.ToLower,
 		"sub": func(a, b int) int {
 			return a - b
 		},
-		"getType": getType,
-		"getTypeValue": func(t Field) any {
-			v := t.Type
-			switch v {
-			case "string", "types.String":
-				return `""`
-			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
-				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
-				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
-				"types.Float64", "types.BigInt", "types.Money":
-				return 0
-			case "time.Time", "types.Time":
-				return `types.Time{}` // `time.Time{}`
-			case "bool", "types.Bool":
-				return `false`
-			default:
-				if v[:2] == "[]" {
-					return "p." + t.Name + "[:0]"
-				}
-				return v + "{}"
-			}
-		},
-		"getZeroValue": func(t Field) any {
-			v := t.Type
-			switch v {
-			case "string", "types.String":
-				return ` == ""`
-			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
-				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
-				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.BigInt", "types.Money":
-				return ` == 0`
-			case "float32", "float64", "types.Float32", "types.Float64":
-				return ` == 0.0`
-			case "time.Time", "types.Time":
-				return `.IsZero()`
-			case "bool", "types.Bool":
-				return ` == false`
-			default:
-				return ` == nil`
-			}
-		},
-		"getNotZeroValue": func(t Field) any {
-			v := t.Type
-			switch v {
-			case "string", "types.String":
-				return `p.` + t.Name + ` != ""`
-			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
-				"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
-				"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.BigInt", "types.Money":
-				return `p.` + t.Name + ` != 0`
-			case "float32", "float64", "types.Float32", "types.Float64":
-				return `p.` + t.Name + ` != 0.0`
-			case "time.Time", "types.Time":
-				return `!p.` + t.Name + `.IsZero()`
-			case "bool", "types.Bool":
-				return `p.` + t.Name + ` != false`
-			default:
-				return `p.` + t.Name + ` != nil`
-			}
-		},
-		"getSqlValue": func(t Field) any {
-			switch t.Type {
-			case "string":
-				return "sql.NullString"
-			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":
-				return "sql.NullInt64"
-			case "float32", "float64":
-				return "sql.NullFloat64"
-			case "time.Time":
-				return "sql.NullTime"
-			case "bool":
-				return "sql.NullBool"
-			default:
-				return "sql.NullInt64"
-			}
-		},
-		"getSqlType": func(t Field) any {
-			switch t.Type {
-			case "string":
-				return "String"
-			case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64":
-				return "Int64"
-			case "float32", "float64":
-				return "Float64"
-			case "time.Time":
-				return "Time"
-			case "bool":
-				return "Bool"
-			default:
-				return "Int64"
-			}
-		},
+		"getType":           getType,
+		"getTypeValue":      getTypeValue,
+		"getZeroValue":      getZeroValue,
+		"getNotZeroValue":   getNotZeroValue,
+		"getSqlValue":       getSqlValue,
+		"getSqlType":        getSqlType,
 		"getUnmarshalValue": getUnmarshalValue,
 	}
 

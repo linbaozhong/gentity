@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	version = "0.4.9"
+	version = "0.5.2"
 )
 
 var (
@@ -61,6 +61,14 @@ var (
 				showError(err)
 				return
 			}
+			// 上一级目录
+			parent = filepath.Dir(fullpath)
+			pos := strings.LastIndex(fullpath, string(os.PathSeparator))
+			if pos > 0 {
+				parent = fullpath[:pos]
+			}
+			// 包名
+			packageName := fullpath[pos+1:]
 			//
 			switch command {
 			case "api": // 如果command="api"，则初始化api模板
@@ -70,30 +78,23 @@ var (
 					showError("The project name is not entered")
 				}
 				return
-			case "dao", "sql", "db":
-				// 上一级目录
-				parent = filepath.Dir(fullpath)
-				pos := strings.LastIndex(fullpath, string(os.PathSeparator))
-				if pos > 0 {
-					parent = fullpath[:pos]
-				}
-				//
-				definePath := filepath.Join(parent, "define")
-				// 包名
-				packageName := fullpath[pos+1:]
-
+			case "sql", "db": // 如果command="db"或"sql"，则根据数据表信息生成结构体
 				if len(driver) > 0 && len(dns) > 0 {
-					// 生成结构体
-					// has, _ := regexp.MatchString("@.*:|:.*@", dns)
-					if command == "db" {
-						err = db2struct(driver, dns, fullpath, packageName)
-					} else if command == "sql" {
-						err = sql2struct(driver, dns, fullpath, packageName)
-					}
-					if err != nil {
-						showError(err)
-					}
+					showError("The database driver and connection string must be entered")
+					return
 				}
+				// 生成结构体
+				if command == "db" { // 从dns获取表结构生成结构体
+					err = db2struct(driver, dns, fullpath, packageName)
+				} else if command == "sql" { // 根据sql建表文件生成结构体
+					err = sql2struct(driver, dns, fullpath, packageName)
+				}
+				if err != nil {
+					showError(err)
+				}
+				fallthrough
+			case "dao": // 根据struct生成dao层代码和序列化器
+				definePath := filepath.Join(parent, "define")
 				tablePath = filepath.Join(definePath, "table")
 				// 创建生成dao层代码的目录
 				err = os.MkdirAll(tablePath, os.ModePerm)
@@ -143,11 +144,19 @@ var (
 				if filepath.Ext(filename) != ".go" {
 					continue
 				}
-
 				if command == "check" {
-					err = generateCheck(filename)
+					tds, err := parseFile(filename, pkgPath, "checker", "request", "response")
+					if err != nil {
+						showError(err)
+					}
+					// err = generateCheck(filename)
+					err = generateDTO(tds, filename)
 				} else {
-					err = parseFile(filename, pkgPath)
+					tds, err := parseFile(filename, pkgPath, "tablename")
+					if err != nil {
+						showError(err)
+					}
+					err = generateDao(tds, filename)
 				}
 				if err != nil {
 					showError(err)
