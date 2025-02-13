@@ -121,7 +121,7 @@ func writeToDTO(d TempData, fileName string) error {
 		"getValidFunc":      getValidFunc,
 		"getValidParamFunc": getValidParamFunc,
 		"getFieldString":    getFieldString,
-		"contains":          util.SliceContains[string],
+		"contains":          contains,
 	}
 	var fn func(ioWriter io.Writer, funcMap template.FuncMap) error
 	fn = func(ioWriter io.Writer, funcMap template.FuncMap) error {
@@ -274,4 +274,14 @@ func getValidParamFunc(t, n string) (fo funcObj) {
 		return
 	}
 	return
+}
+
+func contains(s []string, e string) bool {
+	es := strings.Split(e, "|")
+	for _, v := range es {
+		if util.SliceContains(s, v) {
+			return true
+		}
+	}
+	return false
 }

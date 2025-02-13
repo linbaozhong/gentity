@@ -1,14 +1,13 @@
-{{- $structName := .StructName}}
-{{- $structNameLower := lower .StructName}}
 
-{{- if contains .ParseTag "checker"}}
+/*
+	--- {{.StructName}} ---
+*/
+{{- if contains .ParseTag "checker|request"}}
 // Init
 func (p *{{.StructName}}) Init() error {
-	{{- range $key, $value := .Columns}}{{range $valid := $value.Valids}}
-		{{- if eq $valid "required"}}
+	{{- range $key, $value := .Columns}}
 		p.{{$value.Name}} = {{getTypeNil $value}}
-		{{- end}}
-	{{- end}}{{end}}
+	{{- end}}
 
 	return nil
 }
@@ -60,7 +59,7 @@ func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 }
 {{end}}
 
-{{- if contains .ParseTag "request"}}
+{{- if contains .ParseTag "checker|request"}}
 // UnmarshalJSON
 func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 	{{- if .HasRef}}
