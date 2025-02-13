@@ -203,8 +203,6 @@ func getFieldString(t Field) string {
 		"types.BigInt", "types.Money", "types.Float32", "types.Float64", "types.Time",
 		"types.Bool", "types.String":
 		return `p.` + t.Name + ".String()"
-	// case "types.String":
-	// 	return `types.String(value.Str)`
 	default:
 		return `conv.Any2String(p.` + t.Name + `)`
 	}
