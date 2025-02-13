@@ -196,12 +196,12 @@ func getTypeNil(t Field) any {
 }
 func getFieldString(t Field) string {
 	switch t.Type {
-	case "string", "types.String":
+	case "string":
 		return `p.` + t.Name
 	case "types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64",
 		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
 		"types.BigInt", "types.Money", "types.Float32", "types.Float64", "types.Time",
-		"types.Bool":
+		"types.Bool", "types.String":
 		return `p.` + t.Name + ".String()"
 	// case "types.String":
 	// 	return `types.String(value.Str)`
