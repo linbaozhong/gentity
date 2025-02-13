@@ -45,10 +45,10 @@ func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 	{{- range $key, $value := .Columns}}
 		{{- if $value.Json.OmitEmpty}}
 		if {{getNotZeroValue $value}} {
-			buf.WriteString(`"`+tbl{{$structNameLower}}.{{ $value.Name }}.Json+`":`+types.Marshal(p.{{$value.Name}})+`,`)
+			buf.WriteString(`"{{ $value.Json.Name }}":`+types.Marshal(p.{{$value.Name}})+`,`)
 		}
 		{{- else}}
-		buf.WriteString(`"`+tbl{{$structNameLower}}.{{ $value.Name }}.Json+`":`+types.Marshal(p.{{$value.Name}})+`,`)
+		buf.WriteString(`"{{ $value.Json.Name }}":`+types.Marshal(p.{{$value.Name}})+`,`)
 		{{- end}}
 	{{- end}}
 	if l := buf.Len(); l > 1 {
@@ -60,12 +60,14 @@ func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON
 func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
+	{{- if .HasRef}}
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error(r)
 			return
 		}
 	}()
+	{{- end}}
 
 	ok := gjson.ValidBytes(data)
 	if !ok {
@@ -76,11 +78,15 @@ func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 		var e error
 		switch key.Str {
 		{{- range $key, $value := .Columns}}
-			case tbl{{$structNameLower}}.{{ $value.Name }}.Json:
+			case "{{ $value.Json.Name }}":
 				e = types.Unmarshal(value, &p.{{$value.Name}},{{getUnmarshalValue $value}})
 		{{- end}}
 		}
-		return e == nil
+		if e != nil {
+			log.Error(e)
+			return false
+		}
+		return true
 	})
 	return nil
 }

@@ -22,7 +22,7 @@ import (
 	"sync"
 )
 
-const dentityDTO = "gentity_dto.go"
+const dentityDTO = "gentity_dto.gen.go"
 
 var (
 	astOnce sync.Once

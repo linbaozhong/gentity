@@ -63,12 +63,14 @@ func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 {{- if contains .ParseTag "request"}}
 // UnmarshalJSON
 func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
+	{{- if .HasRef}}
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error(r)
 			return
 		}
 	}()
+	{{- end}}
 
 	ok := gjson.ValidBytes(data)
 	if !ok {
@@ -83,7 +85,11 @@ func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 				e = types.Unmarshal(value, &p.{{$value.Name}},{{getUnmarshalValue $value}})
 		{{- end}}
 		}
-		return e == nil
+		if e != nil {
+			log.Error(e)
+			return false
+		}
+		return true
 	})
 	return nil
 }

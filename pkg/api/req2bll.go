@@ -89,7 +89,6 @@ func Get[A, B any](
 	if ctx.Request().URL.RawQuery == "" {
 		e = ctx.ReadForm(&req)
 	} else {
-		// e = ctx.ReadQuery(&req)
 		e = ctx.ReadURL(&req)
 	}
 	if e != nil {

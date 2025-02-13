@@ -22,6 +22,25 @@ import (
 	"unicode"
 )
 
+const (
+	jsonTag  = "json"
+	formTag  = "form"
+	urlTag   = "url"
+	paramTag = "param"
+	dbTag    = "db"
+	validTag = "valid"
+)
+
+func parseType(fieldType string) (kind, typeName string) {
+	if strings.HasPrefix(fieldType, "[]") {
+		return "slice", fieldType[2:]
+	} else if strings.HasPrefix(fieldType, "*") {
+		return "ptr", fieldType[1:]
+	} else {
+		return "struct", fieldType
+	}
+}
+
 func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 	var structFullName = filepath.Join(fullpath, filename)
 	astFile, err := getAst(structFullName)
@@ -85,29 +104,23 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			)
 			var _namejson = Field{}
 			for k, v := range field.Tags {
-				if k == "json" {
+				switch k {
+				case jsonTag, urlTag, formTag, paramTag:
 					_namejson.Json = parseJson(v) // json_name
-				} else if k == "db" {
+				case dbTag:
 					_namejson.Col, pk, rw, ref = parseTagsForDB(v) // column_name
-					if len(ref) > 0 {
-						_ref := strings.Split(ref, "|")
-						if len(_ref) == 2 {
-							if strings.HasPrefix(field.Type.String(), "[]") {
-								tempData.RelationX.Kind = "slice"
-								tempData.RelationX.Type = field.Type.String()[2:]
-							} else if strings.HasPrefix(field.Type.String(), "*") {
-								tempData.RelationX.Kind = "ptr"
-								tempData.RelationX.Type = field.Type.String()[1:]
-							} else {
-								tempData.RelationX.Kind = "struct"
-								tempData.RelationX.Type = field.Type.String()
-							}
-							tempData.RelationX.Name = field.Name
-							tempData.RelationX.Field = _ref[0]
-							tempData.RelationX.Foreign = _ref[1]
-						}
+					if len(ref) == 0 {
+						continue
 					}
-				} else if k == "valid" {
+					_ref := strings.Split(ref, "|")
+					if len(_ref) != 2 {
+						continue
+					}
+					tempData.RelationX.Kind, tempData.RelationX.Type = parseType(field.Type.String())
+					tempData.RelationX.Name = field.Name
+					tempData.RelationX.Field = _ref[0]
+					tempData.RelationX.Foreign = _ref[1]
+				case validTag:
 					_namejson.Valids = moveToFront(v, "required")
 				}
 			}
@@ -140,8 +153,8 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 				// 	tempData.HasCustomType = true
 				// }
 			}
-			if _namejson.Col == "state" {
-				tempData.HasState = true
+			if r := _namejson.Type[:1]; r == "*" || r == "[" || r == "m" {
+				tempData.HasRef = true
 			}
 		}
 		tplsData = append(tplsData, tempData)

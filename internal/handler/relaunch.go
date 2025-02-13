@@ -17,6 +17,7 @@ package handler
 import (
 	"fmt"
 	"github.com/linbaozhong/gentity/internal/base"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -135,13 +136,24 @@ var (
 			if command == "check" {
 				defer dtoFile.Close()
 			}
-
+			// 初始化进度条
+			bar := progressbar.NewOptions(len(dirs),
+				progressbar.OptionEnableColorCodes(true),
+				progressbar.OptionSetTheme(progressbar.Theme{
+					Saucer:        "[red]=[reset]",
+					SaucerHead:    "[red]>[reset]",
+					SaucerPadding: " ",
+					BarStart:      "[",
+					BarEnd:        "]",
+				}),
+				progressbar.OptionShowCount())
 			for _, dir := range dirs {
+				bar.Add(1)
 				if dir.IsDir() {
 					continue
 				}
 				var filename = dir.Name() // struct文件名
-				if filepath.Ext(filename) != ".go" {
+				if filepath.Ext(filename) != ".go" || strings.HasSuffix(filename, ".gen.go") {
 					continue
 				}
 				if command == "check" {
@@ -149,7 +161,6 @@ var (
 					if err != nil {
 						showError(err)
 					}
-					// err = generateCheck(filename)
 					err = generateDTO(tds, filename)
 				} else {
 					tds, err := parseFile(filename, pkgPath, "tablename")

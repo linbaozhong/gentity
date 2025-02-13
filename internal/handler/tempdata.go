@@ -43,7 +43,7 @@ type TempData struct {
 	PrimaryKey    Field
 	RelationX     Relation // 关系键
 	HasPrimaryKey bool
-	HasState      bool
+	HasRef        bool // 有引用类型
 	HasCache      bool
 	HasCustomType bool
 	HasTime       bool
@@ -155,7 +155,7 @@ func getUnmarshalValue(t Field) string {
 	default:
 		return `func(value gjson.Result) ` + t.Type + ` {
 		var obj ` + t.Type + `
-		e := types.Unmarshal([]byte(value.Raw), &obj)
+		e := types.Unmarshal(value, &obj)
 		if e != nil {
 			panic(e)
 		}

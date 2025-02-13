@@ -186,7 +186,12 @@ func getTypeNil(t Field) any {
 	case "bool", "types.Bool":
 		return "types.Bool(-1)"
 	default:
-		return `nil`
+		switch t.Type[0] {
+		case '*', '[', 'm':
+			return "nil"
+		default:
+			return `"请将字段类型改为指针/切片/映射等引用类型"`
+		}
 	}
 }
 func getFieldString(t Field) string {

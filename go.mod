@@ -1,8 +1,6 @@
 module github.com/linbaozhong/gentity
 
-go 1.23
-
-toolchain go1.23.2
+go 1.23.2
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
@@ -15,8 +13,10 @@ require (
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/redis/go-redis/v9 v9.5.1
+	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/spf13/cobra v1.8.1
-	github.com/tidwall/gjson v1.18.0
+	github.com/tidwall/match v1.1.1
+	github.com/tidwall/pretty v1.2.0
 	github.com/vetcher/go-astra v1.2.0
 	golang.org/x/sync v0.10.0
 	golang.org/x/tools v0.28.0
@@ -55,16 +55,16 @@ require (
 	github.com/mailgun/raymond/v2 v2.0.48 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
+	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tdewolff/minify/v2 v2.20.19 // indirect
 	github.com/tdewolff/parse/v2 v2.7.12 // indirect
-	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
@@ -74,7 +74,8 @@ require (
 	golang.org/x/exp v0.0.0-20240404231335-c0f41cb1a7a0 // indirect
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/net v0.32.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/term v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
