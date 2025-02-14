@@ -7,14 +7,14 @@ import (
 
 // checker
 type UserRegisterReq struct {
-	UserName int              `json:"user_name" url:"user_name" form:"user_name" valid:"required,range(10|25)"`
-	Password types.String     `json:"password" url:"password" form:"password" valid:"required"`
-	Email    string           `json:"email" url:"email" form:"email" valid:"email~Email格式错误,required"`
-	Content  types.Float64    `valid:"runelength(50|100),required"`
-	Age      int8             `valid:"range(18|60),required"`
-	AuthorIP int64            `valid:"ipv4"`
-	Date     time.Time        `valid:"required"`
-	Get      UserRegisterResp `valid:"required"`
+	UserName int               `json:"user_name" url:"user_name" form:"user_name" valid:"required,range(10|25)"`
+	Password types.String      `json:"password" url:"password" form:"password" valid:"required"`
+	Email    string            `json:"email" url:"email" form:"email" valid:"email~Email格式错误,required"`
+	Content  types.Float64     `valid:"runelength(50|100),required"`
+	Age      int8              `valid:"range(18|60),required"`
+	AuthorIP int64             `valid:"ipv4"`
+	Date     time.Time         `valid:"required"`
+	Get      *UserRegisterResp `valid:"required"`
 }
 
 type UserRegisterResp struct {

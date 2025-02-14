@@ -42,14 +42,14 @@ func Post[A, B any](
 
 	switch ctx.GetContentTypeRequested() {
 	case "application/json":
-		e = ctx.ReadJSON(&req)
+		e = ReadJSON(ctx, &req)
 	case "application/x-www-form-urlencoded", "multipart/form-data":
 		e = ctx.ReadForm(&req)
 	default:
 		if ctx.Request().URL.RawQuery == "" {
 			e = ctx.ReadForm(&req)
 		} else {
-			e = ctx.ReadQuery(&req)
+			e = ReadQuery(ctx, &req)
 		}
 	}
 
@@ -89,7 +89,7 @@ func Get[A, B any](
 	if ctx.Request().URL.RawQuery == "" {
 		e = ctx.ReadForm(&req)
 	} else {
-		e = ctx.ReadURL(&req)
+		e = ReadQuery(ctx, &req)
 	}
 	if e != nil {
 		Fail(ctx, Param_Invalid)

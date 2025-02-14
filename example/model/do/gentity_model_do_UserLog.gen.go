@@ -3,11 +3,15 @@
 package do
 
 import (
+	"bytes"
 	"database/sql"
+	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tbluserlog"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/gjson"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
@@ -24,6 +28,95 @@ var (
 func NewUserLog() *UserLog {
 	obj := userlogPool.Get().(*UserLog)
 	return obj
+}
+
+// MarshalJSON
+func (p *UserLog) MarshalJSON() ([]byte, error) {
+	var buf = bytes.NewBuffer(nil)
+	buf.WriteByte('{')
+	if p.Id != 0 {
+		buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+	}
+	if p.UserId != 0 {
+		buf.WriteString(`"user_id":` + types.Marshal(p.UserId) + `,`)
+	}
+	if !p.LoginTime.IsZero() {
+		buf.WriteString(`"login_time":` + types.Marshal(p.LoginTime) + `,`)
+	}
+	if p.Device != "" {
+		buf.WriteString(`"device":` + types.Marshal(p.Device) + `,`)
+	}
+	if p.Os != "" {
+		buf.WriteString(`"os":` + types.Marshal(p.Os) + `,`)
+	}
+	if p.OsVersion != "" {
+		buf.WriteString(`"os_version":` + types.Marshal(p.OsVersion) + `,`)
+	}
+	if p.AppName != "" {
+		buf.WriteString(`"app_name":` + types.Marshal(p.AppName) + `,`)
+	}
+	if p.AppVersion != "" {
+		buf.WriteString(`"app_version":` + types.Marshal(p.AppVersion) + `,`)
+	}
+	if p.Ip != "" {
+		buf.WriteString(`"ip":` + types.Marshal(p.Ip) + `,`)
+	}
+	if p.User != nil {
+		buf.WriteString(`"user":` + types.Marshal(p.User) + `,`)
+	}
+	if l := buf.Len(); l > 1 {
+		buf.Truncate(l - 1)
+	}
+	buf.WriteByte('}')
+	return buf.Bytes(), nil
+}
+
+// UnmarshalJSON
+func (p *UserLog) UnmarshalJSON(data []byte) error {
+
+	ok := gjson.ValidBytes(data)
+	if !ok {
+		return errors.New("invalid json")
+	}
+	result := gjson.ParseBytes(data)
+	result.ForEach(func(key, value gjson.Result) bool {
+		var e error
+		switch key.Str {
+		case "id":
+			e = types.Unmarshal(value, &p.Id, types.BigInt(value.Uint()))
+		case "user_id":
+			e = types.Unmarshal(value, &p.UserId, types.BigInt(value.Uint()))
+		case "login_time":
+			e = types.Unmarshal(value, &p.LoginTime, types.Time{Time: value.Time()})
+		case "device":
+			e = types.Unmarshal(value, &p.Device, types.String(value.Str))
+		case "os":
+			e = types.Unmarshal(value, &p.Os, types.String(value.Str))
+		case "os_version":
+			e = types.Unmarshal(value, &p.OsVersion, types.String(value.Str))
+		case "app_name":
+			e = types.Unmarshal(value, &p.AppName, types.String(value.Str))
+		case "app_version":
+			e = types.Unmarshal(value, &p.AppVersion, types.String(value.Str))
+		case "ip":
+			e = types.Unmarshal(value, &p.Ip, types.String(value.Str))
+		case "user":
+			e = types.Unmarshal(value, &p.User, func(value gjson.Result) User {
+				var obj User
+				e := types.Unmarshal(value, &obj)
+				if e != nil {
+					panic(e)
+				}
+				return obj
+			}(value))
+		}
+		if e != nil {
+			log.Error(e)
+			return false
+		}
+		return true
+	})
+	return nil
 }
 
 // Free
@@ -101,11 +194,13 @@ func (p *UserLog) Scan(rows *sql.Rows, args ...dialect.Field) ([]UserLog, bool, 
 		vals := p.AssignPtr(args...)
 		err := rows.Scan(vals...)
 		if err != nil {
+			log.Error(err)
 			return nil, false, err
 		}
 		user_logs = append(user_logs, *p)
 	}
 	if err := rows.Err(); err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 	if len(user_logs) == 0 {

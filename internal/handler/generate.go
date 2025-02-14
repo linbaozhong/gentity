@@ -275,11 +275,12 @@ func getValidParamFunc(t, n string) (fo funcObj) {
 }
 
 func contains(s []string, e string) bool {
-	es := strings.Split(e, "|")
-	for _, v := range es {
-		if util.SliceContains(s, v) {
-			return true
-		}
+	before, after, found := strings.Cut(e, "|")
+	if util.SliceContains(s, before) {
+		return true
+	}
+	if found {
+		return util.SliceContains(s, after)
 	}
 	return false
 }

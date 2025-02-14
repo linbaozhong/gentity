@@ -18,20 +18,48 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"strings"
 )
 
-func ReadJSON(ctx Context, v any) error {
+type UnmarshalValueser interface {
+	UnmarshalValues(vals map[string][]string) error
+}
+
+// Content-Type为application/json的请求
+func ReadJSON(ctx Context, ptr any) error {
 	// 从请求体中读取 JSON 数据
 	body, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
 		return err
 	}
+	// 关闭请求体
+	defer ctx.Request().Body.Close()
+
 	if len(body) == 0 {
 		return errors.New("请求体为空")
 	}
 	// 解析 JSON 数据到结构体中
-	if x, ok := v.(json.Unmarshaler); ok {
+	if x, ok := ptr.(json.Unmarshaler); ok {
 		return x.UnmarshalJSON(body)
 	}
-	return json.Unmarshal(body, v)
+	return json.Unmarshal(body, ptr)
+}
+
+func ReadQuery(ctx Context, ptr any) error {
+	if x, ok := ptr.(UnmarshalValueser); ok {
+		params := ctx.Params()
+		values := make(map[string][]string, params.Len())
+		params.Visit(func(key string, value string) {
+			values[key] = strings.Split(value, "/")
+		})
+
+		for k, v := range ctx.Request().URL.Query() {
+			values[k] = append(values[k], v...)
+		}
+		if len(values) == 0 {
+			return nil
+		}
+		return x.UnmarshalValues(values)
+	}
+	return ctx.ReadBody(ptr)
 }

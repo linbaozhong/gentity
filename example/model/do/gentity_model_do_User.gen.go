@@ -3,11 +3,15 @@
 package do
 
 import (
+	"bytes"
 	"database/sql"
+	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tbluser"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/gjson"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
@@ -24,6 +28,71 @@ var (
 func NewUser() *User {
 	obj := userPool.Get().(*User)
 	return obj
+}
+
+// MarshalJSON
+func (p *User) MarshalJSON() ([]byte, error) {
+	var buf = bytes.NewBuffer(nil)
+	buf.WriteByte('{')
+	if p.Id != 0 {
+		buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+	}
+	if p.Uuid != "" {
+		buf.WriteString(`"uuid":` + types.Marshal(p.Uuid) + `,`)
+	}
+	if !p.Ctime.IsZero() {
+		buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+	}
+	if p.UserLogs != nil {
+		buf.WriteString(`"user_logs":` + types.Marshal(p.UserLogs) + `,`)
+	}
+	if l := buf.Len(); l > 1 {
+		buf.Truncate(l - 1)
+	}
+	buf.WriteByte('}')
+	return buf.Bytes(), nil
+}
+
+// UnmarshalJSON
+func (p *User) UnmarshalJSON(data []byte) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error(r)
+			return
+		}
+	}()
+
+	ok := gjson.ValidBytes(data)
+	if !ok {
+		return errors.New("invalid json")
+	}
+	result := gjson.ParseBytes(data)
+	result.ForEach(func(key, value gjson.Result) bool {
+		var e error
+		switch key.Str {
+		case "id":
+			e = types.Unmarshal(value, &p.Id, types.BigInt(value.Uint()))
+		case "uuid":
+			e = types.Unmarshal(value, &p.Uuid, types.String(value.Str))
+		case "ctime":
+			e = types.Unmarshal(value, &p.Ctime, types.Time{Time: value.Time()})
+		case "user_logs":
+			e = types.Unmarshal(value, &p.UserLogs, func(value gjson.Result) []UserLog {
+				var obj []UserLog
+				e := types.Unmarshal(value, &obj)
+				if e != nil {
+					panic(e)
+				}
+				return obj
+			}(value))
+		}
+		if e != nil {
+			log.Error(e)
+			return false
+		}
+		return true
+	})
+	return nil
 }
 
 // Free
@@ -83,11 +152,13 @@ func (p *User) Scan(rows *sql.Rows, args ...dialect.Field) ([]User, bool, error)
 		vals := p.AssignPtr(args...)
 		err := rows.Scan(vals...)
 		if err != nil {
+			log.Error(err)
 			return nil, false, err
 		}
 		users = append(users, *p)
 	}
 	if err := rows.Err(); err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 	if len(users) == 0 {

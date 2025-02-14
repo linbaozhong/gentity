@@ -3,11 +3,16 @@
 package do
 
 import (
+	"bytes"
 	"database/sql"
+	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblapp"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/gjson"
+	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/types"
 )
 
 const AppTableName = "app"
@@ -23,6 +28,68 @@ var (
 func NewApp() *App {
 	obj := appPool.Get().(*App)
 	return obj
+}
+
+// MarshalJSON
+func (p *App) MarshalJSON() ([]byte, error) {
+	var buf = bytes.NewBuffer(nil)
+	buf.WriteByte('{')
+	if p.Id != 0 {
+		buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+	}
+	if p.Arch != "" {
+		buf.WriteString(`"arch":` + types.Marshal(p.Arch) + `,`)
+	}
+	if p.Version != "" {
+		buf.WriteString(`"version":` + types.Marshal(p.Version) + `,`)
+	}
+	if p.Url != "" {
+		buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
+	}
+	if p.State != 0 {
+		buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+	}
+	if p.Force != 0 {
+		buf.WriteString(`"force":` + types.Marshal(p.Force) + `,`)
+	}
+	if l := buf.Len(); l > 1 {
+		buf.Truncate(l - 1)
+	}
+	buf.WriteByte('}')
+	return buf.Bytes(), nil
+}
+
+// UnmarshalJSON
+func (p *App) UnmarshalJSON(data []byte) error {
+
+	ok := gjson.ValidBytes(data)
+	if !ok {
+		return errors.New("invalid json")
+	}
+	result := gjson.ParseBytes(data)
+	result.ForEach(func(key, value gjson.Result) bool {
+		var e error
+		switch key.Str {
+		case "id":
+			e = types.Unmarshal(value, &p.Id, types.BigInt(value.Uint()))
+		case "arch":
+			e = types.Unmarshal(value, &p.Arch, types.String(value.Str))
+		case "version":
+			e = types.Unmarshal(value, &p.Version, types.String(value.Str))
+		case "url":
+			e = types.Unmarshal(value, &p.Url, types.String(value.Str))
+		case "state":
+			e = types.Unmarshal(value, &p.State, types.Int8(value.Int()))
+		case "force":
+			e = types.Unmarshal(value, &p.Force, types.Int8(value.Int()))
+		}
+		if e != nil {
+			log.Error(e)
+			return false
+		}
+		return true
+	})
+	return nil
 }
 
 // Free
@@ -88,11 +155,13 @@ func (p *App) Scan(rows *sql.Rows, args ...dialect.Field) ([]App, bool, error) {
 		vals := p.AssignPtr(args...)
 		err := rows.Scan(vals...)
 		if err != nil {
+			log.Error(err)
 			return nil, false, err
 		}
 		apps = append(apps, *p)
 	}
 	if err := rows.Err(); err != nil {
+		log.Error(err)
 		return nil, false, err
 	}
 	if len(apps) == 0 {
