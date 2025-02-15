@@ -52,9 +52,9 @@ type daoApp struct {
 }
 
 func App(exec ace.Executer) apper {
-	obj := &daoApp{}
-	obj.db = exec
-	return obj
+	_obj := &daoApp{}
+	_obj.db = exec
+	return _obj
 }
 
 // C Create app
@@ -82,53 +82,53 @@ func (p *daoApp) Insert(ctx context.Context, sets ...dialect.Setter) (int64, err
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	result, err := p.C().
+	_result, e := p.C().
 		Set(sets...).
 		Exec(ctx)
-	if err != nil {
-		log.Error(err)
-		return 0, err
+	if e != nil {
+		log.Error(e)
+		return 0, e
 	}
-	return result.LastInsertId()
+	return _result.LastInsertId()
 }
 
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *daoApp) InsertOne(ctx context.Context, bean *do.App, cols ...dialect.Field) (bool, error) {
-	result, err := p.C().
+	_result, e := p.C().
 		Cols(cols...).
 		Struct(ctx, bean)
-	if err != nil {
-		log.Error(err)
-		return false, err
+	if e != nil {
+		log.Error(e)
+		return false, e
 	}
 
-	bean.AssignPrimaryKeyValues(result)
+	bean.AssignPrimaryKeyValues(_result)
 
-	n, err := result.RowsAffected()
-	return n > 0, err
+	_n, e := _result.RowsAffected()
+	return _n > 0, e
 }
 
 // InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 // cols: 要插入的列名
 func (p *daoApp) InsertBatch(ctx context.Context, beans []*do.App, cols ...dialect.Field) (int64, error) {
-	lens := len(beans)
-	if lens == 0 {
+	_lens := len(beans)
+	if _lens == 0 {
 		return 0, dialect.ErrBeanEmpty
 	}
-	args := make([]dialect.Modeler, 0, lens)
-	for _, bean := range beans {
-		args = append(args, bean)
+	_args := make([]dialect.Modeler, 0, _lens)
+	for _, _bean := range beans {
+		_args = append(_args, _bean)
 	}
-	result, err := p.C().
+	_result, e := p.C().
 		Cols(cols...).
-		StructBatch(ctx, args...)
-	if err != nil {
-		log.Error(err)
-		return 0, err
+		StructBatch(ctx, _args...)
+	if e != nil {
+		log.Error(e)
+		return 0, e
 	}
 
-	return result.RowsAffected()
+	return _result.RowsAffected()
 }
 
 // Update
@@ -136,16 +136,16 @@ func (p *daoApp) Update(ctx context.Context, sets []dialect.Setter, cond ...dial
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	result, err := p.U().
+	_result, e := p.U().
 		Where(cond...).
 		Set(sets...).
 		Exec(ctx)
-	if err != nil {
-		log.Error(err)
-		return false, err
+	if e != nil {
+		log.Error(e)
+		return false, e
 	}
-	n, err := result.RowsAffected()
-	return n >= 0, err
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // UpdateById
@@ -159,36 +159,36 @@ func (p *daoApp) UpdateById(ctx context.Context, id types.BigInt, sets ...dialec
 // UpdateBatch 批量更新,禁止在事务中使用
 // cols: 要更新的列名
 func (p *daoApp) UpdateBatch(ctx context.Context, beans []*do.App, cols ...dialect.Field) (bool, error) {
-	lens := len(beans)
-	if lens == 0 {
+	_lens := len(beans)
+	if _lens == 0 {
 		return false, dialect.ErrBeanEmpty
 	}
-	args := make([]dialect.Modeler, 0, lens)
-	for _, bean := range beans {
-		args = append(args, bean)
+	_args := make([]dialect.Modeler, 0, _lens)
+	for _, _bean := range beans {
+		_args = append(_args, _bean)
 	}
-	result, err := p.U().
+	_result, e := p.U().
 		Cols(cols...).
-		StructBatch(ctx, args...)
-	if err != nil {
-		log.Error(err)
-		return false, err
+		StructBatch(ctx, _args...)
+	if e != nil {
+		log.Error(e)
+		return false, e
 	}
-	n, err := result.RowsAffected()
-	return n >= 0, err
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // Delete
 func (p *daoApp) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	result, err := p.D().
+	_result, e := p.D().
 		Where(cond...).
 		Exec(ctx)
-	if err != nil {
-		log.Error(err)
-		return false, err
+	if e != nil {
+		log.Error(e)
+		return false, e
 	}
-	n, err := result.RowsAffected()
-	return n >= 0, err
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // DeleteById
@@ -200,64 +200,64 @@ func (p *daoApp) DeleteById(ctx context.Context, id types.BigInt) (bool, error) 
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoApp) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*do.App, bool, error) {
-	c := p.R()
+	_c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tblapp.ReadableFields...)
+		_c.Cols(tblapp.ReadableFields...)
 	} else {
-		c.Cols(cols...)
+		_c.Cols(cols...)
 	}
 
-	row, err := c.Where(cond...).
+	_row, e := _c.Where(cond...).
 		QueryRow(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, false, err
+	if e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
 
-	obj := do.NewApp()
+	_obj := do.NewApp()
 
-	err = row.Scan(obj.AssignPtr(cols...)...)
-	switch err {
+	e = _row.Scan(_obj.AssignPtr(cols...)...)
+	switch e {
 	case sql.ErrNoRows:
 		return nil, false, nil
 	case nil:
-		return obj, true, nil
+		return _obj, true, nil
 	default:
-		log.Error(err)
-		return nil, false, err
+		log.Error(e)
+		return nil, false, e
 	}
 }
 
 // Find4Cols 分页获取app slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoApp) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]do.App, bool, error) {
-	c := p.R()
+	_c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tblapp.ReadableFields...)
+		_c.Cols(tblapp.ReadableFields...)
 	} else {
-		c.Cols(cols...)
+		_c.Cols(cols...)
 	}
 	//
 	if pageSize == 0 {
 		pageSize = dialect.PageSize
 	}
 	//
-	rows, err := c.Where(cond...).
+	_rows, e := _c.Where(cond...).
 		Limit(pageSize, pageSize*pageIndex).
 		Query(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, false, err
+	if e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
-	defer rows.Close()
+	defer _rows.Close()
 
-	obj := do.NewApp()
+	_obj := do.NewApp()
 
-	objs, has, err := obj.Scan(rows, cols...)
+	_objs, has, e := _obj.Scan(_rows, cols...)
 	if has {
-		return objs, true, nil
+		return _objs, true, nil
 	}
-	log.Error(err)
-	return nil, false, err
+	log.Error(e)
+	return nil, false, e
 }
 
 // GetByID 按主键读取一个app对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -272,23 +272,23 @@ func (p *daoApp) Get(ctx context.Context, cond ...dialect.Condition) (*do.App, b
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoApp) GetFirstCell(ctx context.Context, col dialect.Field, cond ...dialect.Condition) (any, bool, error) {
-	c := p.R().Cols(col)
-	row, err := c.Where(cond...).QueryRow(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, false, err
+	_c := p.R().Cols(col)
+	_row, e := _c.Where(cond...).QueryRow(ctx)
+	if e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
 
-	var v any
-	err = row.Scan(&v)
-	switch err {
+	var _v any
+	e = _row.Scan(&_v)
+	switch e {
 	case sql.ErrNoRows:
 		return nil, false, nil
 	case nil:
-		return v, true, nil
+		return _v, true, nil
 	default:
-		log.Error(err)
-		return nil, false, err
+		log.Error(e)
+		return nil, false, e
 	}
 }
 
@@ -299,51 +299,51 @@ func (p *daoApp) Find(ctx context.Context, pageIndex, pageSize uint, cond ...dia
 
 // IDs
 func (p *daoApp) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols(tblapp.PrimaryKey)
-	rows, err := c.Where(cond...).
+	_c := p.R().Cols(tblapp.PrimaryKey)
+	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		Query(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, err
+	if e != nil {
+		log.Error(e)
+		return nil, e
 	}
-	defer rows.Close()
+	defer _rows.Close()
 
-	ids := make([]any, 0, dialect.PageSize)
-	for rows.Next() {
+	_ids := make([]any, 0, dialect.PageSize)
+	for _rows.Next() {
 		var id types.BigInt
-		if err = rows.Scan(&id); err != nil {
-			log.Error(err)
-			return nil, err
+		if e = _rows.Scan(&id); e != nil {
+			log.Error(e)
+			return nil, e
 		}
-		ids = append(ids, id)
+		_ids = append(_ids, id)
 	}
 
-	return ids, rows.Err()
+	return _ids, _rows.Err()
 }
 
 // Columns
 func (p *daoApp) Columns(ctx context.Context, col dialect.Field, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols(col)
-	rows, err := c.Where(cond...).
+	_c := p.R().Cols(col)
+	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		Query(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, err
+	if e != nil {
+		log.Error(e)
+		return nil, e
 	}
-	defer rows.Close()
+	defer _rows.Close()
 
-	cols := make([]any, 0, dialect.PageSize)
-	for rows.Next() {
-		var v any
-		if err = rows.Scan(&v); err != nil {
-			log.Error(err)
-			return nil, err
+	_cols := make([]any, 0, dialect.PageSize)
+	for _rows.Next() {
+		var _v any
+		if e = _rows.Scan(&_v); e != nil {
+			log.Error(e)
+			return nil, e
 		}
-		cols = append(cols, v)
+		_cols = append(_cols, _v)
 	}
-	return cols, rows.Err()
+	return _cols, _rows.Err()
 }
 
 // Count
@@ -358,21 +358,21 @@ func (p *daoApp) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.
 
 // Exists
 func (p *daoApp) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	c := p.R().Cols(tblapp.PrimaryKey).Where(cond...)
-	row, err := c.QueryRow(ctx)
-	if err != nil {
-		log.Error(err)
-		return false, err
+	_c := p.R().Cols(tblapp.PrimaryKey).Where(cond...)
+	_row, e := _c.QueryRow(ctx)
+	if e != nil {
+		log.Error(e)
+		return false, e
 	}
 
 	var id types.BigInt
-	err = row.Scan(&id)
-	switch err {
+	e = _row.Scan(&id)
+	switch e {
 	case sql.ErrNoRows:
 		return false, nil
 	case nil:
 		return true, nil
 	default:
-		return false, err
+		return false, e
 	}
 }

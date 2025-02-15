@@ -53,13 +53,13 @@ var (
 	gentity version`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
-				err     error
+				e       error
 				pkgPath string
 			)
 			// struct全路径
-			fullpath, err = filepath.Abs(path)
-			if err != nil {
-				showError(err)
+			fullpath, e = filepath.Abs(path)
+			if e != nil {
+				showError(e)
 				return
 			}
 			// 上一级目录
@@ -69,7 +69,7 @@ var (
 				parent = fullpath[:pos]
 			}
 			// 包名
-			packageName := fullpath[pos+1:]
+			_packageName := fullpath[pos+1:]
 			//
 			switch command {
 			case "api": // 如果command="api"，则初始化api模板
@@ -86,31 +86,31 @@ var (
 				}
 				// 生成结构体
 				if command == "db" { // 从dns获取表结构生成结构体
-					err = db2struct(driver, dns, fullpath, packageName)
+					e = db2struct(driver, dns, fullpath, _packageName)
 				} else if command == "sql" { // 根据sql建表文件生成结构体
-					err = sql2struct(driver, dns, fullpath, packageName)
+					e = sql2struct(driver, dns, fullpath, _packageName)
 				}
-				if err != nil {
-					showError(err)
+				if e != nil {
+					showError(e)
 				}
 				fallthrough
 			case "dao": // 根据struct生成dao层代码和序列化器
-				definePath := filepath.Join(parent, "define")
-				tablePath = filepath.Join(definePath, "table")
+				_definePath := filepath.Join(parent, "define")
+				tablePath = filepath.Join(_definePath, "table")
 				// 创建生成dao层代码的目录
-				err = os.MkdirAll(tablePath, os.ModePerm)
-				if err != nil {
-					showError(err)
+				e = os.MkdirAll(tablePath, os.ModePerm)
+				if e != nil {
+					showError(e)
 				}
-				daoPath = filepath.Join(definePath, "dao")
-				err = os.MkdirAll(daoPath, os.ModePerm)
-				if err != nil {
-					showError(err)
+				daoPath = filepath.Join(_definePath, "dao")
+				e = os.MkdirAll(daoPath, os.ModePerm)
+				if e != nil {
+					showError(e)
 				}
 				// 写入daoBase
-				err = writeDaoBase(daoPath)
-				if err != nil {
-					showError(err)
+				e = writeDaoBase(daoPath)
+				if e != nil {
+					showError(e)
 				}
 			case "check":
 			case "version":
@@ -122,22 +122,22 @@ var (
 			}
 
 			// 包目录
-			pkgPath, err = base.PkgPath(nil, path)
-			if err != nil {
-				showError(err)
+			pkgPath, e = base.PkgPath(nil, path)
+			if e != nil {
+				showError(e)
 				return
 			}
 			// 遍历结构体目录中的文件，生成dao层代码
-			dirs, err := os.ReadDir(path)
-			if err != nil {
-				showError(err)
+			_dirs, e := os.ReadDir(path)
+			if e != nil {
+				showError(e)
 			}
 
 			if command == "check" {
 				defer dtoFile.Close()
 			}
 			// 初始化进度条
-			bar := progressbar.NewOptions(len(dirs),
+			_bar := progressbar.NewOptions(len(_dirs),
 				progressbar.OptionEnableColorCodes(true),
 				progressbar.OptionSetTheme(progressbar.Theme{
 					Saucer:        "[red]=[reset]",
@@ -147,8 +147,8 @@ var (
 					BarEnd:        "]",
 				}),
 				progressbar.OptionShowCount())
-			for _, dir := range dirs {
-				bar.Add(1)
+			for _, dir := range _dirs {
+				_bar.Add(1)
 				if dir.IsDir() {
 					continue
 				}
@@ -157,20 +157,20 @@ var (
 					continue
 				}
 				if command == "check" {
-					tds, err := parseFile(filename, pkgPath, "checker", "request", "response")
-					if err != nil {
-						showError(err)
+					_tds, e := parseFile(filename, pkgPath, "checker", "request", "response")
+					if e != nil {
+						showError(e)
 					}
-					err = generateDTO(tds, filename)
+					e = generateDTO(_tds, filename)
 				} else {
-					tds, err := parseFile(filename, pkgPath, "tablename")
-					if err != nil {
-						showError(err)
+					_tds, e := parseFile(filename, pkgPath, "tablename")
+					if e != nil {
+						showError(e)
 					}
-					err = generateDao(tds, filename)
+					e = generateDao(_tds, filename)
 				}
-				if err != nil {
-					showError(err)
+				if e != nil {
+					showError(e)
 				}
 			}
 		},
@@ -184,27 +184,27 @@ func showError(msg any) {
 }
 
 func Execute() {
-	lens := len(os.Args)
+	_lens := len(os.Args)
 	path = "."
 	driver = "mysql"
-	if lens > 1 {
+	if _lens > 1 {
 		command = os.Args[1]
-		if lens > 2 {
+		if _lens > 2 {
 			path = os.Args[2]
-			if lens > 3 {
+			if _lens > 3 {
 				driver = os.Args[3]
-				if lens > 4 {
+				if _lens > 4 {
 					dns = os.Args[4]
 				}
 			}
 		}
 	}
 
-	var err error
+	var e error
 
-	err = launch.Execute()
-	if err != nil {
-		showError(err)
+	e = launch.Execute()
+	if e != nil {
+		showError(e)
 	}
 }
 

@@ -9,7 +9,7 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/tbluserlog"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/broker"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -19,67 +19,66 @@ const UserLogTableName = "user_log"
 
 var (
 	userlogPool = pool.New(app.Context, func() any {
-		obj := &UserLog{}
-		obj.UUID()
-		return obj
+		_obj := &UserLog{}
+		_obj.UUID()
+		return _obj
 	})
 )
 
 func NewUserLog() *UserLog {
-	obj := userlogPool.Get().(*UserLog)
-	return obj
+	_obj := userlogPool.Get().(*UserLog)
+	return _obj
 }
 
 // MarshalJSON
 func (p *UserLog) MarshalJSON() ([]byte, error) {
-	var buf = bytes.NewBuffer(nil)
-	buf.WriteByte('{')
+	var _buf = bytes.NewBuffer(nil)
+	_buf.WriteByte('{')
 	if p.Id != 0 {
-		buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
 	}
 	if p.UserId != 0 {
-		buf.WriteString(`"user_id":` + types.Marshal(p.UserId) + `,`)
+		_buf.WriteString(`"user_id":` + types.Marshal(p.UserId) + `,`)
 	}
 	if !p.LoginTime.IsZero() {
-		buf.WriteString(`"login_time":` + types.Marshal(p.LoginTime) + `,`)
+		_buf.WriteString(`"login_time":` + types.Marshal(p.LoginTime) + `,`)
 	}
 	if p.Device != "" {
-		buf.WriteString(`"device":` + types.Marshal(p.Device) + `,`)
+		_buf.WriteString(`"device":` + types.Marshal(p.Device) + `,`)
 	}
 	if p.Os != "" {
-		buf.WriteString(`"os":` + types.Marshal(p.Os) + `,`)
+		_buf.WriteString(`"os":` + types.Marshal(p.Os) + `,`)
 	}
 	if p.OsVersion != "" {
-		buf.WriteString(`"os_version":` + types.Marshal(p.OsVersion) + `,`)
+		_buf.WriteString(`"os_version":` + types.Marshal(p.OsVersion) + `,`)
 	}
 	if p.AppName != "" {
-		buf.WriteString(`"app_name":` + types.Marshal(p.AppName) + `,`)
+		_buf.WriteString(`"app_name":` + types.Marshal(p.AppName) + `,`)
 	}
 	if p.AppVersion != "" {
-		buf.WriteString(`"app_version":` + types.Marshal(p.AppVersion) + `,`)
+		_buf.WriteString(`"app_version":` + types.Marshal(p.AppVersion) + `,`)
 	}
 	if p.Ip != "" {
-		buf.WriteString(`"ip":` + types.Marshal(p.Ip) + `,`)
+		_buf.WriteString(`"ip":` + types.Marshal(p.Ip) + `,`)
 	}
 	if p.User != nil {
-		buf.WriteString(`"user":` + types.Marshal(p.User) + `,`)
+		_buf.WriteString(`"user":` + types.Marshal(p.User) + `,`)
 	}
-	if l := buf.Len(); l > 1 {
-		buf.Truncate(l - 1)
+	if l := _buf.Len(); l > 1 {
+		_buf.Truncate(l - 1)
 	}
-	buf.WriteByte('}')
-	return buf.Bytes(), nil
+	_buf.WriteByte('}')
+	return _buf.Bytes(), nil
 }
 
 // UnmarshalJSON
 func (p *UserLog) UnmarshalJSON(data []byte) error {
 
-	ok := gjson.ValidBytes(data)
-	if !ok {
+	if !gjson.ValidBytes(data) {
 		return errors.New("invalid json")
 	}
-	result := gjson.ParseBytes(data)
-	result.ForEach(func(key, value gjson.Result) bool {
+	_result := gjson.ParseBytes(data)
+	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
 		case "id":
@@ -152,33 +151,33 @@ func (p *UserLog) AssignPtr(args ...dialect.Field) []any {
 		args = tbluserlog.ReadableFields
 	}
 
-	vals := make([]any, 0, len(args))
+	_vals := make([]any, 0, len(args))
 	for _, col := range args {
 		switch col {
 		case tbluserlog.Id:
-			vals = append(vals, &p.Id)
+			_vals = append(_vals, &p.Id)
 		case tbluserlog.UserId:
-			vals = append(vals, &p.UserId)
+			_vals = append(_vals, &p.UserId)
 		case tbluserlog.LoginTime:
-			vals = append(vals, &p.LoginTime)
+			_vals = append(_vals, &p.LoginTime)
 		case tbluserlog.Device:
-			vals = append(vals, &p.Device)
+			_vals = append(_vals, &p.Device)
 		case tbluserlog.Os:
-			vals = append(vals, &p.Os)
+			_vals = append(_vals, &p.Os)
 		case tbluserlog.OsVersion:
-			vals = append(vals, &p.OsVersion)
+			_vals = append(_vals, &p.OsVersion)
 		case tbluserlog.AppName:
-			vals = append(vals, &p.AppName)
+			_vals = append(_vals, &p.AppName)
 		case tbluserlog.AppVersion:
-			vals = append(vals, &p.AppVersion)
+			_vals = append(_vals, &p.AppVersion)
 		case tbluserlog.Ip:
-			vals = append(vals, &p.Ip)
+			_vals = append(_vals, &p.Ip)
 		case tbluserlog.User:
-			vals = append(vals, &p.User)
+			_vals = append(_vals, &p.User)
 		}
 	}
 
-	return vals
+	return _vals
 }
 
 func (p *UserLog) Scan(rows *sql.Rows, args ...dialect.Field) ([]UserLog, bool, error) {
@@ -190,18 +189,18 @@ func (p *UserLog) Scan(rows *sql.Rows, args ...dialect.Field) ([]UserLog, bool, 
 	}
 
 	for rows.Next() {
-		p := NewUserLog()
-		vals := p.AssignPtr(args...)
-		err := rows.Scan(vals...)
-		if err != nil {
-			log.Error(err)
-			return nil, false, err
+		_p := NewUserLog()
+		_vals := _p.AssignPtr(args...)
+		e := rows.Scan(_vals...)
+		if e != nil {
+			log.Error(e)
+			return nil, false, e
 		}
-		user_logs = append(user_logs, *p)
+		user_logs = append(user_logs, *_p)
 	}
-	if err := rows.Err(); err != nil {
-		log.Error(err)
-		return nil, false, err
+	if e := rows.Err(); e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
 	if len(user_logs) == 0 {
 		return nil, false, sql.ErrNoRows
@@ -211,111 +210,111 @@ func (p *UserLog) Scan(rows *sql.Rows, args ...dialect.Field) ([]UserLog, bool, 
 
 func (p *UserLog) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
-		lens = len(args)
-		cols []string
-		vals []any
+		_lens = len(args)
+		_cols []string
+		_vals []any
 	)
 
 	if len(args) == 0 {
 		args = tbluserlog.WritableFields
-		lens = len(args)
-		cols = make([]string, 0, lens)
-		vals = make([]any, 0, lens)
+		_lens = len(args)
+		_cols = make([]string, 0, _lens)
+		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
 			switch arg {
 			case tbluserlog.Id:
 				if p.Id == 0 {
 					continue
 				}
-				cols = append(cols, tbluserlog.Id.Quote())
-				vals = append(vals, p.Id)
+				_cols = append(_cols, tbluserlog.Id.Quote())
+				_vals = append(_vals, p.Id)
 			case tbluserlog.UserId:
 				if p.UserId == 0 {
 					continue
 				}
-				cols = append(cols, tbluserlog.UserId.Quote())
-				vals = append(vals, p.UserId)
+				_cols = append(_cols, tbluserlog.UserId.Quote())
+				_vals = append(_vals, p.UserId)
 			case tbluserlog.LoginTime:
 				if p.LoginTime.IsZero() {
 					continue
 				}
-				cols = append(cols, tbluserlog.LoginTime.Quote())
-				vals = append(vals, p.LoginTime)
+				_cols = append(_cols, tbluserlog.LoginTime.Quote())
+				_vals = append(_vals, p.LoginTime)
 			case tbluserlog.Device:
 				if p.Device == "" {
 					continue
 				}
-				cols = append(cols, tbluserlog.Device.Quote())
-				vals = append(vals, p.Device)
+				_cols = append(_cols, tbluserlog.Device.Quote())
+				_vals = append(_vals, p.Device)
 			case tbluserlog.Os:
 				if p.Os == "" {
 					continue
 				}
-				cols = append(cols, tbluserlog.Os.Quote())
-				vals = append(vals, p.Os)
+				_cols = append(_cols, tbluserlog.Os.Quote())
+				_vals = append(_vals, p.Os)
 			case tbluserlog.OsVersion:
 				if p.OsVersion == "" {
 					continue
 				}
-				cols = append(cols, tbluserlog.OsVersion.Quote())
-				vals = append(vals, p.OsVersion)
+				_cols = append(_cols, tbluserlog.OsVersion.Quote())
+				_vals = append(_vals, p.OsVersion)
 			case tbluserlog.AppName:
 				if p.AppName == "" {
 					continue
 				}
-				cols = append(cols, tbluserlog.AppName.Quote())
-				vals = append(vals, p.AppName)
+				_cols = append(_cols, tbluserlog.AppName.Quote())
+				_vals = append(_vals, p.AppName)
 			case tbluserlog.AppVersion:
 				if p.AppVersion == "" {
 					continue
 				}
-				cols = append(cols, tbluserlog.AppVersion.Quote())
-				vals = append(vals, p.AppVersion)
+				_cols = append(_cols, tbluserlog.AppVersion.Quote())
+				_vals = append(_vals, p.AppVersion)
 			case tbluserlog.Ip:
 				if p.Ip == "" {
 					continue
 				}
-				cols = append(cols, tbluserlog.Ip.Quote())
-				vals = append(vals, p.Ip)
+				_cols = append(_cols, tbluserlog.Ip.Quote())
+				_vals = append(_vals, p.Ip)
 			}
 		}
-		return cols, vals
+		return _cols, _vals
 	}
 
-	cols = make([]string, 0, lens)
-	vals = make([]any, 0, lens)
+	_cols = make([]string, 0, _lens)
+	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
 		switch arg {
 		case tbluserlog.Id:
-			cols = append(cols, tbluserlog.Id.Quote())
-			vals = append(vals, p.Id)
+			_cols = append(_cols, tbluserlog.Id.Quote())
+			_vals = append(_vals, p.Id)
 		case tbluserlog.UserId:
-			cols = append(cols, tbluserlog.UserId.Quote())
-			vals = append(vals, p.UserId)
+			_cols = append(_cols, tbluserlog.UserId.Quote())
+			_vals = append(_vals, p.UserId)
 		case tbluserlog.LoginTime:
-			cols = append(cols, tbluserlog.LoginTime.Quote())
-			vals = append(vals, p.LoginTime)
+			_cols = append(_cols, tbluserlog.LoginTime.Quote())
+			_vals = append(_vals, p.LoginTime)
 		case tbluserlog.Device:
-			cols = append(cols, tbluserlog.Device.Quote())
-			vals = append(vals, p.Device)
+			_cols = append(_cols, tbluserlog.Device.Quote())
+			_vals = append(_vals, p.Device)
 		case tbluserlog.Os:
-			cols = append(cols, tbluserlog.Os.Quote())
-			vals = append(vals, p.Os)
+			_cols = append(_cols, tbluserlog.Os.Quote())
+			_vals = append(_vals, p.Os)
 		case tbluserlog.OsVersion:
-			cols = append(cols, tbluserlog.OsVersion.Quote())
-			vals = append(vals, p.OsVersion)
+			_cols = append(_cols, tbluserlog.OsVersion.Quote())
+			_vals = append(_vals, p.OsVersion)
 		case tbluserlog.AppName:
-			cols = append(cols, tbluserlog.AppName.Quote())
-			vals = append(vals, p.AppName)
+			_cols = append(_cols, tbluserlog.AppName.Quote())
+			_vals = append(_vals, p.AppName)
 		case tbluserlog.AppVersion:
-			cols = append(cols, tbluserlog.AppVersion.Quote())
-			vals = append(vals, p.AppVersion)
+			_cols = append(_cols, tbluserlog.AppVersion.Quote())
+			_vals = append(_vals, p.AppVersion)
 		case tbluserlog.Ip:
-			cols = append(cols, tbluserlog.Ip.Quote())
-			vals = append(vals, p.Ip)
+			_cols = append(_cols, tbluserlog.Ip.Quote())
+			_vals = append(_vals, p.Ip)
 		}
 	}
-	return cols, vals
+	return _cols, _vals
 }
 
 func (p *UserLog) AssignKeys() (dialect.Field, any) {
@@ -323,10 +322,10 @@ func (p *UserLog) AssignKeys() (dialect.Field, any) {
 }
 
 func (p *UserLog) AssignPrimaryKeyValues(result sql.Result) error {
-	id, err := result.LastInsertId()
-	if err != nil {
-		return err
+	_id, e := result.LastInsertId()
+	if e != nil {
+		return e
 	}
-	p.Id = types.BigInt(id)
+	p.Id = types.BigInt(_id)
 	return nil
 }

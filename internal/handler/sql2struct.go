@@ -15,78 +15,78 @@ import (
 func sql2struct(driver, sqlPath, outputPath, packageName string) error {
 	dialect.Register(driver)
 
-	sqlPath, err := filepath.Abs(sqlPath)
-	if err != nil {
-		return err
+	_sqlPath, e := filepath.Abs(sqlPath)
+	if e != nil {
+		return e
 	}
-	_, err = os.Stat(sqlPath)
-	if err != nil {
-		return err
+	_, e = os.Stat(_sqlPath)
+	if e != nil {
+		return e
 	}
-	f, err := os.OpenFile(filepath.Join(outputPath, "gentity_model.go"), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		return err
+	_f, e := os.OpenFile(filepath.Join(outputPath, "gentity_model.go"), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+	if e != nil {
+		return e
 	}
-	defer f.Close()
+	defer _f.Close()
 
-	buf, err := schema.SqlFile2Struct(sqlPath, packageName)
-	if err != nil {
-		return err
-	}
-
-	formatted, err := format.Source(buf)
-	if err != nil {
-		return err
+	_buf, e := schema.SqlFile2Struct(_sqlPath, packageName)
+	if e != nil {
+		return e
 	}
 
-	_, err = f.Write(formatted)
-	if err != nil {
-		return err
+	_formatted, e := format.Source(_buf)
+	if e != nil {
+		return e
+	}
+
+	_, e = _f.Write(_formatted)
+	if e != nil {
+		return e
 	}
 	return nil
 }
 
 func db2struct(driver, dns, outputPath, packageName string) error {
-	db, err := ace.Connect(context.Background(), driver, dns)
-	if err != nil {
-		return err
+	_db, e := ace.Connect(context.Background(), driver, dns)
+	if e != nil {
+		return e
 	}
-	defer db.Close()
+	defer _db.Close()
 
-	re := regexp.MustCompile(`/([^/]+)\?`)
-	match := re.FindStringSubmatch(dns)
+	_re := regexp.MustCompile(`/([^/]+)\?`)
+	match := _re.FindStringSubmatch(dns)
 	if match == nil || len(match) == 0 {
 		return fmt.Errorf("Could not parse database name from the connection string.")
 	}
-	dr, err := getDriver(driver)
-	if err != nil {
-		return err
+	_dr, e := getDriver(driver)
+	if e != nil {
+		return e
 	}
 	// match[1] 存储的就是 dbname 的值
-	tables, err := dr.GetTables(db, match[1])
-	if err != nil {
-		return err
+	tables, e := _dr.GetTables(_db, match[1])
+	if e != nil {
+		return e
 	}
 
-	buf, err := schema.DB2Struct(tables, packageName)
-	if err != nil {
-		return err
+	_buf, e := schema.DB2Struct(tables, packageName)
+	if e != nil {
+		return e
 	}
 
-	formatted, err := format.Source(buf)
-	if err != nil {
-		return err
+	formatted, e := format.Source(_buf)
+	if e != nil {
+		return e
 	}
 
-	f, err := os.OpenFile(filepath.Join(outputPath, "gentity_model.go"), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		return err
+	_f, e := os.OpenFile(filepath.Join(outputPath, "gentity_model.go"), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+	if e != nil {
+		return e
 	}
-	defer f.Close()
+	defer _f.Close()
 
-	_, err = f.Write(formatted)
-	if err != nil {
-		return err
+	_, e = _f.Write(formatted)
+	if e != nil {
+		return e
 	}
 	return nil
 }

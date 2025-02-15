@@ -31,13 +31,13 @@ var (
 
 func getAst(structFullName string) (*ast.File, error) {
 	var src any
-	fset := token.NewFileSet()
-	astFile, err := parser.ParseFile(fset, structFullName, src, parser.ParseComments)
-	if err != nil {
-		return nil, err
+	_fset := token.NewFileSet()
+	_astFile, e := parser.ParseFile(_fset, structFullName, src, parser.ParseComments)
+	if e != nil {
+		return nil, e
 	}
 
-	return astFile, nil
+	return _astFile, nil
 }
 
 // func generateCheck(filename string) error {
@@ -48,14 +48,14 @@ func getAst(structFullName string) (*ast.File, error) {
 // 	var structFullName = filepath.Join(fullpath, filename)
 //
 // 	astOnce.Do(func() {
-// 		astFile, err := getAst(structFullName)
-// 		if err != nil {
-// 			showError(err)
+// 		astFile, e := getAst(structFullName)
+// 		if e != nil {
+// 			showError(e)
 // 			return
 // 		}
-// 		dtoFile, err = os.OpenFile(filepath.Join(fullpath, dentityDTO), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-// 		if err != nil {
-// 			showError(err)
+// 		dtoFile, e = os.OpenFile(filepath.Join(fullpath, dentityDTO), os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+// 		if e != nil {
+// 			showError(e)
 // 			return
 // 		}
 // 		var buf bytes.Buffer
@@ -67,18 +67,18 @@ func getAst(structFullName string) (*ast.File, error) {
 // 		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/conv\" \n")
 // 		buf.WriteString("	\"net/http\" \n")
 // 		buf.WriteString(") \n\n")
-// 		_, err = dtoFile.Write(buf.Bytes())
-// 		if err != nil {
-// 			showError(err)
+// 		_, e = dtoFile.Write(buf.Bytes())
+// 		if e != nil {
+// 			showError(e)
 // 			return
 // 		}
 // 	})
 //
-// 	file, err := astra.ParseFile(structFullName,
+// 	file, e := astra.ParseFile(structFullName,
 // 		astra.IgnoreVariables|astra.IgnoreConstants|astra.IgnoreFunctions|
 // 			astra.IgnoreInterfaces|astra.IgnoreTypes|astra.IgnoreMethods)
-// 	if err != nil {
-// 		return err
+// 	if e != nil {
+// 		return e
 // 	}
 // 	if len(file.Structures) == 0 {
 // 		return nil
@@ -96,8 +96,8 @@ func getAst(structFullName string) (*ast.File, error) {
 // 		// 生成 checker 接口方法
 // 		writeCheck(&buf, receiver, stru)
 // 	}
-// 	_, err = dtoFile.Write(buf.Bytes())
-// 	return err
+// 	_, e = dtoFile.Write(buf.Bytes())
+// 	return e
 // }
 
 // func writeInit(buf *bytes.Buffer, receiver string, stru types.Struct) {

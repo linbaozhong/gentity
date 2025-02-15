@@ -83,12 +83,12 @@ type dao{{$structName}} struct {
 }
 
 func {{$structName}}(exec ace.Executer) {{$tablename}}er {
-	obj := &dao{{$structName}}{}
-	obj.db = exec
+	_obj := &dao{{$structName}}{}
+	_obj.db = exec
 {{- if .HasCache}}
-	obj.cache = exec.Cache({{$package}}.{{$structName}}TableName)
+	_obj.cache = exec.Cache({{$package}}.{{$structName}}TableName)
 {{- end}}
-	return obj
+	return _obj
 }
 
 // C Create {{$tablename}}
@@ -117,53 +117,53 @@ func (p *dao{{$structName}}) Insert(ctx context.Context, sets ...dialect.Setter)
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	result, err := p.C().
+	_result, e := p.C().
 	    Set(sets...).
 	    Exec(ctx)
-	if err != nil {
-		log.Error(err)
-		return 0, err
+	if e != nil {
+		log.Error(e)
+		return 0, e
 	}
-	return result.LastInsertId()
+	return _result.LastInsertId()
 }
 
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *dao{{$structName}}) InsertOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
-	result, err := p.C().
+	_result, e := p.C().
 	    Cols(cols...).
 	    Struct(ctx, bean)
-	if err != nil {
-		log.Error(err)
-		return false, err
+	if e != nil {
+		log.Error(e)
+		return false, e
 	}
 
-    bean.AssignPrimaryKeyValues(result)
+    bean.AssignPrimaryKeyValues(_result)
 
-	n, err := result.RowsAffected()
-	return n > 0, err
+	_n, e := _result.RowsAffected()
+	return _n > 0, e
 }
 
 // InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 // cols: 要插入的列名
 func (p *dao{{$structName}}) InsertBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (int64, error) {
-	lens := len(beans)
-	if lens == 0 {
+	_lens := len(beans)
+	if _lens == 0 {
 		return 0, dialect.ErrBeanEmpty
 	}
-	args := make([]dialect.Modeler, 0, lens)
-	for _, bean := range beans {
-		args = append(args, bean)
+	_args := make([]dialect.Modeler, 0, _lens)
+	for _, _bean := range beans {
+		_args = append(_args, _bean)
 	}
-	result, err := p.C().
+	_result, e := p.C().
 	    Cols(cols...).
-	    StructBatch(ctx, args...)
-	if err != nil {
-		log.Error(err)
-		return 0, err
+	    StructBatch(ctx, _args...)
+	if e != nil {
+		log.Error(e)
+		return 0, e
 	}
 
-	return result.RowsAffected()
+	return _result.RowsAffected()
 }
 
 // Update
@@ -171,16 +171,16 @@ func (p *dao{{$structName}}) Update(ctx context.Context, sets []dialect.Setter, 
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	result, err := p.U().
+	_result, e := p.U().
 	    Where(cond...).
 	    Set(sets...).
 	    Exec(ctx)
-	if err != nil {
-		log.Error(err)
-		return false, err
+	if e != nil {
+		log.Error(e)
+		return false, e
 	}
-	n, err := result.RowsAffected()
-	return n >= 0, err
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // UpdateById
@@ -194,36 +194,36 @@ func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}} 
 // UpdateBatch 批量更新,禁止在事务中使用
 // cols: 要更新的列名
 func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
-	lens := len(beans)
-	if lens == 0 {
+	_lens := len(beans)
+	if _lens == 0 {
 		return false, dialect.ErrBeanEmpty
 	}
-	args := make([]dialect.Modeler, 0, lens)
-	for _, bean := range beans {
-		args = append(args, bean)
+	_args := make([]dialect.Modeler, 0, _lens)
+	for _, _bean := range beans {
+		_args = append(_args, _bean)
 	}
-	result, err := p.U().
+	_result, e := p.U().
 	    Cols(cols...).
-	    StructBatch(ctx, args...)
-	if err != nil {
-		log.Error(err)
-		return false, err
+	    StructBatch(ctx, _args...)
+	if e != nil {
+		log.Error(e)
+		return false, e
 	}
-	n, err := result.RowsAffected()
-	return n >= 0, err
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // Delete
 func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	result, err := p.D().
+	_result, e := p.D().
 	    Where(cond...).
 	    Exec(ctx)
-	if err != nil {
-		log.Error(err)
-		return false, err
+	if e != nil {
+		log.Error(e)
+		return false, e
 	}
-	n, err := result.RowsAffected()
-	return n >= 0, err
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // DeleteById
@@ -235,83 +235,83 @@ func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}}
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{$package}}.{{$structName}}, bool, error) {
-	c := p.R()
+	_c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tbl{{$structNameLower}}.ReadableFields...)
+		_c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
-		c.Cols(cols...)
+		_c.Cols(cols...)
 	}
 
-	row, err := c.Where(cond...).
+	_row, e := _c.Where(cond...).
 	    QueryRow(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, false, err
+	if e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
 
-	obj := {{$package}}.New{{$structName}}()
+	_obj := {{$package}}.New{{$structName}}()
 
-	err = row.Scan(obj.AssignPtr(cols...)...)
-	switch err {
+	e = _row.Scan(_obj.AssignPtr(cols...)...)
+	switch e {
 	case sql.ErrNoRows:
 		return nil,false, nil
 	case nil:
-		return obj,true, nil
+		return _obj,true, nil
 	default:
-		log.Error(err)
-		return nil,false, err
+		log.Error(e)
+		return nil,false, e
 	}
 }
 
 // Find4Cols 分页获取{{.TableName}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{$package}}.{{$structName}}, bool, error) {
-	c := p.R()
+	_c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tbl{{$structNameLower}}.ReadableFields...)
+		_c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
-		c.Cols(cols...)
+		_c.Cols(cols...)
 	}
 	//
 	if pageSize == 0 {
 		pageSize = dialect.PageSize
 	}
 	//
-	rows, err := c.Where(cond...).
+	_rows, e := _c.Where(cond...).
 	    Limit(pageSize, pageSize*pageIndex).
 	    Query(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, false, err
+	if e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
-	defer rows.Close()
+	defer _rows.Close()
 
-	obj := {{$package}}.New{{$structName}}()
+	_obj := {{$package}}.New{{$structName}}()
 
-	objs, has, err := obj.Scan(rows, cols...)
+	_objs, has, e := _obj.Scan(_rows, cols...)
 	if has {
-		return objs, true, nil
+		return _objs, true, nil
 	}
-	log.Error(err)
-	return nil, false, err
+	log.Error(e)
+	return nil, false, e
 }
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
 {{- if .HasCache}}
-	obj,has,e:=p.getCache(ctx, {{.PrimaryKey.Col}})
+	_obj,has,e:=p.getCache(ctx, {{.PrimaryKey.Col}})
 	if has{
-		return obj,has,nil
+		return _obj,has,nil
 	}
 
-	v, e, _ := p.sg.Do(conv.Any2String({{.PrimaryKey.Col}}), func() (any, error) {
-		obj, has, e = p.Get4Cols(ctx, cols, tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}))
+	_v, e, _ := p.sg.Do(conv.Any2String({{.PrimaryKey.Col}}), func() (any, error) {
+		_obj, has, e = p.Get4Cols(ctx, cols, tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}))
 		if has {
-			e = p.setCache(ctx, obj)
+			e = p.setCache(ctx, _obj)
 		}
-		return obj, e
+		return _obj, e
 	})
-	if v != nil {
-		return v.(*{{$package}}.{{$structName}}), true, e
+	if _v != nil {
+		return _v.(*{{$package}}.{{$structName}}), true, e
 	}
 
 	return nil,false,e
@@ -327,23 +327,23 @@ func (p *dao{{$structName}}) Get(ctx context.Context, cond ...dialect.Condition)
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) GetFirstCell(ctx context.Context,col dialect.Field, cond ...dialect.Condition) (any, bool, error) {
-	c := p.R().Cols(col)
-	row, err := c.Where(cond...).QueryRow(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil,false, err
+	_c := p.R().Cols(col)
+	_row, e := _c.Where(cond...).QueryRow(ctx)
+	if e != nil {
+		log.Error(e)
+		return nil,false, e
 	}
 
-	var v any
-	err = row.Scan(&v)
-	switch err {
+	var _v any
+	e = _row.Scan(&_v)
+	switch e {
     case sql.ErrNoRows:
         return nil,false,nil
     case nil:
-        return v,true,nil
+        return _v,true,nil
     default:
-		log.Error(err)
-        return nil,false,err
+		log.Error(e)
+        return nil,false,e
     }
 }
 
@@ -355,51 +355,51 @@ func (p *dao{{$structName}}) Find(ctx context.Context, pageIndex, pageSize uint,
 
 // IDs
 func (p *dao{{$structName}}) IDs(ctx context.Context, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols(tbl{{$structNameLower}}.PrimaryKey)
-	rows, err := c.Where(cond...).
+	_c := p.R().Cols(tbl{{$structNameLower}}.PrimaryKey)
+	_rows, e := _c.Where(cond...).
 	    Limit(dialect.MaxLimit).
 	    Query(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, err
+	if e != nil {
+		log.Error(e)
+		return nil, e
 	}
-	defer rows.Close()
+	defer _rows.Close()
 
-	ids := make([]any, 0, dialect.PageSize)
-	for rows.Next() {
+	_ids := make([]any, 0, dialect.PageSize)
+	for _rows.Next() {
 	    var {{ .PrimaryKey.Col }} {{.PrimaryKey.Type}}
-		if err = rows.Scan(&{{.PrimaryKey.Col}}); err != nil {
-			log.Error(err)
-			return nil, err
+		if e = _rows.Scan(&{{.PrimaryKey.Col}}); e != nil {
+			log.Error(e)
+			return nil, e
 		}
-		ids = append(ids, {{.PrimaryKey.Col}})
+		_ids = append(_ids, {{.PrimaryKey.Col}})
 	}
 
-	return ids, rows.Err()
+	return _ids, _rows.Err()
 }
 
 // Columns
 func (p *dao{{$structName}}) Columns(ctx context.Context, col dialect.Field, cond ...dialect.Condition) ([]any, error) {
-	c := p.R().Cols(col)
-	rows, err := c.Where(cond...).
+	_c := p.R().Cols(col)
+	_rows, e := _c.Where(cond...).
 	    Limit(dialect.MaxLimit).
 	    Query(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, err
+	if e != nil {
+		log.Error(e)
+		return nil, e
 	}
-	defer rows.Close()
+	defer _rows.Close()
 
-	cols := make([]any, 0, dialect.PageSize)
-	for rows.Next() {
-		var v any
-		if err = rows.Scan(&v); err != nil {
-			log.Error(err)
-			return nil, err
+	_cols := make([]any, 0, dialect.PageSize)
+	for _rows.Next() {
+		var _v any
+		if e = _rows.Scan(&_v); e != nil {
+			log.Error(e)
+			return nil, e
 		}
-		cols = append(cols, v)
+		_cols = append(_cols, _v)
 	}
-	return cols, rows.Err()
+	return _cols, _rows.Err()
 }
 
 // Count
@@ -414,32 +414,32 @@ func (p *dao{{$structName}}) Sum(ctx context.Context, cols []dialect.Field, cond
 
 // Exists
 func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	c := p.R().Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
-	row, err := c.QueryRow(ctx)
-    if err != nil {
-		log.Error(err)
-        return false, err
+	_c := p.R().Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
+	_row, e := _c.QueryRow(ctx)
+    if e != nil {
+		log.Error(e)
+        return false, e
     }
 
 	var {{ .PrimaryKey.Col }} {{.PrimaryKey.Type}}
-    err = row.Scan(&{{.PrimaryKey.Col}})
-    switch err {
+    e = _row.Scan(&{{.PrimaryKey.Col}})
+    switch e {
     case sql.ErrNoRows:
         return false, nil
     case nil:
         return true, nil
     default:
-        return false, err
+        return false, e
     }
 }
 
 {{- if .HasCache}}
 // onUpdate
 func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.Type}}) error {
-	for _, id := range ids {
-		if err := p.cache.Delete(ctx, GetIdHashKey(id)); err != nil {
-			log.Error(err)
-			return err
+	for _, _id := range ids {
+		if e := p.cache.Delete(ctx, GetIdHashKey(_id)); e != nil {
+			log.Error(e)
+			return e
 		}
 	}
 
@@ -448,31 +448,31 @@ func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.
 
 // getCache
 func (p *dao{{$structName}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (*{{$package}}.{{$structName}}, bool, error) {
-	s,err := p.cache.Fetch(ctx, GetIdHashKey({{.PrimaryKey.Col}}))
-	if err != nil {
-		log.Error(err)
-		return nil, false, err
+	_s,e := p.cache.Fetch(ctx, GetIdHashKey({{.PrimaryKey.Col}}))
+	if e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
-	if len(s)==0 {
+	if len(_s)==0 {
 		return nil, false, nil
 	}
-	obj := {{$package}}.New{{$structName}}()
-	err = json.Unmarshal(s, obj)
-	if err != nil {
-		log.Error(err)
-		return nil, false, err
+	_obj := {{$package}}.New{{$structName}}()
+	e = json.Unmarshal(_s, _obj)
+	if e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
-	return obj, true,nil
+	return _obj, true,nil
 }
 
 // setCache
 func (p *dao{{$structName}}) setCache(ctx context.Context, obj *{{$package}}.{{$structName}}) error {
-	s,err := json.Marshal(obj)
-	if err != nil {
-		log.Error(err)
-		return err
+	_s,e := json.Marshal(obj)
+	if e != nil {
+		log.Error(e)
+		return e
 	}
-	return p.cache.Save(ctx, GetIdHashKey(obj.{{.PrimaryKey.Name}}), string(s), {{.CacheData}})
+	return p.cache.Save(ctx, GetIdHashKey(obj.{{.PrimaryKey.Name}}), string(_s), {{.CacheData}})
 }
 {{end}}
 
@@ -486,24 +486,24 @@ func (p *dao{{$structName}}) FindX(ctx context.Context, pageIndex, pageSize uint
 }
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (*{{$package}}.{{$structName}}, bool, error) {
-	c := p.R()
+	_c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tbl{{$structNameLower}}.ReadableFields...)
+		_c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
-		c.Cols(cols...)
+		_c.Cols(cols...)
 	}
 
-	row, err := c.Where(cond...).
+	_row, e := _c.Where(cond...).
 		QueryRow(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, false, err
+	if e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
 
 	obj := {{$package}}.New{{$structName}}()
 
-	err = row.Scan(obj.AssignPtr(cols...)...)
-	switch err {
+	e = _row.Scan(obj.AssignPtr(cols...)...)
+	switch e {
 	case sql.ErrNoRows:
 		return nil, false, nil
 	case nil:
@@ -520,8 +520,8 @@ func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field
 		}
 		return obj, true, nil
 	default:
-		log.Error(err)
-		return nil, false, err
+		log.Error(e)
+		return nil, false, e
 	}
 }
 
@@ -540,60 +540,60 @@ func (p *dao{{$structName}}) edges(ctx context.Context,ids []any) map[any][]{{$p
 
 // Find4Cols 分页获取{{.TableName}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond ...dialect.Condition) ([]{{$package}}.{{$structName}}, bool, error) {
-	c := p.R()
+	_c := p.R()
 	if len(cols) == 0 {
-		c.Cols(tbl{{$structNameLower}}.ReadableFields...)
+		_c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
-		c.Cols(cols...)
+		_c.Cols(cols...)
 	}
 	//
 	if pageSize == 0 {
 		pageSize = dialect.PageSize
 	}
 	//
-	rows, err := c.Where(cond...).
+	rows, e := _c.Where(cond...).
 		Limit(pageSize, pageSize*pageIndex).
 		Query(ctx)
-	if err != nil {
-		log.Error(err)
-		return nil, false, err
+	if e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
 	defer rows.Close()
 
 	obj := {{$package}}.New{{$structName}}()
 
-	objs, has, err := obj.Scan(rows, cols...)
+	_objs, has, e := obj.Scan(rows, cols...)
 	if has {
-		l := len(objs)
+		l := len(_objs)
 		idsMap := make(map[any]struct{}, l)
 		ids := make([]any, 0, l)
 		for i := 0; i < l; i++ {
-			if _, ok := idsMap[objs[i].{{.RelationX.Field}}]; ok {
+			if _, ok := idsMap[_objs[i].{{.RelationX.Field}}]; ok {
 				continue
 			}
-			idsMap[objs[i].{{.RelationX.Field}}] = struct{}{}
-			ids = append(ids, objs[i].{{.RelationX.Field}})
+			idsMap[_objs[i].{{.RelationX.Field}}] = struct{}{}
+			ids = append(ids, _objs[i].{{.RelationX.Field}})
 		}
 		if len(ids) == 0 {
-			return objs, true, nil
+			return _objs, true, nil
 		}
 		rs := p.edges(ctx, ids)
 		if len(rs) > 0 {
 			for i := 0; i < l; i++ {
 			{{- if eq .RelationX.Kind "slice"}}
-				objs[i].{{.RelationX.Name}} = rs[objs[i].{{.RelationX.Field}}]
+				_objs[i].{{.RelationX.Name}} = rs[_objs[i].{{.RelationX.Field}}]
 			{{- else if eq .RelationX.Kind "ptr"}}
-				tmp := rs[objs[i].{{.RelationX.Field}}][0]
-				objs[i].{{.RelationX.Name}} = &tmp
+				tmp := rs[_objs[i].{{.RelationX.Field}}][0]
+				_objs[i].{{.RelationX.Name}} = &tmp
 			{{- else}}
-				objs[i].{{.RelationX.Name}} = rs[objs[i].{{.RelationX.Field}}][0]
+				_objs[i].{{.RelationX.Name}} = rs[_objs[i].{{.RelationX.Field}}][0]
 			{{- end}}
 			}
 		}
-		return objs, true, nil
+		return _objs, true, nil
 	}
-	log.Error(err)
-	return nil, false, err
+	log.Error(e)
+	return nil, false, e
 }
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil

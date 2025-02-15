@@ -13,39 +13,39 @@ import (
 )
 
 func main() {
-	port := ":8080"
+	_port := ":8080"
 	// 命令行指定端口
 	if len(os.Args) > 1 {
-		port = os.Args[1]
+		_port = os.Args[1]
 	}
-	if port[0] != ':' {
-		port = ":" + port
+	if _port[0] != ':' {
+		_port = ":" + _port
 	}
 
 	log.RegisterLogger(app.Context,false)
-	log.Info(fmt.Sprintf("%s %s %s 服务已开启", "{{.ModulePath}} Api", "0.1", port))
+	log.Info(fmt.Sprintf("%s %s %s 服务已开启", "{{.ModulePath}} Api", "0.1", _port))
 	// 启动API服务
 	_app := router.Init()
 
-	idleConnsClosed := make(chan struct{})
+	_idleConnsClosed := make(chan struct{})
 	api.OnInterrupt(func() {
-		timeout := 5 * time.Second
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
+		_timeout := 5 * time.Second
+		_ctx, _cancel := context.WithTimeout(context.Background(), _timeout)
+		defer _cancel()
 		// close all hosts.
-		_app.Shutdown(ctx)
-		closing("{{.ModulePath}} Api", "0.1", port)
-		close(idleConnsClosed)
+		_app.Shutdown(_ctx)
+		closing("{{.ModulePath}} Api", "0.1", _port)
+		close(_idleConnsClosed)
 	})
 
 	service.Open(app.Context)
 
-	if err := _app.Listen(port); err != nil {
-		log.Error(err)
+	if e := _app.Listen(_port); e != nil {
+		log.Error(e)
 	}
 
 	// 优雅地关闭
-	<-idleConnsClosed
+	<-_idleConnsClosed
 }
 func closing(name, ver, addr string) {
 	app.Close()

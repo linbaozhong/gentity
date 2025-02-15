@@ -24,87 +24,86 @@ import (
 )
 
 func generateApi(name string) error {
-	dir, err := os.Getwd()
-	if err != nil {
-		return err
+	_dir, e := os.Getwd()
+	if e != nil {
+		return e
 	}
-	dir = filepath.Join(dir, name)
-	_, err = os.Stat(dir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.Mkdir(dir, os.ModePerm)
-			if err != nil {
-				showError(err)
-				return err
+	_dir = filepath.Join(_dir, name)
+	_, e = os.Stat(_dir)
+	if e != nil {
+		if os.IsNotExist(e) {
+			e = os.Mkdir(_dir, os.ModePerm)
+			if e != nil {
+				showError(e)
+				return e
 			}
 			log.Printf("The application directory %s is created successfully. \n", name)
 		} else {
-			showError(err)
-			return err
+			showError(e)
+			return e
 		}
 	} else {
-		showError("dir already exists")
+		showError("_dir already exists")
 	}
 	// 进入目录
-	err = os.Chdir(dir)
-	if err != nil {
-		showError(err)
-		return err
+	e = os.Chdir(_dir)
+	if e != nil {
+		showError(e)
+		return e
 	}
 
 	// 初始化模块
-	err = apiInitModule(name)
-	if err != nil {
-		showError(err)
-		return err
+	e = apiInitModule(name)
+	if e != nil {
+		showError(e)
+		return e
 	}
 
 	// 生成其他文件
-	err = apiCmd(name)
-	if err != nil {
-		showError(err)
-		return err
+	e = apiCmd(name)
+	if e != nil {
+		showError(e)
+		return e
 	}
 
-	err = apiHandler(name)
-	if err != nil {
-		showError(err)
-		return err
+	e = apiHandler(name)
+	if e != nil {
+		showError(e)
+		return e
 	}
 
-	err = apiRouter(name)
-	if err != nil {
-		showError(err)
-		return err
+	e = apiRouter(name)
+	if e != nil {
+		showError(e)
+		return e
 	}
 
-	err = apiModel(name)
-	if err != nil {
-		showError(err)
-		return err
+	e = apiModel(name)
+	if e != nil {
+		showError(e)
+		return e
 	}
 
-	err = apiConstant(name)
-	if err != nil {
-		showError(err)
-		return err
+	e = apiConstant(name)
+	if e != nil {
+		showError(e)
+		return e
 	}
 
-	err = apiServiceInit(name)
-	if err != nil {
-		showError(err)
-		return err
+	e = apiServiceInit(name)
+	if e != nil {
+		showError(e)
+		return e
 	}
 
-	err = apiService(name)
-	if err != nil {
-		showError(err)
-		return err
+	e = apiService(name)
+	if e != nil {
+		showError(e)
+		return e
 	}
 
-	return nil
-	//log.Printf("go mod tidy ... \n")
-	//return exec.Command("go", "mod", "tidy").Run()
+	log.Printf("go mod tidy ... \n")
+	return exec.Command("go", "mod", "tidy").Run()
 }
 
 func apiInitModule(name string) error {
@@ -113,26 +112,26 @@ func apiInitModule(name string) error {
 }
 
 func apiCmd(name string) error {
-	log.Printf("Create the main.go application entry file. \n")
-	err := os.Mkdir("cmd", os.ModePerm)
-	if err != nil {
-		return err
+	log.Printf("Creating the main.go application entry file. \n")
+	e := os.Mkdir("cmd", os.ModePerm)
+	if e != nil {
+		return e
 	}
-	_, err = os.Stat("cmd/main.go")
-	if err != nil {
-		if os.IsNotExist(err) {
-			f, err := os.OpenFile("cmd/main.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-			if err != nil {
-				return err
+	_, e = os.Stat("cmd/main.go")
+	if e != nil {
+		if os.IsNotExist(e) {
+			_f, e := os.OpenFile("cmd/main.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if e != nil {
+				return e
 			}
-			defer f.Close()
+			defer _f.Close()
 
-			tmpl := template.New("")
-			_, err = tmpl.ParseFS(resources.TemplatesFS, "templates/api_cmd_main.tmpl")
-			if err != nil {
-				showError(err)
+			_tmpl := template.New("")
+			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_cmd_main.tmpl")
+			if e != nil {
+				showError(e)
 			}
-			return tmpl.ExecuteTemplate(f, "api_cmd_main.tmpl", struct {
+			return _tmpl.ExecuteTemplate(_f, "api_cmd_main.tmpl", struct {
 				ModulePath string
 			}{
 				ModulePath: name,
@@ -145,23 +144,23 @@ func apiCmd(name string) error {
 }
 
 func apiHandler(name string) error {
-	log.Printf("Create new api handler file. \n")
-	err := os.MkdirAll("internal/handler", os.ModePerm)
-	if err != nil {
-		return err
+	log.Printf("Creating new api handler file. \n")
+	e := os.MkdirAll("internal/handler", os.ModePerm)
+	if e != nil {
+		return e
 	}
-	_, err = os.Stat("internal/handler/user_handler.go")
-	if err != nil {
-		if os.IsNotExist(err) {
-			f, err := os.OpenFile("internal/handler/user_handler.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-			if err != nil {
-				return err
+	_, e = os.Stat("internal/handler/user_handler.go")
+	if e != nil {
+		if os.IsNotExist(e) {
+			_f, e := os.OpenFile("internal/handler/user_handler.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if e != nil {
+				return e
 			}
-			defer f.Close()
+			defer _f.Close()
 
-			tmpl := template.New("")
-			_, err = tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_handler.tmpl")
-			return tmpl.ExecuteTemplate(f, "api_internal_handler.tmpl", struct {
+			_tmpl := template.New("")
+			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_handler.tmpl")
+			return _tmpl.ExecuteTemplate(_f, "api_internal_handler.tmpl", struct {
 				ModulePath string
 			}{
 				ModulePath: name,
@@ -174,23 +173,23 @@ func apiHandler(name string) error {
 }
 
 func apiRouter(name string) error {
-	log.Printf("Create new api route file. \n")
-	err := os.MkdirAll("internal/router", os.ModePerm)
-	if err != nil {
-		return err
+	log.Printf("Creating new api route file. \n")
+	e := os.MkdirAll("internal/router", os.ModePerm)
+	if e != nil {
+		return e
 	}
-	_, err = os.Stat("internal/router/router.go")
-	if err != nil {
-		if os.IsNotExist(err) {
-			f, err := os.OpenFile("internal/router/router.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-			if err != nil {
-				return err
+	_, e = os.Stat("internal/router/router.go")
+	if e != nil {
+		if os.IsNotExist(e) {
+			_f, e := os.OpenFile("internal/router/router.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if e != nil {
+				return e
 			}
-			defer f.Close()
+			defer _f.Close()
 
-			tmpl := template.New("")
-			_, err = tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_router.tmpl")
-			return tmpl.ExecuteTemplate(f, "api_internal_router.tmpl", struct {
+			_tmpl := template.New("")
+			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_router.tmpl")
+			return _tmpl.ExecuteTemplate(_f, "api_internal_router.tmpl", struct {
 				ModulePath string
 			}{
 				ModulePath: name,
@@ -202,24 +201,24 @@ func apiRouter(name string) error {
 	return nil
 }
 func apiServiceInit(name string) error {
-	log.Printf("Create new api service file. \n")
+	log.Printf("Creating new api service file. \n")
 	const parent = "internal/service"
-	err := os.MkdirAll(parent, os.ModePerm)
-	if err != nil {
-		return err
+	e := os.MkdirAll(parent, os.ModePerm)
+	if e != nil {
+		return e
 	}
-	_, err = os.Stat(parent + "/init.go")
-	if err != nil {
-		if os.IsNotExist(err) {
-			f, err := os.OpenFile(parent+"/init.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-			if err != nil {
-				return err
+	_, e = os.Stat(parent + "/init.go")
+	if e != nil {
+		if os.IsNotExist(e) {
+			_f, e := os.OpenFile(parent+"/init.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if e != nil {
+				return e
 			}
-			defer f.Close()
+			defer _f.Close()
 
-			tmpl := template.New("")
-			_, err = tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_service_init.tmpl")
-			return tmpl.ExecuteTemplate(f, "api_internal_service_init.tmpl", struct {
+			_tmpl := template.New("")
+			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_service_init.tmpl")
+			return _tmpl.ExecuteTemplate(_f, "api_internal_service_init.tmpl", struct {
 				ModulePath string
 			}{
 				ModulePath: name,
@@ -233,22 +232,22 @@ func apiServiceInit(name string) error {
 
 func apiService(name string) error {
 	const parent = "internal/service/user"
-	err := os.MkdirAll(parent, os.ModePerm)
-	if err != nil {
-		return err
+	e := os.MkdirAll(parent, os.ModePerm)
+	if e != nil {
+		return e
 	}
-	_, err = os.Stat(parent + "/user_service.go")
-	if err != nil {
-		if os.IsNotExist(err) {
-			f, err := os.OpenFile(parent+"/user_service.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-			if err != nil {
-				return err
+	_, e = os.Stat(parent + "/user_service.go")
+	if e != nil {
+		if os.IsNotExist(e) {
+			_f, e := os.OpenFile(parent+"/user_service.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if e != nil {
+				return e
 			}
-			defer f.Close()
+			defer _f.Close()
 
-			tmpl := template.New("")
-			_, err = tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_service.tmpl")
-			return tmpl.ExecuteTemplate(f, "api_internal_service.tmpl", struct {
+			_tmpl := template.New("")
+			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_service.tmpl")
+			return _tmpl.ExecuteTemplate(_f, "api_internal_service.tmpl", struct {
 				ModulePath string
 			}{
 				ModulePath: name,
@@ -261,24 +260,24 @@ func apiService(name string) error {
 }
 
 func apiModel(name string) error {
-	log.Printf("Create new api model file. \n")
+	log.Printf("Creating new api model file. \n")
 	const parent = "internal/model/dto"
-	err := os.MkdirAll(parent, os.ModePerm)
-	if err != nil {
-		return err
+	e := os.MkdirAll(parent, os.ModePerm)
+	if e != nil {
+		return e
 	}
-	_, err = os.Stat(parent + "/user.go")
-	if err != nil {
-		if os.IsNotExist(err) {
-			f, err := os.OpenFile(parent+"/user.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-			if err != nil {
-				return err
+	_, e = os.Stat(parent + "/user.go")
+	if e != nil {
+		if os.IsNotExist(e) {
+			_f, e := os.OpenFile(parent+"/user.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if e != nil {
+				return e
 			}
-			defer f.Close()
+			defer _f.Close()
 
-			tmpl := template.New("")
-			_, err = tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_model_dto.tmpl")
-			return tmpl.ExecuteTemplate(f, "api_internal_model_dto.tmpl", struct {
+			_tmpl := template.New("")
+			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_model_dto.tmpl")
+			return _tmpl.ExecuteTemplate(_f, "api_internal_model_dto.tmpl", struct {
 				ModulePath string
 			}{
 				ModulePath: name,
@@ -291,24 +290,24 @@ func apiModel(name string) error {
 }
 
 func apiConstant(name string) error {
-	log.Printf("Create new api constant file. \n")
+	log.Printf("Creating new api constant file. \n")
 	const parent = "internal/constant"
-	err := os.MkdirAll(parent, os.ModePerm)
-	if err != nil {
-		return err
+	e := os.MkdirAll(parent, os.ModePerm)
+	if e != nil {
+		return e
 	}
-	_, err = os.Stat(parent + "/error.go")
-	if err != nil {
-		if os.IsNotExist(err) {
-			f, err := os.OpenFile(parent+"/error.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-			if err != nil {
-				return err
+	_, e = os.Stat(parent + "/error.go")
+	if e != nil {
+		if os.IsNotExist(e) {
+			_f, e := os.OpenFile(parent+"/error.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if e != nil {
+				return e
 			}
-			defer f.Close()
+			defer _f.Close()
 
-			tmpl := template.New("")
-			_, err = tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_constant.tmpl")
-			return tmpl.ExecuteTemplate(f, "api_internal_constant.tmpl", struct {
+			_tmpl := template.New("")
+			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_constant.tmpl")
+			return _tmpl.ExecuteTemplate(_f, "api_internal_constant.tmpl", struct {
 				ModulePath string
 			}{
 				ModulePath: name,

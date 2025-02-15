@@ -11,13 +11,13 @@ func Init() api.Application {
 	_app.Use(api.Recovery())
 	_app.Use(api.Logger())
 
-	v1 := api.NewParty(app, "/v1")
+	_v1 := api.NewParty(_app, "/v1")
 	// 注册路由
-	l := len(api.Instances)
-	for i := 0; i < l; i++ {
+	_l := len(api.Instances)
+	for i := 0; i < _l; i++ {
 		if m, ok := api.Instances[i].(api.IRegisterRouter); ok {
-			m.RegisterRouter(v1)
+			m.RegisterRouter(_v1)
 		}
 	}
-	return app
+	return _app
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/tbluser"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/broker"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -19,38 +19,38 @@ const UserTableName = "user"
 
 var (
 	userPool = pool.New(app.Context, func() any {
-		obj := &User{}
-		obj.UUID()
-		return obj
+		_obj := &User{}
+		_obj.UUID()
+		return _obj
 	})
 )
 
 func NewUser() *User {
-	obj := userPool.Get().(*User)
-	return obj
+	_obj := userPool.Get().(*User)
+	return _obj
 }
 
 // MarshalJSON
 func (p *User) MarshalJSON() ([]byte, error) {
-	var buf = bytes.NewBuffer(nil)
-	buf.WriteByte('{')
+	var _buf = bytes.NewBuffer(nil)
+	_buf.WriteByte('{')
 	if p.Id != 0 {
-		buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
 	}
 	if p.Uuid != "" {
-		buf.WriteString(`"uuid":` + types.Marshal(p.Uuid) + `,`)
+		_buf.WriteString(`"uuid":` + types.Marshal(p.Uuid) + `,`)
 	}
 	if !p.Ctime.IsZero() {
-		buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
 	}
 	if p.UserLogs != nil {
-		buf.WriteString(`"user_logs":` + types.Marshal(p.UserLogs) + `,`)
+		_buf.WriteString(`"user_logs":` + types.Marshal(p.UserLogs) + `,`)
 	}
-	if l := buf.Len(); l > 1 {
-		buf.Truncate(l - 1)
+	if l := _buf.Len(); l > 1 {
+		_buf.Truncate(l - 1)
 	}
-	buf.WriteByte('}')
-	return buf.Bytes(), nil
+	_buf.WriteByte('}')
+	return _buf.Bytes(), nil
 }
 
 // UnmarshalJSON
@@ -62,12 +62,11 @@ func (p *User) UnmarshalJSON(data []byte) error {
 		}
 	}()
 
-	ok := gjson.ValidBytes(data)
-	if !ok {
+	if !gjson.ValidBytes(data) {
 		return errors.New("invalid json")
 	}
-	result := gjson.ParseBytes(data)
-	result.ForEach(func(key, value gjson.Result) bool {
+	_result := gjson.ParseBytes(data)
+	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
 		case "id":
@@ -122,21 +121,21 @@ func (p *User) AssignPtr(args ...dialect.Field) []any {
 		args = tbluser.ReadableFields
 	}
 
-	vals := make([]any, 0, len(args))
+	_vals := make([]any, 0, len(args))
 	for _, col := range args {
 		switch col {
 		case tbluser.Id:
-			vals = append(vals, &p.Id)
+			_vals = append(_vals, &p.Id)
 		case tbluser.Uuid:
-			vals = append(vals, &p.Uuid)
+			_vals = append(_vals, &p.Uuid)
 		case tbluser.Ctime:
-			vals = append(vals, &p.Ctime)
+			_vals = append(_vals, &p.Ctime)
 		case tbluser.UserLogs:
-			vals = append(vals, &p.UserLogs)
+			_vals = append(_vals, &p.UserLogs)
 		}
 	}
 
-	return vals
+	return _vals
 }
 
 func (p *User) Scan(rows *sql.Rows, args ...dialect.Field) ([]User, bool, error) {
@@ -148,18 +147,18 @@ func (p *User) Scan(rows *sql.Rows, args ...dialect.Field) ([]User, bool, error)
 	}
 
 	for rows.Next() {
-		p := NewUser()
-		vals := p.AssignPtr(args...)
-		err := rows.Scan(vals...)
-		if err != nil {
-			log.Error(err)
-			return nil, false, err
+		_p := NewUser()
+		_vals := _p.AssignPtr(args...)
+		e := rows.Scan(_vals...)
+		if e != nil {
+			log.Error(e)
+			return nil, false, e
 		}
-		users = append(users, *p)
+		users = append(users, *_p)
 	}
-	if err := rows.Err(); err != nil {
-		log.Error(err)
-		return nil, false, err
+	if e := rows.Err(); e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
 	if len(users) == 0 {
 		return nil, false, sql.ErrNoRows
@@ -169,57 +168,57 @@ func (p *User) Scan(rows *sql.Rows, args ...dialect.Field) ([]User, bool, error)
 
 func (p *User) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
-		lens = len(args)
-		cols []string
-		vals []any
+		_lens = len(args)
+		_cols []string
+		_vals []any
 	)
 
 	if len(args) == 0 {
 		args = tbluser.WritableFields
-		lens = len(args)
-		cols = make([]string, 0, lens)
-		vals = make([]any, 0, lens)
+		_lens = len(args)
+		_cols = make([]string, 0, _lens)
+		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
 			switch arg {
 			case tbluser.Id:
 				if p.Id == 0 {
 					continue
 				}
-				cols = append(cols, tbluser.Id.Quote())
-				vals = append(vals, p.Id)
+				_cols = append(_cols, tbluser.Id.Quote())
+				_vals = append(_vals, p.Id)
 			case tbluser.Uuid:
 				if p.Uuid == "" {
 					continue
 				}
-				cols = append(cols, tbluser.Uuid.Quote())
-				vals = append(vals, p.Uuid)
+				_cols = append(_cols, tbluser.Uuid.Quote())
+				_vals = append(_vals, p.Uuid)
 			case tbluser.Ctime:
 				if p.Ctime.IsZero() {
 					continue
 				}
-				cols = append(cols, tbluser.Ctime.Quote())
-				vals = append(vals, p.Ctime)
+				_cols = append(_cols, tbluser.Ctime.Quote())
+				_vals = append(_vals, p.Ctime)
 			}
 		}
-		return cols, vals
+		return _cols, _vals
 	}
 
-	cols = make([]string, 0, lens)
-	vals = make([]any, 0, lens)
+	_cols = make([]string, 0, _lens)
+	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
 		switch arg {
 		case tbluser.Id:
-			cols = append(cols, tbluser.Id.Quote())
-			vals = append(vals, p.Id)
+			_cols = append(_cols, tbluser.Id.Quote())
+			_vals = append(_vals, p.Id)
 		case tbluser.Uuid:
-			cols = append(cols, tbluser.Uuid.Quote())
-			vals = append(vals, p.Uuid)
+			_cols = append(_cols, tbluser.Uuid.Quote())
+			_vals = append(_vals, p.Uuid)
 		case tbluser.Ctime:
-			cols = append(cols, tbluser.Ctime.Quote())
-			vals = append(vals, p.Ctime)
+			_cols = append(_cols, tbluser.Ctime.Quote())
+			_vals = append(_vals, p.Ctime)
 		}
 	}
-	return cols, vals
+	return _cols, _vals
 }
 
 func (p *User) AssignKeys() (dialect.Field, any) {
@@ -227,10 +226,10 @@ func (p *User) AssignKeys() (dialect.Field, any) {
 }
 
 func (p *User) AssignPrimaryKeyValues(result sql.Result) error {
-	id, err := result.LastInsertId()
-	if err != nil {
-		return err
+	_id, e := result.LastInsertId()
+	if e != nil {
+		return e
 	}
-	p.Id = types.BigInt(id)
+	p.Id = types.BigInt(_id)
 	return nil
 }

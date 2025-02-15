@@ -9,7 +9,7 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/tblapp"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/broker"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -19,55 +19,54 @@ const AppTableName = "app"
 
 var (
 	appPool = pool.New(app.Context, func() any {
-		obj := &App{}
-		obj.UUID()
-		return obj
+		_obj := &App{}
+		_obj.UUID()
+		return _obj
 	})
 )
 
 func NewApp() *App {
-	obj := appPool.Get().(*App)
-	return obj
+	_obj := appPool.Get().(*App)
+	return _obj
 }
 
 // MarshalJSON
 func (p *App) MarshalJSON() ([]byte, error) {
-	var buf = bytes.NewBuffer(nil)
-	buf.WriteByte('{')
+	var _buf = bytes.NewBuffer(nil)
+	_buf.WriteByte('{')
 	if p.Id != 0 {
-		buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
 	}
 	if p.Arch != "" {
-		buf.WriteString(`"arch":` + types.Marshal(p.Arch) + `,`)
+		_buf.WriteString(`"arch":` + types.Marshal(p.Arch) + `,`)
 	}
 	if p.Version != "" {
-		buf.WriteString(`"version":` + types.Marshal(p.Version) + `,`)
+		_buf.WriteString(`"version":` + types.Marshal(p.Version) + `,`)
 	}
 	if p.Url != "" {
-		buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
+		_buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
 	}
 	if p.State != 0 {
-		buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
 	}
 	if p.Force != 0 {
-		buf.WriteString(`"force":` + types.Marshal(p.Force) + `,`)
+		_buf.WriteString(`"force":` + types.Marshal(p.Force) + `,`)
 	}
-	if l := buf.Len(); l > 1 {
-		buf.Truncate(l - 1)
+	if l := _buf.Len(); l > 1 {
+		_buf.Truncate(l - 1)
 	}
-	buf.WriteByte('}')
-	return buf.Bytes(), nil
+	_buf.WriteByte('}')
+	return _buf.Bytes(), nil
 }
 
 // UnmarshalJSON
 func (p *App) UnmarshalJSON(data []byte) error {
 
-	ok := gjson.ValidBytes(data)
-	if !ok {
+	if !gjson.ValidBytes(data) {
 		return errors.New("invalid json")
 	}
-	result := gjson.ParseBytes(data)
-	result.ForEach(func(key, value gjson.Result) bool {
+	_result := gjson.ParseBytes(data)
+	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
 		case "id":
@@ -121,25 +120,25 @@ func (p *App) AssignPtr(args ...dialect.Field) []any {
 		args = tblapp.ReadableFields
 	}
 
-	vals := make([]any, 0, len(args))
+	_vals := make([]any, 0, len(args))
 	for _, col := range args {
 		switch col {
 		case tblapp.Id:
-			vals = append(vals, &p.Id)
+			_vals = append(_vals, &p.Id)
 		case tblapp.Arch:
-			vals = append(vals, &p.Arch)
+			_vals = append(_vals, &p.Arch)
 		case tblapp.Version:
-			vals = append(vals, &p.Version)
+			_vals = append(_vals, &p.Version)
 		case tblapp.Url:
-			vals = append(vals, &p.Url)
+			_vals = append(_vals, &p.Url)
 		case tblapp.State:
-			vals = append(vals, &p.State)
+			_vals = append(_vals, &p.State)
 		case tblapp.Force:
-			vals = append(vals, &p.Force)
+			_vals = append(_vals, &p.Force)
 		}
 	}
 
-	return vals
+	return _vals
 }
 
 func (p *App) Scan(rows *sql.Rows, args ...dialect.Field) ([]App, bool, error) {
@@ -151,18 +150,18 @@ func (p *App) Scan(rows *sql.Rows, args ...dialect.Field) ([]App, bool, error) {
 	}
 
 	for rows.Next() {
-		p := NewApp()
-		vals := p.AssignPtr(args...)
-		err := rows.Scan(vals...)
-		if err != nil {
-			log.Error(err)
-			return nil, false, err
+		_p := NewApp()
+		_vals := _p.AssignPtr(args...)
+		e := rows.Scan(_vals...)
+		if e != nil {
+			log.Error(e)
+			return nil, false, e
 		}
-		apps = append(apps, *p)
+		apps = append(apps, *_p)
 	}
-	if err := rows.Err(); err != nil {
-		log.Error(err)
-		return nil, false, err
+	if e := rows.Err(); e != nil {
+		log.Error(e)
+		return nil, false, e
 	}
 	if len(apps) == 0 {
 		return nil, false, sql.ErrNoRows
@@ -172,84 +171,84 @@ func (p *App) Scan(rows *sql.Rows, args ...dialect.Field) ([]App, bool, error) {
 
 func (p *App) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
-		lens = len(args)
-		cols []string
-		vals []any
+		_lens = len(args)
+		_cols []string
+		_vals []any
 	)
 
 	if len(args) == 0 {
 		args = tblapp.WritableFields
-		lens = len(args)
-		cols = make([]string, 0, lens)
-		vals = make([]any, 0, lens)
+		_lens = len(args)
+		_cols = make([]string, 0, _lens)
+		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
 			switch arg {
 			case tblapp.Id:
 				if p.Id == 0 {
 					continue
 				}
-				cols = append(cols, tblapp.Id.Quote())
-				vals = append(vals, p.Id)
+				_cols = append(_cols, tblapp.Id.Quote())
+				_vals = append(_vals, p.Id)
 			case tblapp.Arch:
 				if p.Arch == "" {
 					continue
 				}
-				cols = append(cols, tblapp.Arch.Quote())
-				vals = append(vals, p.Arch)
+				_cols = append(_cols, tblapp.Arch.Quote())
+				_vals = append(_vals, p.Arch)
 			case tblapp.Version:
 				if p.Version == "" {
 					continue
 				}
-				cols = append(cols, tblapp.Version.Quote())
-				vals = append(vals, p.Version)
+				_cols = append(_cols, tblapp.Version.Quote())
+				_vals = append(_vals, p.Version)
 			case tblapp.Url:
 				if p.Url == "" {
 					continue
 				}
-				cols = append(cols, tblapp.Url.Quote())
-				vals = append(vals, p.Url)
+				_cols = append(_cols, tblapp.Url.Quote())
+				_vals = append(_vals, p.Url)
 			case tblapp.State:
 				if p.State == 0 {
 					continue
 				}
-				cols = append(cols, tblapp.State.Quote())
-				vals = append(vals, p.State)
+				_cols = append(_cols, tblapp.State.Quote())
+				_vals = append(_vals, p.State)
 			case tblapp.Force:
 				if p.Force == 0 {
 					continue
 				}
-				cols = append(cols, tblapp.Force.Quote())
-				vals = append(vals, p.Force)
+				_cols = append(_cols, tblapp.Force.Quote())
+				_vals = append(_vals, p.Force)
 			}
 		}
-		return cols, vals
+		return _cols, _vals
 	}
 
-	cols = make([]string, 0, lens)
-	vals = make([]any, 0, lens)
+	_cols = make([]string, 0, _lens)
+	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
 		switch arg {
 		case tblapp.Id:
-			cols = append(cols, tblapp.Id.Quote())
-			vals = append(vals, p.Id)
+			_cols = append(_cols, tblapp.Id.Quote())
+			_vals = append(_vals, p.Id)
 		case tblapp.Arch:
-			cols = append(cols, tblapp.Arch.Quote())
-			vals = append(vals, p.Arch)
+			_cols = append(_cols, tblapp.Arch.Quote())
+			_vals = append(_vals, p.Arch)
 		case tblapp.Version:
-			cols = append(cols, tblapp.Version.Quote())
-			vals = append(vals, p.Version)
+			_cols = append(_cols, tblapp.Version.Quote())
+			_vals = append(_vals, p.Version)
 		case tblapp.Url:
-			cols = append(cols, tblapp.Url.Quote())
-			vals = append(vals, p.Url)
+			_cols = append(_cols, tblapp.Url.Quote())
+			_vals = append(_vals, p.Url)
 		case tblapp.State:
-			cols = append(cols, tblapp.State.Quote())
-			vals = append(vals, p.State)
+			_cols = append(_cols, tblapp.State.Quote())
+			_vals = append(_vals, p.State)
 		case tblapp.Force:
-			cols = append(cols, tblapp.Force.Quote())
-			vals = append(vals, p.Force)
+			_cols = append(_cols, tblapp.Force.Quote())
+			_vals = append(_vals, p.Force)
 		}
 	}
-	return cols, vals
+	return _cols, _vals
 }
 
 func (p *App) AssignKeys() (dialect.Field, any) {

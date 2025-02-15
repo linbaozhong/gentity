@@ -29,20 +29,20 @@ func Sql2Struct(buf []byte, packageName string) ([]byte, error) {
 }
 
 func SqlFile2Struct(filePath, packageName string) ([]byte, error) {
-	f, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
+	_f, e := os.Open(filePath)
+	if e != nil {
+		return nil, e
 	}
-	defer f.Close()
+	defer _f.Close()
 
-	return reader2Struct(f, packageName)
+	return reader2Struct(_f, packageName)
 }
 
 func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
-	parser := sqlparser.NewParser(r)
-	schema, err := parser.Parse()
-	if err != nil {
-		return nil, err
+	_parser := sqlparser.NewParser(r)
+	_schema, e := _parser.Parse()
+	if e != nil {
+		return nil, e
 	}
 
 	var buf bytes.Buffer
@@ -65,7 +65,7 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 	// buf.WriteString("// UUID 只是为了实现接口方法，外部不建议调用。\n")
 	// buf.WriteString("func (a *noCopy) UUID() uint64 {\n\tif a.nocopy_uuid == 0 {\n\t\ta.nocopy_uuid = atomic.AddUint64(&nocopy_uint64, 1)\n\t}\n\treturn a.nocopy_uuid\n}\n\nfunc (p *noCopy) Lock()   {}\nfunc (p *noCopy) Unlock() {}\n")
 
-	for _, table := range schema {
+	for _, table := range _schema {
 		buf.WriteString("// tablename " + table.Name + "\n")
 		// buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + ParseField(table.Name) + " struct {\n")

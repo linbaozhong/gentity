@@ -74,51 +74,51 @@ type Relation struct {
 }
 
 func getBaseFilename(filename string) string {
-	f := filepath.Base(filename)
-	pos := strings.LastIndex(f, ".")
+	_f := filepath.Base(filename)
+	pos := strings.LastIndex(_f, ".")
 	if pos == -1 {
-		return f
+		return _f
 	}
-	return f[:pos]
+	return _f[:pos]
 }
 
 func writeDaoBase(parent string) error {
-	err := os.MkdirAll(parent, os.ModePerm)
-	if err != nil {
+	e := os.MkdirAll(parent, os.ModePerm)
+	if e != nil {
 		fmt.Println("----")
-		showError(err)
-		return err
+		showError(e)
+		return e
 	}
 
-	fileName := filepath.Join(parent, "gentity_model.gen.go")
+	_fileName := filepath.Join(parent, "gentity_model.gen.go")
 
-	funcMap := template.FuncMap{
+	_funcMap := template.FuncMap{
 		"lower": strings.ToLower,
 	}
-	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
-		tmpl := template.New("").Funcs(funcMap)
-		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/dao_base.tmpl")
-		if err != nil {
-			showError(err)
-			return err
+	return writeToFormatFile(_fileName, _funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
+		_tmpl := template.New("").Funcs(funcMap)
+		_, e := _tmpl.ParseFS(resources.TemplatesFS, "templates/dao_base.tmpl")
+		if e != nil {
+			showError(e)
+			return e
 		}
 
-		err = tmpl.ExecuteTemplate(ioWriter, "dao_base.tmpl", nil)
-		if err != nil {
-			showError(err)
+		e = _tmpl.ExecuteTemplate(ioWriter, "dao_base.tmpl", nil)
+		if e != nil {
+			showError(e)
 		}
-		return err
+		return e
 	})
 }
 
 func getType(t Field) string {
-	v := t.Type
-	switch v {
+	_v := t.Type
+	switch _v {
 	case "string", "types.String", "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
 		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
 		"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
 		"types.Float64", "types.BigInt", "types.Money", "time.Time", "types.Time", "bool", "types.Bool":
-		return v
+		return _v
 	default:
 		return "any"
 	}
@@ -260,7 +260,7 @@ func getSqlType(t Field) any {
 }
 
 func (d *TempData) writeToModel(fileName string) error {
-	funcMap := template.FuncMap{
+	_f := template.FuncMap{
 		"lower": strings.ToLower,
 		"sub": func(a, b int) int {
 			return a - b
@@ -276,11 +276,11 @@ func (d *TempData) writeToModel(fileName string) error {
 
 	fileName = filepath.Join(fullpath, getBaseFilename(fileName)+"_do_"+d.StructName+".gen.go")
 
-	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
+	return writeToFormatFile(fileName, _f, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)
-		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/struct.tmpl")
-		if err != nil {
-			return err
+		_, e := tmpl.ParseFS(resources.TemplatesFS, "templates/struct.tmpl")
+		if e != nil {
+			return e
 		}
 		return tmpl.ExecuteTemplate(ioWriter, "struct.tmpl", d)
 	})
@@ -288,22 +288,22 @@ func (d *TempData) writeToModel(fileName string) error {
 
 // writeTable 将生成好的模块文件写到本地
 func (d *TempData) writeTable(parent string) error {
-	err := os.MkdirAll(parent, os.ModePerm)
-	if err != nil {
-		// showError(err)
-		return err
+	e := os.MkdirAll(parent, os.ModePerm)
+	if e != nil {
+		// showError(e)
+		return e
 	}
 
-	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_tbl_"+d.StructName+".gen.go") // d.tableFilename(parent)
-	funcMap := template.FuncMap{
+	_fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_tbl_"+d.StructName+".gen.go") // d.tableFilename(parent)
+	_f := template.FuncMap{
 		"lower":   strings.ToLower,
 		"getType": getType,
 	}
-	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
+	return writeToFormatFile(_fileName, _f, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)
-		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/table.tmpl")
-		if err != nil {
-			return err
+		_, e := tmpl.ParseFS(resources.TemplatesFS, "templates/table.tmpl")
+		if e != nil {
+			return e
 		}
 		return tmpl.ExecuteTemplate(ioWriter, "table.tmpl", d)
 	})
@@ -311,63 +311,63 @@ func (d *TempData) writeTable(parent string) error {
 }
 
 func (d *TempData) writeBuild(parent string) error {
-	err := os.MkdirAll(parent, os.ModePerm)
-	if err != nil {
-		// showError(err)
-		return err
+	e := os.MkdirAll(parent, os.ModePerm)
+	if e != nil {
+		// showError(e)
+		return e
 	}
 
-	fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_dao_"+d.StructName+".gen.go")
+	_fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_dao_"+d.StructName+".gen.go")
 
-	funcMap := template.FuncMap{
+	_f := template.FuncMap{
 		"lower": strings.ToLower,
 		"getReturnValue": func(p, t string) string {
 			return "[]" + p + "." + t
 		},
 	}
-	return writeToFormatFile(fileName, funcMap, func(ioWriter io.Writer, funcMap template.FuncMap) error {
+	return writeToFormatFile(_fileName, _f, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)
-		_, err := tmpl.ParseFS(resources.TemplatesFS, "templates/dao.tmpl")
-		if err != nil {
-			// showError(err)
-			return err
+		_, e := tmpl.ParseFS(resources.TemplatesFS, "templates/dao.tmpl")
+		if e != nil {
+			// showError(e)
+			return e
 		}
 		return tmpl.ExecuteTemplate(ioWriter, "dao.tmpl", d)
 	})
 }
 
 func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(ioWriter io.Writer, funcMap template.FuncMap) error) error {
-	if fi, err := os.Stat(fullFilename); err == nil {
+	if fi, e := os.Stat(fullFilename); e == nil {
 		if !fi.IsDir() {
-			if err := os.Remove(fullFilename); err != nil {
-				showError(err)
-				return err
+			if e := os.Remove(fullFilename); e != nil {
+				showError(e)
+				return e
 			}
 		}
 	}
 
-	f, err := os.OpenFile(fullFilename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		showError(err.Error())
-		return err
+	_f, e := os.OpenFile(fullFilename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+	if e != nil {
+		showError(e.Error())
+		return e
 	}
-	defer f.Close()
+	defer _f.Close()
 	var buf bytes.Buffer
-	err = fn(&buf, funcMap)
-	if err != nil {
-		showError(err.Error())
-		return err
+	e = fn(&buf, funcMap)
+	if e != nil {
+		showError(e.Error())
+		return e
 	}
 
 	formatted, _ := format.Source(buf.Bytes())
 	if formatted == nil {
-		_, err = f.Write(buf.Bytes())
+		_, e = _f.Write(buf.Bytes())
 	} else {
-		_, err = f.Write(formatted)
+		_, e = _f.Write(formatted)
 	}
-	if err != nil {
-		showError(err.Error())
-		return err
+	if e != nil {
+		showError(e.Error())
+		return e
 	}
-	return err
+	return e
 }

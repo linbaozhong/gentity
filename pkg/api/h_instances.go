@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/linbaozhong/gentity/pkg/api/iface"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"strconv"
 	"time"
 )
@@ -21,7 +21,7 @@ func Initiate(ctx Context, arg any) {
 		ctx.SetID(id)
 	}
 
-	if ier, ok := arg.(iface.Initializer); ok {
+	if ier, ok := arg.(Initializer); ok {
 		ier.Init()
 	}
 }

@@ -43,41 +43,41 @@ func parseType(fieldType string) (kind, typeName string) {
 
 func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 	var structFullName = filepath.Join(fullpath, filename)
-	astFile, err := getAst(structFullName)
-	if err != nil {
-		showError(err)
-		return nil, err
+	_astFile, e := getAst(structFullName)
+	if e != nil {
+		showError(e)
+		return nil, e
 	}
 
-	file, err := astra.ParseFile(structFullName,
+	_file, e := astra.ParseFile(structFullName,
 		astra.IgnoreVariables|astra.IgnoreConstants|astra.IgnoreFunctions|
 			astra.IgnoreInterfaces|astra.IgnoreTypes|astra.IgnoreMethods)
-	if err != nil {
-		showError(err)
-		return nil, err
+	if e != nil {
+		showError(e)
+		return nil, e
 	}
-	if len(file.Structures) == 0 {
+	if len(_file.Structures) == 0 {
 		return nil, nil
 	}
 
-	imps := make([]string, 0, len(file.Imports))
-	for _, im := range file.Imports {
-		imps = append(imps, im.Package)
+	_imps := make([]string, 0, len(_file.Imports))
+	for _, im := range _file.Imports {
+		_imps = append(_imps, im.Package)
 	}
 	// 文件中全部符合条件的struct模板
-	tplsData := make([]TempData, 0, len(file.Structures))
+	_tplsData := make([]TempData, 0, len(_file.Structures))
 	// 遍历struct
-	for _, stru := range file.Structures {
+	for _, stru := range _file.Structures {
 		// 如果struct名称为空,或者是一个私有struct,或者field为空,返回
 		if len(stru.Name) == 0 || len(stru.Fields) == 0 /*|| unicode.IsLower(rune(stru.Name[0]))*/ {
 			continue
 		}
 
-		tempData := TempData{
+		_tempData := TempData{
 			ParseTag:    make([]string, 0, 2),
 			ModulePath:  pkgPath,
-			PackageName: astFile.Name.Name,
-			Imports:     imps,
+			PackageName: _astFile.Name.Name,
+			Imports:     _imps,
 			StructName:  stru.Name,
 			CacheData:   "time.Minute",
 			CacheList:   "time.Minute",
@@ -88,8 +88,8 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			Columns:     make([]Field, 0, 20),
 		}
 		// 解析struct文档
-		parseDocs(&tempData, stru.Docs, tags...)
-		if len(tempData.ParseTag) == 0 {
+		parseDocs(&_tempData, stru.Docs, tags...)
+		if len(_tempData.ParseTag) == 0 {
 			continue
 		}
 
@@ -116,10 +116,10 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 					if len(_ref) != 2 {
 						continue
 					}
-					tempData.RelationX.Kind, tempData.RelationX.Type = parseType(field.Type.String())
-					tempData.RelationX.Name = field.Name
-					tempData.RelationX.Field = _ref[0]
-					tempData.RelationX.Foreign = _ref[1]
+					_tempData.RelationX.Kind, _tempData.RelationX.Type = parseType(field.Type.String())
+					_tempData.RelationX.Name = field.Name
+					_tempData.RelationX.Field = _ref[0]
+					_tempData.RelationX.Foreign = _ref[1]
 				case validTag:
 					_namejson.Valids = moveToFront(v, "required")
 				}
@@ -129,10 +129,10 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			_namejson.Rw = rw
 
 			if strings.HasPrefix(_namejson.Type, "types") {
-				tempData.HasCustomType = true
+				_tempData.HasCustomType = true
 			}
 			if _namejson.Type == "time.Time" {
-				tempData.HasTime = true
+				_tempData.HasTime = true
 			}
 
 			if _namejson.Col == "" {
@@ -143,24 +143,24 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 				}
 			}
 
-			tempData.Columns = append(tempData.Columns, _namejson)
+			_tempData.Columns = append(_tempData.Columns, _namejson)
 			if pk != "" {
-				tempData.HasPrimaryKey = true
-				// tempData.Keys = append(tempData.Keys, _namejson)
-				tempData.PrimaryKey = _namejson
+				_tempData.HasPrimaryKey = true
+				// _tempData.Keys = append(_tempData.Keys, _namejson)
+				_tempData.PrimaryKey = _namejson
 				// // 主键是否是自增
-				// if tempData.PrimaryKey[4] == "<-" {
-				// 	tempData.HasCustomType = true
+				// if _tempData.PrimaryKey[4] == "<-" {
+				// 	_tempData.HasCustomType = true
 				// }
 			}
 			if r := _namejson.Type[:1]; r == "*" || r == "[" || r == "m" {
-				tempData.HasRef = true
+				_tempData.HasRef = true
 			}
 		}
-		tplsData = append(tplsData, tempData)
+		_tplsData = append(_tplsData, _tempData)
 	}
 
-	return tplsData, err
+	return _tplsData, e
 }
 
 func parseJson(keys []string) jsonObj {
@@ -186,11 +186,11 @@ func moveToFront(slice []string, target string) []string {
 			// 如果找到目标字符串，将其移动到切片的第一个位置
 			if i > 0 {
 				// 把目标字符串暂存起来
-				temp := slice[i]
+				_temp := slice[i]
 				// 将目标字符串之前的元素依次向后移动一位
 				copy(slice[1:i+1], slice[0:i])
 				// 将目标字符串放到切片的第一个位置
-				slice[0] = temp
+				slice[0] = _temp
 			}
 			break
 		}

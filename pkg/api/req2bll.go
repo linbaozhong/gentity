@@ -16,7 +16,6 @@ package api
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/api/iface"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
@@ -58,7 +57,7 @@ func Post[A, B any](
 		log.Error(e)
 		return
 	}
-	if e := iface.Validate(&req); e != nil {
+	if e := Validate(&req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return
@@ -97,7 +96,7 @@ func Get[A, B any](
 		return
 	}
 	//
-	if e = iface.Validate(&req); e != nil {
+	if e = Validate(&req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return
