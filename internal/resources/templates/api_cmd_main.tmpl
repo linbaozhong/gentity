@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-func init() {
-	service.Open(broker.Context)
-}
-
 func main() {
 	port := ":8080"
 	// 命令行指定端口
@@ -41,6 +37,9 @@ func main() {
 		closing("{{.ModulePath}} Api", "0.1", port)
 		close(idleConnsClosed)
 	})
+
+	service.Open(broker.Context)
+
 	if err := app.Listen(port); err != nil {
 		log.Error(err)
 	}

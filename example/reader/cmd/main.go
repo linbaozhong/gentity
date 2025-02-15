@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-func init() {
-	service.Open(api.AppContext)
-}
-
 func main() {
 	port := ":8080"
 	// 命令行指定端口
@@ -41,6 +37,9 @@ func main() {
 		closing("reader Api", "0.1", port)
 		close(idleConnsClosed)
 	})
+
+	service.Open(api.AppContext)
+
 	if err := app.Listen(port); err != nil {
 		log.Error(err)
 	}
