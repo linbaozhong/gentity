@@ -6,10 +6,10 @@ import (
 )
 
 func Init() api.Application {
-	app := api.NewApplication("{{.ModulePath}}", "0.1")
+	_app := api.NewApplication("{{.ModulePath}}", "0.1")
 
-	app.Use(api.Recovery())
-	app.Use(api.Logger())
+	_app.Use(api.Recovery())
+	_app.Use(api.Logger())
 
 	v1 := api.NewParty(app, "/v1")
 	// 注册路由

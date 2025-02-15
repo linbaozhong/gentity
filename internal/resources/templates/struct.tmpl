@@ -10,7 +10,7 @@ import (
 	"database/sql"
 	"errors"
 	"{{.ModulePath}}/define/table/tbl{{ $structNameLower }}"
-	"github.com/linbaozhong/gentity/pkg/api/broker"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -26,7 +26,7 @@ import (
 const {{$structName}}TableName = "{{.TableName}}"
 
 var (
-	{{lower .StructName}}Pool = pool.New(broker.Context,func() any {
+	{{lower .StructName}}Pool = pool.New(app.Context,func() any {
 		obj := &{{.StructName}}{}
 		obj.UUID()
 		return obj

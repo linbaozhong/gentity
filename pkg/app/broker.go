@@ -1,9 +1,12 @@
-package broker
+package app
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/api/iface"
 )
+
+type IServiceCloser interface {
+	Close() error
+}
 
 const (
 	OperationID = "operation_id"
@@ -17,15 +20,8 @@ var (
 	ServiceCloses = make([]any, 0)
 )
 
-func Validate(arg any) error {
-	if checker, ok := arg.(iface.Checker); ok {
-		return checker.Check()
-	}
-	return nil
-}
-
 // RegisterServiceCloser 注册服务关闭器
-func RegisterServiceCloser(s iface.IServiceCloser) {
+func RegisterServiceCloser(s IServiceCloser) {
 	ServiceCloses = append(ServiceCloses, s)
 }
 
@@ -33,7 +29,7 @@ func RegisterServiceCloser(s iface.IServiceCloser) {
 func Close() {
 	Cancel()
 	for _, s := range ServiceCloses {
-		if s, ok := s.(iface.IServiceCloser); ok {
+		if s, ok := s.(IServiceCloser); ok {
 			s.Close()
 		}
 	}

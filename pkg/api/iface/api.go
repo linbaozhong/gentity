@@ -21,6 +21,9 @@ type Initializer interface {
 	Init()
 }
 
-type IServiceCloser interface {
-	Close() error
+func Validate(arg any) error {
+	if checker, ok := arg.(Checker); ok {
+		return checker.Check()
+	}
+	return nil
 }

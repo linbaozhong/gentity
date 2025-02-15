@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/linbaozhong/gentity/pkg/api/broker"
 	"github.com/linbaozhong/gentity/pkg/api/iface"
 	"strconv"
 	"time"
@@ -16,7 +15,7 @@ type IRegisterRouter interface {
 }
 
 func Initiate(ctx Context, arg any) {
-	if id := ctx.GetHeader(broker.OperationID); len(id) == 0 {
+	if id := ctx.GetHeader(app.OperationID); len(id) == 0 {
 		ctx.SetID(strconv.FormatInt(time.Now().UnixMilli(), 10))
 	} else {
 		ctx.SetID(id)

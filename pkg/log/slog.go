@@ -5,7 +5,7 @@ import (
 	"github.com/gookit/slog"
 	"github.com/gookit/slog/handler"
 	"github.com/gookit/slog/rotatefile"
-	"github.com/linbaozhong/gentity/pkg/api/broker"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"os"
 	"path/filepath"
 	"time"
@@ -39,7 +39,7 @@ func RegisterLogger(ctx context.Context, production bool) {
 		)
 		l.PushHandler(infoHandler)
 		// 注册关闭器
-		broker.RegisterServiceCloser(l)
+		app.RegisterServiceCloser(l)
 	})
 	if production {
 		level = slog.ErrorLevel

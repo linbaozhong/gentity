@@ -9,7 +9,7 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/tbluser"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/api/broker"
+	"github.com/linbaozhong/gentity/pkg/broker"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const UserTableName = "user"
 
 var (
-	userPool = pool.New(broker.Context, func() any {
+	userPool = pool.New(app.Context, func() any {
 		obj := &User{}
 		obj.UUID()
 		return obj

@@ -9,7 +9,7 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/tblapp"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/api/broker"
+	"github.com/linbaozhong/gentity/pkg/broker"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const AppTableName = "app"
 
 var (
-	appPool = pool.New(broker.Context, func() any {
+	appPool = pool.New(app.Context, func() any {
 		obj := &App{}
 		obj.UUID()
 		return obj
