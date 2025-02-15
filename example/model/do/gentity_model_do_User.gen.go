@@ -18,7 +18,7 @@ import (
 const UserTableName = "user"
 
 var (
-	userPool = pool.New(ace.Context, func() any {
+	userPool = pool.New(broker.Context, func() any {
 		obj := &User{}
 		obj.UUID()
 		return obj

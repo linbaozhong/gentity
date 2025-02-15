@@ -19,7 +19,7 @@ var (
 
 func init() {
 	var err error
-	dbx, err = ace.Connect(ace.Context, "mysql",
+	dbx, err = ace.Connect(broker.Context, "mysql",
 		"snow_dev:harrylin_68@tcp(123.56.5.53:13306)/snow_reminder?charset=utf8mb4&parseTime=True&loc=Local")
 	if err != nil {
 		log.Fatal(err)

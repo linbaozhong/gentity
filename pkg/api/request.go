@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strings"
 )
 
 type UnmarshalValueser interface {
@@ -47,15 +46,8 @@ func ReadJSON(ctx Context, ptr any) error {
 
 func ReadQuery(ctx Context, ptr any) error {
 	if x, ok := ptr.(UnmarshalValueser); ok {
-		params := ctx.Params()
-		values := make(map[string][]string, params.Len())
-		params.Visit(func(key string, value string) {
-			values[key] = strings.Split(value, "/")
-		})
+		values := ctx.Request().URL.Query()
 
-		for k, v := range ctx.Request().URL.Query() {
-			values[k] = append(values[k], v...)
-		}
 		if len(values) == 0 {
 			return nil
 		}

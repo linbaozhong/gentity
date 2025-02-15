@@ -14,16 +14,6 @@
 
 package iface
 
-import (
-	"github.com/linbaozhong/gentity/pkg/api"
-	"strconv"
-	"time"
-)
-
-const (
-	OperationID = "operation_id"
-)
-
 type Checker interface {
 	Check() error
 }
@@ -31,21 +21,6 @@ type Initializer interface {
 	Init()
 }
 
-func Validate(arg any) error {
-	if checker, ok := arg.(Checker); ok {
-		return checker.Check()
-	}
-	return nil
-}
-
-func Initiate(ctx api.Context, arg any) {
-	if id := ctx.GetHeader(OperationID); len(id) == 0 {
-		ctx.SetID(strconv.FormatInt(time.Now().UnixMilli(), 10))
-	} else {
-		ctx.SetID(id)
-	}
-
-	if ier, ok := arg.(Initializer); ok {
-		ier.Init()
-	}
+type IServiceCloser interface {
+	Close() error
 }

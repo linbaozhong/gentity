@@ -18,11 +18,11 @@ import (
 	rd "github.com/redis/go-redis/v9"
 )
 
-var (
-	// 全局context，用于支持外部调用。最好在程序启动时引用，否则可能造成panic。
-	// 在程序退出时，需要调用Cancel()。
-	Context, Cancel = context.WithCancel(context.Background())
-)
+//var (
+//	// 全局context，用于支持外部调用。最好在程序启动时引用，否则可能造成panic。
+//	// 在程序退出时，需要调用Cancel()。
+//	Context, Cancel = context.WithCancel(context.Background())
+//)
 
 type (
 	Cruder interface {

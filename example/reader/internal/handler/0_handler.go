@@ -16,7 +16,6 @@ package handler
 
 import (
 	"github.com/linbaozhong/gentity/pkg/api"
-	"github.com/linbaozhong/gentity/pkg/types"
 	"reader/internal/constant/cst"
 	"reader/internal/constant/err"
 )
@@ -37,11 +36,11 @@ func AuthRequired(rule ...bool) api.Handler {
 			goto stop
 		}
 
-		// 将用户简介植入上下文
-		c.Values().Set(cst.VisitorKey, types.Visitor{
-			ID: 12345,
-			IP: c.RemoteAddr(),
-		})
+		//// 将用户简介植入上下文
+		//c.Values().Set(cst.VisitorKey, types.Visitor{
+		//	ID: 12345,
+		//	IP: c.RemoteAddr(),
+		//})
 
 		c.Next()
 		return

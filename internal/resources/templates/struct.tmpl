@@ -26,7 +26,7 @@ import (
 const {{$structName}}TableName = "{{.TableName}}"
 
 var (
-	{{lower .StructName}}Pool = pool.New(ace.Context,func() any {
+	{{lower .StructName}}Pool = pool.New(broker.Context,func() any {
 		obj := &{{.StructName}}{}
 		obj.UUID()
 		return obj

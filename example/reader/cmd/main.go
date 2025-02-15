@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/api"
+	"github.com/linbaozhong/gentity/pkg/api/broker"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"os"
 	"reader/internal/router"
@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	service.Open(ace.Context)
+	service.Open(api.AppContext)
 }
 
 func main() {
@@ -26,7 +26,7 @@ func main() {
 		port = ":" + port
 	}
 
-	log.RegisterLogger(ace.Context, false)
+	log.RegisterLogger(broker.Context, false)
 	log.Info(fmt.Sprintf("%s %s %s 服务已开启", "reader Api", "0.1", port))
 	// 启动API服务
 	app := router.Init()
@@ -49,6 +49,6 @@ func main() {
 	<-idleConnsClosed
 }
 func closing(name, ver, addr string) {
-	ace.Cancel()
+	broker.Close()
 	log.Fatal(fmt.Sprintf("%s %s %s 服务已关闭", name, ver, addr))
 }

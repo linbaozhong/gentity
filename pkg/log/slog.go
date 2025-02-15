@@ -5,12 +5,15 @@ import (
 	"github.com/gookit/slog"
 	"github.com/gookit/slog/handler"
 	"github.com/gookit/slog/rotatefile"
+	"github.com/linbaozhong/gentity/pkg/api/broker"
 	"os"
 	"path/filepath"
 	"time"
 )
 
-var level slog.Level
+var (
+	level slog.Level
+)
 
 func RegisterLogger(ctx context.Context, production bool) {
 	_ = os.Mkdir("logs", os.ModePerm)
@@ -22,17 +25,21 @@ func RegisterLogger(ctx context.Context, production bool) {
 		f.TimeFormat = time.DateTime
 		l.CallerSkip += 1
 
-		l.PushHandler(handler.MustFileHandler(filepath.Join(".", "logs", "error.log"),
+		errorHandler := handler.MustFileHandler(filepath.Join(".", "logs", "error.log"),
 			handler.WithBuffMode(handler.BuffModeLine),
 			handler.WithRotateTime(rotatefile.EveryDay),
 			handler.WithLogLevels(slog.DangerLevels),
-		))
+		)
+		l.PushHandler(errorHandler)
 
-		l.PushHandler(handler.MustFileHandler(filepath.Join(".", "logs", "info.log"),
+		infoHandler := handler.MustFileHandler(filepath.Join(".", "logs", "info.log"),
 			handler.WithBuffMode(handler.BuffModeLine),
 			handler.WithRotateTime(rotatefile.EveryDay),
 			handler.WithLogLevels(slog.NormalLevels),
-		))
+		)
+		l.PushHandler(infoHandler)
+		// 注册关闭器
+		broker.RegisterServiceCloser(l)
 	})
 	if production {
 		level = slog.ErrorLevel
@@ -40,17 +47,6 @@ func RegisterLogger(ctx context.Context, production bool) {
 		level = slog.TraceLevel
 	}
 	slog.SetLogLevel(level)
-
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				slog.Close()
-				return
-			default:
-			}
-		}
-	}()
 }
 
 func Trace(args ...any) {
@@ -105,8 +101,4 @@ func Panicf(format string, args ...any) {
 
 func setLevel(l slog.Level) {
 	slog.SetLogLevel(l)
-}
-
-func Close() error {
-	return slog.Close()
 }
