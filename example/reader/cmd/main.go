@@ -38,7 +38,7 @@ func main() {
 		close(idleConnsClosed)
 	})
 
-	service.Open(api.AppContext)
+	service.Open(app.Context)
 
 	if err := _app.Listen(port); err != nil {
 		log.Error(err)

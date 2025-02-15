@@ -15,7 +15,6 @@
 package api
 
 import (
-	"context"
 	"github.com/kataras/iris/v12"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -29,12 +28,6 @@ type (
 	Context     = iris.Context
 	Party       = iris.Party
 	Handler     = iris.Handler
-)
-
-var (
-	// 全局context，用于支持外部调用。最好在程序启动时引用，否则可能造成panic。
-	// 在程序退出时，需要调用Cancel()。
-	AppContext, AppCancel = context.WithCancel(context.Background())
 )
 
 func NewApplication(name, version string) Application {
