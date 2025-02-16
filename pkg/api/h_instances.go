@@ -7,11 +7,11 @@ import (
 )
 
 var (
-	Instances = make([]any, 0)
+	routes = make([]any, 0)
 )
 
-type IRegisterRouter interface {
-	RegisterRouter(party Party)
+type IRegisterRoute interface {
+	RegisterRoute(party Party)
 }
 
 func Initiate(ctx Context, arg any) {
@@ -23,5 +23,20 @@ func Initiate(ctx Context, arg any) {
 
 	if ier, ok := arg.(Initializer); ok {
 		ier.Init()
+	}
+}
+
+// RegisterRoute 注册路由
+func RegisterRoute(r IRegisterRoute) {
+	routes = append(routes, r)
+}
+
+// RegisterRouter 注册路由器
+func RegisterRouter(group Party) {
+	_l := len(routes)
+	for i := 0; i < _l; i++ {
+		if m, ok := routes[i].(IRegisterRoute); ok {
+			m.RegisterRoute(group)
+		}
 	}
 }

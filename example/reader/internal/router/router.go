@@ -15,8 +15,8 @@ func Init() api.Application {
 	// 注册路由
 	l := len(api.Instances)
 	for i := 0; i < l; i++ {
-		if m, ok := api.Instances[i].(api.IRegisterRouter); ok {
-			m.RegisterRouter(v1)
+		if m, ok := api.Instances[i].(api.IRegisterRoute); ok {
+			m.RegisterRoute(v1)
 		}
 	}
 	return app
