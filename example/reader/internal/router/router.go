@@ -13,11 +13,6 @@ func Init() api.Application {
 
 	v1 := api.NewParty(app, "/v1")
 	// 注册路由
-	l := len(api.Instances)
-	for i := 0; i < l; i++ {
-		if m, ok := api.Instances[i].(api.IRegisterRoute); ok {
-			m.RegisterRoute(v1)
-		}
-	}
+	api.RegisterRouter(v1)
 	return app
 }

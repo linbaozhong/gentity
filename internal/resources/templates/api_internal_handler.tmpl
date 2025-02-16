@@ -8,10 +8,10 @@ import (
 type user struct{}
 
 func init() {
-	api.Instances = append(api.Instances, &user{})
+	api.RegisterRoute(&user{})
 }
 
-func (u *user) RegisterRouter(group api.Party) {
+func (u *user) RegisterRoute(group api.Party) {
 	_g := api.NewParty(group, "/user")
 
 	_g.Post("/user_register", u.userRegister)
