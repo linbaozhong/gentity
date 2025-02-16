@@ -102,6 +102,7 @@ var TagMap = map[string]string{
 	"ISO4217":            "IsISO4217",
 	"IMEI":               "IsIMEI",
 	"ulid":               "IsULID",
+	"mobile":             "IsMobile",
 }
 
 // ISO3166Entry stores country codes

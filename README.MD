@@ -458,6 +458,7 @@ type ChannelReq struct {
 "ISO3166Alpha2":      // ISO3166 Alpha2
 "ISO3166Alpha3":      // ISO3166 Alpha3
 "ulid":               // ulid
+"mobile":             // 手机号码
 ```
 ### 校验器可用参数
 ```
