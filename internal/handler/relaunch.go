@@ -17,7 +17,6 @@ package handler
 import (
 	"fmt"
 	"github.com/linbaozhong/gentity/internal/base"
-	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -136,19 +135,19 @@ var (
 			if command == "check" {
 				defer dtoFile.Close()
 			}
-			// 初始化进度条
-			_bar := progressbar.NewOptions(len(_dirs),
-				progressbar.OptionEnableColorCodes(true),
-				progressbar.OptionSetTheme(progressbar.Theme{
-					Saucer:        "[red]=[reset]",
-					SaucerHead:    "[red]>[reset]",
-					SaucerPadding: " ",
-					BarStart:      "[",
-					BarEnd:        "]",
-				}),
-				progressbar.OptionShowCount())
+			//// 初始化进度条
+			//_bar := progressbar.NewOptions(len(_dirs),
+			//	progressbar.OptionEnableColorCodes(true),
+			//	progressbar.OptionSetTheme(progressbar.Theme{
+			//		Saucer:        "[red]=[reset]",
+			//		SaucerHead:    "[red]>[reset]",
+			//		SaucerPadding: " ",
+			//		BarStart:      "[",
+			//		BarEnd:        "]",
+			//	}),
+			//	progressbar.OptionShowCount())
 			for _, dir := range _dirs {
-				_bar.Add(1)
+				//_bar.Add(1)
 				if dir.IsDir() {
 					continue
 				}

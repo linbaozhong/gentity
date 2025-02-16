@@ -40,6 +40,11 @@ var (
 	whiteSpacesAndMinus = regexp.MustCompile(`[\s-]+`)
 )
 
+// IsMobile checks if the string is a mobile number.
+func IsMobile(str string) bool {
+	return rxCnMobile.MatchString(str)
+}
+
 // IsEmail checks if the string is an email.
 func IsEmail(str string) bool {
 	// TODO uppercase letters are not supported
