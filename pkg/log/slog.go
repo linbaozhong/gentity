@@ -15,7 +15,8 @@ var (
 	level slog.Level
 )
 
-func RegisterLogger(ctx context.Context, production bool) {
+// Register slog logger
+func Register(production bool) {
 	_ = os.Mkdir("logs", os.ModePerm)
 
 	slog.Configure(func(l *slog.SugaredLogger) {
@@ -38,8 +39,6 @@ func RegisterLogger(ctx context.Context, production bool) {
 			handler.WithLogLevels(slog.NormalLevels),
 		)
 		l.PushHandler(infoHandler)
-		// 注册关闭器
-		app.RegisterServiceCloser(l)
 	})
 	if production {
 		level = slog.ErrorLevel
@@ -47,6 +46,13 @@ func RegisterLogger(ctx context.Context, production bool) {
 		level = slog.TraceLevel
 	}
 	slog.SetLogLevel(level)
+	// 注册关闭器
+	app.RegisterServiceCloser(slog.Std())
+}
+
+// RegisterLogger slog logger
+func RegisterLogger(ctx context.Context, production bool) {
+	Register(production)
 }
 
 func Trace(args ...any) {

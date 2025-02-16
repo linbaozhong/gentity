@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+var (
+	_ = app.Context
+)
+
 func main() {
 	port := ":8080"
 	// 命令行指定端口
@@ -22,7 +26,7 @@ func main() {
 		port = ":" + port
 	}
 
-	log.RegisterLogger(app.Context, false)
+	log.Register(false)
 	log.Info(fmt.Sprintf("%s %s %s 服务已开启", "reader Api", "0.1", port))
 	// 启动API服务
 	_app := router.Init()
@@ -38,7 +42,7 @@ func main() {
 		close(idleConnsClosed)
 	})
 
-	service.Open(app.Context)
+	service.Open()
 
 	if err := _app.Listen(port); err != nil {
 		log.Error(err)

@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/cachego/memcached"
 	"github.com/linbaozhong/gentity/pkg/cachego/redis"
 	syc "github.com/linbaozhong/gentity/pkg/cachego/sync"
@@ -81,7 +82,7 @@ const (
 )
 
 // Connect
-func Connect(ctx context.Context, driverName, dns string) (*DB, error) {
+func Connect(driverName, dns string) (*DB, error) {
 	dialect.Register(driverName)
 	db, e := sql.Open(driverName, dns)
 	if e != nil {
@@ -100,28 +101,24 @@ func Connect(ctx context.Context, driverName, dns string) (*DB, error) {
 	obj.mapper = mapper()
 	obj.debug = false
 
-	// 初始化全局的context，使其支持取消
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				obj.DB.Close()
-				return
-			}
-		}
-	}()
+	app.RegisterServiceCloser(obj)
+	//go func() {
+	//	for {
+	//		select {
+	//		case <-ctx.Done():
+	//			obj.DB.Close()
+	//			return
+	//		}
+	//	}
+	//}()
 
 	return obj, e
 }
 
-// // Close
-// func (s *DB) Close() error {
-// 	return s.DB.Close()
-// }
+// Close
+func (s *DB) Close() error {
+	return s.DB.Close()
+}
 
 // Mapper
 func (s *DB) Mapper() *reflectx.Mapper {

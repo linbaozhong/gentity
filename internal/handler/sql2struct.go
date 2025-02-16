@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"fmt"
 	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
@@ -47,7 +46,7 @@ func sql2struct(driver, sqlPath, outputPath, packageName string) error {
 }
 
 func db2struct(driver, dns, outputPath, packageName string) error {
-	_db, e := ace.Connect(context.Background(), driver, dns)
+	_db, e := ace.Connect(driver, dns)
 	if e != nil {
 		return e
 	}

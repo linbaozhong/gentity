@@ -102,7 +102,7 @@ func generateApi(name string) error {
 		return e
 	}
 
-	log.Printf("go mod tidy ... \n")
+	log.Printf("go mod tidying ... \n")
 	return exec.Command("go", "mod", "tidy").Run()
 }
 

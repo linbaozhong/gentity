@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"sync"
@@ -12,10 +11,10 @@ var (
 	openOnce sync.Once
 )
 
-func Open(ctx context.Context) error {
+func Open() error {
 	openOnce.Do(func() {
 		var err error
-		db, err = ace.Connect(ctx, "mysql",
+		db, err = ace.Connect("mysql",
 			"user:password@tcp(0.0.0.0:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local")
 		if err != nil {
 			log.Fatal(err)
