@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	version = "0.5.2"
+	version = "0.5.92"
 )
 
 var (
@@ -135,8 +135,8 @@ var (
 			if command == "check" {
 				defer dtoFile.Close()
 			}
-			//// 初始化进度条
-			//_bar := progressbar.NewOptions(len(_dirs),
+			// // 初始化进度条
+			// _bar := progressbar.NewOptions(len(_dirs),
 			//	progressbar.OptionEnableColorCodes(true),
 			//	progressbar.OptionSetTheme(progressbar.Theme{
 			//		Saucer:        "[red]=[reset]",
@@ -147,7 +147,7 @@ var (
 			//	}),
 			//	progressbar.OptionShowCount())
 			for _, dir := range _dirs {
-				//_bar.Add(1)
+				// _bar.Add(1)
 				if dir.IsDir() {
 					continue
 				}
