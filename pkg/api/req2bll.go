@@ -34,25 +34,95 @@ func Post[A, B any](
 	fn func(ctx context.Context, req *A, resp *B) error,
 ) {
 	var (
-		req A
-		e   error
-	)
-	Initiate(ctx, &req)
+		req  A
+		resp B
+		read = func(ctx Context, req *A) error {
+			Initiate(ctx, req)
 
-	switch ctx.GetContentTypeRequested() {
-	case "application/json":
-		e = ReadJSON(ctx, &req)
-	case "application/x-www-form-urlencoded", "multipart/form-data":
-		e = ReadForm(ctx, &req)
-	default:
-		if ctx.Request().URL.RawQuery == "" {
-			e = ReadForm(ctx, &req)
-		} else {
-			e = ReadQuery(ctx, &req)
+			switch ctx.GetContentTypeRequested() {
+			case "application/json":
+				return ReadJSON(ctx, req)
+			case "application/x-www-form-urlencoded", "multipart/form-data":
+				return ReadForm(ctx, req)
+			default:
+				if ctx.Request().URL.RawQuery == "" {
+					return ReadForm(ctx, req)
+				} else {
+					return ReadQuery(ctx, req)
+				}
+			}
 		}
-	}
+	)
 
-	if e != nil {
+	response(ctx, &req, &resp, read, fn)
+
+	// Initiate(ctx, &req)
+	//
+	// switch ctx.GetContentTypeRequested() {
+	// case "application/json":
+	// 	e = ReadJSON(ctx, &req)
+	// case "application/x-www-form-urlencoded", "multipart/form-data":
+	// 	e = ReadForm(ctx, &req)
+	// default:
+	// 	if ctx.Request().URL.RawQuery == "" {
+	// 		e = ReadForm(ctx, &req)
+	// 	} else {
+	// 		e = ReadQuery(ctx, &req)
+	// 	}
+	// }
+	//
+	// if e != nil {
+	// 	Fail(ctx, Param_Invalid)
+	// 	log.Error(e)
+	// 	return
+	// }
+	// if e := Validate(&req); e != nil {
+	// 	Fail(ctx, e)
+	// 	log.Error(e)
+	// 	return
+	// }
+	//
+	// var resp B
+	// if e := fn(ctx, &req, &resp); e != nil {
+	// 	Fail(ctx, e)
+	// 	log.Error(e)
+	// 	return
+	// }
+	// Ok(ctx, resp)
+}
+func PostX[A, B any](
+	ctx Context,
+	fn func(ctx Context, req *A, resp *B) error,
+) {
+	var (
+		req  A
+		resp B
+		read = func(ctx Context, req *A) error {
+			Initiate(ctx, req)
+
+			switch ctx.GetContentTypeRequested() {
+			case "application/json":
+				return ReadJSON(ctx, req)
+			case "application/x-www-form-urlencoded", "multipart/form-data":
+				return ReadForm(ctx, req)
+			default:
+				if ctx.Request().URL.RawQuery == "" {
+					return ReadForm(ctx, req)
+				} else {
+					return ReadQuery(ctx, req)
+				}
+			}
+		}
+	)
+
+	responseX(ctx, &req, &resp, read, fn)
+}
+
+func response[A, B any](ctx Context, req *A, resp *B,
+	read func(ctx Context, req *A) error,
+	write func(ctx context.Context, req *A, resp *B) error) {
+
+	if e := read(ctx, req); e != nil {
 		Fail(ctx, Param_Invalid)
 		log.Error(e)
 		return
@@ -63,8 +133,30 @@ func Post[A, B any](
 		return
 	}
 
-	var resp B
-	if e := fn(ctx, &req, &resp); e != nil {
+	if e := write(ctx, req, resp); e != nil {
+		Fail(ctx, e)
+		log.Error(e)
+		return
+	}
+	Ok(ctx, resp)
+}
+
+func responseX[A, B any](ctx Context, req *A, resp *B,
+	read func(ctx Context, req *A) error,
+	write func(ctx Context, req *A, resp *B) error) {
+
+	if e := read(ctx, req); e != nil {
+		Fail(ctx, Param_Invalid)
+		log.Error(e)
+		return
+	}
+	if e := Validate(&req); e != nil {
+		Fail(ctx, e)
+		log.Error(e)
+		return
+	}
+
+	if e := write(ctx, req, resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return
@@ -73,39 +165,75 @@ func Post[A, B any](
 }
 
 // Get get请求：
-// 读取query，req结构体的字段 tag 为 url 或者 param。
+// 读取query，req结构体的字段 tag 为 url。
 func Get[A, B any](
 	ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error,
 ) {
 	var (
-		req A
-		e   error
+		req  A
+		resp B
+		read = func(ctx Context, req *A) error {
+			Initiate(ctx, req)
+
+			if ctx.Request().URL.RawQuery == "" {
+				return ReadForm(ctx, &req)
+			} else {
+				return ReadQuery(ctx, &req)
+			}
+		}
 	)
-	Initiate(ctx, &req)
 
-	if ctx.Request().URL.RawQuery == "" {
-		e = ReadForm(ctx, &req)
-	} else {
-		e = ReadQuery(ctx, &req)
-	}
-	if e != nil {
-		Fail(ctx, Param_Invalid)
-		log.Error(e)
-		return
-	}
+	response(ctx, &req, &resp, read, fn)
+	// var (
+	// 	req A
+	// 	e   error
+	// )
+	// Initiate(ctx, &req)
 	//
-	if e = Validate(&req); e != nil {
-		Fail(ctx, e)
-		log.Error(e)
-		return
-	}
+	// if ctx.Request().URL.RawQuery == "" {
+	// 	e = ReadForm(ctx, &req)
+	// } else {
+	// 	e = ReadQuery(ctx, &req)
+	// }
+	// if e != nil {
+	// 	Fail(ctx, Param_Invalid)
+	// 	log.Error(e)
+	// 	return
+	// }
+	// //
+	// if e = Validate(&req); e != nil {
+	// 	Fail(ctx, e)
+	// 	log.Error(e)
+	// 	return
+	// }
+	//
+	// var resp B
+	// if e = fn(ctx, &req, &resp); e != nil {
+	// 	Fail(ctx, e)
+	// 	log.Error(e)
+	// 	return
+	// }
+	// Ok(ctx, resp)
+}
 
-	var resp B
-	if e = fn(ctx, &req, &resp); e != nil {
-		Fail(ctx, e)
-		log.Error(e)
-		return
-	}
-	Ok(ctx, resp)
+func GetX[A, B any](
+	ctx Context,
+	fn func(ctx Context, req *A, resp *B) error,
+) {
+	var (
+		req  A
+		resp B
+		read = func(ctx Context, req *A) error {
+			Initiate(ctx, req)
+
+			if ctx.Request().URL.RawQuery == "" {
+				return ReadForm(ctx, &req)
+			} else {
+				return ReadQuery(ctx, &req)
+			}
+		}
+	)
+
+	responseX(ctx, &req, &resp, read, fn)
 }
