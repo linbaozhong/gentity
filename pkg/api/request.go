@@ -44,6 +44,19 @@ func ReadJSON(ctx Context, ptr any) error {
 	return json.Unmarshal(body, ptr)
 }
 
+// Content-Type为application/x-www-form-urlencoded的请求
+func ReadForm(ctx Context, ptr any) error {
+	if x, ok := ptr.(UnmarshalValueser); ok {
+		values := ctx.FormValues()
+
+		if len(values) == 0 {
+			return nil
+		}
+		return x.UnmarshalValues(values)
+	}
+	return ctx.ReadForm(ptr)
+}
+
 func ReadQuery(ctx Context, ptr any) error {
 	if x, ok := ptr.(UnmarshalValueser); ok {
 		values := ctx.Request().URL.Query()
@@ -53,5 +66,5 @@ func ReadQuery(ctx Context, ptr any) error {
 		}
 		return x.UnmarshalValues(values)
 	}
-	return ctx.ReadBody(ptr)
+	return ctx.ReadQuery(ptr)
 }

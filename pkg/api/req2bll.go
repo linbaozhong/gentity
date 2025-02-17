@@ -43,10 +43,10 @@ func Post[A, B any](
 	case "application/json":
 		e = ReadJSON(ctx, &req)
 	case "application/x-www-form-urlencoded", "multipart/form-data":
-		e = ctx.ReadForm(&req)
+		e = ReadForm(ctx, &req)
 	default:
 		if ctx.Request().URL.RawQuery == "" {
-			e = ctx.ReadForm(&req)
+			e = ReadForm(ctx, &req)
 		} else {
 			e = ReadQuery(ctx, &req)
 		}
@@ -73,8 +73,7 @@ func Post[A, B any](
 }
 
 // Get get请求：
-// 首先尝试读取query，req结构体的字段 tag 为 url 或者 param。
-// 如果query为空，则尝试读取form，req结构体的字段tag为form。
+// 读取query，req结构体的字段 tag 为 url 或者 param。
 func Get[A, B any](
 	ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error,
@@ -86,7 +85,7 @@ func Get[A, B any](
 	Initiate(ctx, &req)
 
 	if ctx.Request().URL.RawQuery == "" {
-		e = ctx.ReadForm(&req)
+		e = ReadForm(ctx, &req)
 	} else {
 		e = ReadQuery(ctx, &req)
 	}
