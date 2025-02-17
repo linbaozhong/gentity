@@ -79,7 +79,7 @@ var (
 				}
 				return
 			case "sql", "db": // 如果command="db"或"sql"，则根据数据表信息生成结构体
-				if len(driver) == 0 && len(dns) == 0 {
+				if len(driver) == 0 || len(dns) == 0 {
 					showError("The database driver and connection string must be entered")
 					return
 				}
