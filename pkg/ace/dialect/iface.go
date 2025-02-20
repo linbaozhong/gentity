@@ -11,8 +11,10 @@ const (
 	Left_Join  JoinType = " LEFT"
 	Right_Join JoinType = " RIGHT"
 
-	Operator_and = " AND "
-	Operator_or  = " OR "
+	Operator_and  = " AND "
+	Operator_or   = " OR "
+	Operator_Asc  = " ASC"
+	Operator_Desc = " DESC"
 
 	MaxLimit uint = 1000
 	PageSize uint = 20

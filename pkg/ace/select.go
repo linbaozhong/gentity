@@ -109,6 +109,18 @@ func (s *Selector) String() string {
 	return s.commandString.String()
 }
 
+func (s *Selector) SetTableName(n string) {
+	s.table = n
+}
+
+func (s *Selector) GetTableName() string {
+	return s.table
+}
+
+func (s *Selector) GetCols() []dialect.Field {
+	return s.cols
+}
+
 // distinct
 func (s *Selector) Distinct(cols ...dialect.Field) *Selector {
 	s.distinct = true
@@ -274,6 +286,19 @@ func (s *Selector) Or(fns ...dialect.Condition) *Selector {
 	return s
 }
 
+// OrderField
+func (s *Selector) OrderField(ords ...dialect.Order) *Selector {
+	for _, ord := range ords {
+		sord, fs := ord()
+		if sord == dialect.Operator_Desc {
+			s.Desc(fs...)
+		} else {
+			s.Asc(fs...)
+		}
+	}
+	return s
+}
+
 // Order
 func (s *Selector) Order(cols ...dialect.Field) *Selector {
 	return s.Asc(cols...)
@@ -302,7 +327,7 @@ func (s *Selector) Desc(cols ...dialect.Field) *Selector {
 		if s.orderBy.Len() > 0 {
 			s.orderBy.WriteByte(',')
 		}
-		s.orderBy.WriteString(col.Quote() + " DESC")
+		s.orderBy.WriteString(col.Quote() + dialect.Operator_Desc)
 	}
 	return s
 }

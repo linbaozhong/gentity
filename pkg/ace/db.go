@@ -19,11 +19,11 @@ import (
 	rd "github.com/redis/go-redis/v9"
 )
 
-//var (
+// var (
 //	// 全局context，用于支持外部调用。最好在程序启动时引用，否则可能造成panic。
 //	// 在程序退出时，需要调用Cancel()。
 //	Context, Cancel = context.WithCancel(context.Background())
-//)
+// )
 
 type (
 	Cruder interface {
@@ -102,7 +102,7 @@ func Connect(driverName, dns string) (*DB, error) {
 	obj.debug = false
 
 	app.RegisterServiceCloser(obj)
-	//go func() {
+	// go func() {
 	//	for {
 	//		select {
 	//		case <-ctx.Done():
@@ -110,7 +110,7 @@ func Connect(driverName, dns string) (*DB, error) {
 	//			return
 	//		}
 	//	}
-	//}()
+	// }()
 
 	return obj, e
 }
@@ -300,4 +300,14 @@ func And(fns ...dialect.Condition) dialect.Condition {
 
 		return buf.String(), params
 	}
+}
+
+func Order(fs ...dialect.Field) (string, []dialect.Field) {
+	return Asc(fs...)
+}
+func Asc(fs ...dialect.Field) (string, []dialect.Field) {
+	return dialect.Operator_Asc, fs
+}
+func Desc(fs ...dialect.Field) (string, []dialect.Field) {
+	return dialect.Operator_Desc, fs
 }
