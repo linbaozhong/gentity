@@ -369,7 +369,14 @@ func (s *Selector) Having(fns ...dialect.Condition) *Selector {
 	}
 	return s
 }
+
+// Limit
+// size 大小
+// start 开始位置
 func (s *Selector) Limit(size uint, start ...uint) *Selector {
+	if size == 0 {
+		return s
+	}
 	if len(start) > 0 {
 		s.limit = " LIMIT " + strconv.Itoa(int(size)) + " OFFSET " + strconv.Itoa(int(start[0]))
 	} else {
@@ -379,6 +386,20 @@ func (s *Selector) Limit(size uint, start ...uint) *Selector {
 	return s
 }
 
+// Page
+// page 页码
+// size 页大小
+func (s *Selector) Page(pageIndex, pageSize uint) *Selector {
+	if pageIndex < 1 {
+		pageIndex = 1
+	}
+	if pageSize < 1 {
+		pageSize = dialect.PageSize
+	}
+	return s.Limit(pageSize, (pageIndex-1)*pageSize)
+}
+
+// parse
 func (s *Selector) parse() []dialect.Field {
 	s.command.WriteString("SELECT ")
 
