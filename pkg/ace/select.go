@@ -470,11 +470,16 @@ func (s *Selector) Get(ctx context.Context, dest any) error {
 	defer rows.Close()
 
 	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
-
+	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
+	// 否则，调用 scanAny 方法
+	if d, ok := dest.(dialect.Modeler); ok {
+		vals := d.AssignPtr()
+		return r.Scan(vals...)
+	}
 	return r.scanAny(dest, false)
 }
 
-// Gets 返回数据切片，dest 必须是指针
+// Gets 返回数据切片，dest 必须是slice指针
 func (s *Selector) Gets(ctx context.Context, dest any) error {
 	defer s.Free()
 	if s.err != nil {
