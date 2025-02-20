@@ -510,7 +510,7 @@ func (s *Selector) Map(ctx context.Context) (map[string]any, error) {
 	return dest, r.MapScan(dest)
 }
 
-// Maps 返回 map[string]any 切片 []map[string]any，用于列数未知的情况
+// Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
 func (s *Selector) Maps(ctx context.Context) ([]map[string]any, error) {
 	defer s.Free()
 	if s.err != nil {
@@ -557,7 +557,7 @@ func (s *Selector) Slice(ctx context.Context) ([]any, error) {
 	return r.SliceScan()
 }
 
-// Slices 返回 map[string]any 切片 []map[string]any，用于列数未知的情况
+// Slices 返回 []any 的切片 [][]any，用于列数未知的情况
 func (s *Selector) Slices(ctx context.Context) ([][]any, error) {
 	defer s.Free()
 	if s.err != nil {
