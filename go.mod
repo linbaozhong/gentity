@@ -13,7 +13,6 @@ require (
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/redis/go-redis/v9 v9.5.1
-	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/spf13/cobra v1.8.1
 	github.com/tidwall/match v1.1.1
 	github.com/tidwall/pretty v1.2.0
@@ -54,11 +53,10 @@ require (
 	github.com/klauspost/compress v1.17.7 // indirect
 	github.com/mailgun/raymond/v2 v2.0.48 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
-	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect

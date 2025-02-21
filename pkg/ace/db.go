@@ -302,12 +302,16 @@ func And(fns ...dialect.Condition) dialect.Condition {
 	}
 }
 
-func Order(fs ...dialect.Field) (string, []dialect.Field) {
+func Order(fs ...dialect.Field) dialect.Order {
 	return Asc(fs...)
 }
-func Asc(fs ...dialect.Field) (string, []dialect.Field) {
-	return dialect.Operator_Asc, fs
+func Asc(fs ...dialect.Field) dialect.Order {
+	return func() (string, []dialect.Field) {
+		return dialect.Operator_Asc, fs
+	}
 }
-func Desc(fs ...dialect.Field) (string, []dialect.Field) {
-	return dialect.Operator_Desc, fs
+func Desc(fs ...dialect.Field) dialect.Order {
+	return func() (string, []dialect.Field) {
+		return dialect.Operator_Desc, fs
+	}
 }

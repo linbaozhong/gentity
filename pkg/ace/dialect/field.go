@@ -29,7 +29,7 @@ type (
 
 	Function   func() string
 	Condition  func() (string, any)
-	Order      func(f ...Field) (string, []Field)
+	Order      func() (string, []Field)
 	Setter     func() (Field, any)
 	ExprSetter func() (string, any)
 )
