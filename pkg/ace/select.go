@@ -286,8 +286,9 @@ func (s *Selector) Or(fns ...dialect.Condition) *Selector {
 	return s
 }
 
-// OrderField
-func (s *Selector) OrderField(ords ...dialect.Order) *Selector {
+// OrderFunc 方法用于根据传入的排序规则函数设置排序规则
+// 它会遍历传入的排序规则函数，根据规则函数的返回值调用 Asc 或 Desc 方法
+func (s *Selector) OrderFunc(ords ...dialect.Order) *Selector {
 	for _, ord := range ords {
 		sord, fs := ord()
 		if sord == dialect.Operator_Desc {
@@ -297,6 +298,11 @@ func (s *Selector) OrderField(ords ...dialect.Order) *Selector {
 		}
 	}
 	return s
+}
+
+// OrderField
+func (s *Selector) OrderField(ords ...dialect.Order) *Selector {
+	return s.OrderFunc(ords...)
 }
 
 // Order

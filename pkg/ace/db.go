@@ -302,16 +302,31 @@ func And(fns ...dialect.Condition) dialect.Condition {
 	}
 }
 
+// Order 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Field 类型的参数，
+// 并调用 Asc 函数来生成一个升序排序的规则。
+// 返回值为一个实现了 dialect.Order 接口的函数，该函数可以被用于指定查询结果的排序方式。
 func Order(fs ...dialect.Field) dialect.Order {
 	return Asc(fs...)
 }
+
+// Asc 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Field 类型的参数，
+// 返回一个实现了 dialect.Order 接口的函数，该函数会返回排序操作符 "ASC" 和指定的字段列表。
+// 该函数可用于指定查询结果按指定字段进行升序排序。
 func Asc(fs ...dialect.Field) dialect.Order {
+	// 返回一个匿名函数，该函数实现了 dialect.Order 接口，返回排序操作符 "ASC" 和字段列表
 	return func() (string, []dialect.Field) {
+		// 返回升序操作符
 		return dialect.Operator_Asc, fs
 	}
 }
+
+// Desc 函数用于创建一个降序排序的规则。它接收可变数量的 dialect.Field 类型的参数，
+// 返回一个实现了 dialect.Order 接口的函数，该函数会返回排序操作符 "DESC" 和指定的字段列表。
+// 该函数可用于指定查询结果按指定字段进行降序排序。
 func Desc(fs ...dialect.Field) dialect.Order {
+	// 返回一个匿名函数，该函数实现了 dialect.Order 接口，返回排序操作符 "DESC" 和字段列表
 	return func() (string, []dialect.Field) {
+		// 返回降序操作符
 		return dialect.Operator_Desc, fs
 	}
 }

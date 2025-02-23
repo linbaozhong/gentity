@@ -268,7 +268,7 @@ func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field,
 	}
 
 	_row, e := _c.Where(cond...).
-		OrderField(sort...).
+		OrderFunc(sort...).
 	    QueryRow(ctx)
 	if e != nil {
 		log.Error(e)
@@ -303,7 +303,7 @@ func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize 
 	}
 	//
 	_rows, e := _c.Where(cond...).
-		OrderField(sort...).
+		OrderFunc(sort...).
 	    Limit(pageSize, pageSize*pageIndex).
 	    Query(ctx)
 	if e != nil {
@@ -356,7 +356,7 @@ func (p *dao{{$structName}}) Get(ctx context.Context, cond  []dialect.Condition,
 func (p *dao{{$structName}}) GetFirstCell(ctx context.Context,col dialect.Field, cond  []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
 	_c := p.R().Cols(col)
 	_row, e := _c.Where(cond...).
-		OrderField(sort...).
+		OrderFunc(sort...).
 		QueryRow(ctx)
 	if e != nil {
 		log.Error(e)
@@ -386,7 +386,7 @@ func (p *dao{{$structName}}) Find(ctx context.Context, pageIndex, pageSize uint,
 func (p *dao{{$structName}}) IDs(ctx context.Context, cond  []dialect.Condition, sort ...dialect.Order) ([]any, error) {
 	_c := p.R().Cols(tbl{{$structNameLower}}.PrimaryKey)
 	_rows, e := _c.Where(cond...).
-		OrderField(sort...).
+		OrderFunc(sort...).
 	    Limit(dialect.MaxLimit).
 	    Query(ctx)
 	if e != nil {
@@ -413,7 +413,7 @@ func (p *dao{{$structName}}) Columns(ctx context.Context, col dialect.Field, con
 	_c := p.R().Cols(col)
 	_rows, e := _c.Where(cond...).
 	    Limit(dialect.MaxLimit).
-		OrderField(sort...).
+		OrderFunc(sort...).
 	    Query(ctx)
 	if e != nil {
 		log.Error(e)
@@ -525,7 +525,7 @@ func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field
 	}
 
 	_row, e := _c.Where(cond...).
-		OrderField(sort...).
+		OrderFunc(sort...).
 		QueryRow(ctx)
 	if e != nil {
 		log.Error(e)
@@ -584,7 +584,7 @@ func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize
 	}
 	//
 	rows, e := _c.Where(cond...).
-		OrderField(sort...).
+		OrderFunc(sort...).
 		Limit(pageSize, pageSize*pageIndex).
 		Query(ctx)
 	if e != nil {
