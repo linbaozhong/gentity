@@ -301,6 +301,7 @@ func (s *Selector) OrderFunc(ords ...dialect.Order) *Selector {
 }
 
 // OrderField
+// Deprecated: 此方法后续版本可能会被移除，建议使用 OrderFunc 方法
 func (s *Selector) OrderField(ords ...dialect.Order) *Selector {
 	return s.OrderFunc(ords...)
 }
