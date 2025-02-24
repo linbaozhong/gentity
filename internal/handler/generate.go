@@ -163,7 +163,7 @@ func getTypeNil(t Field) any {
 		return "types.NilInt16"
 	case "int32", "types.Int32":
 		return "types.NilInt32"
-	case "int64", "types.Int64":
+	case "int64", "types.Int64", "types.Money":
 		return "types.NilInt64"
 	case "uint", "types.Uint":
 		return "types.NilUint"
@@ -173,7 +173,7 @@ func getTypeNil(t Field) any {
 		return "types.NilUint16"
 	case "uint32", "types.Uint32":
 		return "types.NilUint32"
-	case "uint64", "types.Uint64":
+	case "uint64", "types.Uint64", "types.BigInt":
 		return "types.NilUint64"
 	case "float32", "types.Float32":
 		return "types.NilFloat32"

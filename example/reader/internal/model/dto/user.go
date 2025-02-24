@@ -7,6 +7,7 @@ import (
 
 // checker
 type UserRegisterReq struct {
+	ID       types.BigInt      `json:"id" valid:"required"`
 	UserName int               `json:"user_name" url:"user_name" form:"user_name" valid:"required,range(10|25)"`
 	Password types.String      `json:"password" url:"password" form:"password" valid:"required"`
 	Email    string            `json:"email" url:"email" form:"email" valid:"email~Email格式错误,required"`
@@ -15,6 +16,7 @@ type UserRegisterReq struct {
 	AuthorIP int64             `valid:"ipv4"`
 	Date     time.Time         `valid:"required"`
 	Get      *UserRegisterResp `valid:"required"`
+	Amount   types.Money       `valid:"required"`
 }
 
 type UserRegisterResp struct {
