@@ -32,6 +32,7 @@ type (
 		db            Executer
 		table         string
 		join          [][3]string
+		joinParams    []any
 		distinct      bool
 		cols          []dialect.Field
 		funcs         []string
@@ -89,6 +90,7 @@ func (s *Selector) Free() {
 	s.funcs = s.funcs[:0]
 	s.distinct = false
 	s.join = s.join[:0]
+	s.joinParams = s.joinParams[:0]
 	s.omit = s.omit[:0]
 	s.where.Reset()
 	s.whereParams = s.whereParams[:0]
@@ -104,7 +106,7 @@ func (s *Selector) Free() {
 
 func (s *Selector) String() string {
 	if s.commandString.Len() == 0 {
-		s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.whereParams))
+		s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.mergeParams()))
 	}
 	return s.commandString.String()
 }
@@ -171,9 +173,9 @@ func (s *Selector) Join(joinType dialect.JoinType, left, right dialect.Field, fn
 		// }
 		on.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			s.whereParams = append(s.whereParams, vals...)
+			s.joinParams = append(s.joinParams, vals...)
 		} else {
-			s.whereParams = append(s.whereParams, val)
+			s.joinParams = append(s.joinParams, val)
 		}
 	}
 	s.join = append(s.join, [3]string{
@@ -435,6 +437,7 @@ func (s *Selector) parse() []dialect.Field {
 	for _, j := range s.join {
 		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	}
+
 	// WHERE
 	if s.where.Len() > 0 {
 		s.command.WriteString(" WHERE " + s.where.String())
@@ -473,7 +476,7 @@ func (s *Selector) query(ctx context.Context) (*sql.Rows, error) {
 		defer stmt.Close()
 	}
 
-	row, err := stmt.QueryContext(ctx, s.whereParams...)
+	row, err := stmt.QueryContext(ctx, s.mergeParams()...)
 	return row, err
 }
 
@@ -504,7 +507,7 @@ func (s *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
 		defer stmt.Close()
 	}
 
-	return stmt.QueryRowContext(ctx, s.whereParams...), nil
+	return stmt.QueryRowContext(ctx, s.mergeParams()...), nil
 }
 
 // Get 返回单个数据，dest 必须是指针
@@ -666,7 +669,7 @@ func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64,
 		defer stmt.Close()
 	}
 
-	row := stmt.QueryRowContext(ctx, s.whereParams...)
+	row := stmt.QueryRowContext(ctx, s.mergeParams()...)
 	var count int64
 	err = row.Scan(&count)
 	if err != nil {
@@ -703,7 +706,7 @@ func (s *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialec
 		defer stmt.Close()
 	}
 
-	row := stmt.QueryRowContext(ctx, s.whereParams...)
+	row := stmt.QueryRowContext(ctx, s.mergeParams()...)
 	var sum = make([]any, len(cols))
 	err = row.Scan(sum...)
 	if err != nil {
@@ -715,4 +718,16 @@ func (s *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialec
 		sums[cols[i].Name] = sum[i]
 	}
 	return sums, nil
+}
+
+// 合并参数
+func (s *Selector) mergeParams() []any {
+	var params = make([]any, len(s.joinParams)+len(s.whereParams))
+	if len(s.joinParams) > 0 {
+		copy(params, s.joinParams)
+	}
+	if len(s.whereParams) > 0 {
+		copy(params[len(s.joinParams):], s.whereParams)
+	}
+	return params
 }
