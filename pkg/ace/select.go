@@ -722,12 +722,14 @@ func (s *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialec
 
 // 合并参数
 func (s *Selector) mergeParams() []any {
-	var params = make([]any, len(s.joinParams)+len(s.whereParams))
 	if len(s.joinParams) > 0 {
-		copy(params, s.joinParams)
+		if len(s.whereParams) > 0 {
+			var params = make([]any, len(s.joinParams)+len(s.whereParams))
+			copy(params, s.joinParams)
+			copy(params[len(s.joinParams):], s.whereParams)
+			return params
+		}
+		return s.joinParams
 	}
-	if len(s.whereParams) > 0 {
-		copy(params[len(s.joinParams):], s.whereParams)
-	}
-	return params
+	return s.whereParams
 }
