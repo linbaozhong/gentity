@@ -396,8 +396,8 @@ func (s *Selector) Limit(size uint, start ...uint) *Selector {
 }
 
 // Page
-// page 页码
-// size 页大小
+// pageIndex 页码
+// pageSize 页大小
 func (s *Selector) Page(pageIndex, pageSize uint) *Selector {
 	if pageIndex < 1 {
 		pageIndex = 1
