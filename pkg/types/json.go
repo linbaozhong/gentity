@@ -63,6 +63,10 @@ func Marshal(s any) string {
 			return fmt.Sprintf("%+v", v)
 		}
 		return `"` + conv.Bytes2String(b) + `"`
+	default:
+		if s == nil {
+			return "null"
+		}
 	}
 	return conv.Any2String(s)
 }

@@ -5,6 +5,7 @@
 package types
 
 import (
+	"bytes"
 	"sync"
 )
 
@@ -19,7 +20,7 @@ type JsonResult struct {
 var resultPool = sync.Pool{
 	New: func() any {
 		return &JsonResult{
-			Data: []int{},
+			// Data: []int{},
 		}
 	},
 }
@@ -36,4 +37,15 @@ func (j *JsonResult) Free() {
 	j.Message = ""
 	j.Info = ""
 	resultPool.Put(j)
+}
+
+func (j JsonResult) MarshalJSON() ([]byte, error) {
+	var _buf = bytes.NewBuffer(nil)
+	_buf.WriteByte('{')
+	_buf.WriteString(`"code":` + Marshal(j.Code) + `,`)
+	_buf.WriteString(`"data":` + Marshal(j.Data) + `,`)
+	_buf.WriteString(`"msg":` + Marshal(j.Message) + `,`)
+	_buf.WriteString(`"info":` + Marshal(j.Info))
+	_buf.WriteByte('}')
+	return _buf.Bytes(), nil
 }

@@ -86,6 +86,7 @@ func generateDTO(tds []TempData, prefix string) error {
 		buf.WriteString("	\"net/http\" \n")
 		buf.WriteString(") \n\n")
 		buf.WriteString("var _ = conv.Any2String(\"\")\n")
+		buf.WriteString("var _ = bytes.NewBuffer(nil)\n")
 		_, e = dtoFile.Write(buf.Bytes())
 		if e != nil {
 			showError(e)

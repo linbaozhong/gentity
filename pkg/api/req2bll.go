@@ -177,9 +177,9 @@ func Get[A, B any](
 			Initiate(ctx, req)
 
 			if ctx.Request().URL.RawQuery == "" {
-				return ReadForm(ctx, &req)
+				return ReadForm(ctx, req)
 			} else {
-				return ReadQuery(ctx, &req)
+				return ReadQuery(ctx, req)
 			}
 		}
 	)
@@ -228,9 +228,9 @@ func GetX[A, B any](
 			Initiate(ctx, req)
 
 			if ctx.Request().URL.RawQuery == "" {
-				return ReadForm(ctx, &req)
+				return ReadForm(ctx, req)
 			} else {
-				return ReadQuery(ctx, &req)
+				return ReadQuery(ctx, req)
 			}
 		}
 	)

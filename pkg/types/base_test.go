@@ -15,6 +15,7 @@
 package types
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -75,4 +76,13 @@ func TestConv(t *testing.T) {
 	s := "as12"
 	i, e := strconv.ParseInt(s, 10, 64)
 	t.Log(i, e)
+}
+
+func TestJsonResult(t *testing.T) {
+	var r = NewResult()
+	b, e := json.Marshal(r)
+	if e != nil {
+		t.Error(e)
+	}
+	t.Log(string(b))
 }

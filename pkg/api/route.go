@@ -25,6 +25,11 @@ func Initiate(ctx Context, arg any) {
 		ier.Init()
 	}
 }
+func InitiateX(ctx Context, arg any) {
+	if ier, ok := arg.(Initializer); ok {
+		ier.Init()
+	}
+}
 
 // RegisterRoute 注册路由
 func RegisterRoute(r IRegisterRoute) {

@@ -19,6 +19,7 @@ type UserRegisterReq struct {
 	Amount   types.Money       `valid:"required"`
 }
 
+// response
 type UserRegisterResp struct {
 	UserID   uint64 `json:"user_id"`
 	UserName string `json:"user_name"`
