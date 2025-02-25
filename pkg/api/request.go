@@ -17,6 +17,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"github.com/kataras/iris/v12"
 	"io"
 )
 
@@ -54,7 +55,11 @@ func ReadForm(ctx Context, ptr any) error {
 		}
 		return x.UnmarshalValues(values)
 	}
-	return ctx.ReadForm(ptr)
+	e := ctx.ReadForm(ptr)
+	if e != nil && !iris.IsErrPath(e) {
+		return e
+	}
+	return nil
 }
 
 func ReadQuery(ctx Context, ptr any) error {

@@ -7,7 +7,7 @@ import (
 
 func Init() api.Application {
 	app := api.NewApplication("reader", "0.1")
-
+	app.Configure()
 	app.Use(api.Recovery())
 	app.Use(api.Logger())
 
