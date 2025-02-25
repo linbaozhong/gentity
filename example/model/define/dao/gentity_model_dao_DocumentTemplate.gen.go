@@ -53,9 +53,13 @@ type daoDocumentTemplate struct {
 	db ace.Executer
 }
 
-func DocumentTemplate(exec ace.Executer) document_templateer {
+func DocumentTemplate(exec ...ace.Executer) document_templateer {
 	_obj := &daoDocumentTemplate{}
-	_obj.db = exec
+	if len(exec) > 0 {
+		_obj.db = exec[0]
+	} else {
+		_obj.db = ace.GetDB()
+	}
 	return _obj
 }
 

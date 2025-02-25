@@ -84,9 +84,13 @@ type dao{{$structName}} struct {
 {{- end}}
 }
 
-func {{$structName}}(exec ace.Executer) {{$tablename}}er {
+func {{$structName}}(exec ...ace.Executer) {{$tablename}}er {
 	_obj := &dao{{$structName}}{}
-	_obj.db = exec
+	if len(exec) > 0 {
+		_obj.db = exec[0]
+	}else{
+		_obj.db = ace.GetDB()
+	}
 {{- if .HasCache}}
 	_obj.cache = exec.Cache({{$package}}.{{$structName}}TableName)
 {{- end}}

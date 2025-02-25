@@ -53,9 +53,13 @@ type daoCompanyMan struct {
 	db ace.Executer
 }
 
-func CompanyMan(exec ace.Executer) company_maner {
+func CompanyMan(exec ...ace.Executer) company_maner {
 	_obj := &daoCompanyMan{}
-	_obj.db = exec
+	if len(exec) > 0 {
+		_obj.db = exec[0]
+	} else {
+		_obj.db = ace.GetDB()
+	}
 	return _obj
 }
 

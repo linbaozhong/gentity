@@ -53,9 +53,13 @@ type daoDispatchCompany struct {
 	db ace.Executer
 }
 
-func DispatchCompany(exec ace.Executer) dispatch_companyer {
+func DispatchCompany(exec ...ace.Executer) dispatch_companyer {
 	_obj := &daoDispatchCompany{}
-	_obj.db = exec
+	if len(exec) > 0 {
+		_obj.db = exec[0]
+	} else {
+		_obj.db = ace.GetDB()
+	}
 	return _obj
 }
 

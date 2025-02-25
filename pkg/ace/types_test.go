@@ -34,7 +34,7 @@ var pool = sync.Pool{
 func NewA() *A {
 	obj := pool.Get().(*A)
 	// time.Sleep(time.Millisecond)
-	// obj.Name = time.Now().String()
+	// _obj.Name = time.Now().String()
 	fmt.Print("\t\t")
 
 	return obj

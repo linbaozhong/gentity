@@ -53,9 +53,13 @@ type daoCompanyStamp struct {
 	db ace.Executer
 }
 
-func CompanyStamp(exec ace.Executer) company_stamper {
+func CompanyStamp(exec ...ace.Executer) company_stamper {
 	_obj := &daoCompanyStamp{}
-	_obj.db = exec
+	if len(exec) > 0 {
+		_obj.db = exec[0]
+	} else {
+		_obj.db = ace.GetDB()
+	}
 	return _obj
 }
 

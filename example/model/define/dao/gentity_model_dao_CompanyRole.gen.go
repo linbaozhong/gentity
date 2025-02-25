@@ -53,9 +53,13 @@ type daoCompanyRole struct {
 	db ace.Executer
 }
 
-func CompanyRole(exec ace.Executer) company_roleer {
+func CompanyRole(exec ...ace.Executer) company_roleer {
 	_obj := &daoCompanyRole{}
-	_obj.db = exec
+	if len(exec) > 0 {
+		_obj.db = exec[0]
+	} else {
+		_obj.db = ace.GetDB()
+	}
 	return _obj
 }
 

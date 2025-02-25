@@ -19,12 +19,6 @@ import (
 	rd "github.com/redis/go-redis/v9"
 )
 
-// var (
-//	// 全局context，用于支持外部调用。最好在程序启动时引用，否则可能造成panic。
-//	// 在程序退出时，需要调用Cancel()。
-//	Context, Cancel = context.WithCancel(context.Background())
-// )
-
 type (
 	Cruder interface {
 		// C Create 命令体
@@ -81,6 +75,8 @@ const (
 	CacheTypeSyncMap cacheType = "sync"
 )
 
+var _obj *DB
+
 // Connect
 func Connect(driverName, dns string) (*DB, error) {
 	dialect.Register(driverName)
@@ -95,24 +91,24 @@ func Connect(driverName, dns string) (*DB, error) {
 		return nil, e
 	}
 
-	obj := &DB{}
-	obj.DB = db
-	obj.driverName = driverName
-	obj.mapper = mapper()
-	obj.debug = false
+	_obj = &DB{}
+	_obj.DB = db
+	_obj.driverName = driverName
+	_obj.mapper = mapper()
+	_obj.debug = false
 
-	app.RegisterServiceCloser(obj)
-	// go func() {
-	//	for {
-	//		select {
-	//		case <-ctx.Done():
-	//			obj.DB.Close()
-	//			return
-	//		}
-	//	}
-	// }()
+	app.RegisterServiceCloser(_obj)
 
-	return obj, e
+	return _obj, e
+}
+
+// GetDB
+// 调用该方法前，确保已经调用过 Connect 方法并确保没有 error 产生
+func GetDB() *DB {
+	if _obj == nil {
+		log.Panic("db not init")
+	}
+	return _obj
 }
 
 // Close
