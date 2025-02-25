@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"github.com/linbaozhong/gentity/pkg/gjson"
-	"go/types"
+	"reflect"
 	"time"
 )
 
@@ -37,16 +37,6 @@ func Unmarshal(r gjson.Result, ptr any, args ...any) error {
 }
 
 func Marshal(s any) string {
-	if j, ok := s.(json.Marshaler); ok {
-		b, e := j.MarshalJSON()
-		if e != nil {
-			return ""
-		}
-		return conv.Bytes2String(b)
-	}
-	if ss, ok := s.(conv.Stringer); ok {
-		return `"` + ss.String() + `"`
-	}
 	switch v := s.(type) {
 	case string:
 		return `"` + v + `"`
@@ -56,16 +46,26 @@ func Marshal(s any) string {
 		if v.IsZero() {
 			return ""
 		}
-		return v.Format(time.DateTime)
-	case types.Slice, types.Struct, types.Map:
-		b, e := json.Marshal(v)
-		if e != nil {
-			return fmt.Sprintf("%+v", v)
-		}
-		return `"` + conv.Bytes2String(b) + `"`
+		return `"` + v.Format(time.DateTime) + `"`
 	default:
 		if s == nil {
 			return "null"
+		}
+		if j, ok := s.(json.Marshaler); ok {
+			b, e := j.MarshalJSON()
+			if e != nil {
+				return ""
+			}
+			return conv.Bytes2String(b)
+		}
+		switch reflect.Indirect(reflect.ValueOf(s)).Kind() {
+		case reflect.Struct, reflect.Slice, reflect.Map:
+			b, e := json.Marshal(s)
+			if e != nil {
+				return fmt.Sprintf("%+v", s)
+			}
+
+			return conv.Bytes2String(b)
 		}
 	}
 	return conv.Any2String(s)

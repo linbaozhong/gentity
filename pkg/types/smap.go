@@ -1,8 +1,7 @@
 package types
 
 import (
-	"encoding/json"
-	"github.com/linbaozhong/gentity/pkg/conv"
+	"bytes"
 	"time"
 )
 
@@ -16,19 +15,16 @@ func NewSmap(size ...int) Smap {
 }
 
 func (p Smap) MarshalJSON() ([]byte, error) {
-	m := make(map[string]any)
+	var _buf bytes.Buffer
+	_buf.WriteString("{")
 	for k, v := range p {
-		if vv, ok := v.([]byte); ok {
-			m[k] = conv.Bytes2String(vv)
-			continue
-		}
-		if vv, ok := v.(time.Time); ok {
-			m[k] = minuteToString(vv)
-			continue
-		}
-		m[k] = v
+		_buf.WriteString(`"` + k + `":` + Marshal(v) + `,`)
 	}
-	return json.Marshal(m)
+	if _buf.Len() > 1 {
+		_buf.Truncate(_buf.Len() - 1)
+	}
+	_buf.WriteString("}")
+	return _buf.Bytes(), nil
 }
 
 func (p Smap) ConvertFrom(m map[string]any) Smap {
