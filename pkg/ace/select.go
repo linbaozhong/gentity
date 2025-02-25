@@ -400,6 +400,9 @@ func (s *Selector) Limit(size uint, start ...uint) *Selector {
 // pageSize 页大小
 func (s *Selector) Page(pageIndex, pageSize uint) *Selector {
 	if pageIndex < 1 {
+		if pageSize < 1 {
+			return s.Limit(dialect.MaxLimit)
+		}
 		pageIndex = 1
 	}
 	if pageSize < 1 {
