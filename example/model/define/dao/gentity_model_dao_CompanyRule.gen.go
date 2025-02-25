@@ -267,13 +267,9 @@ func (p *daoCompanyRule) Find4Cols(ctx context.Context, pageIndex, pageSize uint
 		_c.Cols(cols...)
 	}
 	//
-	if pageSize == 0 {
-		pageSize = dialect.MaxLimit
-	}
-	//
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
-		Limit(pageSize, pageSize*pageIndex).
+		Page(pageIndex, pageSize).
 		Query(ctx)
 	if e != nil {
 		log.Error(e)

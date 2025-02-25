@@ -55,40 +55,6 @@ func Post[A, B any](
 	)
 
 	response(ctx, &req, &resp, read, fn)
-
-	// Initiate(ctx, &req)
-	//
-	// switch ctx.GetContentTypeRequested() {
-	// case "application/json":
-	// 	e = ReadJSON(ctx, &req)
-	// case "application/x-www-form-urlencoded", "multipart/form-data":
-	// 	e = ReadForm(ctx, &req)
-	// default:
-	// 	if ctx.Request().URL.RawQuery == "" {
-	// 		e = ReadForm(ctx, &req)
-	// 	} else {
-	// 		e = ReadQuery(ctx, &req)
-	// 	}
-	// }
-	//
-	// if e != nil {
-	// 	Fail(ctx, Param_Invalid)
-	// 	log.Error(e)
-	// 	return
-	// }
-	// if e := Validate(&req); e != nil {
-	// 	Fail(ctx, e)
-	// 	log.Error(e)
-	// 	return
-	// }
-	//
-	// var resp B
-	// if e := fn(ctx, &req, &resp); e != nil {
-	// 	Fail(ctx, e)
-	// 	log.Error(e)
-	// 	return
-	// }
-	// Ok(ctx, resp)
 }
 func PostX[A, B any](
 	ctx Context,
@@ -185,36 +151,6 @@ func Get[A, B any](
 	)
 
 	response(ctx, &req, &resp, read, fn)
-	// var (
-	// 	req A
-	// 	e   error
-	// )
-	// Initiate(ctx, &req)
-	//
-	// if ctx.Request().URL.RawQuery == "" {
-	// 	e = ReadForm(ctx, &req)
-	// } else {
-	// 	e = ReadQuery(ctx, &req)
-	// }
-	// if e != nil {
-	// 	Fail(ctx, Param_Invalid)
-	// 	log.Error(e)
-	// 	return
-	// }
-	// //
-	// if e = Validate(&req); e != nil {
-	// 	Fail(ctx, e)
-	// 	log.Error(e)
-	// 	return
-	// }
-	//
-	// var resp B
-	// if e = fn(ctx, &req, &resp); e != nil {
-	// 	Fail(ctx, e)
-	// 	log.Error(e)
-	// 	return
-	// }
-	// Ok(ctx, resp)
 }
 
 func GetX[A, B any](
