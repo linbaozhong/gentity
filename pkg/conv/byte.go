@@ -2,7 +2,6 @@ package conv
 
 import (
 	"time"
-	"unsafe"
 )
 
 // Bytes2Any r 必须是引用地址
@@ -73,15 +72,17 @@ func Bytes2Any(b []byte, r any) error {
 
 // Bytes2String converts byte slice to string.
 func Bytes2String(b []byte) string {
-	return *(*string)(unsafe.Pointer(&b))
+	// return *(*string)(unsafe.Pointer(&b))
+	return string(b)
 }
 
 // String2Bytes converts string to byte slice.
 func String2Bytes(s string) []byte {
-	return *(*[]byte)(unsafe.Pointer(
-		&struct {
-			string
-			Cap int
-		}{s, len(s)},
-	))
+	// return *(*[]byte)(unsafe.Pointer(
+	// 	&struct {
+	// 		string
+	// 		Cap int
+	// 	}{s, len(s)},
+	// ))
+	return []byte(s)
 }
