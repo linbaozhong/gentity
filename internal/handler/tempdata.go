@@ -16,7 +16,6 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/linbaozhong/gentity/internal/resources"
 	"go/format"
 	"io"
@@ -85,7 +84,6 @@ func getBaseFilename(filename string) string {
 func writeDaoBase(parent string) error {
 	e := os.MkdirAll(parent, os.ModePerm)
 	if e != nil {
-		fmt.Println("----")
 		showError(e)
 		return e
 	}
