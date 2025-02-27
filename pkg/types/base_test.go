@@ -43,14 +43,14 @@ func TestBase(t *testing.T) {
 	a.State = 1
 	a.Force = 11256
 	a.Ctime = Now()
-	
+
 	b, e := json.Marshal(a)
 	if e != nil {
 		t.Error(e)
 	}
 	s := string(b)
 	t.Log(s)
-	
+
 	n := NewSmap(3).
 		Set("id", a.Id).
 		Set("arch", a.Arch).
@@ -60,7 +60,7 @@ func TestBase(t *testing.T) {
 		Set("ctime", a.Ctime)
 	m := NewSmap(3).
 		Set("data", []Smap{n, n})
-	
+
 	r := NewResult()
 	r.Data = m
 	b, e = json.Marshal(r)
@@ -76,7 +76,7 @@ func TestBase(t *testing.T) {
 	if e != nil {
 		t.Error(e)
 	}
-	
+
 	t.Log(a2)
 }
 

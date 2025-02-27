@@ -93,7 +93,7 @@ func response[A, B any](ctx Context, req *A, resp *B,
 		log.Error(e)
 		return
 	}
-	if e := Validate(&req); e != nil {
+	if e := Validate(req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return
@@ -116,7 +116,7 @@ func responseX[A, B any](ctx Context, req *A, resp *B,
 		log.Error(e)
 		return
 	}
-	if e := Validate(&req); e != nil {
+	if e := Validate(req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return
