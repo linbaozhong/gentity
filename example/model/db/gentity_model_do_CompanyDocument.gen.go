@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanydocument"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const CompanyDocumentTableName = "company_document"
 
 var (
-	companydocumentPool = pool.New(app.Context,func() any {
+	companydocumentPool = pool.New(app.Context, func() any {
 		_obj := &CompanyDocument{}
 		_obj.UUID()
 		return _obj
@@ -34,48 +34,48 @@ func NewCompanyDocument() *CompanyDocument {
 func (p *CompanyDocument) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
 	_buf.WriteByte('{')
-		if p.Id != 0 {
-			_buf.WriteString(`"id":`+types.Marshal(p.Id)+`,`)
-		}
-		if p.CompanyId != 0 {
-			_buf.WriteString(`"company_id":`+types.Marshal(p.CompanyId)+`,`)
-		}
-		if p.TemplateId != 0 {
-			_buf.WriteString(`"template_id":`+types.Marshal(p.TemplateId)+`,`)
-		}
-		if p.Title != "" {
-			_buf.WriteString(`"title":`+types.Marshal(p.Title)+`,`)
-		}
-		if p.Classify != 0 {
-			_buf.WriteString(`"classify":`+types.Marshal(p.Classify)+`,`)
-		}
-		if p.Genre != 0 {
-			_buf.WriteString(`"genre":`+types.Marshal(p.Genre)+`,`)
-		}
-		if p.HandleGenre != 0 {
-			_buf.WriteString(`"handle_genre":`+types.Marshal(p.HandleGenre)+`,`)
-		}
-		if p.Job != "" {
-			_buf.WriteString(`"job":`+types.Marshal(p.Job)+`,`)
-		}
-		if p.VariableMode != 0 {
-			_buf.WriteString(`"variable_mode":`+types.Marshal(p.VariableMode)+`,`)
-		}
-		if p.IsDefault != 0 {
-			_buf.WriteString(`"is_default":`+types.Marshal(p.IsDefault)+`,`)
-		}
-		if p.CanDefault != 0 {
-			_buf.WriteString(`"can_default":`+types.Marshal(p.CanDefault)+`,`)
-		}
-		if p.Modifier != 0 {
-			_buf.WriteString(`"modifier":`+types.Marshal(p.Modifier)+`,`)
-		}
-		if p.State != 0 {
-			_buf.WriteString(`"state":`+types.Marshal(p.State)+`,`)
-		}
-		if !p.Ctime.IsZero() {
-			_buf.WriteString(`"ctime":`+types.Marshal(p.Ctime)+`,`)
-		}
+	if p.Id != 0 {
+		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+	}
+	if p.CompanyId != 0 {
+		_buf.WriteString(`"company_id":` + types.Marshal(p.CompanyId) + `,`)
+	}
+	if p.TemplateId != 0 {
+		_buf.WriteString(`"template_id":` + types.Marshal(p.TemplateId) + `,`)
+	}
+	if p.Title != "" {
+		_buf.WriteString(`"title":` + types.Marshal(p.Title) + `,`)
+	}
+	if p.Classify != 0 {
+		_buf.WriteString(`"classify":` + types.Marshal(p.Classify) + `,`)
+	}
+	if p.Genre != 0 {
+		_buf.WriteString(`"genre":` + types.Marshal(p.Genre) + `,`)
+	}
+	if p.HandleGenre != 0 {
+		_buf.WriteString(`"handle_genre":` + types.Marshal(p.HandleGenre) + `,`)
+	}
+	if p.Job != "" {
+		_buf.WriteString(`"job":` + types.Marshal(p.Job) + `,`)
+	}
+	if p.VariableMode != 0 {
+		_buf.WriteString(`"variable_mode":` + types.Marshal(p.VariableMode) + `,`)
+	}
+	if p.IsDefault != 0 {
+		_buf.WriteString(`"is_default":` + types.Marshal(p.IsDefault) + `,`)
+	}
+	if p.CanDefault != 0 {
+		_buf.WriteString(`"can_default":` + types.Marshal(p.CanDefault) + `,`)
+	}
+	if p.Modifier != 0 {
+		_buf.WriteString(`"modifier":` + types.Marshal(p.Modifier) + `,`)
+	}
+	if p.State != 0 {
+		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+	}
+	if !p.Ctime.IsZero() {
+		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+	}
 	if l := _buf.Len(); l > 1 {
 		_buf.Truncate(l - 1)
 	}
@@ -93,34 +93,34 @@ func (p *CompanyDocument) UnmarshalJSON(data []byte) error {
 	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
-			case "id":
-				e = types.Unmarshal(value, &p.Id,p.Id = types.BigInt(value.Uint()))
-			case "company_id":
-				e = types.Unmarshal(value, &p.CompanyId,p.CompanyId = types.BigInt(value.Uint()))
-			case "template_id":
-				e = types.Unmarshal(value, &p.TemplateId,p.TemplateId = types.Money(value.Uint()))
-			case "title":
-				e = types.Unmarshal(value, &p.Title,p.Title = types.String(value.Str))
-			case "classify":
-				e = types.Unmarshal(value, &p.Classify,p.Classify = types.Int8(value.Int()))
-			case "genre":
-				e = types.Unmarshal(value, &p.Genre,p.Genre = types.Int8(value.Int()))
-			case "handle_genre":
-				e = types.Unmarshal(value, &p.HandleGenre,p.HandleGenre = types.Int8(value.Int()))
-			case "job":
-				e = types.Unmarshal(value, &p.Job,p.Job = types.String(value.Str))
-			case "variable_mode":
-				e = types.Unmarshal(value, &p.VariableMode,p.VariableMode = types.Int32(value.Int()))
-			case "is_default":
-				e = types.Unmarshal(value, &p.IsDefault,p.IsDefault = types.Int8(value.Int()))
-			case "can_default":
-				e = types.Unmarshal(value, &p.CanDefault,p.CanDefault = types.Int8(value.Int()))
-			case "modifier":
-				e = types.Unmarshal(value, &p.Modifier,p.Modifier = types.Money(value.Uint()))
-			case "state":
-				e = types.Unmarshal(value, &p.State,p.State = types.Int8(value.Int()))
-			case "ctime":
-				e = types.Unmarshal(value, &p.Ctime,p.Ctime = types.Time{Time: value.Time()})
+		case "id":
+			p.Id = types.BigInt(value.Uint())
+		case "company_id":
+			p.CompanyId = types.BigInt(value.Uint())
+		case "template_id":
+			p.TemplateId = types.Money(value.Uint())
+		case "title":
+			p.Title = types.String(value.Str)
+		case "classify":
+			p.Classify = types.Int8(value.Int())
+		case "genre":
+			p.Genre = types.Int8(value.Int())
+		case "handle_genre":
+			p.HandleGenre = types.Int8(value.Int())
+		case "job":
+			p.Job = types.String(value.Str)
+		case "variable_mode":
+			p.VariableMode = types.Int32(value.Int())
+		case "is_default":
+			p.IsDefault = types.Int8(value.Int())
+		case "can_default":
+			p.CanDefault = types.Int8(value.Int())
+		case "modifier":
+			p.Modifier = types.Money(value.Uint())
+		case "state":
+			p.State = types.Int8(value.Int())
+		case "ctime":
+			p.Ctime = types.Time{Time: value.Time()}
 		}
 		if e != nil {
 			log.Error(e)
@@ -156,52 +156,51 @@ func (p *CompanyDocument) Reset() {
 	p.Modifier = 0
 	p.State = 0
 	p.Ctime = types.Time{}
-	
-}
 
+}
 
 func (p *CompanyDocument) TableName() string {
 	return CompanyDocumentTableName
 }
 
-func (p *CompanyDocument) AssignPtr(args ...dialect.Field) ([]any) {
+func (p *CompanyDocument) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompanydocument.ReadableFields
 	}
 
-    _vals := make([]any, 0, len(args))
-    for _, col := range args {
-        switch col {
-        case tblcompanydocument.Id:
-            _vals = append(_vals, &p.Id)
-        case tblcompanydocument.CompanyId:
-            _vals = append(_vals, &p.CompanyId)
-        case tblcompanydocument.TemplateId:
-            _vals = append(_vals, &p.TemplateId)
-        case tblcompanydocument.Title:
-            _vals = append(_vals, &p.Title)
-        case tblcompanydocument.Classify:
-            _vals = append(_vals, &p.Classify)
-        case tblcompanydocument.Genre:
-            _vals = append(_vals, &p.Genre)
-        case tblcompanydocument.HandleGenre:
-            _vals = append(_vals, &p.HandleGenre)
-        case tblcompanydocument.Job:
-            _vals = append(_vals, &p.Job)
-        case tblcompanydocument.VariableMode:
-            _vals = append(_vals, &p.VariableMode)
-        case tblcompanydocument.IsDefault:
-            _vals = append(_vals, &p.IsDefault)
-        case tblcompanydocument.CanDefault:
-            _vals = append(_vals, &p.CanDefault)
-        case tblcompanydocument.Modifier:
-            _vals = append(_vals, &p.Modifier)
-        case tblcompanydocument.State:
-            _vals = append(_vals, &p.State)
-        case tblcompanydocument.Ctime:
-            _vals = append(_vals, &p.Ctime)
-        }
-    }
+	_vals := make([]any, 0, len(args))
+	for _, col := range args {
+		switch col {
+		case tblcompanydocument.Id:
+			_vals = append(_vals, &p.Id)
+		case tblcompanydocument.CompanyId:
+			_vals = append(_vals, &p.CompanyId)
+		case tblcompanydocument.TemplateId:
+			_vals = append(_vals, &p.TemplateId)
+		case tblcompanydocument.Title:
+			_vals = append(_vals, &p.Title)
+		case tblcompanydocument.Classify:
+			_vals = append(_vals, &p.Classify)
+		case tblcompanydocument.Genre:
+			_vals = append(_vals, &p.Genre)
+		case tblcompanydocument.HandleGenre:
+			_vals = append(_vals, &p.HandleGenre)
+		case tblcompanydocument.Job:
+			_vals = append(_vals, &p.Job)
+		case tblcompanydocument.VariableMode:
+			_vals = append(_vals, &p.VariableMode)
+		case tblcompanydocument.IsDefault:
+			_vals = append(_vals, &p.IsDefault)
+		case tblcompanydocument.CanDefault:
+			_vals = append(_vals, &p.CanDefault)
+		case tblcompanydocument.Modifier:
+			_vals = append(_vals, &p.Modifier)
+		case tblcompanydocument.State:
+			_vals = append(_vals, &p.State)
+		case tblcompanydocument.Ctime:
+			_vals = append(_vals, &p.Ctime)
+		}
+	}
 
 	return _vals
 }
@@ -234,7 +233,7 @@ func (p *CompanyDocument) Scan(rows *sql.Rows, args ...dialect.Field) ([]Company
 	return company_documents, true, nil
 }
 
-func (p *CompanyDocument)AssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *CompanyDocument) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)
 		_cols []string
@@ -388,18 +387,15 @@ func (p *CompanyDocument)AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
-//
 func (p *CompanyDocument) AssignKeys() (dialect.Field, any) {
-	return tblcompanydocument.PrimaryKey,p.Id
+	return tblcompanydocument.PrimaryKey, p.Id
 }
 
-
-//
 func (p *CompanyDocument) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
-        return e
-    }
-    p.Id = types.BigInt(_id)
-    return nil
+		return e
+	}
+	p.Id = types.BigInt(_id)
+	return nil
 }

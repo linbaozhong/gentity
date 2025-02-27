@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanystamp"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const CompanyStampTableName = "company_stamp"
 
 var (
-	companystampPool = pool.New(app.Context,func() any {
+	companystampPool = pool.New(app.Context, func() any {
 		_obj := &CompanyStamp{}
 		_obj.UUID()
 		return _obj
@@ -34,45 +34,45 @@ func NewCompanyStamp() *CompanyStamp {
 func (p *CompanyStamp) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
 	_buf.WriteByte('{')
-		if p.Id != 0 {
-			_buf.WriteString(`"id":`+types.Marshal(p.Id)+`,`)
-		}
-		if p.CompanyId != 0 {
-			_buf.WriteString(`"company_id":`+types.Marshal(p.CompanyId)+`,`)
-		}
-		if p.Url != "" {
-			_buf.WriteString(`"url":`+types.Marshal(p.Url)+`,`)
-		}
-		if p.Genre != 0 {
-			_buf.WriteString(`"genre":`+types.Marshal(p.Genre)+`,`)
-		}
-		if p.IsDefault != 0 {
-			_buf.WriteString(`"is_default":`+types.Marshal(p.IsDefault)+`,`)
-		}
-		if p.Creator != 0 {
-			_buf.WriteString(`"creator":`+types.Marshal(p.Creator)+`,`)
-		}
-		if p.CreatorName != "" {
-			_buf.WriteString(`"creator_name":`+types.Marshal(p.CreatorName)+`,`)
-		}
-		if p.Department != "" {
-			_buf.WriteString(`"department":`+types.Marshal(p.Department)+`,`)
-		}
-		if p.Position != "" {
-			_buf.WriteString(`"position":`+types.Marshal(p.Position)+`,`)
-		}
-		if p.State != 0 {
-			_buf.WriteString(`"state":`+types.Marshal(p.State)+`,`)
-		}
-		if p.Status != 0 {
-			_buf.WriteString(`"status":`+types.Marshal(p.Status)+`,`)
-		}
-		if !p.Ctime.IsZero() {
-			_buf.WriteString(`"ctime":`+types.Marshal(p.Ctime)+`,`)
-		}
-		if !p.Utime.IsZero() {
-			_buf.WriteString(`"utime":`+types.Marshal(p.Utime)+`,`)
-		}
+	if p.Id != 0 {
+		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+	}
+	if p.CompanyId != 0 {
+		_buf.WriteString(`"company_id":` + types.Marshal(p.CompanyId) + `,`)
+	}
+	if p.Url != "" {
+		_buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
+	}
+	if p.Genre != 0 {
+		_buf.WriteString(`"genre":` + types.Marshal(p.Genre) + `,`)
+	}
+	if p.IsDefault != 0 {
+		_buf.WriteString(`"is_default":` + types.Marshal(p.IsDefault) + `,`)
+	}
+	if p.Creator != 0 {
+		_buf.WriteString(`"creator":` + types.Marshal(p.Creator) + `,`)
+	}
+	if p.CreatorName != "" {
+		_buf.WriteString(`"creator_name":` + types.Marshal(p.CreatorName) + `,`)
+	}
+	if p.Department != "" {
+		_buf.WriteString(`"department":` + types.Marshal(p.Department) + `,`)
+	}
+	if p.Position != "" {
+		_buf.WriteString(`"position":` + types.Marshal(p.Position) + `,`)
+	}
+	if p.State != 0 {
+		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+	}
+	if p.Status != 0 {
+		_buf.WriteString(`"status":` + types.Marshal(p.Status) + `,`)
+	}
+	if !p.Ctime.IsZero() {
+		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+	}
+	if !p.Utime.IsZero() {
+		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
+	}
 	if l := _buf.Len(); l > 1 {
 		_buf.Truncate(l - 1)
 	}
@@ -90,32 +90,32 @@ func (p *CompanyStamp) UnmarshalJSON(data []byte) error {
 	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
-			case "id":
-				e = types.Unmarshal(value, &p.Id,p.Id = types.Money(value.Uint()))
-			case "company_id":
-				e = types.Unmarshal(value, &p.CompanyId,p.CompanyId = types.Money(value.Uint()))
-			case "url":
-				e = types.Unmarshal(value, &p.Url,p.Url = types.String(value.Str))
-			case "genre":
-				e = types.Unmarshal(value, &p.Genre,p.Genre = types.Int8(value.Int()))
-			case "is_default":
-				e = types.Unmarshal(value, &p.IsDefault,p.IsDefault = types.Int8(value.Int()))
-			case "creator":
-				e = types.Unmarshal(value, &p.Creator,p.Creator = types.BigInt(value.Uint()))
-			case "creator_name":
-				e = types.Unmarshal(value, &p.CreatorName,p.CreatorName = types.String(value.Str))
-			case "department":
-				e = types.Unmarshal(value, &p.Department,p.Department = types.String(value.Str))
-			case "position":
-				e = types.Unmarshal(value, &p.Position,p.Position = types.String(value.Str))
-			case "state":
-				e = types.Unmarshal(value, &p.State,p.State = types.Int8(value.Int()))
-			case "status":
-				e = types.Unmarshal(value, &p.Status,p.Status = types.Int8(value.Int()))
-			case "ctime":
-				e = types.Unmarshal(value, &p.Ctime,p.Ctime = types.Time{Time: value.Time()})
-			case "utime":
-				e = types.Unmarshal(value, &p.Utime,p.Utime = types.Time{Time: value.Time()})
+		case "id":
+			p.Id = types.Money(value.Uint())
+		case "company_id":
+			p.CompanyId = types.Money(value.Uint())
+		case "url":
+			p.Url = types.String(value.Str)
+		case "genre":
+			p.Genre = types.Int8(value.Int())
+		case "is_default":
+			p.IsDefault = types.Int8(value.Int())
+		case "creator":
+			p.Creator = types.BigInt(value.Uint())
+		case "creator_name":
+			p.CreatorName = types.String(value.Str)
+		case "department":
+			p.Department = types.String(value.Str)
+		case "position":
+			p.Position = types.String(value.Str)
+		case "state":
+			p.State = types.Int8(value.Int())
+		case "status":
+			p.Status = types.Int8(value.Int())
+		case "ctime":
+			p.Ctime = types.Time{Time: value.Time()}
+		case "utime":
+			p.Utime = types.Time{Time: value.Time()}
 		}
 		if e != nil {
 			log.Error(e)
@@ -150,50 +150,49 @@ func (p *CompanyStamp) Reset() {
 	p.Status = 0
 	p.Ctime = types.Time{}
 	p.Utime = types.Time{}
-	
-}
 
+}
 
 func (p *CompanyStamp) TableName() string {
 	return CompanyStampTableName
 }
 
-func (p *CompanyStamp) AssignPtr(args ...dialect.Field) ([]any) {
+func (p *CompanyStamp) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompanystamp.ReadableFields
 	}
 
-    _vals := make([]any, 0, len(args))
-    for _, col := range args {
-        switch col {
-        case tblcompanystamp.Id:
-            _vals = append(_vals, &p.Id)
-        case tblcompanystamp.CompanyId:
-            _vals = append(_vals, &p.CompanyId)
-        case tblcompanystamp.Url:
-            _vals = append(_vals, &p.Url)
-        case tblcompanystamp.Genre:
-            _vals = append(_vals, &p.Genre)
-        case tblcompanystamp.IsDefault:
-            _vals = append(_vals, &p.IsDefault)
-        case tblcompanystamp.Creator:
-            _vals = append(_vals, &p.Creator)
-        case tblcompanystamp.CreatorName:
-            _vals = append(_vals, &p.CreatorName)
-        case tblcompanystamp.Department:
-            _vals = append(_vals, &p.Department)
-        case tblcompanystamp.Position:
-            _vals = append(_vals, &p.Position)
-        case tblcompanystamp.State:
-            _vals = append(_vals, &p.State)
-        case tblcompanystamp.Status:
-            _vals = append(_vals, &p.Status)
-        case tblcompanystamp.Ctime:
-            _vals = append(_vals, &p.Ctime)
-        case tblcompanystamp.Utime:
-            _vals = append(_vals, &p.Utime)
-        }
-    }
+	_vals := make([]any, 0, len(args))
+	for _, col := range args {
+		switch col {
+		case tblcompanystamp.Id:
+			_vals = append(_vals, &p.Id)
+		case tblcompanystamp.CompanyId:
+			_vals = append(_vals, &p.CompanyId)
+		case tblcompanystamp.Url:
+			_vals = append(_vals, &p.Url)
+		case tblcompanystamp.Genre:
+			_vals = append(_vals, &p.Genre)
+		case tblcompanystamp.IsDefault:
+			_vals = append(_vals, &p.IsDefault)
+		case tblcompanystamp.Creator:
+			_vals = append(_vals, &p.Creator)
+		case tblcompanystamp.CreatorName:
+			_vals = append(_vals, &p.CreatorName)
+		case tblcompanystamp.Department:
+			_vals = append(_vals, &p.Department)
+		case tblcompanystamp.Position:
+			_vals = append(_vals, &p.Position)
+		case tblcompanystamp.State:
+			_vals = append(_vals, &p.State)
+		case tblcompanystamp.Status:
+			_vals = append(_vals, &p.Status)
+		case tblcompanystamp.Ctime:
+			_vals = append(_vals, &p.Ctime)
+		case tblcompanystamp.Utime:
+			_vals = append(_vals, &p.Utime)
+		}
+	}
 
 	return _vals
 }
@@ -226,7 +225,7 @@ func (p *CompanyStamp) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanySta
 	return company_stamps, true, nil
 }
 
-func (p *CompanyStamp)AssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *CompanyStamp) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)
 		_cols []string
@@ -371,13 +370,10 @@ func (p *CompanyStamp)AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
-//
 func (p *CompanyStamp) AssignKeys() (dialect.Field, any) {
-	return tblcompanystamp.PrimaryKey,p.Id
+	return tblcompanystamp.PrimaryKey, p.Id
 }
 
-
-//
 func (p *CompanyStamp) AssignPrimaryKeyValues(result sql.Result) error {
-    return nil
+	return nil
 }

@@ -78,7 +78,7 @@ func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 		switch key.Str {
 		{{- range $key, $value := .Columns}}
 			case "{{ $value.Json.Name }}":
-				e = types.Unmarshal(value, &p.{{$value.Name}},{{getUnmarshalValue $value}})
+				{{getUnmarshalValue $value}}
 		{{- end}}
 		}
 		if e != nil {

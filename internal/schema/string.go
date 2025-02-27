@@ -104,7 +104,7 @@ func ParseFieldAceType(col *sqlparser.Column) string {
 			return "types.Uint8"
 		}
 		return "types.Int8"
-	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT":
+	case "VARCHAR", "LONGTEXT", "MEDIUMTEXT", "TEXT", "JSON":
 		return "types.String"
 	case "BIT", "BOOLEAN":
 		return "types.Bool"

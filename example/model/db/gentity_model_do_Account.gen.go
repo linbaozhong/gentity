@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const AccountTableName = "account"
 
 var (
-	accountPool = pool.New(app.Context,func() any {
+	accountPool = pool.New(app.Context, func() any {
 		_obj := &Account{}
 		_obj.UUID()
 		return _obj
@@ -34,24 +34,24 @@ func NewAccount() *Account {
 func (p *Account) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
 	_buf.WriteByte('{')
-		if p.Id != 0 {
-			_buf.WriteString(`"id":`+types.Marshal(p.Id)+`,`)
-		}
-		if p.LoginName != "" {
-			_buf.WriteString(`"login_name":`+types.Marshal(p.LoginName)+`,`)
-		}
-		if p.Password != "" {
-			_buf.WriteString(`"password":`+types.Marshal(p.Password)+`,`)
-		}
-		if p.State != 0 {
-			_buf.WriteString(`"state":`+types.Marshal(p.State)+`,`)
-		}
-		if !p.Ctime.IsZero() {
-			_buf.WriteString(`"ctime":`+types.Marshal(p.Ctime)+`,`)
-		}
-		if !p.Utime.IsZero() {
-			_buf.WriteString(`"utime":`+types.Marshal(p.Utime)+`,`)
-		}
+	if p.Id != 0 {
+		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+	}
+	if p.LoginName != "" {
+		_buf.WriteString(`"login_name":` + types.Marshal(p.LoginName) + `,`)
+	}
+	if p.Password != "" {
+		_buf.WriteString(`"password":` + types.Marshal(p.Password) + `,`)
+	}
+	if p.State != 0 {
+		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+	}
+	if !p.Ctime.IsZero() {
+		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+	}
+	if !p.Utime.IsZero() {
+		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
+	}
 	if l := _buf.Len(); l > 1 {
 		_buf.Truncate(l - 1)
 	}
@@ -69,18 +69,18 @@ func (p *Account) UnmarshalJSON(data []byte) error {
 	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
-			case "id":
-				e = types.Unmarshal(value, &p.Id,p.Id = types.BigInt(value.Uint()))
-			case "login_name":
-				e = types.Unmarshal(value, &p.LoginName,p.LoginName = types.String(value.Str))
-			case "password":
-				e = types.Unmarshal(value, &p.Password,p.Password = types.String(value.Str))
-			case "state":
-				e = types.Unmarshal(value, &p.State,p.State = types.Int8(value.Int()))
-			case "ctime":
-				e = types.Unmarshal(value, &p.Ctime,p.Ctime = types.Time{Time: value.Time()})
-			case "utime":
-				e = types.Unmarshal(value, &p.Utime,p.Utime = types.Time{Time: value.Time()})
+		case "id":
+			p.Id = types.BigInt(value.Uint())
+		case "login_name":
+			p.LoginName = types.String(value.Str)
+		case "password":
+			p.Password = types.String(value.Str)
+		case "state":
+			p.State = types.Int8(value.Int())
+		case "ctime":
+			p.Ctime = types.Time{Time: value.Time()}
+		case "utime":
+			p.Utime = types.Time{Time: value.Time()}
 		}
 		if e != nil {
 			log.Error(e)
@@ -108,36 +108,35 @@ func (p *Account) Reset() {
 	p.State = 0
 	p.Ctime = types.Time{}
 	p.Utime = types.Time{}
-	
-}
 
+}
 
 func (p *Account) TableName() string {
 	return AccountTableName
 }
 
-func (p *Account) AssignPtr(args ...dialect.Field) ([]any) {
+func (p *Account) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblaccount.ReadableFields
 	}
 
-    _vals := make([]any, 0, len(args))
-    for _, col := range args {
-        switch col {
-        case tblaccount.Id:
-            _vals = append(_vals, &p.Id)
-        case tblaccount.LoginName:
-            _vals = append(_vals, &p.LoginName)
-        case tblaccount.Password:
-            _vals = append(_vals, &p.Password)
-        case tblaccount.State:
-            _vals = append(_vals, &p.State)
-        case tblaccount.Ctime:
-            _vals = append(_vals, &p.Ctime)
-        case tblaccount.Utime:
-            _vals = append(_vals, &p.Utime)
-        }
-    }
+	_vals := make([]any, 0, len(args))
+	for _, col := range args {
+		switch col {
+		case tblaccount.Id:
+			_vals = append(_vals, &p.Id)
+		case tblaccount.LoginName:
+			_vals = append(_vals, &p.LoginName)
+		case tblaccount.Password:
+			_vals = append(_vals, &p.Password)
+		case tblaccount.State:
+			_vals = append(_vals, &p.State)
+		case tblaccount.Ctime:
+			_vals = append(_vals, &p.Ctime)
+		case tblaccount.Utime:
+			_vals = append(_vals, &p.Utime)
+		}
+	}
 
 	return _vals
 }
@@ -170,7 +169,7 @@ func (p *Account) Scan(rows *sql.Rows, args ...dialect.Field) ([]Account, bool, 
 	return accounts, true, nil
 }
 
-func (p *Account)AssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *Account) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)
 		_cols []string
@@ -252,18 +251,15 @@ func (p *Account)AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
-//
 func (p *Account) AssignKeys() (dialect.Field, any) {
-	return tblaccount.PrimaryKey,p.Id
+	return tblaccount.PrimaryKey, p.Id
 }
 
-
-//
 func (p *Account) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
-        return e
-    }
-    p.Id = types.BigInt(_id)
-    return nil
+		return e
+	}
+	p.Id = types.BigInt(_id)
+	return nil
 }

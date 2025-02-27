@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const CompanyTableName = "company"
 
 var (
-	companyPool = pool.New(app.Context,func() any {
+	companyPool = pool.New(app.Context, func() any {
 		_obj := &Company{}
 		_obj.UUID()
 		return _obj
@@ -34,51 +34,51 @@ func NewCompany() *Company {
 func (p *Company) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
 	_buf.WriteByte('{')
-		if p.Id != 0 {
-			_buf.WriteString(`"id":`+types.Marshal(p.Id)+`,`)
-		}
-		if p.LongName != "" {
-			_buf.WriteString(`"long_name":`+types.Marshal(p.LongName)+`,`)
-		}
-		if p.ShortName != "" {
-			_buf.WriteString(`"short_name":`+types.Marshal(p.ShortName)+`,`)
-		}
-		if p.Address != "" {
-			_buf.WriteString(`"address":`+types.Marshal(p.Address)+`,`)
-		}
-		if p.Email != "" {
-			_buf.WriteString(`"email":`+types.Marshal(p.Email)+`,`)
-		}
-		if p.ContactName != "" {
-			_buf.WriteString(`"contact_name":`+types.Marshal(p.ContactName)+`,`)
-		}
-		if p.ContactTelephone != "" {
-			_buf.WriteString(`"contact_telephone":`+types.Marshal(p.ContactTelephone)+`,`)
-		}
-		if p.ContactMobile != "" {
-			_buf.WriteString(`"contact_mobile":`+types.Marshal(p.ContactMobile)+`,`)
-		}
-		if p.ContactEmail != "" {
-			_buf.WriteString(`"contact_email":`+types.Marshal(p.ContactEmail)+`,`)
-		}
-		if p.LegalName != "" {
-			_buf.WriteString(`"legal_name":`+types.Marshal(p.LegalName)+`,`)
-		}
-		if p.Creator != 0 {
-			_buf.WriteString(`"creator":`+types.Marshal(p.Creator)+`,`)
-		}
-		if p.State != 0 {
-			_buf.WriteString(`"state":`+types.Marshal(p.State)+`,`)
-		}
-		if p.Status != 0 {
-			_buf.WriteString(`"status":`+types.Marshal(p.Status)+`,`)
-		}
-		if !p.Ctime.IsZero() {
-			_buf.WriteString(`"ctime":`+types.Marshal(p.Ctime)+`,`)
-		}
-		if !p.Utime.IsZero() {
-			_buf.WriteString(`"utime":`+types.Marshal(p.Utime)+`,`)
-		}
+	if p.Id != 0 {
+		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+	}
+	if p.LongName != "" {
+		_buf.WriteString(`"long_name":` + types.Marshal(p.LongName) + `,`)
+	}
+	if p.ShortName != "" {
+		_buf.WriteString(`"short_name":` + types.Marshal(p.ShortName) + `,`)
+	}
+	if p.Address != "" {
+		_buf.WriteString(`"address":` + types.Marshal(p.Address) + `,`)
+	}
+	if p.Email != "" {
+		_buf.WriteString(`"email":` + types.Marshal(p.Email) + `,`)
+	}
+	if p.ContactName != "" {
+		_buf.WriteString(`"contact_name":` + types.Marshal(p.ContactName) + `,`)
+	}
+	if p.ContactTelephone != "" {
+		_buf.WriteString(`"contact_telephone":` + types.Marshal(p.ContactTelephone) + `,`)
+	}
+	if p.ContactMobile != "" {
+		_buf.WriteString(`"contact_mobile":` + types.Marshal(p.ContactMobile) + `,`)
+	}
+	if p.ContactEmail != "" {
+		_buf.WriteString(`"contact_email":` + types.Marshal(p.ContactEmail) + `,`)
+	}
+	if p.LegalName != "" {
+		_buf.WriteString(`"legal_name":` + types.Marshal(p.LegalName) + `,`)
+	}
+	if p.Creator != 0 {
+		_buf.WriteString(`"creator":` + types.Marshal(p.Creator) + `,`)
+	}
+	if p.State != 0 {
+		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+	}
+	if p.Status != 0 {
+		_buf.WriteString(`"status":` + types.Marshal(p.Status) + `,`)
+	}
+	if !p.Ctime.IsZero() {
+		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+	}
+	if !p.Utime.IsZero() {
+		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
+	}
 	if l := _buf.Len(); l > 1 {
 		_buf.Truncate(l - 1)
 	}
@@ -96,36 +96,36 @@ func (p *Company) UnmarshalJSON(data []byte) error {
 	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
-			case "id":
-				e = types.Unmarshal(value, &p.Id,p.Id = types.BigInt(value.Uint()))
-			case "long_name":
-				e = types.Unmarshal(value, &p.LongName,p.LongName = types.String(value.Str))
-			case "short_name":
-				e = types.Unmarshal(value, &p.ShortName,p.ShortName = types.String(value.Str))
-			case "address":
-				e = types.Unmarshal(value, &p.Address,p.Address = types.String(value.Str))
-			case "email":
-				e = types.Unmarshal(value, &p.Email,p.Email = types.String(value.Str))
-			case "contact_name":
-				e = types.Unmarshal(value, &p.ContactName,p.ContactName = types.String(value.Str))
-			case "contact_telephone":
-				e = types.Unmarshal(value, &p.ContactTelephone,p.ContactTelephone = types.String(value.Str))
-			case "contact_mobile":
-				e = types.Unmarshal(value, &p.ContactMobile,p.ContactMobile = types.String(value.Str))
-			case "contact_email":
-				e = types.Unmarshal(value, &p.ContactEmail,p.ContactEmail = types.String(value.Str))
-			case "legal_name":
-				e = types.Unmarshal(value, &p.LegalName,p.LegalName = types.String(value.Str))
-			case "creator":
-				e = types.Unmarshal(value, &p.Creator,p.Creator = types.BigInt(value.Uint()))
-			case "state":
-				e = types.Unmarshal(value, &p.State,p.State = types.Int8(value.Int()))
-			case "status":
-				e = types.Unmarshal(value, &p.Status,p.Status = types.Int8(value.Int()))
-			case "ctime":
-				e = types.Unmarshal(value, &p.Ctime,p.Ctime = types.Time{Time: value.Time()})
-			case "utime":
-				e = types.Unmarshal(value, &p.Utime,p.Utime = types.Time{Time: value.Time()})
+		case "id":
+			p.Id = types.BigInt(value.Uint())
+		case "long_name":
+			p.LongName = types.String(value.Str)
+		case "short_name":
+			p.ShortName = types.String(value.Str)
+		case "address":
+			p.Address = types.String(value.Str)
+		case "email":
+			p.Email = types.String(value.Str)
+		case "contact_name":
+			p.ContactName = types.String(value.Str)
+		case "contact_telephone":
+			p.ContactTelephone = types.String(value.Str)
+		case "contact_mobile":
+			p.ContactMobile = types.String(value.Str)
+		case "contact_email":
+			p.ContactEmail = types.String(value.Str)
+		case "legal_name":
+			p.LegalName = types.String(value.Str)
+		case "creator":
+			p.Creator = types.BigInt(value.Uint())
+		case "state":
+			p.State = types.Int8(value.Int())
+		case "status":
+			p.Status = types.Int8(value.Int())
+		case "ctime":
+			p.Ctime = types.Time{Time: value.Time()}
+		case "utime":
+			p.Utime = types.Time{Time: value.Time()}
 		}
 		if e != nil {
 			log.Error(e)
@@ -162,54 +162,53 @@ func (p *Company) Reset() {
 	p.Status = 0
 	p.Ctime = types.Time{}
 	p.Utime = types.Time{}
-	
-}
 
+}
 
 func (p *Company) TableName() string {
 	return CompanyTableName
 }
 
-func (p *Company) AssignPtr(args ...dialect.Field) ([]any) {
+func (p *Company) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompany.ReadableFields
 	}
 
-    _vals := make([]any, 0, len(args))
-    for _, col := range args {
-        switch col {
-        case tblcompany.Id:
-            _vals = append(_vals, &p.Id)
-        case tblcompany.LongName:
-            _vals = append(_vals, &p.LongName)
-        case tblcompany.ShortName:
-            _vals = append(_vals, &p.ShortName)
-        case tblcompany.Address:
-            _vals = append(_vals, &p.Address)
-        case tblcompany.Email:
-            _vals = append(_vals, &p.Email)
-        case tblcompany.ContactName:
-            _vals = append(_vals, &p.ContactName)
-        case tblcompany.ContactTelephone:
-            _vals = append(_vals, &p.ContactTelephone)
-        case tblcompany.ContactMobile:
-            _vals = append(_vals, &p.ContactMobile)
-        case tblcompany.ContactEmail:
-            _vals = append(_vals, &p.ContactEmail)
-        case tblcompany.LegalName:
-            _vals = append(_vals, &p.LegalName)
-        case tblcompany.Creator:
-            _vals = append(_vals, &p.Creator)
-        case tblcompany.State:
-            _vals = append(_vals, &p.State)
-        case tblcompany.Status:
-            _vals = append(_vals, &p.Status)
-        case tblcompany.Ctime:
-            _vals = append(_vals, &p.Ctime)
-        case tblcompany.Utime:
-            _vals = append(_vals, &p.Utime)
-        }
-    }
+	_vals := make([]any, 0, len(args))
+	for _, col := range args {
+		switch col {
+		case tblcompany.Id:
+			_vals = append(_vals, &p.Id)
+		case tblcompany.LongName:
+			_vals = append(_vals, &p.LongName)
+		case tblcompany.ShortName:
+			_vals = append(_vals, &p.ShortName)
+		case tblcompany.Address:
+			_vals = append(_vals, &p.Address)
+		case tblcompany.Email:
+			_vals = append(_vals, &p.Email)
+		case tblcompany.ContactName:
+			_vals = append(_vals, &p.ContactName)
+		case tblcompany.ContactTelephone:
+			_vals = append(_vals, &p.ContactTelephone)
+		case tblcompany.ContactMobile:
+			_vals = append(_vals, &p.ContactMobile)
+		case tblcompany.ContactEmail:
+			_vals = append(_vals, &p.ContactEmail)
+		case tblcompany.LegalName:
+			_vals = append(_vals, &p.LegalName)
+		case tblcompany.Creator:
+			_vals = append(_vals, &p.Creator)
+		case tblcompany.State:
+			_vals = append(_vals, &p.State)
+		case tblcompany.Status:
+			_vals = append(_vals, &p.Status)
+		case tblcompany.Ctime:
+			_vals = append(_vals, &p.Ctime)
+		case tblcompany.Utime:
+			_vals = append(_vals, &p.Utime)
+		}
+	}
 
 	return _vals
 }
@@ -242,7 +241,7 @@ func (p *Company) Scan(rows *sql.Rows, args ...dialect.Field) ([]Company, bool, 
 	return companys, true, nil
 }
 
-func (p *Company)AssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *Company) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)
 		_cols []string
@@ -405,18 +404,15 @@ func (p *Company)AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
-//
 func (p *Company) AssignKeys() (dialect.Field, any) {
-	return tblcompany.PrimaryKey,p.Id
+	return tblcompany.PrimaryKey, p.Id
 }
 
-
-//
 func (p *Company) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
-        return e
-    }
-    p.Id = types.BigInt(_id)
-    return nil
+		return e
+	}
+	p.Id = types.BigInt(_id)
+	return nil
 }
