@@ -16,6 +16,7 @@ package handler
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/linbaozhong/gentity/internal/resources"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"github.com/linbaozhong/gentity/pkg/validator"
@@ -27,41 +28,9 @@ import (
 	"text/template"
 )
 
-func generateDao(tds []TempData, prefix string) error {
-	for _, td := range tds {
-		// 写table文件
-		e := td.writeTable(filepath.Join(tablePath, "tbl"+strings.ToLower(td.StructName)))
-		if e != nil {
-			showError(e.Error())
-			return e
-		}
-
-		// 写model文件
-		e = td.writeToModel(prefix)
-		if e != nil {
-			showError(e)
-			return e
-		}
-
-		// 写dal文件
-		e = td.writeBuild(daoPath)
-		if e != nil {
-			showError(e.Error())
-			return e
-		}
-	}
-	return nil
-}
-
-func generateDTO(tds []TempData, prefix string) error {
-	if prefix == dentityDTO {
-		return nil
-	}
-	defer dtoFile.Close()
-
-	var structFullName = filepath.Join(fullpath, prefix)
-
+func initDTOFile(prefix string) {
 	astOnce.Do(func() {
+		var structFullName = filepath.Join(fullpath, prefix)
 		_astFile, e := getAst(structFullName)
 		if e != nil {
 			showError(e)
@@ -93,10 +62,39 @@ func generateDTO(tds []TempData, prefix string) error {
 			return
 		}
 	})
+}
 
+func generateDao(tds []TempData, prefix string) error {
 	for _, td := range tds {
+		// 写table文件
+		e := td.writeTable(filepath.Join(tablePath, "tbl"+strings.ToLower(td.StructName)))
+		if e != nil {
+			showError(e.Error())
+			return e
+		}
+
+		// 写model文件
+		e = td.writeToModel(prefix)
+		if e != nil {
+			showError(e)
+			return e
+		}
+
+		// 写dal文件
+		e = td.writeBuild(daoPath)
+		if e != nil {
+			showError(e.Error())
+			return e
+		}
+	}
+	return nil
+}
+
+func generateDTO(tds []TempData) error {
+	for _, td := range tds {
+		fmt.Println(td.StructName)
 		// 写DTO文件
-		e := writeToDTO(td, prefix)
+		e := writeToDTO(td)
 		if e != nil {
 			showError(e)
 			return e
@@ -105,7 +103,7 @@ func generateDTO(tds []TempData, prefix string) error {
 	return nil
 }
 
-func writeToDTO(d TempData, fileName string) error {
+func writeToDTO(d TempData) error {
 	_funcMap := template.FuncMap{
 		"lower": strings.ToLower,
 		"sub": func(a, b int) int {

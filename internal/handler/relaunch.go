@@ -133,6 +133,7 @@ var (
 			}
 
 			if command == "check" {
+				os.Remove(filepath.Join(fullpath, dentityDTO))
 				defer dtoFile.Close()
 			}
 			// // 初始化进度条
@@ -156,11 +157,15 @@ var (
 					continue
 				}
 				if command == "check" {
+					if filename == dentityDTO {
+						continue
+					}
 					_tds, e := parseFile(filename, pkgPath, "checker", "request", "response")
 					if e != nil {
 						showError(e)
 					}
-					e = generateDTO(_tds, filename)
+					initDTOFile(filename)
+					e = generateDTO(_tds)
 				} else {
 					_tds, e := parseFile(filename, pkgPath, "tablename")
 					if e != nil {
