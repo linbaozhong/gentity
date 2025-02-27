@@ -29,10 +29,26 @@ func Unmarshal(r gjson.Result, ptr any, args ...any) error {
 		return j.UnmarshalJSON(b)
 	}
 	if len(args) > 0 {
-		ptr = args[0]
+		// 获取 ptr 的反射值
+		ptrValue := reflect.ValueOf(ptr)
+		// 检查 ptr 是否为指针
+		if ptrValue.Kind() != reflect.Ptr {
+			return fmt.Errorf("ptr must be a pointer")
+		}
+		// 获取指针指向的值
+		elem := ptrValue.Elem()
+		// 获取 args[0] 的反射值
+		argValue := reflect.ValueOf(args[0])
+		// 检查类型是否兼容
+		if argValue.Type().AssignableTo(elem.Type()) {
+			// 将 args[0] 的值赋给 ptr 指向的位置
+			elem.Set(argValue)
+		} else {
+			return fmt.Errorf("type of args[0] is not assignable to the type pointed by ptr")
+		}
 		return nil
 	}
-
+	
 	return json.Unmarshal(b, ptr)
 }
 
@@ -64,7 +80,7 @@ func Marshal(s any) string {
 			if e != nil {
 				return fmt.Sprintf("%+v", s)
 			}
-
+			
 			return conv.Bytes2String(b)
 		}
 	}
