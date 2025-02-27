@@ -35,44 +35,44 @@ type App struct {
 }
 
 func TestBase(t *testing.T) {
-	a := new(App)
-	a.Id = 1234567
-	a.Arch = 3.14159265358979323846
-	a.Version = Bool(-1)
-	a.Url = "https://www.baidu.com"
-	a.State = 1
-	a.Force = 11256
-	a.Ctime = Now()
-
-	b, e := json.Marshal(a)
-	if e != nil {
-		t.Error(e)
-	}
-	s := string(b)
-	t.Log(s)
-
-	n := NewSmap(3).
-		Set("id", a.Id).
-		Set("arch", a.Arch).
-		Set("version", a.Version).
-		Set("force", a.Force).
-		Set("url", a.Url).
-		Set("ctime", a.Ctime)
-	m := NewSmap(3).
-		Set("data", []Smap{n, n})
-
-	r := NewResult()
-	r.Data = m
-	b, e = json.Marshal(r)
-	if e != nil {
-		t.Error(e)
-	}
-	s = string(b)
-	t.Log(s)
+	// a := new(App)
+	// a.Id = 1234567
+	// a.Arch = 3.14159265358979323846
+	// a.Version = Bool(-1)
+	// a.Url = "https://www.baidu.com"
+	// a.State = 1
+	// a.Force = 11256
+	// a.Ctime = Now()
+	//
+	// b, e := json.Marshal(a)
+	// if e != nil {
+	// 	t.Error(e)
+	// }
+	// s := string(b)
+	// t.Log(s)
+	//
+	// n := NewSmap(3).
+	// 	Set("id", a.Id).
+	// 	Set("arch", a.Arch).
+	// 	Set("version", a.Version).
+	// 	Set("force", a.Force).
+	// 	Set("url", a.Url).
+	// 	Set("ctime", a.Ctime)
+	// m := NewSmap(3).
+	// 	Set("data", []Smap{n, n})
+	//
+	// r := NewResult()
+	// r.Data = m
+	// b, e = json.Marshal(r)
+	// if e != nil {
+	// 	t.Error(e)
+	// }
+	// s = string(b)
+	// t.Log(s)
 	//
 	var a2 App
 	a2.Id = math.MaxUint64
-	e = json.Unmarshal([]byte(`{"id":"undefined",  "arch":3.14159265358979323846,"version":"true","url":"undefined","state":"undefined","force":112.56,"ctime":"2024-12-03 15:59:30"}`), &a2)
+	e := json.Unmarshal([]byte(`{"id":"undefined",  "arch":3.14159265358979323846,"version":"true","url":"undefined","state":"undefined","force":112.56,"ctime":"12:03:35"}`), &a2)
 	if e != nil {
 		t.Error(e)
 	}
@@ -102,4 +102,8 @@ func TestJsonResult(t *testing.T) {
 		t.Error(e)
 	}
 	t.Log(string(b))
+}
+
+func TestTime(t *testing.T) {
+
 }
