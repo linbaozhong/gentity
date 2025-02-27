@@ -672,10 +672,10 @@ func (t *Time) UnmarshalJSON(b []byte) error {
 	if e != nil {
 		if _e, ok := e.(*time.ParseError); ok {
 			switch _e.LayoutElem {
-			case "2006", "-", "01", "02":
-				tem, e = time.Parse(time.TimeOnly, c)
 			case "15", ":", "04", "05":
 				tem, e = time.Parse(time.DateOnly, c)
+			case "2006", "-", "01", "02":
+				tem, e = time.Parse(time.TimeOnly, c)
 			}
 			if e != nil {
 				return e
