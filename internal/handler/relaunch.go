@@ -164,8 +164,7 @@ var (
 					if e != nil {
 						showError(e)
 					}
-					initDTOFile(filename)
-					e = generateDTO(_tds)
+					e = generateDTO(_tds, filename)
 				} else {
 					_tds, e := parseFile(filename, pkgPath, "tablename")
 					if e != nil {

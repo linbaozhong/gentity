@@ -16,7 +16,6 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/linbaozhong/gentity/internal/resources"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"github.com/linbaozhong/gentity/pkg/validator"
@@ -90,9 +89,10 @@ func generateDao(tds []TempData, prefix string) error {
 	return nil
 }
 
-func generateDTO(tds []TempData) error {
+func generateDTO(tds []TempData, prefix string) error {
+	initDTOFile(prefix)
+
 	for _, td := range tds {
-		fmt.Println(td.StructName)
 		// 写DTO文件
 		e := writeToDTO(td)
 		if e != nil {
