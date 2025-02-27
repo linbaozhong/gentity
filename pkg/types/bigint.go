@@ -1,7 +1,6 @@
 package types
 
 import (
-	"bytes"
 	"database/sql/driver"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/conv"
@@ -15,7 +14,7 @@ func (i BigInt) MarshalJSON() ([]byte, error) {
 }
 
 func (i *BigInt) UnmarshalJSON(b []byte) error {
-	c := conv.Bytes2String(bytes.Trim(b, "\""))
+	c := bytes2String(b)
 
 	if c == "" {
 		*i = BigInt(0)

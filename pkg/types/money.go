@@ -15,7 +15,8 @@ func (m Money) MarshalJSON() ([]byte, error) {
 }
 
 func (m *Money) UnmarshalJSON(b []byte) error {
-	fen, e := strconv.ParseFloat(string(b), 10)
+	c := bytes2String(b)
+	fen, e := strconv.ParseFloat(c, 10)
 	if e != nil {
 		return e
 	}
