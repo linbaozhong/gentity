@@ -15,7 +15,7 @@ type UserRegisterReq struct {
 	Age      int8              `valid:"range(18|60),required"`
 	AuthorIP int64             `valid:"ipv4"`
 	Date     time.Time         `valid:"required"`
-	Get      *UserRegisterResp `valid:"required"`
+	Get      *UserRegisterResp `valid:"required" json:"get"`
 	Amount   types.Money       `valid:"required"`
 }
 

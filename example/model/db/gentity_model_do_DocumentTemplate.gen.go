@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tbldocumenttemplate"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const DocumentTemplateTableName = "document_template"
 
 var (
-	documenttemplatePool = pool.New(app.Context, func() any {
+	documenttemplatePool = pool.New(app.Context,func() any {
 		_obj := &DocumentTemplate{}
 		_obj.UUID()
 		return _obj
@@ -34,39 +34,39 @@ func NewDocumentTemplate() *DocumentTemplate {
 func (p *DocumentTemplate) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
 	_buf.WriteByte('{')
-	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
-	}
-	if p.Genre != 0 {
-		_buf.WriteString(`"genre":` + types.Marshal(p.Genre) + `,`)
-	}
-	if p.Company != 0 {
-		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
-	}
-	if p.Way != 0 {
-		_buf.WriteString(`"way":` + types.Marshal(p.Way) + `,`)
-	}
-	if p.AuthSign != 0 {
-		_buf.WriteString(`"auth_sign":` + types.Marshal(p.AuthSign) + `,`)
-	}
-	if p.Title != "" {
-		_buf.WriteString(`"title":` + types.Marshal(p.Title) + `,`)
-	}
-	if p.Content != "" {
-		_buf.WriteString(`"content":` + types.Marshal(p.Content) + `,`)
-	}
-	if p.Url != "" {
-		_buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
-	}
-	if p.HasForm != 0 {
-		_buf.WriteString(`"has_form":` + types.Marshal(p.HasForm) + `,`)
-	}
-	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
-	}
-	if !p.Utime.IsZero() {
-		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
-	}
+		if p.Id != 0 {
+			_buf.WriteString(`"id":`+types.Marshal(p.Id)+`,`)
+		}
+		if p.Genre != 0 {
+			_buf.WriteString(`"genre":`+types.Marshal(p.Genre)+`,`)
+		}
+		if p.Company != 0 {
+			_buf.WriteString(`"company":`+types.Marshal(p.Company)+`,`)
+		}
+		if p.Way != 0 {
+			_buf.WriteString(`"way":`+types.Marshal(p.Way)+`,`)
+		}
+		if p.AuthSign != 0 {
+			_buf.WriteString(`"auth_sign":`+types.Marshal(p.AuthSign)+`,`)
+		}
+		if p.Title != "" {
+			_buf.WriteString(`"title":`+types.Marshal(p.Title)+`,`)
+		}
+		if p.Content != "" {
+			_buf.WriteString(`"content":`+types.Marshal(p.Content)+`,`)
+		}
+		if p.Url != "" {
+			_buf.WriteString(`"url":`+types.Marshal(p.Url)+`,`)
+		}
+		if p.HasForm != 0 {
+			_buf.WriteString(`"has_form":`+types.Marshal(p.HasForm)+`,`)
+		}
+		if p.State != 0 {
+			_buf.WriteString(`"state":`+types.Marshal(p.State)+`,`)
+		}
+		if !p.Utime.IsZero() {
+			_buf.WriteString(`"utime":`+types.Marshal(p.Utime)+`,`)
+		}
 	if l := _buf.Len(); l > 1 {
 		_buf.Truncate(l - 1)
 	}
@@ -84,28 +84,28 @@ func (p *DocumentTemplate) UnmarshalJSON(data []byte) error {
 	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
-		case "id":
-			e = types.Unmarshal(value, &p.Id, types.BigInt(value.Uint()))
-		case "genre":
-			e = types.Unmarshal(value, &p.Genre, types.Int8(value.Int()))
-		case "company":
-			e = types.Unmarshal(value, &p.Company, types.Money(value.Uint()))
-		case "way":
-			e = types.Unmarshal(value, &p.Way, types.Int8(value.Int()))
-		case "auth_sign":
-			e = types.Unmarshal(value, &p.AuthSign, types.Int8(value.Int()))
-		case "title":
-			e = types.Unmarshal(value, &p.Title, types.String(value.Str))
-		case "content":
-			e = types.Unmarshal(value, &p.Content, types.String(value.Str))
-		case "url":
-			e = types.Unmarshal(value, &p.Url, types.String(value.Str))
-		case "has_form":
-			e = types.Unmarshal(value, &p.HasForm, types.Int8(value.Int()))
-		case "state":
-			e = types.Unmarshal(value, &p.State, types.Int8(value.Int()))
-		case "utime":
-			e = types.Unmarshal(value, &p.Utime, types.Time{Time: value.Time()})
+			case "id":
+				e = types.Unmarshal(value, &p.Id,p.Id = types.BigInt(value.Uint()))
+			case "genre":
+				e = types.Unmarshal(value, &p.Genre,p.Genre = types.Int8(value.Int()))
+			case "company":
+				e = types.Unmarshal(value, &p.Company,p.Company = types.Money(value.Uint()))
+			case "way":
+				e = types.Unmarshal(value, &p.Way,p.Way = types.Int8(value.Int()))
+			case "auth_sign":
+				e = types.Unmarshal(value, &p.AuthSign,p.AuthSign = types.Int8(value.Int()))
+			case "title":
+				e = types.Unmarshal(value, &p.Title,p.Title = types.String(value.Str))
+			case "content":
+				e = types.Unmarshal(value, &p.Content,p.Content = types.String(value.Str))
+			case "url":
+				e = types.Unmarshal(value, &p.Url,p.Url = types.String(value.Str))
+			case "has_form":
+				e = types.Unmarshal(value, &p.HasForm,p.HasForm = types.Int8(value.Int()))
+			case "state":
+				e = types.Unmarshal(value, &p.State,p.State = types.Int8(value.Int()))
+			case "utime":
+				e = types.Unmarshal(value, &p.Utime,p.Utime = types.Time{Time: value.Time()})
 		}
 		if e != nil {
 			log.Error(e)
@@ -138,45 +138,46 @@ func (p *DocumentTemplate) Reset() {
 	p.HasForm = 0
 	p.State = 0
 	p.Utime = types.Time{}
-
+	
 }
+
 
 func (p *DocumentTemplate) TableName() string {
 	return DocumentTemplateTableName
 }
 
-func (p *DocumentTemplate) AssignPtr(args ...dialect.Field) []any {
+func (p *DocumentTemplate) AssignPtr(args ...dialect.Field) ([]any) {
 	if len(args) == 0 {
 		args = tbldocumenttemplate.ReadableFields
 	}
 
-	_vals := make([]any, 0, len(args))
-	for _, col := range args {
-		switch col {
-		case tbldocumenttemplate.Id:
-			_vals = append(_vals, &p.Id)
-		case tbldocumenttemplate.Genre:
-			_vals = append(_vals, &p.Genre)
-		case tbldocumenttemplate.Company:
-			_vals = append(_vals, &p.Company)
-		case tbldocumenttemplate.Way:
-			_vals = append(_vals, &p.Way)
-		case tbldocumenttemplate.AuthSign:
-			_vals = append(_vals, &p.AuthSign)
-		case tbldocumenttemplate.Title:
-			_vals = append(_vals, &p.Title)
-		case tbldocumenttemplate.Content:
-			_vals = append(_vals, &p.Content)
-		case tbldocumenttemplate.Url:
-			_vals = append(_vals, &p.Url)
-		case tbldocumenttemplate.HasForm:
-			_vals = append(_vals, &p.HasForm)
-		case tbldocumenttemplate.State:
-			_vals = append(_vals, &p.State)
-		case tbldocumenttemplate.Utime:
-			_vals = append(_vals, &p.Utime)
-		}
-	}
+    _vals := make([]any, 0, len(args))
+    for _, col := range args {
+        switch col {
+        case tbldocumenttemplate.Id:
+            _vals = append(_vals, &p.Id)
+        case tbldocumenttemplate.Genre:
+            _vals = append(_vals, &p.Genre)
+        case tbldocumenttemplate.Company:
+            _vals = append(_vals, &p.Company)
+        case tbldocumenttemplate.Way:
+            _vals = append(_vals, &p.Way)
+        case tbldocumenttemplate.AuthSign:
+            _vals = append(_vals, &p.AuthSign)
+        case tbldocumenttemplate.Title:
+            _vals = append(_vals, &p.Title)
+        case tbldocumenttemplate.Content:
+            _vals = append(_vals, &p.Content)
+        case tbldocumenttemplate.Url:
+            _vals = append(_vals, &p.Url)
+        case tbldocumenttemplate.HasForm:
+            _vals = append(_vals, &p.HasForm)
+        case tbldocumenttemplate.State:
+            _vals = append(_vals, &p.State)
+        case tbldocumenttemplate.Utime:
+            _vals = append(_vals, &p.Utime)
+        }
+    }
 
 	return _vals
 }
@@ -209,7 +210,7 @@ func (p *DocumentTemplate) Scan(rows *sql.Rows, args ...dialect.Field) ([]Docume
 	return document_templates, true, nil
 }
 
-func (p *DocumentTemplate) AssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *DocumentTemplate)AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)
 		_cols []string
@@ -336,15 +337,18 @@ func (p *DocumentTemplate) AssignValues(args ...dialect.Field) ([]string, []any)
 	return _cols, _vals
 }
 
+//
 func (p *DocumentTemplate) AssignKeys() (dialect.Field, any) {
-	return tbldocumenttemplate.PrimaryKey, p.Id
+	return tbldocumenttemplate.PrimaryKey,p.Id
 }
 
+
+//
 func (p *DocumentTemplate) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
-		return e
-	}
-	p.Id = types.BigInt(_id)
-	return nil
+        return e
+    }
+    p.Id = types.BigInt(_id)
+    return nil
 }

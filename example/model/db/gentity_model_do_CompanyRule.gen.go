@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyrule"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const CompanyRuleTableName = "company_rule"
 
 var (
-	companyrulePool = pool.New(app.Context, func() any {
+	companyrulePool = pool.New(app.Context,func() any {
 		_obj := &CompanyRule{}
 		_obj.UUID()
 		return _obj
@@ -34,33 +34,33 @@ func NewCompanyRule() *CompanyRule {
 func (p *CompanyRule) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
 	_buf.WriteByte('{')
-	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
-	}
-	if p.Pid != 0 {
-		_buf.WriteString(`"pid":` + types.Marshal(p.Pid) + `,`)
-	}
-	if p.Path != "" {
-		_buf.WriteString(`"path":` + types.Marshal(p.Path) + `,`)
-	}
-	if p.Title != "" {
-		_buf.WriteString(`"title":` + types.Marshal(p.Title) + `,`)
-	}
-	if p.Type != 0 {
-		_buf.WriteString(`"type":` + types.Marshal(p.Type) + `,`)
-	}
-	if p.IsPrivate != 0 {
-		_buf.WriteString(`"is_private":` + types.Marshal(p.IsPrivate) + `,`)
-	}
-	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
-	}
-	if p.Descr != "" {
-		_buf.WriteString(`"descr":` + types.Marshal(p.Descr) + `,`)
-	}
-	if p.Belong != 0 {
-		_buf.WriteString(`"belong":` + types.Marshal(p.Belong) + `,`)
-	}
+		if p.Id != 0 {
+			_buf.WriteString(`"id":`+types.Marshal(p.Id)+`,`)
+		}
+		if p.Pid != 0 {
+			_buf.WriteString(`"pid":`+types.Marshal(p.Pid)+`,`)
+		}
+		if p.Path != "" {
+			_buf.WriteString(`"path":`+types.Marshal(p.Path)+`,`)
+		}
+		if p.Title != "" {
+			_buf.WriteString(`"title":`+types.Marshal(p.Title)+`,`)
+		}
+		if p.Type != 0 {
+			_buf.WriteString(`"type":`+types.Marshal(p.Type)+`,`)
+		}
+		if p.IsPrivate != 0 {
+			_buf.WriteString(`"is_private":`+types.Marshal(p.IsPrivate)+`,`)
+		}
+		if p.State != 0 {
+			_buf.WriteString(`"state":`+types.Marshal(p.State)+`,`)
+		}
+		if p.Descr != "" {
+			_buf.WriteString(`"descr":`+types.Marshal(p.Descr)+`,`)
+		}
+		if p.Belong != 0 {
+			_buf.WriteString(`"belong":`+types.Marshal(p.Belong)+`,`)
+		}
 	if l := _buf.Len(); l > 1 {
 		_buf.Truncate(l - 1)
 	}
@@ -78,24 +78,24 @@ func (p *CompanyRule) UnmarshalJSON(data []byte) error {
 	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
-		case "id":
-			e = types.Unmarshal(value, &p.Id, types.BigInt(value.Uint()))
-		case "pid":
-			e = types.Unmarshal(value, &p.Pid, types.BigInt(value.Uint()))
-		case "path":
-			e = types.Unmarshal(value, &p.Path, types.String(value.Str))
-		case "title":
-			e = types.Unmarshal(value, &p.Title, types.String(value.Str))
-		case "type":
-			e = types.Unmarshal(value, &p.Type, types.Uint8(value.Uint()))
-		case "is_private":
-			e = types.Unmarshal(value, &p.IsPrivate, types.Uint8(value.Uint()))
-		case "state":
-			e = types.Unmarshal(value, &p.State, types.Int8(value.Int()))
-		case "descr":
-			e = types.Unmarshal(value, &p.Descr, types.String(value.Str))
-		case "belong":
-			e = types.Unmarshal(value, &p.Belong, types.Int8(value.Int()))
+			case "id":
+				e = types.Unmarshal(value, &p.Id,p.Id = types.BigInt(value.Uint()))
+			case "pid":
+				e = types.Unmarshal(value, &p.Pid,p.Pid = types.BigInt(value.Uint()))
+			case "path":
+				e = types.Unmarshal(value, &p.Path,p.Path = types.String(value.Str))
+			case "title":
+				e = types.Unmarshal(value, &p.Title,p.Title = types.String(value.Str))
+			case "type":
+				e = types.Unmarshal(value, &p.Type,p.Type = types.Uint8(value.Uint()))
+			case "is_private":
+				e = types.Unmarshal(value, &p.IsPrivate,p.IsPrivate = types.Uint8(value.Uint()))
+			case "state":
+				e = types.Unmarshal(value, &p.State,p.State = types.Int8(value.Int()))
+			case "descr":
+				e = types.Unmarshal(value, &p.Descr,p.Descr = types.String(value.Str))
+			case "belong":
+				e = types.Unmarshal(value, &p.Belong,p.Belong = types.Int8(value.Int()))
 		}
 		if e != nil {
 			log.Error(e)
@@ -126,41 +126,42 @@ func (p *CompanyRule) Reset() {
 	p.State = 0
 	p.Descr = ""
 	p.Belong = 0
-
+	
 }
+
 
 func (p *CompanyRule) TableName() string {
 	return CompanyRuleTableName
 }
 
-func (p *CompanyRule) AssignPtr(args ...dialect.Field) []any {
+func (p *CompanyRule) AssignPtr(args ...dialect.Field) ([]any) {
 	if len(args) == 0 {
 		args = tblcompanyrule.ReadableFields
 	}
 
-	_vals := make([]any, 0, len(args))
-	for _, col := range args {
-		switch col {
-		case tblcompanyrule.Id:
-			_vals = append(_vals, &p.Id)
-		case tblcompanyrule.Pid:
-			_vals = append(_vals, &p.Pid)
-		case tblcompanyrule.Path:
-			_vals = append(_vals, &p.Path)
-		case tblcompanyrule.Title:
-			_vals = append(_vals, &p.Title)
-		case tblcompanyrule.Type:
-			_vals = append(_vals, &p.Type)
-		case tblcompanyrule.IsPrivate:
-			_vals = append(_vals, &p.IsPrivate)
-		case tblcompanyrule.State:
-			_vals = append(_vals, &p.State)
-		case tblcompanyrule.Descr:
-			_vals = append(_vals, &p.Descr)
-		case tblcompanyrule.Belong:
-			_vals = append(_vals, &p.Belong)
-		}
-	}
+    _vals := make([]any, 0, len(args))
+    for _, col := range args {
+        switch col {
+        case tblcompanyrule.Id:
+            _vals = append(_vals, &p.Id)
+        case tblcompanyrule.Pid:
+            _vals = append(_vals, &p.Pid)
+        case tblcompanyrule.Path:
+            _vals = append(_vals, &p.Path)
+        case tblcompanyrule.Title:
+            _vals = append(_vals, &p.Title)
+        case tblcompanyrule.Type:
+            _vals = append(_vals, &p.Type)
+        case tblcompanyrule.IsPrivate:
+            _vals = append(_vals, &p.IsPrivate)
+        case tblcompanyrule.State:
+            _vals = append(_vals, &p.State)
+        case tblcompanyrule.Descr:
+            _vals = append(_vals, &p.Descr)
+        case tblcompanyrule.Belong:
+            _vals = append(_vals, &p.Belong)
+        }
+    }
 
 	return _vals
 }
@@ -193,7 +194,7 @@ func (p *CompanyRule) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyRule
 	return company_rules, true, nil
 }
 
-func (p *CompanyRule) AssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *CompanyRule)AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)
 		_cols []string
@@ -302,15 +303,18 @@ func (p *CompanyRule) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
+//
 func (p *CompanyRule) AssignKeys() (dialect.Field, any) {
-	return tblcompanyrule.PrimaryKey, p.Id
+	return tblcompanyrule.PrimaryKey,p.Id
 }
 
+
+//
 func (p *CompanyRule) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
-		return e
-	}
-	p.Id = types.BigInt(_id)
-	return nil
+        return e
+    }
+    p.Id = types.BigInt(_id)
+    return nil
 }

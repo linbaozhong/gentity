@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tbldispatchcompany"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const DispatchCompanyTableName = "dispatch_company"
 
 var (
-	dispatchcompanyPool = pool.New(app.Context, func() any {
+	dispatchcompanyPool = pool.New(app.Context,func() any {
 		_obj := &DispatchCompany{}
 		_obj.UUID()
 		return _obj
@@ -34,30 +34,30 @@ func NewDispatchCompany() *DispatchCompany {
 func (p *DispatchCompany) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
 	_buf.WriteByte('{')
-	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
-	}
-	if p.CompanyId != 0 {
-		_buf.WriteString(`"company_id":` + types.Marshal(p.CompanyId) + `,`)
-	}
-	if p.Name != "" {
-		_buf.WriteString(`"name":` + types.Marshal(p.Name) + `,`)
-	}
-	if p.Address != "" {
-		_buf.WriteString(`"address":` + types.Marshal(p.Address) + `,`)
-	}
-	if p.Creator != 0 {
-		_buf.WriteString(`"creator":` + types.Marshal(p.Creator) + `,`)
-	}
-	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
-	}
-	if !p.Ctime.IsZero() {
-		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
-	}
-	if !p.Utime.IsZero() {
-		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
-	}
+		if p.Id != 0 {
+			_buf.WriteString(`"id":`+types.Marshal(p.Id)+`,`)
+		}
+		if p.CompanyId != 0 {
+			_buf.WriteString(`"company_id":`+types.Marshal(p.CompanyId)+`,`)
+		}
+		if p.Name != "" {
+			_buf.WriteString(`"name":`+types.Marshal(p.Name)+`,`)
+		}
+		if p.Address != "" {
+			_buf.WriteString(`"address":`+types.Marshal(p.Address)+`,`)
+		}
+		if p.Creator != 0 {
+			_buf.WriteString(`"creator":`+types.Marshal(p.Creator)+`,`)
+		}
+		if p.State != 0 {
+			_buf.WriteString(`"state":`+types.Marshal(p.State)+`,`)
+		}
+		if !p.Ctime.IsZero() {
+			_buf.WriteString(`"ctime":`+types.Marshal(p.Ctime)+`,`)
+		}
+		if !p.Utime.IsZero() {
+			_buf.WriteString(`"utime":`+types.Marshal(p.Utime)+`,`)
+		}
 	if l := _buf.Len(); l > 1 {
 		_buf.Truncate(l - 1)
 	}
@@ -75,22 +75,22 @@ func (p *DispatchCompany) UnmarshalJSON(data []byte) error {
 	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
-		case "id":
-			e = types.Unmarshal(value, &p.Id, types.BigInt(value.Uint()))
-		case "company_id":
-			e = types.Unmarshal(value, &p.CompanyId, types.BigInt(value.Uint()))
-		case "name":
-			e = types.Unmarshal(value, &p.Name, types.String(value.Str))
-		case "address":
-			e = types.Unmarshal(value, &p.Address, types.String(value.Str))
-		case "creator":
-			e = types.Unmarshal(value, &p.Creator, types.BigInt(value.Uint()))
-		case "state":
-			e = types.Unmarshal(value, &p.State, types.Int8(value.Int()))
-		case "ctime":
-			e = types.Unmarshal(value, &p.Ctime, types.Time{Time: value.Time()})
-		case "utime":
-			e = types.Unmarshal(value, &p.Utime, types.Time{Time: value.Time()})
+			case "id":
+				e = types.Unmarshal(value, &p.Id,p.Id = types.BigInt(value.Uint()))
+			case "company_id":
+				e = types.Unmarshal(value, &p.CompanyId,p.CompanyId = types.BigInt(value.Uint()))
+			case "name":
+				e = types.Unmarshal(value, &p.Name,p.Name = types.String(value.Str))
+			case "address":
+				e = types.Unmarshal(value, &p.Address,p.Address = types.String(value.Str))
+			case "creator":
+				e = types.Unmarshal(value, &p.Creator,p.Creator = types.BigInt(value.Uint()))
+			case "state":
+				e = types.Unmarshal(value, &p.State,p.State = types.Int8(value.Int()))
+			case "ctime":
+				e = types.Unmarshal(value, &p.Ctime,p.Ctime = types.Time{Time: value.Time()})
+			case "utime":
+				e = types.Unmarshal(value, &p.Utime,p.Utime = types.Time{Time: value.Time()})
 		}
 		if e != nil {
 			log.Error(e)
@@ -120,39 +120,40 @@ func (p *DispatchCompany) Reset() {
 	p.State = 0
 	p.Ctime = types.Time{}
 	p.Utime = types.Time{}
-
+	
 }
+
 
 func (p *DispatchCompany) TableName() string {
 	return DispatchCompanyTableName
 }
 
-func (p *DispatchCompany) AssignPtr(args ...dialect.Field) []any {
+func (p *DispatchCompany) AssignPtr(args ...dialect.Field) ([]any) {
 	if len(args) == 0 {
 		args = tbldispatchcompany.ReadableFields
 	}
 
-	_vals := make([]any, 0, len(args))
-	for _, col := range args {
-		switch col {
-		case tbldispatchcompany.Id:
-			_vals = append(_vals, &p.Id)
-		case tbldispatchcompany.CompanyId:
-			_vals = append(_vals, &p.CompanyId)
-		case tbldispatchcompany.Name:
-			_vals = append(_vals, &p.Name)
-		case tbldispatchcompany.Address:
-			_vals = append(_vals, &p.Address)
-		case tbldispatchcompany.Creator:
-			_vals = append(_vals, &p.Creator)
-		case tbldispatchcompany.State:
-			_vals = append(_vals, &p.State)
-		case tbldispatchcompany.Ctime:
-			_vals = append(_vals, &p.Ctime)
-		case tbldispatchcompany.Utime:
-			_vals = append(_vals, &p.Utime)
-		}
-	}
+    _vals := make([]any, 0, len(args))
+    for _, col := range args {
+        switch col {
+        case tbldispatchcompany.Id:
+            _vals = append(_vals, &p.Id)
+        case tbldispatchcompany.CompanyId:
+            _vals = append(_vals, &p.CompanyId)
+        case tbldispatchcompany.Name:
+            _vals = append(_vals, &p.Name)
+        case tbldispatchcompany.Address:
+            _vals = append(_vals, &p.Address)
+        case tbldispatchcompany.Creator:
+            _vals = append(_vals, &p.Creator)
+        case tbldispatchcompany.State:
+            _vals = append(_vals, &p.State)
+        case tbldispatchcompany.Ctime:
+            _vals = append(_vals, &p.Ctime)
+        case tbldispatchcompany.Utime:
+            _vals = append(_vals, &p.Utime)
+        }
+    }
 
 	return _vals
 }
@@ -185,7 +186,7 @@ func (p *DispatchCompany) Scan(rows *sql.Rows, args ...dialect.Field) ([]Dispatc
 	return dispatch_companys, true, nil
 }
 
-func (p *DispatchCompany) AssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *DispatchCompany)AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)
 		_cols []string
@@ -285,15 +286,18 @@ func (p *DispatchCompany) AssignValues(args ...dialect.Field) ([]string, []any) 
 	return _cols, _vals
 }
 
+//
 func (p *DispatchCompany) AssignKeys() (dialect.Field, any) {
-	return tbldispatchcompany.PrimaryKey, p.Id
+	return tbldispatchcompany.PrimaryKey,p.Id
 }
 
+
+//
 func (p *DispatchCompany) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
-		return e
-	}
-	p.Id = types.BigInt(_id)
-	return nil
+        return e
+    }
+    p.Id = types.BigInt(_id)
+    return nil
 }

@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyfadada"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,7 +18,7 @@ import (
 const CompanyFadadaTableName = "company_fadada"
 
 var (
-	companyfadadaPool = pool.New(app.Context, func() any {
+	companyfadadaPool = pool.New(app.Context,func() any {
 		_obj := &CompanyFadada{}
 		_obj.UUID()
 		return _obj
@@ -34,48 +34,48 @@ func NewCompanyFadada() *CompanyFadada {
 func (p *CompanyFadada) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
 	_buf.WriteByte('{')
-	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
-	}
-	if p.CompanyName != "" {
-		_buf.WriteString(`"company_name":` + types.Marshal(p.CompanyName) + `,`)
-	}
-	if p.CustomerId != "" {
-		_buf.WriteString(`"customer_id":` + types.Marshal(p.CustomerId) + `,`)
-	}
-	if p.TransactionNo != "" {
-		_buf.WriteString(`"transaction_no":` + types.Marshal(p.TransactionNo) + `,`)
-	}
-	if p.Url != "" {
-		_buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
-	}
-	if p.CertInfo != "" {
-		_buf.WriteString(`"cert_info":` + types.Marshal(p.CertInfo) + `,`)
-	}
-	if p.Status != 0 {
-		_buf.WriteString(`"status":` + types.Marshal(p.Status) + `,`)
-	}
-	if p.HasCertificate != 0 {
-		_buf.WriteString(`"has_certificate":` + types.Marshal(p.HasCertificate) + `,`)
-	}
-	if p.AuthSign != 0 {
-		_buf.WriteString(`"auth_sign":` + types.Marshal(p.AuthSign) + `,`)
-	}
-	if p.AuthTransactionId != "" {
-		_buf.WriteString(`"auth_transaction_id":` + types.Marshal(p.AuthTransactionId) + `,`)
-	}
-	if p.AuthContractId != "" {
-		_buf.WriteString(`"auth_contract_id":` + types.Marshal(p.AuthContractId) + `,`)
-	}
-	if p.AuthResult != "" {
-		_buf.WriteString(`"auth_result":` + types.Marshal(p.AuthResult) + `,`)
-	}
-	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
-	}
-	if !p.Ctime.IsZero() {
-		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
-	}
+		if p.Id != 0 {
+			_buf.WriteString(`"id":`+types.Marshal(p.Id)+`,`)
+		}
+		if p.CompanyName != "" {
+			_buf.WriteString(`"company_name":`+types.Marshal(p.CompanyName)+`,`)
+		}
+		if p.CustomerId != "" {
+			_buf.WriteString(`"customer_id":`+types.Marshal(p.CustomerId)+`,`)
+		}
+		if p.TransactionNo != "" {
+			_buf.WriteString(`"transaction_no":`+types.Marshal(p.TransactionNo)+`,`)
+		}
+		if p.Url != "" {
+			_buf.WriteString(`"url":`+types.Marshal(p.Url)+`,`)
+		}
+		if p.CertInfo != "" {
+			_buf.WriteString(`"cert_info":`+types.Marshal(p.CertInfo)+`,`)
+		}
+		if p.Status != 0 {
+			_buf.WriteString(`"status":`+types.Marshal(p.Status)+`,`)
+		}
+		if p.HasCertificate != 0 {
+			_buf.WriteString(`"has_certificate":`+types.Marshal(p.HasCertificate)+`,`)
+		}
+		if p.AuthSign != 0 {
+			_buf.WriteString(`"auth_sign":`+types.Marshal(p.AuthSign)+`,`)
+		}
+		if p.AuthTransactionId != "" {
+			_buf.WriteString(`"auth_transaction_id":`+types.Marshal(p.AuthTransactionId)+`,`)
+		}
+		if p.AuthContractId != "" {
+			_buf.WriteString(`"auth_contract_id":`+types.Marshal(p.AuthContractId)+`,`)
+		}
+		if p.AuthResult != "" {
+			_buf.WriteString(`"auth_result":`+types.Marshal(p.AuthResult)+`,`)
+		}
+		if p.State != 0 {
+			_buf.WriteString(`"state":`+types.Marshal(p.State)+`,`)
+		}
+		if !p.Ctime.IsZero() {
+			_buf.WriteString(`"ctime":`+types.Marshal(p.Ctime)+`,`)
+		}
 	if l := _buf.Len(); l > 1 {
 		_buf.Truncate(l - 1)
 	}
@@ -93,34 +93,34 @@ func (p *CompanyFadada) UnmarshalJSON(data []byte) error {
 	_result.ForEach(func(key, value gjson.Result) bool {
 		var e error
 		switch key.Str {
-		case "id":
-			e = types.Unmarshal(value, &p.Id, types.BigInt(value.Uint()))
-		case "company_name":
-			e = types.Unmarshal(value, &p.CompanyName, types.String(value.Str))
-		case "customer_id":
-			e = types.Unmarshal(value, &p.CustomerId, types.String(value.Str))
-		case "transaction_no":
-			e = types.Unmarshal(value, &p.TransactionNo, types.String(value.Str))
-		case "url":
-			e = types.Unmarshal(value, &p.Url, types.String(value.Str))
-		case "cert_info":
-			e = types.Unmarshal(value, &p.CertInfo, types.String(value.Str))
-		case "status":
-			e = types.Unmarshal(value, &p.Status, types.Int8(value.Int()))
-		case "has_certificate":
-			e = types.Unmarshal(value, &p.HasCertificate, types.Int8(value.Int()))
-		case "auth_sign":
-			e = types.Unmarshal(value, &p.AuthSign, types.Int8(value.Int()))
-		case "auth_transaction_id":
-			e = types.Unmarshal(value, &p.AuthTransactionId, types.String(value.Str))
-		case "auth_contract_id":
-			e = types.Unmarshal(value, &p.AuthContractId, types.String(value.Str))
-		case "auth_result":
-			e = types.Unmarshal(value, &p.AuthResult, types.String(value.Str))
-		case "state":
-			e = types.Unmarshal(value, &p.State, types.Int8(value.Int()))
-		case "ctime":
-			e = types.Unmarshal(value, &p.Ctime, types.Time{Time: value.Time()})
+			case "id":
+				e = types.Unmarshal(value, &p.Id,p.Id = types.BigInt(value.Uint()))
+			case "company_name":
+				e = types.Unmarshal(value, &p.CompanyName,p.CompanyName = types.String(value.Str))
+			case "customer_id":
+				e = types.Unmarshal(value, &p.CustomerId,p.CustomerId = types.String(value.Str))
+			case "transaction_no":
+				e = types.Unmarshal(value, &p.TransactionNo,p.TransactionNo = types.String(value.Str))
+			case "url":
+				e = types.Unmarshal(value, &p.Url,p.Url = types.String(value.Str))
+			case "cert_info":
+				e = types.Unmarshal(value, &p.CertInfo,p.CertInfo = types.String(value.Str))
+			case "status":
+				e = types.Unmarshal(value, &p.Status,p.Status = types.Int8(value.Int()))
+			case "has_certificate":
+				e = types.Unmarshal(value, &p.HasCertificate,p.HasCertificate = types.Int8(value.Int()))
+			case "auth_sign":
+				e = types.Unmarshal(value, &p.AuthSign,p.AuthSign = types.Int8(value.Int()))
+			case "auth_transaction_id":
+				e = types.Unmarshal(value, &p.AuthTransactionId,p.AuthTransactionId = types.String(value.Str))
+			case "auth_contract_id":
+				e = types.Unmarshal(value, &p.AuthContractId,p.AuthContractId = types.String(value.Str))
+			case "auth_result":
+				e = types.Unmarshal(value, &p.AuthResult,p.AuthResult = types.String(value.Str))
+			case "state":
+				e = types.Unmarshal(value, &p.State,p.State = types.Int8(value.Int()))
+			case "ctime":
+				e = types.Unmarshal(value, &p.Ctime,p.Ctime = types.Time{Time: value.Time()})
 		}
 		if e != nil {
 			log.Error(e)
@@ -156,51 +156,52 @@ func (p *CompanyFadada) Reset() {
 	p.AuthResult = ""
 	p.State = 0
 	p.Ctime = types.Time{}
-
+	
 }
+
 
 func (p *CompanyFadada) TableName() string {
 	return CompanyFadadaTableName
 }
 
-func (p *CompanyFadada) AssignPtr(args ...dialect.Field) []any {
+func (p *CompanyFadada) AssignPtr(args ...dialect.Field) ([]any) {
 	if len(args) == 0 {
 		args = tblcompanyfadada.ReadableFields
 	}
 
-	_vals := make([]any, 0, len(args))
-	for _, col := range args {
-		switch col {
-		case tblcompanyfadada.Id:
-			_vals = append(_vals, &p.Id)
-		case tblcompanyfadada.CompanyName:
-			_vals = append(_vals, &p.CompanyName)
-		case tblcompanyfadada.CustomerId:
-			_vals = append(_vals, &p.CustomerId)
-		case tblcompanyfadada.TransactionNo:
-			_vals = append(_vals, &p.TransactionNo)
-		case tblcompanyfadada.Url:
-			_vals = append(_vals, &p.Url)
-		case tblcompanyfadada.CertInfo:
-			_vals = append(_vals, &p.CertInfo)
-		case tblcompanyfadada.Status:
-			_vals = append(_vals, &p.Status)
-		case tblcompanyfadada.HasCertificate:
-			_vals = append(_vals, &p.HasCertificate)
-		case tblcompanyfadada.AuthSign:
-			_vals = append(_vals, &p.AuthSign)
-		case tblcompanyfadada.AuthTransactionId:
-			_vals = append(_vals, &p.AuthTransactionId)
-		case tblcompanyfadada.AuthContractId:
-			_vals = append(_vals, &p.AuthContractId)
-		case tblcompanyfadada.AuthResult:
-			_vals = append(_vals, &p.AuthResult)
-		case tblcompanyfadada.State:
-			_vals = append(_vals, &p.State)
-		case tblcompanyfadada.Ctime:
-			_vals = append(_vals, &p.Ctime)
-		}
-	}
+    _vals := make([]any, 0, len(args))
+    for _, col := range args {
+        switch col {
+        case tblcompanyfadada.Id:
+            _vals = append(_vals, &p.Id)
+        case tblcompanyfadada.CompanyName:
+            _vals = append(_vals, &p.CompanyName)
+        case tblcompanyfadada.CustomerId:
+            _vals = append(_vals, &p.CustomerId)
+        case tblcompanyfadada.TransactionNo:
+            _vals = append(_vals, &p.TransactionNo)
+        case tblcompanyfadada.Url:
+            _vals = append(_vals, &p.Url)
+        case tblcompanyfadada.CertInfo:
+            _vals = append(_vals, &p.CertInfo)
+        case tblcompanyfadada.Status:
+            _vals = append(_vals, &p.Status)
+        case tblcompanyfadada.HasCertificate:
+            _vals = append(_vals, &p.HasCertificate)
+        case tblcompanyfadada.AuthSign:
+            _vals = append(_vals, &p.AuthSign)
+        case tblcompanyfadada.AuthTransactionId:
+            _vals = append(_vals, &p.AuthTransactionId)
+        case tblcompanyfadada.AuthContractId:
+            _vals = append(_vals, &p.AuthContractId)
+        case tblcompanyfadada.AuthResult:
+            _vals = append(_vals, &p.AuthResult)
+        case tblcompanyfadada.State:
+            _vals = append(_vals, &p.State)
+        case tblcompanyfadada.Ctime:
+            _vals = append(_vals, &p.Ctime)
+        }
+    }
 
 	return _vals
 }
@@ -233,7 +234,7 @@ func (p *CompanyFadada) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyFa
 	return company_fadadas, true, nil
 }
 
-func (p *CompanyFadada) AssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *CompanyFadada)AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)
 		_cols []string
@@ -387,10 +388,13 @@ func (p *CompanyFadada) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
+//
 func (p *CompanyFadada) AssignKeys() (dialect.Field, any) {
-	return tblcompanyfadada.PrimaryKey, p.Id
+	return tblcompanyfadada.PrimaryKey,p.Id
 }
 
+
+//
 func (p *CompanyFadada) AssignPrimaryKeyValues(result sql.Result) error {
-	return nil
+    return nil
 }

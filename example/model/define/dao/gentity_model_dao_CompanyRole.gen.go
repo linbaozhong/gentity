@@ -223,6 +223,9 @@ func (p *daoCompanyRole) SelectAll(ctx context.Context, s *ace.Selector) ([]db.C
 	if has {
 		return _objs, true, nil
 	}
+	if e == nil || e == sql.ErrNoRows {
+		return nil, false, nil
+	}
 	log.Error(e)
 	return nil, false, e
 }
@@ -282,6 +285,9 @@ func (p *daoCompanyRole) Find4Cols(ctx context.Context, pageIndex, pageSize uint
 	_objs, has, e := _obj.Scan(_rows, cols...)
 	if has {
 		return _objs, true, nil
+	}
+	if e == nil || e == sql.ErrNoRows {
+		return nil, false, nil
 	}
 	log.Error(e)
 	return nil, false, e

@@ -76,13 +76,13 @@ func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 		return errors.New("invalid json")
 	}
 	_result := gjson.ParseBytes(data)
+	var e error
 	_result.ForEach(func(key, value gjson.Result) bool {
-		var e error
 		switch key.Str {
 		{{- range $key, $value := .Columns}}
 			{{- if ne $value.Json.Name ""}}
 			case "{{ $value.Json.Name }}":
-				e = types.Unmarshal(value, &p.{{$value.Name}},{{getUnmarshalValue $value}})
+				{{getUnmarshalValue $value}}
 			{{- end}}
 		{{- end}}
 		}
@@ -106,14 +106,14 @@ func (p *{{.StructName}}) UnmarshalValues(m map[string][]string) error {
 	}()
 	{{- end}}
 
+	var e error
 	for k, v := range m {
-		var e error
 		value := gjson.Result{Raw: v[0],Str: v[0]}
 		switch k {
 		{{- range $key, $value := .Columns}}
 			{{- if ne $value.Json.Name ""}}
 			case "{{ $value.Json.Name }}":
-				e = types.Unmarshal(value, &p.{{$value.Name}},{{getUnmarshalValue $value}})
+				{{getUnmarshalValue $value}}
 			{{- end}}
 		{{- end}}
 		}

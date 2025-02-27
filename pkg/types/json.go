@@ -48,7 +48,7 @@ func Unmarshal(r gjson.Result, ptr any, args ...any) error {
 		}
 		return nil
 	}
-	
+
 	return json.Unmarshal(b, ptr)
 }
 
@@ -80,7 +80,7 @@ func Marshal(s any) string {
 			if e != nil {
 				return fmt.Sprintf("%+v", s)
 			}
-			
+
 			return conv.Bytes2String(b)
 		}
 	}

@@ -122,43 +122,45 @@ func getType(t Field) string {
 	}
 }
 func getUnmarshalValue(t Field) string {
+	prefix := "p." + t.Name + " = "
 	switch t.Type {
 	case "string":
-		return `value.Str`
+		return prefix + `value.Str`
 	case "int64":
-		return `value.Int()`
+		return prefix + `value.Int()`
 	case "uint64":
-		return `value.Uint()`
+		return prefix + `value.Uint()`
 	case "int", "int8", "int16", "int32",
 		"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64":
-		return t.Type + "(value.Int())"
+		return prefix + t.Type + "(value.Int())"
 	case "uint", "uint8", "uint16", "uint32",
 		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
 		"types.BigInt", "types.Money":
-		return t.Type + "(value.Uint())"
+		return prefix + t.Type + "(value.Uint())"
 	case "float32", "types.Float32", "types.Float64":
-		return t.Type + "(value.Float())"
+		return prefix + t.Type + "(value.Float())"
 	case "float64":
-		return "value.Float()"
+		return prefix + "value.Float()"
 	case "types.String":
-		return `types.String(value.Str)`
+		return prefix + `types.String(value.Str)`
 	case "time.Time":
-		return "value.Time()"
+		return prefix + "value.Time()"
 	case "types.Time":
-		return "types.Time{Time: value.Time()}"
+		return prefix + "types.Time{Time: value.Time()}"
 	case "bool":
-		return "value.Bool()"
+		return prefix + "value.Bool()"
 	case "types.Bool":
-		return "util.IIF(value.Bool(),types.Bool(1),types.Bool(0))"
+		return prefix + "util.IIF(value.Bool(),types.Bool(1),types.Bool(0))"
 	default:
-		return `func(value gjson.Result) ` + t.Type + ` {
-		var obj ` + t.Type + `
-		e := types.Unmarshal(value, &obj)
-		if e != nil {
-			panic(e)
-		}
-		return obj
-	}(value)`
+		fn := `func(value gjson.Result) ` + t.Type + ` {
+					var obj ` + t.Type + `
+					e := types.Unmarshal(value, &obj)
+					if e != nil {
+						panic(e)
+					}
+					return obj
+				}(value)`
+		return `e = types.Unmarshal(value, &p.` + t.Name + `, ` + fn + `)`
 	}
 }
 
