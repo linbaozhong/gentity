@@ -111,7 +111,8 @@ var (
 				if e != nil {
 					showError(e)
 				}
-			case "check":
+			case "check", "dto":
+			case "swag":
 			case "version":
 				fmt.Println("ver." + version)
 				return
@@ -132,7 +133,7 @@ var (
 				showError(e)
 			}
 
-			if command == "check" {
+			if command == "check" || command == "dto" {
 				os.Remove(filepath.Join(fullpath, dentityDTO))
 				defer dtoFile.Close()
 			}
@@ -156,7 +157,11 @@ var (
 				if filepath.Ext(filename) != ".go" || strings.HasSuffix(filename, ".gen.go") {
 					continue
 				}
-				if command == "check" {
+				// 解析文件
+				if command == "swag" {
+					parseSwagger(filename, pkgPath)
+					continue
+				} else if command == "check" || command == "dto" {
 					if filename == dentityDTO {
 						continue
 					}

@@ -2,9 +2,7 @@ module reader
 
 go 1.23.2
 
-require github.com/linbaozhong/gentity v0.0.0
-
-replace github.com/linbaozhong/gentity v0.0.0 => ../../
+require github.com/linbaozhong/gentity v0.7.8
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
