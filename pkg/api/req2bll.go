@@ -54,7 +54,7 @@ func Post[A, B any](
 		}
 	)
 
-	response(ctx, &req, &resp, read, fn)
+	logicProcessing(ctx, &req, &resp, read, fn)
 }
 func PostX[A, B any](
 	ctx Context,
@@ -81,10 +81,11 @@ func PostX[A, B any](
 		}
 	)
 
-	responseX(ctx, &req, &resp, read, fn)
+	loginProcessingX(ctx, &req, &resp, read, fn)
 }
 
-func response[A, B any](ctx Context, req *A, resp *B,
+// logicProcessing 逻辑处理
+func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
 	write func(ctx context.Context, req *A, resp *B) error) {
 
@@ -107,7 +108,8 @@ func response[A, B any](ctx Context, req *A, resp *B,
 	Ok(ctx, resp)
 }
 
-func responseX[A, B any](ctx Context, req *A, resp *B,
+// loginProcessing 逻辑处理
+func loginProcessingX[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
 	write func(ctx Context, req *A, resp *B) error) {
 
@@ -150,7 +152,7 @@ func Get[A, B any](
 		}
 	)
 
-	response(ctx, &req, &resp, read, fn)
+	logicProcessing(ctx, &req, &resp, read, fn)
 }
 
 func GetX[A, B any](
@@ -171,5 +173,5 @@ func GetX[A, B any](
 		}
 	)
 
-	responseX(ctx, &req, &resp, read, fn)
+	loginProcessingX(ctx, &req, &resp, read, fn)
 }

@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sync
+package mmap
 
 import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"strings"
 	"sync"
 	"time"
@@ -34,7 +35,7 @@ type (
 	syncMap struct {
 		mu sync.Mutex
 
-		storage *sync.Map
+		storage cmap.ConcurrentMap[string, any]
 		prefix  string // key前缀
 	}
 )
@@ -48,7 +49,7 @@ func WithPrefix(prefix string) option {
 
 // New creates an instance of SyncMap cache driver
 func New(opts ...option) cachego.Cache {
-	obj := &syncMap{storage: &sync.Map{}}
+	obj := &syncMap{storage: cmap.New[any]()}
 	for _, opt := range opts {
 		opt(obj)
 	}
@@ -56,7 +57,7 @@ func New(opts ...option) cachego.Cache {
 }
 
 func (sm *syncMap) read(ctx context.Context, key string) (*syncMapItem, error) {
-	v, ok := sm.storage.Load(key)
+	v, ok := sm.storage.Get(key)
 	if !ok {
 		return nil, cachego.ErrCacheMiss
 	}
@@ -77,8 +78,7 @@ func (sm *syncMap) read(ctx context.Context, key string) (*syncMapItem, error) {
 
 // Contains checks if cached key exists in SyncMap storage
 func (sm *syncMap) Contains(ctx context.Context, key string) bool {
-	_, ok := sm.storage.Load(sm.getKey(key))
-	return ok
+	return sm.storage.Has(key)
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
@@ -94,18 +94,17 @@ func (sm *syncMap) ExistsOrSave(ctx context.Context, key string, value any, life
 
 // Delete the cached key from SyncMap storage
 func (sm *syncMap) Delete(ctx context.Context, key string) error {
-	sm.storage.Delete(sm.getKey(key))
+	sm.storage.Remove(sm.getKey(key))
 	return nil
 }
 
 // PrefixDelete 按前缀删除
 func (sm *syncMap) PrefixDelete(ctx context.Context, prefix string) error {
 	k := sm.getKey(prefix)
-	sm.storage.Range(func(key, value any) bool {
-		if strings.HasPrefix(key.(string), k) {
-			sm.storage.Delete(key)
+	sm.storage.IterCb(func(key string, value any) {
+		if strings.HasPrefix(key, k) {
+			sm.storage.Remove(key)
 		}
-		return true
 	})
 	return nil
 }
@@ -136,7 +135,7 @@ func (sm *syncMap) FetchMulti(ctx context.Context, keys ...string) ([][]byte, er
 
 // Flush removes all cached keys of the SyncMap storage
 func (sm *syncMap) Flush(ctx context.Context) error {
-	sm.storage = &sync.Map{}
+	sm.storage.Clear()
 	return nil
 }
 
@@ -151,7 +150,7 @@ func (sm *syncMap) Save(ctx context.Context, key string, value any, lifeTime tim
 	if err != nil {
 		return err
 	}
-	sm.storage.Store(sm.getKey(key), &syncMapItem{b, duration})
+	sm.storage.Set(sm.getKey(key), &syncMapItem{b, duration})
 	return nil
 }
 

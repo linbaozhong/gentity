@@ -12,6 +12,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/mattn/go-sqlite3 v1.14.22
+	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/spf13/cobra v1.8.1
 	github.com/tidwall/match v1.1.1

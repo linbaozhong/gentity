@@ -37,3 +37,17 @@ func MemHash(b []byte) uint64 {
 	s := *(*stringStruct)(unsafe.Pointer(&b))
 	return uint64(memhash(s.str, 0, uintptr(s.len)))
 }
+
+// Hashfnv32 实现 FNV-1a 32 位哈希函数
+func Hashfnv32(key string) uint32 {
+	const (
+		offset32 = 2166136261
+		prime32  = 16777619
+	)
+	hash := uint32(offset32)
+	for i := 0; i < len(key); i++ {
+		hash ^= uint32(key[i])
+		hash *= prime32
+	}
+	return hash
+}

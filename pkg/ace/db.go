@@ -8,8 +8,8 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/cachego/memcached"
+	"github.com/linbaozhong/gentity/pkg/cachego/mmap"
 	"github.com/linbaozhong/gentity/pkg/cachego/redis"
-	syc "github.com/linbaozhong/gentity/pkg/cachego/sync"
 	"golang.org/x/sync/singleflight"
 	"sync"
 
@@ -160,10 +160,10 @@ func (s *DB) Cache(name string) cachego.Cache {
 				v = redis.New(rd.NewClient(opts), redis.WithPrefix(name))
 			}
 		default: // CacheTypeSyncMap
-			v = syc.New() // sync.Map 不需要前缀
+			v = mmap.New() // sync.Map 不需要前缀
 		}
 		if v == nil {
-			v = syc.New() // sync.Map 不需要前缀
+			v = mmap.New() // sync.Map 不需要前缀
 		}
 		s.cacheMap.Store(name, v)
 		return v, nil
