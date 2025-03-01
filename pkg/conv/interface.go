@@ -520,22 +520,3 @@ func Any2Bool(s any, def ...bool) bool {
 		return false
 	}
 }
-
-// Any2Bytes
-func Any2Bytes(s any) ([]byte, error) {
-	switch v := s.(type) {
-	case []byte:
-		return v, nil
-	case string:
-		return String2Bytes(v), nil
-	case uint64, uint32, uint16, uint8, int64, int32, int16, int8, float32, float64, bool, int, uint:
-		return String2Bytes(Any2String(v)), nil
-	case time.Time:
-		if s.(time.Time).IsZero() {
-			return []byte{}, nil
-		}
-		return String2Bytes(Any2Time(s).Format(time.DateTime)), nil
-	default:
-		return json.Marshal(v)
-	}
-}

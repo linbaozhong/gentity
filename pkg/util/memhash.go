@@ -38,6 +38,16 @@ func MemHash(b []byte) uint64 {
 	return uint64(memhash(s.str, 0, uintptr(s.len)))
 }
 
+// MemHash
+func MemHash32(b []byte) uint32 {
+	s := *(*stringStruct)(unsafe.Pointer(&b))
+	return uint32(memhash(s.str, 0, uintptr(s.len)))
+}
+
+func MemHashString32(s string) uint32 {
+	return MemHash32(conv.String2Bytes(s))
+}
+
 // Hashfnv32 实现 FNV-1a 32 位哈希函数
 func Hashfnv32(key string) uint32 {
 	const (
