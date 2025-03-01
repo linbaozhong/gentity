@@ -35,7 +35,7 @@ func New(ctx context.Context, fn func() any, opts ...opt) *objPool {
 		// ctx:      ctx,
 		pool: &sync.Pool{New: fn},
 		keys: cmap.NewWithCustomShardingFunction[uint64, time.Time](func(key uint64) uint32 {
-			return util.Hashfnv32(strconv.FormatUint(key, 10))
+			return uint32(util.MemHashString(strconv.FormatUint(key, 10)))
 		}), //&sync.Map{},
 		expire:   2 * time.Minute, // 默认对象过期时间为2分钟。
 		interval: time.Minute,     // 默认清理间隔为1分钟。

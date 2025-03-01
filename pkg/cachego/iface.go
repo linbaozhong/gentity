@@ -41,7 +41,7 @@ type Cache interface {
 
 // Hash 使用MemHash算法
 func Hash(key any) string {
-	return strconv.FormatUint(util.MemHashString(conv.Any2String(key)), 10)
+	return strconv.FormatUint(uint64(util.MemHashString(conv.Any2String(key))), 10)
 }
 
 // GetHashKey 使用MemHash算法生成key

@@ -28,24 +28,14 @@ type stringStruct struct {
 	len int
 }
 
-func MemHashString(s string) uint64 {
+func MemHashString(s string) uintptr {
 	return MemHash(conv.String2Bytes(s))
 }
 
 // MemHash
-func MemHash(b []byte) uint64 {
+func MemHash(b []byte) uintptr {
 	s := *(*stringStruct)(unsafe.Pointer(&b))
-	return uint64(memhash(s.str, 0, uintptr(s.len)))
-}
-
-// MemHash
-func MemHash32(b []byte) uint32 {
-	s := *(*stringStruct)(unsafe.Pointer(&b))
-	return uint32(memhash(s.str, 0, uintptr(s.len)))
-}
-
-func MemHashString32(s string) uint32 {
-	return MemHash32(conv.String2Bytes(s))
+	return memhash(s.str, 0, uintptr(s.len))
 }
 
 // Hashfnv32 实现 FNV-1a 32 位哈希函数
