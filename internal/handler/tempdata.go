@@ -168,7 +168,7 @@ func getUnmarshalJSON(t Field) string {
 func getTypeValue(t Field) any {
 	v := t.Type
 	switch v {
-	case "string", "types.String":
+	case "string", "types.String", "types.Json":
 		return `""`
 	case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
 		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
@@ -210,7 +210,7 @@ func getZeroValue(t Field) any {
 func getNotZeroValue(t Field) any {
 	v := t.Type
 	switch v {
-	case "string", "types.String":
+	case "string", "types.String", "types.Json":
 		return `p.` + t.Name + ` != ""`
 	case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64",
 		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
