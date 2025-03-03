@@ -8,6 +8,7 @@
 package gjson
 
 import (
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"strconv"
 	"strings"
 	"time"
@@ -189,19 +190,7 @@ func (t Result) Float() float64 {
 
 // Time returns a time.Time representation.
 func (t Result) Time() time.Time {
-	s := t.String()
-	res, e := time.Parse(time.DateTime, t.String())
-	if e != nil {
-		if _e, ok := e.(*time.ParseError); ok {
-			switch _e.LayoutElem {
-			case "15", ":", "04", "05":
-				res, e = time.Parse(time.DateOnly, s)
-			case "2006", "-", "01", "02":
-				res, e = time.Parse(time.TimeOnly, s)
-			}
-		}
-	}
-	return res
+	return conv.String2Time(t.String())
 }
 
 // Array returns back an array of values.

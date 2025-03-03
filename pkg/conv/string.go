@@ -177,8 +177,27 @@ func String2Float64(s string, def ...float64) float64 {
 
 // String2Time 如果转换失败,返回 def时间(如果存在)
 func String2Time(s string, def ...time.Time) time.Time {
-	if b, e := time.ParseInLocation("2006-01-02 15:04:05", s, time.Local); e == nil {
+	l := len(time.DateTime)
+	if len(s) > l {
+		s = s[:l]
+	}
+	if pos := strings.Index(s, "T"); pos > 0 {
+		s = strings.Replace(s, "T", " ", 1)
+	}
+	if b, e := time.ParseInLocation(time.DateTime, s, time.Local); e == nil {
 		return b
+	} else {
+		if _e, ok := e.(*time.ParseError); ok {
+			switch _e.LayoutElem {
+			case "15", ":", "04", "05":
+				b, e = time.Parse(time.DateOnly, s)
+			case "2006", "-", "01", "02":
+				b, e = time.Parse(time.TimeOnly, s)
+			}
+			if e == nil {
+				return b
+			}
+		}
 	}
 	if len(def) > 0 {
 		return def[0]

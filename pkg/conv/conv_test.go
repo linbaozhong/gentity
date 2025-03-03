@@ -43,3 +43,8 @@ func Uint64ToBytes(num uint64) []byte {
 	binary.BigEndian.PutUint64(buf, num)
 	return buf
 }
+
+func TestTime(t *testing.T) {
+	a := "2025-01-01T00:00:00Z"
+	t.Log(String2Time(a))
+}
