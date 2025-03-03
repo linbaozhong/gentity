@@ -27,7 +27,7 @@ type App struct {
 	Id      BigInt  `json:"id,omitempty" db:"'id' pk auto"`   //
 	Arch    float64 `json:"arch,omitempty" db:"'arch'"`       // 操作系统架构
 	Version Bool    `json:"version,omitempty" db:"'version'"` // 版本号
-	Url     Json    `json:"url,omitempty" db:"'url'"`         // 应用下载地址
+	Url     String  `json:"url,omitempty" db:"'url'"`         // 应用下载地址
 	State   Int     `json:"state,omitempty" db:"'state'"`     //
 	Force   Money   `json:"force,omitempty" db:"'force'"`     //
 	Ctime   Time    `json:"ctime,omitempty" db:"'ctime'"`     //
@@ -39,7 +39,7 @@ func TestBase(t *testing.T) {
 	a.Id = 1234567
 	a.Arch = 3.14159265358979323846
 	a.Version = Bool(-1)
-	a.Url = "{\"name\":\"linbaozhong\"}"
+	a.Url = `{"name":"linbaozhong"}`
 	a.State = 1
 	a.Force = 11256
 	a.Ctime = Now()

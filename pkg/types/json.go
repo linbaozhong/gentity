@@ -20,6 +20,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -55,15 +56,14 @@ func Unmarshal(r gjson.Result, ptr any, args ...any) error {
 func Marshal(s any) string {
 	switch v := s.(type) {
 	case string:
-		return `"` + v + `"`
+		return strconv.Quote(v)
 	case []byte:
-		fmt.Println(2)
-		return `"` + conv.Bytes2String(v) + `"`
+		return strconv.Quote(conv.Bytes2String(v))
 	case time.Time:
 		if v.IsZero() {
 			return ""
 		}
-		return `"` + v.Format(time.DateTime) + `"`
+		return strconv.Quote(v.Format(time.DateTime))
 	default:
 		if s == nil {
 			return "null"

@@ -10,7 +10,7 @@ import (
 type BigInt uint64
 
 func (i BigInt) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(`"` + i.String() + `"`), nil
+	return conv.String2Bytes(strconv.Quote(i.String())), nil
 }
 
 func (i *BigInt) UnmarshalJSON(b []byte) error {

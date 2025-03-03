@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"strconv"
 	"time"
 )
 
@@ -18,7 +19,7 @@ func (p Smap) MarshalJSON() ([]byte, error) {
 	var _buf bytes.Buffer
 	_buf.WriteString("{")
 	for k, v := range p {
-		_buf.WriteString(`"` + k + `":` + Marshal(v) + `,`)
+		_buf.WriteString(strconv.Quote(k) + `:` + Marshal(v) + `,`)
 	}
 	if _buf.Len() > 1 {
 		_buf.Truncate(_buf.Len() - 1)
