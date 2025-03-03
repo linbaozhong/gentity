@@ -6,6 +6,7 @@ import (
 	"math"
 	"runtime"
 	"time"
+	"unsafe"
 )
 
 var ErrTooShort = errors.New("bytes.Buffer: too short")
@@ -195,17 +196,17 @@ func Any2Bytes[T a2b](s T) ([]byte, error) {
 
 // Bytes2String converts byte slice to string.
 func Bytes2String(b []byte) string {
-	// return *(*string)(unsafe.Pointer(&b))
-	return string(b)
+	return *(*string)(unsafe.Pointer(&b))
+	//return string(b)
 }
 
 // String2Bytes converts string to byte slice.
 func String2Bytes(s string) []byte {
-	// return *(*[]byte)(unsafe.Pointer(
-	// 	&struct {
-	// 		string
-	// 		Cap int
-	// 	}{s, len(s)},
-	// ))
-	return []byte(s)
+	return *(*[]byte)(unsafe.Pointer(
+		&struct {
+			string
+			Cap int
+		}{s, len(s)},
+	))
+	//return []byte(s)
 }
