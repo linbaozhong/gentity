@@ -2,7 +2,6 @@ package types
 
 import (
 	"bytes"
-	"fmt"
 	"time"
 )
 
@@ -16,7 +15,6 @@ func NewSmap(size ...int) Smap {
 }
 
 func (p Smap) MarshalJSON() ([]byte, error) {
-	fmt.Println("smap marshal json")
 	var _buf bytes.Buffer
 	_buf.WriteString("{")
 	for k, v := range p {
