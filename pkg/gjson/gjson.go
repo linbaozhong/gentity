@@ -189,7 +189,18 @@ func (t Result) Float() float64 {
 
 // Time returns a time.Time representation.
 func (t Result) Time() time.Time {
-	res, _ := time.Parse(time.RFC3339, t.String())
+	s := t.String()
+	res, e := time.Parse(time.DateTime, t.String())
+	if e != nil {
+		if _e, ok := e.(*time.ParseError); ok {
+			switch _e.LayoutElem {
+			case "15", ":", "04", "05":
+				res, e = time.Parse(time.DateOnly, s)
+			case "2006", "-", "01", "02":
+				res, e = time.Parse(time.TimeOnly, s)
+			}
+		}
+	}
 	return res
 }
 
