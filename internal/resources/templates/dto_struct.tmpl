@@ -82,7 +82,7 @@ func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 		{{- range $key, $value := .Columns}}
 			{{- if ne $value.Json.Name ""}}
 			case "{{ $value.Json.Name }}":
-				{{getUnmarshalValue $value}}
+				{{getUnmarshalJSON $value}}
 			{{- end}}
 		{{- end}}
 		}
@@ -108,12 +108,12 @@ func (p *{{.StructName}}) UnmarshalValues(m map[string][]string) error {
 
 	var e error
 	for k, v := range m {
-		value := gjson.Result{Raw: v[0],Str: v[0]}
+		value := gjson.Result{Type:gjson.String,Raw: v[0],Str: v[0]}
 		switch k {
 		{{- range $key, $value := .Columns}}
 			{{- if ne $value.Json.Name ""}}
 			case "{{ $value.Json.Name }}":
-				{{getUnmarshalValue $value}}
+				{{getUnmarshalJSON $value}}
 			{{- end}}
 		{{- end}}
 		}

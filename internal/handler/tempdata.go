@@ -121,7 +121,8 @@ func getType(t Field) string {
 		return "any"
 	}
 }
-func getUnmarshalValue(t Field) string {
+
+func getUnmarshalJSON(t Field) string {
 	prefix := "p." + t.Name + " = "
 	switch t.Type {
 	case "string":
@@ -265,13 +266,13 @@ func (d *TempData) writeToModel(fileName string) error {
 		"sub": func(a, b int) int {
 			return a - b
 		},
-		"getType":           getType,
-		"getTypeValue":      getTypeValue,
-		"getZeroValue":      getZeroValue,
-		"getNotZeroValue":   getNotZeroValue,
-		"getSqlValue":       getSqlValue,
-		"getSqlType":        getSqlType,
-		"getUnmarshalValue": getUnmarshalValue,
+		"getType":          getType,
+		"getTypeValue":     getTypeValue,
+		"getZeroValue":     getZeroValue,
+		"getNotZeroValue":  getNotZeroValue,
+		"getSqlValue":      getSqlValue,
+		"getSqlType":       getSqlType,
+		"getUnmarshalJSON": getUnmarshalJSON,
 	}
 
 	fileName = filepath.Join(fullpath, getBaseFilename(fileName)+"_do_"+d.StructName+".gen.go")

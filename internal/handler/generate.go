@@ -115,7 +115,7 @@ func writeToDTO(d TempData) error {
 		"getNotZeroValue":   getNotZeroValue,
 		"getSqlValue":       getSqlValue,
 		"getSqlType":        getSqlType,
-		"getUnmarshalValue": getUnmarshalValue,
+		"getUnmarshalJSON":  getUnmarshalJSON,
 		"getTypeNil":        getTypeNil,
 		"getValidFunc":      getValidFunc,
 		"getValidParamFunc": getValidParamFunc,
