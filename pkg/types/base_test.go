@@ -27,7 +27,7 @@ type App struct {
 	Id      BigInt  `json:"id,omitempty" db:"'id' pk auto"`   //
 	Arch    float64 `json:"arch,omitempty" db:"'arch'"`       // 操作系统架构
 	Version Bool    `json:"version,omitempty" db:"'version'"` // 版本号
-	Url     String  `json:"url,omitempty" db:"'url'"`         // 应用下载地址
+	Url     Json    `json:"url,omitempty" db:"'url'"`         // 应用下载地址
 	State   Int     `json:"state,omitempty" db:"'state'"`     //
 	Force   Money   `json:"force,omitempty" db:"'force'"`     //
 	Ctime   Time    `json:"ctime,omitempty" db:"'ctime'"`     //
@@ -35,14 +35,15 @@ type App struct {
 }
 
 func TestBase(t *testing.T) {
-	// a := new(App)
-	// a.Id = 1234567
-	// a.Arch = 3.14159265358979323846
-	// a.Version = Bool(-1)
-	// a.Url = "https://www.baidu.com"
-	// a.State = 1
-	// a.Force = 11256
-	// a.Ctime = Now()
+	a := new(App)
+	a.Id = 1234567
+	a.Arch = 3.14159265358979323846
+	a.Version = Bool(-1)
+	a.Url = "{\"name\":\"linbaozhong\"}"
+	a.State = 1
+	a.Force = 11256
+	a.Ctime = Now()
+
 	//
 	// b, e := json.Marshal(a)
 	// if e != nil {
@@ -51,16 +52,23 @@ func TestBase(t *testing.T) {
 	// s := string(b)
 	// t.Log(s)
 	//
-	// n := NewSmap(3).
-	// 	Set("id", a.Id).
-	// 	Set("arch", a.Arch).
-	// 	Set("version", a.Version).
-	// 	Set("force", a.Force).
-	// 	Set("url", a.Url).
-	// 	Set("ctime", a.Ctime)
+	n := Smap{
+		"id":      a.Id,
+		"arch":    a.Arch,
+		"version": a.Version,
+		"force":   a.Force,
+		"url":     a.Url,
+		"ctime":   a.Ctime,
+	}
+	// m := make([]Smap, 0)
+	// m = append(m, n)
+
+	buf, e := json.Marshal(&n)
+	t.Log(string(buf), e)
+	return
 	// m := NewSmap(3).
 	// 	Set("data", []Smap{n, n})
-	//
+
 	// r := NewResult()
 	// r.Data = m
 	// b, e = json.Marshal(r)
@@ -72,7 +80,7 @@ func TestBase(t *testing.T) {
 	//
 	var a2 App
 	a2.Id = math.MaxUint64
-	e := json.Unmarshal([]byte(`{"id":"undefined",  "arch":3.14159265358979323846,"version":"true","url":"undefined","state":"undefined","force":112.56,"ctime":"12:03:35"}`), &a2)
+	e = json.Unmarshal([]byte(`{"id":"undefined",  "arch":3.14159265358979323846,"version":"true","url":"undefined","state":"undefined","force":112.56,"ctime":"12:03:35"}`), &a2)
 	if e != nil {
 		t.Error(e)
 	}

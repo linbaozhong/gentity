@@ -24,6 +24,7 @@ import (
 )
 
 type (
+	Json    string
 	String  string
 	Uint64  uint64
 	Uint32  uint32
@@ -93,6 +94,36 @@ func (s String) MarshalJSON() ([]byte, error) {
 func (s *String) UnmarshalJSON(b []byte) error {
 	c := bytes2String(b)
 	*s = String(c)
+	return nil
+}
+
+// ////////////////////////////
+// Json
+func (s *Json) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*s = ""
+	case []byte:
+		*s = Json(conv.Bytes2String(v))
+	case string:
+		*s = Json(v)
+	default:
+		return fmt.Errorf("unsupported scan type for String: %T", src)
+	}
+	return nil
+}
+
+func (s Json) String() string {
+	return string(s)
+}
+
+func (s Json) MarshalJSON() ([]byte, error) {
+	return conv.String2Bytes(string(s)), nil
+}
+
+func (s *Json) UnmarshalJSON(b []byte) error {
+	c := bytes2String(b)
+	*s = Json(c)
 	return nil
 }
 

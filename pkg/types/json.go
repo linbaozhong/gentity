@@ -57,6 +57,7 @@ func Marshal(s any) string {
 	case string:
 		return `"` + v + `"`
 	case []byte:
+		fmt.Println(2)
 		return `"` + conv.Bytes2String(v) + `"`
 	case time.Time:
 		if v.IsZero() {
