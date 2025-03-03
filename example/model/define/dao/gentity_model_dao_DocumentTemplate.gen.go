@@ -224,10 +224,10 @@ func (p *daoDocumentTemplate) SelectAll(ctx context.Context, s *ace.Selector) ([
 		return _objs, true, nil
 	}
 	if e == nil || e == sql.ErrNoRows {
-		return nil, false, nil
+		return _objs, false, nil
 	}
 	log.Error(e)
-	return nil, false, e
+	return _objs, false, e
 }
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -252,12 +252,12 @@ func (p *daoDocumentTemplate) Get4Cols(ctx context.Context, cols []dialect.Field
 	e = _row.Scan(_obj.AssignPtr(cols...)...)
 	switch e {
 	case sql.ErrNoRows:
-		return nil, false, nil
+		return _obj, false, nil
 	case nil:
 		return _obj, true, nil
 	default:
 		log.Error(e)
-		return nil, false, e
+		return _obj, false, e
 	}
 }
 
@@ -287,10 +287,10 @@ func (p *daoDocumentTemplate) Find4Cols(ctx context.Context, pageIndex, pageSize
 		return _objs, true, nil
 	}
 	if e == nil || e == sql.ErrNoRows {
-		return nil, false, nil
+		return _objs, false, nil
 	}
 	log.Error(e)
-	return nil, false, e
+	return _objs, false, e
 }
 
 // GetByID 按主键读取一个document_template对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -318,12 +318,12 @@ func (p *daoDocumentTemplate) GetFirstCell(ctx context.Context, col dialect.Fiel
 	e = _row.Scan(&_v)
 	switch e {
 	case sql.ErrNoRows:
-		return nil, false, nil
+		return _v, false, nil
 	case nil:
 		return _v, true, nil
 	default:
 		log.Error(e)
-		return nil, false, e
+		return _v, false, e
 	}
 }
 

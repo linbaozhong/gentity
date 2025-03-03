@@ -259,10 +259,10 @@ func (p *dao{{$structName}}) SelectAll(ctx context.Context, s *ace.Selector) ([]
 		return _objs, true, nil
 	}
 	if e == nil || e == sql.ErrNoRows {
-		return nil, false, nil
+		return _objs, false, nil
 	}
 	log.Error(e)
-	return nil, false, e
+	return _objs, false, e
 }
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -287,12 +287,12 @@ func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field,
 	e = _row.Scan(_obj.AssignPtr(cols...)...)
 	switch e {
 	case sql.ErrNoRows:
-		return nil,false, nil
+		return _obj,false, nil
 	case nil:
 		return _obj,true, nil
 	default:
 		log.Error(e)
-		return nil,false, e
+		return _obj,false, e
 	}
 }
 
@@ -322,10 +322,10 @@ func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize 
 		return _objs, true, nil
 	}
 	if e == nil || e == sql.ErrNoRows {
-		return nil, false, nil
+		return _objs, false, nil
 	}
 	log.Error(e)
-	return nil, false, e
+	return _objs, false, e
 }
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -373,12 +373,12 @@ func (p *dao{{$structName}}) GetFirstCell(ctx context.Context,col dialect.Field,
 	e = _row.Scan(&_v)
 	switch e {
     case sql.ErrNoRows:
-        return nil,false,nil
+        return _v,false,nil
     case nil:
         return _v,true,nil
     default:
 		log.Error(e)
-        return nil,false,e
+        return _v,false,e
     }
 }
 
@@ -538,28 +538,28 @@ func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field
 		return nil, false, e
 	}
 
-	obj := {{$package}}.New{{$structName}}()
+	_obj := {{$package}}.New{{$structName}}()
 
-	e = _row.Scan(obj.AssignPtr(cols...)...)
+	e = _row.Scan(_obj.AssignPtr(cols...)...)
 	switch e {
 	case sql.ErrNoRows:
-		return nil, false, nil
+		return _obj, false, nil
 	case nil:
-		rs := p.edges(ctx,[]any{obj.{{.RelationX.Field}}})
+		rs := p.edges(ctx,[]any{_obj.{{.RelationX.Field}}})
 		if len(rs) > 0{
 {{- if eq .RelationX.Kind "slice"}}
-			obj.{{.RelationX.Name}} = rs[obj.{{.RelationX.Field}}]
+			_obj.{{.RelationX.Name}} = rs[_obj.{{.RelationX.Field}}]
 {{- else if eq .RelationX.Kind "ptr"}}
-			tmp := rs[obj.{{.RelationX.Field}}][0]
-			obj.{{.RelationX.Name}} = &tmp
+			tmp := rs[_obj.{{.RelationX.Field}}][0]
+			_obj.{{.RelationX.Name}} = &tmp
 {{- else}}
-			obj.{{.RelationX.Name}} = rs[obj.{{.RelationX.Field}}][0]
+			_obj.{{.RelationX.Name}} = rs[_obj.{{.RelationX.Field}}][0]
 {{- end}}
 		}
-		return obj, true, nil
+		return _obj, true, nil
 	default:
 		log.Error(e)
-		return nil, false, e
+		return _obj, false, e
 	}
 }
 
@@ -628,10 +628,10 @@ func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize
 		return _objs, true, nil
 	}
 	if e == nil || e == sql.ErrNoRows {
-		return nil, false, nil
+		return _objs, false, nil
 	}
 	log.Error(e)
-	return nil, false, e
+	return _objs, false, e
 }
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
