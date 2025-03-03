@@ -643,7 +643,7 @@ func (t *Time) Scan(src any) error {
 	}
 }
 func (t Time) Value() (driver.Value, error) {
-	return t, nil
+	return t.Time, nil
 }
 
 func (t Time) Now() Time {
