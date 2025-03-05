@@ -384,6 +384,7 @@ func (s *Selector) Having(fns ...dialect.Condition) *Selector {
 // start 开始位置
 func (s *Selector) Limit(size uint, start ...uint) *Selector {
 	if size == 0 {
+		s.limit = ""
 		return s
 	}
 	if len(start) > 0 {
@@ -399,14 +400,11 @@ func (s *Selector) Limit(size uint, start ...uint) *Selector {
 // pageIndex 页码
 // pageSize 页大小
 func (s *Selector) Page(pageIndex, pageSize uint) *Selector {
-	if pageIndex < 1 {
-		if pageSize < 1 {
-			return s.Limit(dialect.MaxLimit)
-		}
-		pageIndex = 1
+	if pageSize == 0 {
+		return s.Limit(0)
 	}
-	if pageSize < 1 {
-		pageSize = dialect.PageSize
+	if pageIndex < 1 {
+		pageIndex = 1
 	}
 	return s.Limit(pageSize, (pageIndex-1)*pageSize)
 }
@@ -435,34 +433,8 @@ func (s *Selector) parse() []dialect.Field {
 		}
 		s.command.WriteString(strings.Join(s.funcs, ","))
 	}
-	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
-	for _, j := range s.join {
-		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	}
 
-	// WHERE
-	if s.where.Len() > 0 {
-		s.command.WriteString(" WHERE " + s.where.String())
-	}
-	// GROUP BY
-	if s.groupBy.Len() > 0 {
-		s.command.WriteString(" GROUP BY " + s.groupBy.String())
-		// HAVING
-		if s.having.Len() > 0 {
-			s.command.WriteString(" HAVING " + s.having.String())
-			s.whereParams = append(s.whereParams, s.havingParams...)
-		}
-	}
-	// ORDER BY
-	if s.orderBy.Len() > 0 {
-		s.command.WriteString(" ORDER BY " + s.orderBy.String())
-	}
-
-	// LIMIT
-	if s.limit != "" {
-		s.command.WriteString(s.limit)
-	}
+	s.parseSelector()
 
 	return cols
 }
@@ -657,12 +629,8 @@ func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64,
 
 	s.Where(cond...)
 	s.command.WriteString("SELECT COUNT(*)")
-	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
-	// WHERE
-	if s.where.Len() > 0 {
-		s.command.WriteString(" WHERE " + s.where.String())
-	}
+
+	s.parseSelector()
 
 	stmt, err := s.db.PrepareContext(ctx, s.command.String())
 	if err != nil {
@@ -694,12 +662,8 @@ func (s *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialec
 	s.Where(cond...)
 	s.command.WriteString("SELECT ")
 	s.command.WriteString(strings.Join(s.funcs, ","))
-	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
-	// WHERE
-	if s.where.Len() > 0 {
-		s.command.WriteString(" WHERE " + s.where.String())
-	}
+
+	s.parseSelector()
 
 	stmt, err := s.db.PrepareContext(ctx, s.command.String())
 	if err != nil {
@@ -721,6 +685,37 @@ func (s *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialec
 		sums[cols[i].Name] = sum[i]
 	}
 	return sums, nil
+}
+
+func (s *Selector) parseSelector() {
+	// FROM TABLE
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	for _, j := range s.join {
+		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	}
+
+	// WHERE
+	if s.where.Len() > 0 {
+		s.command.WriteString(" WHERE " + s.where.String())
+	}
+	// GROUP BY
+	if s.groupBy.Len() > 0 {
+		s.command.WriteString(" GROUP BY " + s.groupBy.String())
+		// HAVING
+		if s.having.Len() > 0 {
+			s.command.WriteString(" HAVING " + s.having.String())
+			s.whereParams = append(s.whereParams, s.havingParams...)
+		}
+	}
+	// ORDER BY
+	if s.orderBy.Len() > 0 {
+		s.command.WriteString(" ORDER BY " + s.orderBy.String())
+	}
+
+	// LIMIT
+	if s.limit != "" {
+		s.command.WriteString(s.limit)
+	}
 }
 
 // 合并参数

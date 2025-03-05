@@ -246,7 +246,13 @@ func (p *dao{{$structName}}) SelectAll(ctx context.Context, s *ace.Selector) ([]
 	}
 
 	_cols := s.GetCols()
-	_rows, e := s.Query(ctx)
+	if len(_cols) == 0 {
+		_cols = tbl{{$structNameLower}}.ReadableFields
+		s.Cols(_cols...)
+	}
+
+	_c := *s
+	_rows, e := _c.Query(ctx)
 	if e != nil {
 		log.Error(e)
 		return nil, false, e
