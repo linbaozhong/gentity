@@ -16,7 +16,6 @@ package sqlite
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/conv"
 	"testing"
 	"time"
 )
@@ -38,5 +37,5 @@ func TestCache(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	t.Log(conv.Bytes2String(v))
+	t.Log(string(v))
 }

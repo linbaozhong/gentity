@@ -18,13 +18,12 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"github.com/dchest/siphash"
-	"github.com/linbaozhong/gentity/pkg/conv"
 	"testing"
 )
 
 func TestConvert(t *testing.T) {
 	key := "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
-	hash := siphash.New(conv.String2Bytes(key)).Sum64()
+	hash := siphash.New([]byte(key)).Sum64()
 	// 将哈希值转换为字节切片
 	hashBytes := make([]byte, 8)
 	binary.LittleEndian.PutUint64(hashBytes, hash)

@@ -25,7 +25,7 @@ import (
 )
 
 func Unmarshal(r gjson.Result, ptr any, args ...any) error {
-	b := conv.String2Bytes(r.Raw)
+	b := []byte(r.Raw)
 	if j, ok := ptr.(json.Unmarshaler); ok {
 		return j.UnmarshalJSON(b)
 	}
@@ -58,7 +58,7 @@ func Marshal(s any) string {
 	case string:
 		return strconv.Quote(v)
 	case []byte:
-		return strconv.Quote(conv.Bytes2String(v))
+		return strconv.Quote(string(v))
 	case time.Time:
 		if v.IsZero() {
 			return ""
@@ -73,7 +73,7 @@ func Marshal(s any) string {
 			if e != nil {
 				return ""
 			}
-			return conv.Bytes2String(b)
+			return string(b)
 		}
 		switch reflect.Indirect(reflect.ValueOf(s)).Kind() {
 		case reflect.Struct, reflect.Slice, reflect.Map:
@@ -82,7 +82,7 @@ func Marshal(s any) string {
 				return fmt.Sprintf("%+v", s)
 			}
 
-			return conv.Bytes2String(b)
+			return string(b)
 		}
 	}
 	return conv.Any2String(s)

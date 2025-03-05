@@ -464,7 +464,7 @@ func Any2String(s any) string {
 	case string:
 		return v
 	case []byte:
-		return Bytes2String(v)
+		return string(v)
 	case uint64:
 		return strconv.FormatUint(v, 10)
 	case uint32:
@@ -501,7 +501,7 @@ func Any2String(s any) string {
 		if e != nil {
 			return fmt.Sprintf("%+v", v)
 		}
-		return Bytes2String(b)
+		return string(b)
 	}
 }
 

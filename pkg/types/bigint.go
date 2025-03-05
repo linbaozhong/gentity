@@ -3,14 +3,13 @@ package types
 import (
 	"database/sql/driver"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/conv"
 	"strconv"
 )
 
 type BigInt uint64
 
 func (i BigInt) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.Quote(i.String())), nil
+	return []byte(strconv.Quote(i.String())), nil
 }
 
 func (i *BigInt) UnmarshalJSON(b []byte) error {

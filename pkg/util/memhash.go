@@ -15,7 +15,6 @@
 package util
 
 import (
-	"github.com/linbaozhong/gentity/pkg/conv"
 	"unsafe"
 )
 
@@ -29,7 +28,7 @@ type stringStruct struct {
 }
 
 func MemHashString(s string) uintptr {
-	return MemHash(conv.String2Bytes(s))
+	return MemHash([]byte(s))
 }
 
 // MemHash

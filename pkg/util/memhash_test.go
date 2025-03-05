@@ -16,7 +16,6 @@ package util
 
 import (
 	"github.com/dchest/siphash"
-	"github.com/linbaozhong/gentity/pkg/conv"
 	"testing"
 )
 
@@ -30,14 +29,14 @@ func TestHashKey(t *testing.T) {
 }
 
 func BenchmarkHash(b *testing.B) {
-	buf := conv.String2Bytes("testtesttesttesttest")
+	buf := []byte("testtesttesttesttest")
 	for i := 0; i < b.N; i++ {
 		siphash.New(buf).Sum64()
 	}
 }
 
 func BenchmarkMemHash(b *testing.B) {
-	buf := conv.String2Bytes("testtesttesttesttest")
+	buf := []byte("testtesttesttesttest")
 	for i := 0; i < b.N; i++ {
 		MemHash(buf)
 	}

@@ -6,7 +6,6 @@ import (
 	"math"
 	"runtime"
 	"time"
-	"unsafe"
 )
 
 var ErrTooShort = errors.New("bytes.Buffer: too short")
@@ -23,7 +22,7 @@ func Bytes2Any[T b2a](b []byte, r T) error {
 	case *[]byte:
 		*v = b
 	case *string:
-		*v = Bytes2String(b)
+		*v = string(b)
 	case *uint64:
 		if len(b) >= 8 {
 			*v = binary.BigEndian.Uint64(b)
@@ -108,7 +107,7 @@ func Bytes2Any[T b2a](b []byte, r T) error {
 		}
 	case *time.Time:
 		if len(b) > 0 {
-			*v, err = time.Parse(time.RFC3339Nano, Bytes2String(b))
+			*v, err = time.Parse(time.RFC3339Nano, string(b))
 			if err != nil {
 				return err
 			}
@@ -131,7 +130,7 @@ func Any2Bytes[T a2b](s T) ([]byte, error) {
 	switch v := any(s).(type) {
 	case string:
 		// 直接将字符串转换为字节切片
-		buf = String2Bytes(v)
+		buf = []byte(v)
 	case []byte:
 		// 直接返回字节切片
 		buf = v
@@ -202,11 +201,11 @@ func Bytes2String(b []byte) string {
 
 // String2Bytes converts string to byte slice.
 func String2Bytes(s string) []byte {
-	return *(*[]byte)(unsafe.Pointer(
-		&struct {
-			string
-			Cap int
-		}{s, len(s)},
-	))
-	// return []byte(s)
+	// return *(*[]byte)(unsafe.Pointer(
+	// 	&struct {
+	// 		string
+	// 		Cap int
+	// 	}{s, len(s)},
+	// ))
+	return []byte(s)
 }

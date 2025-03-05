@@ -63,7 +63,7 @@ func (b *Bytes) Scan(src any) error {
 }
 
 func (b Bytes) String() string {
-	return conv.Bytes2String(b)
+	return string(b)
 }
 
 // ////////////////////////////
@@ -73,7 +73,7 @@ func (s *String) Scan(src any) error {
 	case nil:
 		*s = ""
 	case []byte:
-		*s = String(conv.Bytes2String(v))
+		*s = String(v)
 	case string:
 		*s = String(v)
 	default:
@@ -87,7 +87,7 @@ func (s String) String() string {
 }
 
 func (s String) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.Quote(string(s))), nil
+	return []byte(strconv.Quote(string(s))), nil
 }
 
 func (s *String) UnmarshalJSON(b []byte) error {
@@ -119,7 +119,7 @@ func (i8 Int8) String() string {
 	return strconv.FormatInt(int64(i8), 10)
 }
 func (i8 Int8) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i8), 10)), nil
+	return []byte(strconv.FormatInt(int64(i8), 10)), nil
 }
 
 func (i8 *Int8) UnmarshalJSON(b []byte) error {
@@ -157,7 +157,7 @@ func (i16 Int16) String() string {
 	return strconv.FormatInt(int64(i16), 10)
 }
 func (i16 Int16) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i16), 10)), nil
+	return []byte(strconv.FormatInt(int64(i16), 10)), nil
 }
 
 func (i16 *Int16) UnmarshalJSON(b []byte) error {
@@ -195,7 +195,7 @@ func (i32 Int32) String() string {
 	return strconv.FormatInt(int64(i32), 10)
 }
 func (i32 Int32) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i32), 10)), nil
+	return []byte(strconv.FormatInt(int64(i32), 10)), nil
 }
 
 func (i32 *Int32) UnmarshalJSON(b []byte) error {
@@ -233,7 +233,7 @@ func (i64 Int64) String() string {
 	return strconv.FormatInt(int64(i64), 10)
 }
 func (i64 Int64) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i64), 10)), nil
+	return []byte(strconv.FormatInt(int64(i64), 10)), nil
 }
 
 func (i64 *Int64) UnmarshalJSON(b []byte) error {
@@ -271,7 +271,7 @@ func (i Int) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
 func (i Int) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i), 10)), nil
+	return []byte(strconv.FormatInt(int64(i), 10)), nil
 }
 
 func (i *Int) UnmarshalJSON(b []byte) error {
@@ -310,7 +310,7 @@ func (i8 Uint8) String() string {
 }
 
 func (i8 Uint8) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i8), 10)), nil
+	return []byte(strconv.FormatInt(int64(i8), 10)), nil
 }
 
 func (i8 *Uint8) UnmarshalJSON(b []byte) error {
@@ -349,7 +349,7 @@ func (i16 Uint16) String() string {
 }
 
 func (i16 Uint16) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i16), 10)), nil
+	return []byte(strconv.FormatInt(int64(i16), 10)), nil
 }
 
 func (i16 *Uint16) UnmarshalJSON(b []byte) error {
@@ -388,7 +388,7 @@ func (i32 Uint32) String() string {
 }
 
 func (i32 Uint32) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i32), 10)), nil
+	return []byte(strconv.FormatInt(int64(i32), 10)), nil
 }
 
 func (i32 *Uint32) UnmarshalJSON(b []byte) error {
@@ -427,7 +427,7 @@ func (i64 Uint64) String() string {
 }
 
 func (i64 Uint64) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i64), 10)), nil
+	return []byte(strconv.FormatInt(int64(i64), 10)), nil
 }
 
 func (i64 *Uint64) UnmarshalJSON(b []byte) error {
@@ -466,7 +466,7 @@ func (i Uint) String() string {
 }
 
 func (i Uint) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatInt(int64(i), 10)), nil
+	return []byte(strconv.FormatInt(int64(i), 10)), nil
 }
 
 func (i *Uint) UnmarshalJSON(b []byte) error {
@@ -505,7 +505,7 @@ func (f32 Float32) String() string {
 }
 
 func (f32 Float32) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatFloat(float64(f32), 'f', -1, 32)), nil
+	return []byte(strconv.FormatFloat(float64(f32), 'f', -1, 32)), nil
 }
 
 func (f32 *Float32) UnmarshalJSON(b []byte) error {
@@ -544,7 +544,7 @@ func (f64 Float64) String() string {
 }
 
 func (f64 Float64) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.FormatFloat(float64(f64), 'f', -1, 64)), nil
+	return []byte(strconv.FormatFloat(float64(f64), 'f', -1, 64)), nil
 }
 
 func (f64 *Float64) UnmarshalJSON(b []byte) error {
@@ -603,7 +603,7 @@ func (b Bool) String() string {
 	}
 }
 func (b Bool) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(b.String()), nil
+	return []byte(b.String()), nil
 }
 
 func (b *Bool) UnmarshalJSON(bs []byte) error {
@@ -632,7 +632,7 @@ func (t *Time) Scan(src any) error {
 		*t = Time{v}
 		return nil
 	case []byte:
-		t2, err := time.Parse(time.DateTime, conv.Bytes2String(v))
+		t2, err := time.Parse(time.DateTime, string(v))
 		if err != nil {
 			return err
 		}
@@ -658,7 +658,7 @@ func (t Time) String() string {
 }
 
 func (t Time) MarshalJSON() ([]byte, error) {
-	return conv.String2Bytes(strconv.Quote(t.String())), nil
+	return []byte(strconv.Quote(t.String())), nil
 }
 
 func (t *Time) UnmarshalJSON(b []byte) error {
@@ -673,7 +673,7 @@ func (t *Time) UnmarshalJSON(b []byte) error {
 }
 
 func bytes2String(b []byte) string {
-	s := conv.Bytes2String(bytes.Trim(b, "\""))
+	s := string(bytes.Trim(b, "\""))
 	if s == Undefined {
 		return ""
 	}
