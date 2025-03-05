@@ -16,8 +16,8 @@ package util
 
 import "reflect"
 
-func IsStructZeroValue(v interface{}) bool {
-	value := reflect.ValueOf(v)
+func IsStructZeroValue(v any) bool {
+	value := reflect.Indirect(reflect.ValueOf(v))
 	if value.Kind() == reflect.Struct {
 		for i := 0; i < value.NumField(); i++ {
 			field := value.Field(i)
