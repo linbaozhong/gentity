@@ -251,8 +251,7 @@ func (p *dao{{$structName}}) SelectAll(ctx context.Context, s *ace.Selector) ([]
 		s.Cols(_cols...)
 	}
 
-	_c := *s
-	_rows, e := _c.Query(ctx)
+	_rows, e := s.Query(ctx)
 	if e != nil {
 		log.Error(e)
 		return nil, false, e

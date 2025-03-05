@@ -434,260 +434,6 @@ func (s *Selector) parse() []dialect.Field {
 		s.command.WriteString(strings.Join(s.funcs, ","))
 	}
 
-	s.parseSelector()
-
-	return cols
-}
-
-// query
-func (s *Selector) query(ctx context.Context) (*sql.Rows, error) {
-	_ = s.parse()
-
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	if err != nil {
-		return nil, err
-	}
-	if s.db.IsDB() {
-		defer stmt.Close()
-	}
-
-	row, err := stmt.QueryContext(ctx, s.mergeParams()...)
-	return row, err
-}
-
-// Query
-func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
-	defer s.Free()
-	if s.err != nil {
-		return nil, s.err
-	}
-
-	return s.query(ctx)
-}
-
-// QueryRow
-func (s *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
-	defer s.Free()
-	if s.err != nil {
-		return nil, s.err
-	}
-
-	_ = s.parse()
-
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	if err != nil {
-		return nil, err
-	}
-	if s.db.IsDB() {
-		defer stmt.Close()
-	}
-
-	return stmt.QueryRowContext(ctx, s.mergeParams()...), nil
-}
-
-// Get 返回单个数据，dest 必须是指针
-func (s *Selector) Get(ctx context.Context, dest any) error {
-	defer s.Free()
-	if s.err != nil {
-		return s.err
-	}
-
-	s.Limit(1)
-
-	rows, err := s.query(ctx)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
-	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
-	// 否则，调用 scanAny 方法
-	if d, ok := dest.(dialect.Modeler); ok {
-		vals := d.AssignPtr()
-		return r.Scan(vals...)
-	}
-	return r.scanAny(dest, false)
-}
-
-// Gets 返回数据切片，dest 必须是slice指针
-func (s *Selector) Gets(ctx context.Context, dest any) error {
-	defer s.Free()
-	if s.err != nil {
-		return s.err
-	}
-
-	rows, err := s.query(ctx)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	return scanAll(rows, dest, false)
-}
-
-// Map 返回 map[string]any，用于列数未知的情况
-func (s *Selector) Map(ctx context.Context) (map[string]any, error) {
-	defer s.Free()
-	if s.err != nil {
-		return nil, s.err
-	}
-
-	s.Limit(1)
-
-	rows, err := s.query(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
-	dest := make(map[string]any)
-	return dest, r.MapScan(dest)
-}
-
-// Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
-func (s *Selector) Maps(ctx context.Context) ([]map[string]any, error) {
-	defer s.Free()
-	if s.err != nil {
-		return nil, s.err
-	}
-
-	rows, err := s.query(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
-	defer rs.Close()
-
-	dests := make([]map[string]any, 0)
-	for rs.Next() {
-		dest := make(map[string]any)
-		err = rs.MapScan(dest)
-		if err != nil {
-			break
-		}
-		dests = append(dests, dest)
-	}
-
-	return dests, rs.Err()
-}
-
-// Slice 返回切片 []any，用于列数未知的情况
-func (s *Selector) Slice(ctx context.Context) ([]any, error) {
-	defer s.Free()
-	if s.err != nil {
-		return nil, s.err
-	}
-
-	s.Limit(1)
-
-	rows, err := s.query(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
-	return r.SliceScan()
-}
-
-// Slices 返回 []any 的切片 [][]any，用于列数未知的情况
-func (s *Selector) Slices(ctx context.Context) ([][]any, error) {
-	defer s.Free()
-	if s.err != nil {
-		return nil, s.err
-	}
-
-	rows, err := s.query(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
-	defer rs.Close()
-
-	dests := make([][]any, 0)
-	for rs.Next() {
-		dest, err := rs.SliceScan()
-		if err != nil {
-			break
-		}
-		dests = append(dests, dest)
-	}
-
-	return dests, rs.Err()
-}
-
-// Count
-func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	defer s.Free()
-	if s.err != nil {
-		return 0, s.err
-	}
-
-	s.Where(cond...)
-	s.command.WriteString("SELECT COUNT(*)")
-
-	s.parseSelector()
-
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	if err != nil {
-		return 0, err
-	}
-	if s.db.IsDB() {
-		defer stmt.Close()
-	}
-
-	row := stmt.QueryRowContext(ctx, s.mergeParams()...)
-	var count int64
-	err = row.Scan(&count)
-	if err != nil {
-		return 0, err
-	}
-	return count, nil
-}
-
-// Sum
-func (s *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	defer s.Free()
-	if s.err != nil {
-		return nil, s.err
-	}
-
-	for _, col := range cols {
-		s.Funcs(col.Sum())
-	}
-	s.Where(cond...)
-	s.command.WriteString("SELECT ")
-	s.command.WriteString(strings.Join(s.funcs, ","))
-
-	s.parseSelector()
-
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	if err != nil {
-		return nil, err
-	}
-	if s.db.IsDB() {
-		defer stmt.Close()
-	}
-
-	row := stmt.QueryRowContext(ctx, s.mergeParams()...)
-	var sum = make([]any, len(cols))
-	err = row.Scan(sum...)
-	if err != nil {
-		return nil, err
-	}
-
-	sums := make(map[string]any, len(cols))
-	for i := range sum {
-		sums[cols[i].Name] = sum[i]
-	}
-	return sums, nil
-}
-
-func (s *Selector) parseSelector() {
 	// FROM TABLE
 	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
 	for _, j := range s.join {
@@ -716,6 +462,294 @@ func (s *Selector) parseSelector() {
 	if s.limit != "" {
 		s.command.WriteString(s.limit)
 	}
+
+	return cols
+}
+
+// query
+func (s *Selector) query(ctx context.Context) (*sql.Rows, error) {
+	_ = s.parse()
+
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return nil, err
+	}
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
+
+	row, err := stmt.QueryContext(ctx, s.mergeParams()...)
+	return row, err
+}
+
+// Query
+func (se *Selector) Query(ctx context.Context) (*sql.Rows, error) {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	return s.query(ctx)
+}
+
+// QueryRow
+func (se *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	_ = s.parse()
+
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return nil, err
+	}
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
+
+	return stmt.QueryRowContext(ctx, s.mergeParams()...), nil
+}
+
+// Get 返回单个数据，dest 必须是指针
+func (se *Selector) Get(ctx context.Context, dest any) error {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return s.err
+	}
+
+	s.Limit(1)
+
+	rows, err := s.query(ctx)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
+	// 否则，调用 scanAny 方法
+	if d, ok := dest.(dialect.Modeler); ok {
+		vals := d.AssignPtr()
+		return r.Scan(vals...)
+	}
+	return r.scanAny(dest, false)
+}
+
+// Gets 返回数据切片，dest 必须是slice指针
+func (se *Selector) Gets(ctx context.Context, dest any) error {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return s.err
+	}
+
+	rows, err := s.query(ctx)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	return scanAll(rows, dest, false)
+}
+
+// Map 返回 map[string]any，用于列数未知的情况
+func (se *Selector) Map(ctx context.Context) (map[string]any, error) {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	s.Limit(1)
+
+	rows, err := s.query(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	dest := make(map[string]any)
+	return dest, r.MapScan(dest)
+}
+
+// Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
+func (se *Selector) Maps(ctx context.Context) ([]map[string]any, error) {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	rows, err := s.query(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	defer rs.Close()
+
+	dests := make([]map[string]any, 0)
+	for rs.Next() {
+		dest := make(map[string]any)
+		err = rs.MapScan(dest)
+		if err != nil {
+			break
+		}
+		dests = append(dests, dest)
+	}
+
+	return dests, rs.Err()
+}
+
+// Slice 返回切片 []any，用于列数未知的情况
+func (se *Selector) Slice(ctx context.Context) ([]any, error) {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	s.Limit(1)
+
+	rows, err := s.query(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	return r.SliceScan()
+}
+
+// Slices 返回 []any 的切片 [][]any，用于列数未知的情况
+func (se *Selector) Slices(ctx context.Context) ([][]any, error) {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	rows, err := s.query(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	defer rs.Close()
+
+	dests := make([][]any, 0)
+	for rs.Next() {
+		dest, err := rs.SliceScan()
+		if err != nil {
+			break
+		}
+		dests = append(dests, dest)
+	}
+
+	return dests, rs.Err()
+}
+
+// Count
+func (se *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return 0, s.err
+	}
+
+	s.Where(cond...)
+	s.command.WriteString("SELECT COUNT(*)")
+
+	// FROM TABLE
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	for _, j := range s.join {
+		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	}
+
+	// WHERE
+	if s.where.Len() > 0 {
+		s.command.WriteString(" WHERE " + s.where.String())
+	}
+
+	// LIMIT
+	if s.limit != "" {
+		s.command.WriteString(s.limit)
+	}
+
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return 0, err
+	}
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
+
+	row := stmt.QueryRowContext(ctx, s.mergeParams()...)
+	var count int64
+	err = row.Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// Sum
+func (se *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+	s := *se
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	for _, col := range cols {
+		s.Funcs(col.Sum())
+	}
+	s.Where(cond...)
+	s.command.WriteString("SELECT ")
+	s.command.WriteString(strings.Join(s.funcs, ","))
+
+	// FROM TABLE
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	for _, j := range s.join {
+		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	}
+
+	// WHERE
+	if s.where.Len() > 0 {
+		s.command.WriteString(" WHERE " + s.where.String())
+	}
+
+	// LIMIT
+	if s.limit != "" {
+		s.command.WriteString(s.limit)
+	}
+
+	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	if err != nil {
+		return nil, err
+	}
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
+
+	row := stmt.QueryRowContext(ctx, s.mergeParams()...)
+	var sum = make([]any, len(cols))
+	err = row.Scan(sum...)
+	if err != nil {
+		return nil, err
+	}
+
+	sums := make(map[string]any, len(cols))
+	for i := range sum {
+		sums[cols[i].Name] = sum[i]
+	}
+	return sums, nil
 }
 
 // 合并参数
