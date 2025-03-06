@@ -35,8 +35,9 @@ type (
 	syncMap struct {
 		mu sync.Mutex
 
-		storage cmap.ConcurrentMap[string, any]
-		prefix  string // key前缀
+		storage  cmap.ConcurrentMap[string, any]
+		prefix   string // key前缀
+		duration int64  // 过期时间
 	}
 )
 
@@ -44,6 +45,13 @@ type (
 func WithPrefix(prefix string) option {
 	return func(o *syncMap) {
 		o.prefix = prefix
+	}
+}
+
+// WithExpired 设置过期时间
+func WithExpired(duration time.Duration) option {
+	return func(o *syncMap) {
+		o.duration = int64(duration.Seconds())
 	}
 }
 
@@ -82,14 +90,14 @@ func (sm *syncMap) Contains(ctx context.Context, key string) bool {
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (sm *syncMap) ExistsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+func (sm *syncMap) ExistsOrSave(ctx context.Context, key string, value any, lifeTime ...time.Duration) bool {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
 	if sm.Contains(ctx, key) {
 		return false
 	}
-	return sm.Save(ctx, key, value, lifeTime) == nil
+	return sm.Save(ctx, key, value, lifeTime...) == nil
 }
 
 // Delete the cached key from SyncMap storage
@@ -140,11 +148,11 @@ func (sm *syncMap) Flush(ctx context.Context) error {
 }
 
 // Save a value in SyncMap storage by key
-func (sm *syncMap) Save(ctx context.Context, key string, value any, lifeTime time.Duration) error {
-	duration := int64(0)
+func (sm *syncMap) Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error {
+	duration := sm.duration
 
-	if lifeTime > 0 {
-		duration = time.Now().Unix() + int64(lifeTime.Seconds())
+	if len(lifeTime) > 0 {
+		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
 	b, err := conv.Any2Bytes(value)
 	if err != nil {

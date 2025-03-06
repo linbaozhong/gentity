@@ -35,6 +35,7 @@ type (
 		interval time.Duration // 空闲时长后清理
 		name     string        // 缓存名称
 		prefix   string        // key前缀
+		duration int64         // 过期时间
 
 		mu sync.Mutex
 	}
@@ -68,6 +69,13 @@ func WithPrefix(prefix string) option {
 func WithInterval(d time.Duration) option {
 	return func(o *sqlite) {
 		o.interval = d
+	}
+}
+
+// WithExpired 设置过期时间
+func WithExpired(duration time.Duration) option {
+	return func(o *sqlite) {
+		o.duration = int64(duration.Seconds())
 	}
 }
 
@@ -123,14 +131,20 @@ func (s *sqlite) Contains(ctx context.Context, key string) bool {
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value any, lifeTime ...time.Duration) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if s.Contains(ctx, key) {
 		return false
 	}
-	result, err := s.db.ExecContext(ctx, "INSERT INTO "+s.name+"(value, expire,key) VALUES(?, ?, ?)", value, time.Now().Unix()+int64(lifeTime.Seconds()), s.getKey(key))
+
+	duration := s.duration
+	if len(lifeTime) > 0 {
+		duration = int64(lifeTime[0].Seconds())
+	}
+
+	result, err := s.db.ExecContext(ctx, "INSERT INTO "+s.name+"(value, expire,key) VALUES(?, ?, ?)", value, time.Now().Unix()+duration, s.getKey(key))
 	if err != nil {
 		return false
 	}
@@ -206,15 +220,15 @@ func (s *sqlite) Flush(ctx context.Context) error {
 	return err
 }
 
-func (s *sqlite) Save(ctx context.Context, key string, value any, lifeTime time.Duration) error {
-	duration := int64(0)
-	if lifeTime > 0 {
-		duration = time.Now().Unix() + int64(lifeTime.Seconds())
-	}
+func (s *sqlite) Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error {
 	var (
 		stmt *sql.Stmt
 		err  error
 	)
+	duration := s.duration
+	if len(lifeTime) > 0 {
+		duration = int64(lifeTime[0].Seconds())
+	}
 	// 查询是否存在
 	if s.Contains(ctx, key) {
 		stmt, err = s.db.PrepareContext(ctx, "UPDATE "+s.name+" SET value = ?, expire = ? WHERE key = ?")
@@ -226,7 +240,7 @@ func (s *sqlite) Save(ctx context.Context, key string, value any, lifeTime time.
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, value, duration, s.getKey(key))
+	_, err = stmt.ExecContext(ctx, value, time.Now().Unix()+duration, s.getKey(key))
 	if err != nil {
 		return err
 	}

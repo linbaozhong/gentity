@@ -32,8 +32,9 @@ type (
 	memcached struct {
 		mu sync.Mutex
 
-		driver *memcache.Client
-		prefix string // key前缀
+		driver   *memcache.Client
+		prefix   string // key前缀
+		duration int32  // 过期时间
 	}
 )
 
@@ -41,6 +42,13 @@ type (
 func WithPrefix(prefix string) option {
 	return func(o *memcached) {
 		o.prefix = prefix
+	}
+}
+
+// WithExpired 设置过期时间
+func WithExpired(duration time.Duration) option {
+	return func(o *memcached) {
+		o.duration = int32(duration.Seconds())
 	}
 }
 
@@ -60,14 +68,14 @@ func (m *memcached) Contains(ctx context.Context, key string) bool {
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (m *memcached) ExistsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
+func (m *memcached) ExistsOrSave(ctx context.Context, key string, value any, lifeTime ...time.Duration) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	if m.Contains(ctx, key) {
 		return false
 	}
-	return m.Save(ctx, key, value, lifeTime) == nil
+	return m.Save(ctx, key, value, lifeTime...) == nil
 }
 
 // Delete the cached key from Memcached storage
@@ -138,16 +146,22 @@ func (m *memcached) Flush(ctx context.Context) error {
 }
 
 // Save a value in Memcached storage by key
-func (m *memcached) Save(ctx context.Context, key string, value any, lifeTime time.Duration) error {
+func (m *memcached) Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error {
 	val, err := conv.Any2Bytes(value)
 	if err != nil {
 		return err
 	}
+
+	duration := m.duration
+	if len(lifeTime) > 0 {
+		duration = int32(lifeTime[0].Seconds())
+	}
+
 	return m.driver.Set(
 		&memcache.Item{
 			Key:        m.getKey(key),
 			Value:      val,
-			Expiration: int32(lifeTime.Seconds()),
+			Expiration: duration,
 		},
 	)
 }

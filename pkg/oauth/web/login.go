@@ -14,6 +14,46 @@
 
 package web
 
+import (
+	"context"
+	"github.com/linbaozhong/gentity/pkg/cachego/mmap"
+	"time"
+)
+
+var (
+	stateCache = mmap.New(mmap.WithExpired(time.Minute * 5))
+)
+
+type SystemOauthTokenRsp struct {
+	UserId       string `json:"user_id"`
+	AccessToken  string `json:"access_token"`
+	ExpiresIn    int64  `json:"expires_in"`
+	RefreshToken string `json:"refresh_token"`
+	ReExpiresIn  int64  `json:"re_expires_in"`
+	AuthStart    string `json:"auth_start"`
+	OpenId       string `json:"open_id"`
+	UnionId      string `json:"union_id"`
+}
+type UserInfoShareRsp struct {
+	AuthNo             string `json:"auth_no"`
+	UserId             string `json:"user_id"`
+	OpenId             string `json:"open_id"`
+	UnionId            string `json:"union_id"`
+	Avatar             string `json:"avatar"`
+	Province           string `json:"province"`
+	City               string `json:"city"`
+	NickName           string `json:"nick_name"`
+	IsStudentCertified string `json:"is_student_certified"`
+	UserType           string `json:"user_type"`
+	UserStatus         string `json:"user_status"`
+	IsCertified        string `json:"is_certified"`
+	Gender             string `json:"gender"`
+	Username           string `json:"user_name"`
+	CertNo             string `json:"cert_no"`
+	CertType           string `json:"cert_type"`
+	Mobile             string `json:"mobile"`
+}
+
 type Loginer interface {
-	GetLoginURL() string
+	GetLoginURL(ctx context.Context, state string) (string, error)
 }

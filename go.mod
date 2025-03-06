@@ -4,6 +4,7 @@ go 1.23.6
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/dchest/siphash v1.2.3
 	github.com/go-json-experiment/json v0.0.0-20250129011340-4e0381018ad6
 	github.com/go-sql-driver/mysql v1.8.1
@@ -11,6 +12,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kataras/iris/v12 v12.2.11
+	github.com/linbaozhong/alipay/v3 v3.0.0-20250306030940-16a57d710961
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/redis/go-redis/v9 v9.5.1
@@ -61,6 +63,10 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/smartwalle/alipay/v3 v3.2.25 // indirect
+	github.com/smartwalle/ncrypto v1.0.4 // indirect
+	github.com/smartwalle/ngx v1.0.9 // indirect
+	github.com/smartwalle/nsign v1.0.9 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tdewolff/minify/v2 v2.20.19 // indirect
 	github.com/tdewolff/parse/v2 v2.7.12 // indirect

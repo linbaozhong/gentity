@@ -484,8 +484,9 @@ func (s *Selector) query(ctx context.Context) (*sql.Rows, error) {
 
 // Query
 func (se *Selector) Query(ctx context.Context) (*sql.Rows, error) {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -495,8 +496,9 @@ func (se *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 
 // QueryRow
 func (se *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -516,8 +518,9 @@ func (se *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
 
 // Get 返回单个数据，dest 必须是指针
 func (se *Selector) Get(ctx context.Context, dest any) error {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return s.err
 	}
@@ -542,8 +545,9 @@ func (se *Selector) Get(ctx context.Context, dest any) error {
 
 // Gets 返回数据切片，dest 必须是slice指针
 func (se *Selector) Gets(ctx context.Context, dest any) error {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return s.err
 	}
@@ -559,8 +563,9 @@ func (se *Selector) Gets(ctx context.Context, dest any) error {
 
 // Map 返回 map[string]any，用于列数未知的情况
 func (se *Selector) Map(ctx context.Context) (map[string]any, error) {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -580,8 +585,9 @@ func (se *Selector) Map(ctx context.Context) (map[string]any, error) {
 
 // Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
 func (se *Selector) Maps(ctx context.Context) ([]map[string]any, error) {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -609,8 +615,9 @@ func (se *Selector) Maps(ctx context.Context) ([]map[string]any, error) {
 
 // Slice 返回切片 []any，用于列数未知的情况
 func (se *Selector) Slice(ctx context.Context) ([]any, error) {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -629,8 +636,9 @@ func (se *Selector) Slice(ctx context.Context) ([]any, error) {
 
 // Slices 返回 []any 的切片 [][]any，用于列数未知的情况
 func (se *Selector) Slices(ctx context.Context) ([][]any, error) {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -657,8 +665,9 @@ func (se *Selector) Slices(ctx context.Context) ([][]any, error) {
 
 // Count
 func (se *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return 0, s.err
 	}
@@ -701,8 +710,9 @@ func (se *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64
 
 // Sum
 func (se *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	s := *se
+	s := se.Clone()
 	defer s.Free()
+
 	if s.err != nil {
 		return nil, s.err
 	}
@@ -750,6 +760,10 @@ func (se *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...diale
 		sums[cols[i].Name] = sum[i]
 	}
 	return sums, nil
+}
+
+func (s *Selector) Clone() Selector {
+	return *s
 }
 
 // 合并参数

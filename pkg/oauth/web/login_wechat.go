@@ -14,6 +14,8 @@
 
 package web
 
+import "context"
+
 type wechat struct {
 	appid        string
 	redirectUrl  string
@@ -23,6 +25,16 @@ type wechat struct {
 	lang         string
 }
 
-func (w *wechat) GetLoginURL() string {
-	return ""
+func NewWechat(appid, redirectUrl, responseType, scope, state, lang string) Loginer {
+	return &wechat{
+		appid:        appid,
+		redirectUrl:  redirectUrl,
+		responseType: responseType,
+		scope:        scope,
+		state:        state,
+		lang:         lang,
+	}
+}
+func (w *wechat) GetLoginURL(ctx context.Context, state string) (string, error) {
+	return "", nil
 }

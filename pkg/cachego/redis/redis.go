@@ -28,8 +28,9 @@ type (
 	option func(o *redis)
 
 	redis struct {
-		driver rd.Cmdable
-		prefix string // key前缀
+		driver   rd.Cmdable
+		prefix   string        // key前缀
+		duration time.Duration // 过期时间
 	}
 )
 
@@ -37,6 +38,13 @@ type (
 func WithPrefix(prefix string) option {
 	return func(o *redis) {
 		o.prefix = prefix
+	}
+}
+
+// WithExpired 设置过期时间
+func WithExpired(duration time.Duration) option {
+	return func(o *redis) {
+		o.duration = duration
 	}
 }
 
@@ -56,8 +64,12 @@ func (r *redis) Contains(ctx context.Context, key string) bool {
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (r *redis) ExistsOrSave(ctx context.Context, key string, value any, lifeTime time.Duration) bool {
-	return r.driver.SetNX(ctx, r.getKey(key), value, lifeTime).Val()
+func (r *redis) ExistsOrSave(ctx context.Context, key string, value any, lifeTime ...time.Duration) bool {
+	duration := r.duration
+	if len(lifeTime) > 0 {
+		duration = lifeTime[0]
+	}
+	return r.driver.SetNX(ctx, r.getKey(key), value, duration).Val()
 }
 
 // Delete the cached key from Redis storage
@@ -129,8 +141,12 @@ func (r *redis) Flush(ctx context.Context) error {
 }
 
 // Save a value in Redis storage by key
-func (r *redis) Save(ctx context.Context, key string, value any, lifeTime time.Duration) error {
-	return r.driver.Set(ctx, r.getKey(key), value, lifeTime).Err()
+func (r *redis) Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error {
+	duration := r.duration
+	if len(lifeTime) > 0 {
+		duration = lifeTime[0]
+	}
+	return r.driver.Set(ctx, r.getKey(key), value, duration).Err()
 }
 
 func (r *redis) getKey(key string) string {
