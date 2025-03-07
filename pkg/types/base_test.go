@@ -39,7 +39,7 @@ func TestBase(t *testing.T) {
 	a.Id = 1234567
 	a.Arch = 3.14159265358979323846
 	a.Version = Bool(-1)
-	a.Url = `{"name":"linbaozhong"}`
+	a.Url = `{"name":"lin,ba\"ozhong"}`
 	a.State = 1
 	a.Force = 11256
 	a.Ctime = Now()
@@ -112,6 +112,7 @@ func TestJsonResult(t *testing.T) {
 	t.Log(string(b))
 }
 
-func TestTime(t *testing.T) {
-
+func TestBytes(t *testing.T) {
+	buf := []byte("hello")
+	fmt.Println(String(buf))
 }

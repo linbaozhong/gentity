@@ -81,7 +81,7 @@ func PostX[A, B any](
 		}
 	)
 
-	loginProcessingX(ctx, &req, &resp, read, fn)
+	logicProcessingX(ctx, &req, &resp, read, fn)
 }
 
 // logicProcessing 逻辑处理
@@ -108,8 +108,8 @@ func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 	Ok(ctx, resp)
 }
 
-// loginProcessing 逻辑处理
-func loginProcessingX[A, B any](ctx Context, req *A, resp *B,
+// logicProcessingX 逻辑处理
+func logicProcessingX[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
 	write func(ctx Context, req *A, resp *B) error) {
 
@@ -173,5 +173,38 @@ func GetX[A, B any](
 		}
 	)
 
-	loginProcessingX(ctx, &req, &resp, read, fn)
+	logicProcessingX(ctx, &req, &resp, read, fn)
+}
+
+func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) error) {
+	var (
+		req  A
+		resp string
+		read = func(ctx Context, req *A) error {
+			Initiate(ctx, req)
+
+			if ctx.Request().URL.RawQuery == "" {
+				return ReadForm(ctx, req)
+			} else {
+				return ReadQuery(ctx, req)
+			}
+		}
+	)
+	if e := read(ctx, &req); e != nil {
+		Fail(ctx, Param_Invalid)
+		log.Error(e)
+		return
+	}
+	if e := Validate(&req); e != nil {
+		Fail(ctx, e)
+		log.Error(e)
+		return
+	}
+
+	if e := fn(ctx, &req, &resp); e != nil {
+		Fail(ctx, e)
+		log.Error(e)
+		return
+	}
+	ctx.Redirect(resp)
 }
