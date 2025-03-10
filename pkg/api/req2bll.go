@@ -32,7 +32,7 @@ var (
 func Post[A, B any](
 	ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error,
-) {
+) error {
 	var (
 		req  A
 		resp B
@@ -54,12 +54,12 @@ func Post[A, B any](
 		}
 	)
 
-	logicProcessing(ctx, &req, &resp, read, fn)
+	return logicProcessing(ctx, &req, &resp, read, fn)
 }
 func PostX[A, B any](
 	ctx Context,
 	fn func(ctx Context, req *A, resp *B) error,
-) {
+) error {
 	var (
 		req  A
 		resp B
@@ -81,55 +81,55 @@ func PostX[A, B any](
 		}
 	)
 
-	logicProcessingX(ctx, &req, &resp, read, fn)
+	return logicProcessingX(ctx, &req, &resp, read, fn)
 }
 
 // logicProcessing 逻辑处理
 func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
-	write func(ctx context.Context, req *A, resp *B) error) {
+	write func(ctx context.Context, req *A, resp *B) error) error {
 
 	if e := read(ctx, req); e != nil {
 		Fail(ctx, Param_Invalid)
 		log.Error(e)
-		return
+		return e
 	}
 	if e := Validate(req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
-		return
+		return e
 	}
 
 	if e := write(ctx, req, resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
-		return
+		return e
 	}
-	Ok(ctx, resp)
+	return Ok(ctx, resp)
 }
 
 // logicProcessingX 逻辑处理
 func logicProcessingX[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
-	write func(ctx Context, req *A, resp *B) error) {
+	write func(ctx Context, req *A, resp *B) error) error {
 
 	if e := read(ctx, req); e != nil {
 		Fail(ctx, Param_Invalid)
 		log.Error(e)
-		return
+		return e
 	}
 	if e := Validate(req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
-		return
+		return e
 	}
 
 	if e := write(ctx, req, resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
-		return
+		return e
 	}
-	Ok(ctx, resp)
+	return Ok(ctx, resp)
 }
 
 // Get get请求：
@@ -137,7 +137,7 @@ func logicProcessingX[A, B any](ctx Context, req *A, resp *B,
 func Get[A, B any](
 	ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error,
-) {
+) error {
 	var (
 		req  A
 		resp B
@@ -152,13 +152,13 @@ func Get[A, B any](
 		}
 	)
 
-	logicProcessing(ctx, &req, &resp, read, fn)
+	return logicProcessing(ctx, &req, &resp, read, fn)
 }
 
 func GetX[A, B any](
 	ctx Context,
 	fn func(ctx Context, req *A, resp *B) error,
-) {
+) error {
 	var (
 		req  A
 		resp B
@@ -173,7 +173,7 @@ func GetX[A, B any](
 		}
 	)
 
-	logicProcessingX(ctx, &req, &resp, read, fn)
+	return logicProcessingX(ctx, &req, &resp, read, fn)
 }
 
 func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) error) error {

@@ -19,7 +19,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
-func Fail(c Context, e error, args ...any) {
+func Fail(c Context, e error, args ...any) error {
 	j := types.NewResult()
 	defer j.Free()
 
@@ -33,10 +33,10 @@ func Fail(c Context, e error, args ...any) {
 	} else {
 		j.Info = fmt.Sprintf("%s", args[0])
 	}
-	c.JSON(j)
+	return c.JSON(j)
 }
 
-func Ok(c Context, args ...any) {
+func Ok(c Context, args ...any) error {
 	j := types.NewResult()
 	defer j.Free()
 
@@ -44,5 +44,5 @@ func Ok(c Context, args ...any) {
 		j.Data = args[0]
 	}
 
-	c.JSON(j)
+	return c.JSON(j)
 }
