@@ -133,7 +133,7 @@ func (s *Selector) Distinct(cols ...dialect.Field) *Selector {
 	return s
 }
 
-// cols
+// cols 字段
 func (s *Selector) Cols(cols ...dialect.Field) *Selector {
 	for _, col := range cols {
 		s.cols = append(s.cols, col)
@@ -141,7 +141,7 @@ func (s *Selector) Cols(cols ...dialect.Field) *Selector {
 	return s
 }
 
-// omits
+// Omit 忽略字段
 func (s *Selector) Omit(cols ...dialect.Field) *Selector {
 	for _, col := range cols {
 		s.omit = append(s.omit, col)
@@ -149,7 +149,7 @@ func (s *Selector) Omit(cols ...dialect.Field) *Selector {
 	return s
 }
 
-// funcs
+// Funcs 聚合函数
 func (s *Selector) Funcs(fns ...dialect.Function) *Selector {
 	for _, fn := range fns {
 		s.funcs = append(s.funcs, fn())
@@ -157,7 +157,7 @@ func (s *Selector) Funcs(fns ...dialect.Function) *Selector {
 	return s
 }
 
-// join
+// Join 连接
 func (s *Selector) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) *Selector {
 	if s.err != nil {
 		return s

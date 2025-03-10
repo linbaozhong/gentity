@@ -34,6 +34,7 @@ type OauthTokenRsp struct {
 	OpenId       string `json:"open_id"`
 	UnionId      string `json:"union_id"`
 }
+
 type UserInfoRsp struct {
 	AuthNo             string `json:"auth_no"`
 	UserId             string `json:"user_id"`
