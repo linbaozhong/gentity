@@ -190,18 +190,15 @@ func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) err
 		}
 	)
 	if e := read(ctx, &req); e != nil {
-		Fail(ctx, Param_Invalid)
 		log.Error(e)
 		return e
 	}
 	if e := Validate(&req); e != nil {
-		Fail(ctx, e)
 		log.Error(e)
 		return e
 	}
 
 	if e := fn(ctx, &req, &resp); e != nil {
-		Fail(ctx, e)
 		log.Error(e)
 		return e
 	}

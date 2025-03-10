@@ -33,12 +33,12 @@ func SliceDiff[T comparable](slice1, slice2 []T) []T {
 	for _, s := range slice2 {
 		set[s] = struct{}{}
 	}
-	
+
 	for _, s := range slice1 {
 		if _, ok := set[s]; !ok {
 			diff = append(diff, s)
 		}
 	}
-	
+
 	return diff
 }
