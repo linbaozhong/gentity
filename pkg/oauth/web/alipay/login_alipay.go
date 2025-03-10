@@ -93,8 +93,8 @@ func (a *ali) GetLoginURL(ctx context.Context, state string) (string, error) {
 	return u.String(), nil
 }
 
-// Login 登录验证
-func (a *ali) Login(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {
+// Callback alipay 用户授权回调，使用授权码换取 access_token
+func (a *ali) Callback(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {
 	// 检查state是否存在,并在使用完成后移除
 	if _, e := web.StateCache.Fetch(ctx, state); e != nil {
 		return nil, types.NewError(conv.String2Int(string(alipay.CodeMissingParam)),

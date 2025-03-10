@@ -68,7 +68,7 @@ func (w *wx) GetLoginURL(ctx context.Context, state string) (string, error) {
 	return fmt.Sprintf("%s?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_login&state=%s#wechat_redirect",
 		wechatAuthURL, w.appid, redirectURI, state), nil
 }
-func (w *wx) Login(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {
+func (w *wx) Callback(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {
 	// 检查state是否存在,并在使用完成后移除
 	if _, e := web.StateCache.Fetch(ctx, state); e != nil {
 		return nil, types.NewError(400001,

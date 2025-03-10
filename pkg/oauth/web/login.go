@@ -57,6 +57,6 @@ type UserInfoRsp struct {
 
 type Loginer interface {
 	GetLoginURL(ctx context.Context, state string) (string, error)
-	Login(ctx context.Context, code, state string) (*OauthTokenRsp, error)
+	Callback(ctx context.Context, code, state string) (*OauthTokenRsp, error)
 	GetUserInfo(ctx context.Context, token string) (*UserInfoRsp, error)
 }
