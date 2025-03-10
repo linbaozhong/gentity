@@ -23,19 +23,22 @@ func SliceContains[T comparable](slice []T, item T) bool {
 	return false
 }
 
-// 计算两个slice的差集
+// 计算两个slice的差集，返回 slice1 中不包含在 slice2 中的元素
 func SliceDiff[T comparable](slice1, slice2 []T) []T {
+	if len(slice1) == 0 || len(slice2) == 0 {
+		return slice1
+	}
 	var diff []T
 	var set = make(map[T]struct{})
 	for _, s := range slice2 {
 		set[s] = struct{}{}
 	}
-
+	
 	for _, s := range slice1 {
 		if _, ok := set[s]; !ok {
 			diff = append(diff, s)
 		}
 	}
-
+	
 	return diff
 }
