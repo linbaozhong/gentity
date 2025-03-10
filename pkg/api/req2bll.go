@@ -176,13 +176,12 @@ func GetX[A, B any](
 	logicProcessingX(ctx, &req, &resp, read, fn)
 }
 
-func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) error) {
+func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) error) error {
 	var (
 		req  A
 		resp string
 		read = func(ctx Context, req *A) error {
 			Initiate(ctx, req)
-
 			if ctx.Request().URL.RawQuery == "" {
 				return ReadForm(ctx, req)
 			} else {
@@ -193,18 +192,19 @@ func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) err
 	if e := read(ctx, &req); e != nil {
 		Fail(ctx, Param_Invalid)
 		log.Error(e)
-		return
+		return e
 	}
 	if e := Validate(&req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
-		return
+		return e
 	}
 
 	if e := fn(ctx, &req, &resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
-		return
+		return e
 	}
 	ctx.Redirect(resp)
+	return nil
 }

@@ -55,7 +55,7 @@ func WithAppSecret(appSecret string) option {
 	}
 }
 
-func NewWechat(opts ...option) web.Loginer {
+func New(opts ...option) web.Loginer {
 	w := &wx{}
 	for _, opt := range opts {
 		opt(w)

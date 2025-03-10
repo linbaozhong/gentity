@@ -62,7 +62,7 @@ func WithNotifyUrl(notifyUrl string) option {
 	}
 }
 
-func NewAlipay(opts ...option) web.Loginer {
+func New(opts ...option) web.Loginer {
 	a := &ali{}
 	for _, opt := range opts {
 		opt(a)
