@@ -16,6 +16,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/redis/go-redis/v9 v9.5.1
+	github.com/silenceper/wechat/v2 v2.1.7
 	github.com/spf13/cobra v1.8.1
 	github.com/tidwall/match v1.1.1
 	github.com/tidwall/pretty v1.2.0
@@ -38,6 +39,7 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
+	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gomarkdown/markdown v0.0.0-20240328165702-4d01890c35c0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -62,14 +64,16 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
-	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/smartwalle/alipay/v3 v3.2.25 // indirect
 	github.com/smartwalle/ncrypto v1.0.4 // indirect
 	github.com/smartwalle/ngx v1.0.9 // indirect
 	github.com/smartwalle/nsign v1.0.9 // indirect
+	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tdewolff/minify/v2 v2.20.19 // indirect
 	github.com/tdewolff/parse/v2 v2.7.12 // indirect
+	github.com/tidwall/gjson v1.14.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect

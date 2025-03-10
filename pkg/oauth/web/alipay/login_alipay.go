@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package web
+package alipay
 
 import (
 	"context"
 	"github.com/linbaozhong/alipay/v3"
 	"github.com/linbaozhong/gentity/pkg/conv"
+	"github.com/linbaozhong/gentity/pkg/oauth/web"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
@@ -33,15 +34,42 @@ var (
 	aliClient *alipay.Client
 )
 
-func NewAlipay(appid, privateKey, publidKey, redirectUrl, notifyUrl string) Loginer {
-	return &ali{
-		appid:      appid,
-		privateKey: privateKey,
-		publicKey:  publidKey,
-		notifyUrl:  notifyUrl,
-		returnUrl:  redirectUrl,
+type option func(a *ali)
+
+func WithAppId(appid string) option {
+	return func(a *ali) {
+		a.appid = appid
 	}
 }
+func WithPrivateKey(privateKey string) option {
+	return func(a *ali) {
+		a.privateKey = privateKey
+	}
+}
+func WithPublicKey(publicKey string) option {
+	return func(a *ali) {
+		a.publicKey = publicKey
+	}
+}
+func WithReturnUrl(returnUrl string) option {
+	return func(a *ali) {
+		a.returnUrl = returnUrl
+	}
+}
+func WithNotifyUrl(notifyUrl string) option {
+	return func(a *ali) {
+		a.notifyUrl = notifyUrl
+	}
+}
+
+func NewAlipay(opts ...option) web.Loginer {
+	a := &ali{}
+	for _, opt := range opts {
+		opt(a)
+	}
+	return a
+}
+
 func (a *ali) client() *alipay.Client {
 	if aliClient == nil {
 		var e error
@@ -57,7 +85,7 @@ func (a *ali) client() *alipay.Client {
 
 // GetLoginURL
 func (a *ali) GetLoginURL(ctx context.Context, state string) (string, error) {
-	stateCache.Save(ctx, state, struct{}{}, 10)
+	web.StateCache.Save(ctx, state, struct{}{}, 10)
 	u, e := a.client().PublicAppAuthorize([]string{"auth_user"}, a.returnUrl, state)
 	if e != nil {
 		return "", e
@@ -66,9 +94,9 @@ func (a *ali) GetLoginURL(ctx context.Context, state string) (string, error) {
 }
 
 // Login 登录验证
-func (a *ali) Login(ctx context.Context, code, state string) (*SystemOauthTokenRsp, error) {
+func (a *ali) Login(ctx context.Context, code, state string) (*web.SystemOauthTokenRsp, error) {
 	// 检查state是否存在,并在使用完成后移除
-	if _, e := stateCache.Fetch(ctx, state); e != nil {
+	if _, e := web.StateCache.Fetch(ctx, state); e != nil {
 		return nil, types.NewError(conv.String2Int(string(alipay.CodeMissingParam)),
 			"state is not exist")
 	}
@@ -82,7 +110,7 @@ func (a *ali) Login(ctx context.Context, code, state string) (*SystemOauthTokenR
 			e.Error())
 	}
 	if _res.IsSuccess() {
-		return &SystemOauthTokenRsp{
+		return &web.SystemOauthTokenRsp{
 			AccessToken:  _res.AccessToken,
 			ExpiresIn:    _res.ExpiresIn,
 			RefreshToken: _res.RefreshToken,
@@ -98,7 +126,7 @@ func (a *ali) Login(ctx context.Context, code, state string) (*SystemOauthTokenR
 }
 
 // GetUserInfo 获取用户信息
-func (a *ali) GetUserInfo(ctx context.Context, token string) (*UserInfoShareRsp, error) {
+func (a *ali) GetUserInfo(ctx context.Context, token string) (*web.UserInfoRsp, error) {
 	_res, e := a.client().UserInfoShare(ctx,
 		alipay.UserInfoShare{
 			AuthToken: token,
@@ -110,7 +138,7 @@ func (a *ali) GetUserInfo(ctx context.Context, token string) (*UserInfoShareRsp,
 		}
 	}
 	if _res.IsSuccess() {
-		return &UserInfoShareRsp{
+		return &web.UserInfoRsp{
 			AuthNo:             _res.AuthNo,
 			UserId:             _res.UserId,
 			OpenId:             _res.OpenId,
