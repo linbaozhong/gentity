@@ -24,7 +24,7 @@ var (
 	StateCache = mmap.New(mmap.WithExpired(time.Minute * 5))
 )
 
-type SystemOauthTokenRsp struct {
+type OauthTokenRsp struct {
 	UserId       string `json:"user_id"`
 	AccessToken  string `json:"access_token"`
 	ExpiresIn    int64  `json:"expires_in"`
@@ -56,6 +56,6 @@ type UserInfoRsp struct {
 
 type Loginer interface {
 	GetLoginURL(ctx context.Context, state string) (string, error)
-	Login(ctx context.Context, code, state string) (*SystemOauthTokenRsp, error)
+	Login(ctx context.Context, code, state string) (*OauthTokenRsp, error)
 	GetUserInfo(ctx context.Context, token string) (*UserInfoRsp, error)
 }
