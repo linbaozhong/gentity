@@ -110,7 +110,7 @@ func (a *ali) Callback(ctx context.Context, code, state string) (*web.OauthToken
 			e.Error())
 	}
 	if _res.IsSuccess() {
-		return &web.OauthTokenRsp{
+		_token := &web.OauthTokenRsp{
 			AccessToken:  _res.AccessToken,
 			ExpiresIn:    _res.ExpiresIn,
 			RefreshToken: _res.RefreshToken,
@@ -119,7 +119,10 @@ func (a *ali) Callback(ctx context.Context, code, state string) (*web.OauthToken
 			AuthStart:    _res.AuthStart,
 			OpenId:       _res.OpenId,
 			UnionId:      _res.UnionId,
-		}, nil
+		}
+		// 保存token
+		e = web.StateCache.Save(ctx, state, _token)
+		return _token, e
 	}
 	return nil, types.NewError(conv.String2Int(string(_res.Code)),
 		_res.Error.Error())
