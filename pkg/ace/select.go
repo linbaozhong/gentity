@@ -36,7 +36,7 @@ type (
 		distinct      bool
 		cols          []dialect.Field
 		funcs         []string
-		omit          []dialect.Field
+		omits         []dialect.Field
 		groupBy       strings.Builder
 		having        strings.Builder
 		havingParams  []any
@@ -91,7 +91,7 @@ func (s *Selector) Free() {
 	s.distinct = false
 	s.join = s.join[:0]
 	s.joinParams = s.joinParams[:0]
-	s.omit = s.omit[:0]
+	s.omits = s.omits[:0]
 	s.where.Reset()
 	s.whereParams = s.whereParams[:0]
 	s.groupBy.Reset()
@@ -141,10 +141,10 @@ func (s *Selector) Cols(cols ...dialect.Field) *Selector {
 	return s
 }
 
-// Omit 忽略字段
-func (s *Selector) Omit(cols ...dialect.Field) *Selector {
+// Omits 忽略字段
+func (s *Selector) Omits(cols ...dialect.Field) *Selector {
 	for _, col := range cols {
-		s.omit = append(s.omit, col)
+		s.omits = append(s.omits, col)
 	}
 	return s
 }
@@ -413,7 +413,7 @@ func (s *Selector) Page(pageIndex, pageSize uint) *Selector {
 func (s *Selector) parse() []dialect.Field {
 	s.command.WriteString("SELECT ")
 
-	var cols = util.SliceDiff(s.cols, s.omit)
+	var cols = util.SliceDiff(s.cols, s.omits)
 	colens := len(cols)
 	funlens := len(s.funcs)
 	if colens+funlens == 0 {
