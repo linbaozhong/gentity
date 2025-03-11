@@ -16,12 +16,6 @@ package web
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/cachego/mmap"
-	"time"
-)
-
-var (
-	StateCache = mmap.New(mmap.WithExpired(time.Minute * 5))
 )
 
 type OauthTokenRsp struct {
@@ -56,7 +50,8 @@ type UserInfoRsp struct {
 }
 
 type Loginer interface {
-	GetLoginURL(ctx context.Context, state string) (string, error)
+	Authorize(ctx context.Context, state string) (string, error)
 	Callback(ctx context.Context, code, state string) (*OauthTokenRsp, error)
 	GetUserInfo(ctx context.Context, token string) (*UserInfoRsp, error)
+	GetPlatform() string
 }

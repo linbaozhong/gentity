@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/oauth/web"
-	"github.com/linbaozhong/gentity/pkg/types"
 	"io"
 	"net/http"
 )
@@ -44,11 +43,13 @@ func WithAppId(appid string) option {
 		w.appid = appid
 	}
 }
+
 func WithLang(lang string) option {
 	return func(w *wx) {
 		w.lang = lang
 	}
 }
+
 func WithAppSecret(appSecret string) option {
 	return func(w *wx) {
 		w.appSecret = appSecret
@@ -63,17 +64,12 @@ func New(opts ...option) web.Loginer {
 	return w
 }
 
-func (w *wx) GetLoginURL(ctx context.Context, state string) (string, error) {
-	web.StateCache.Save(ctx, state, struct{}{}, 10)
+func (w *wx) Authorize(ctx context.Context, state string) (string, error) {
 	return fmt.Sprintf("%s?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_login&state=%s#wechat_redirect",
 		wechatAuthURL, w.appid, redirectURI, state), nil
 }
+
 func (w *wx) Callback(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {
-	// 检查state是否存在,并在使用完成后移除
-	if _, e := web.StateCache.Fetch(ctx, state); e != nil {
-		return nil, types.NewError(400001,
-			"state is not exist")
-	}
 	url := fmt.Sprintf("%s?appid=%s&secret=%s&code=%s&grant_type=authorization_code",
 		wechatTokenURL, w.appid, w.appSecret, code)
 	resp, e := http.Get(url)
@@ -96,4 +92,8 @@ func (w *wx) Callback(ctx context.Context, code, state string) (*web.OauthTokenR
 
 func (w *wx) GetUserInfo(ctx context.Context, token string) (*web.UserInfoRsp, error) {
 	return &web.UserInfoRsp{}, nil
+}
+
+func (w *wx) GetPlatform() string {
+	return "wechat"
 }

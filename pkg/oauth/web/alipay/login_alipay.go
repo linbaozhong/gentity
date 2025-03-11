@@ -83,9 +83,8 @@ func (a *ali) client() *alipay.Client {
 	return aliClient
 }
 
-// GetLoginURL
-func (a *ali) GetLoginURL(ctx context.Context, state string) (string, error) {
-	web.StateCache.Save(ctx, state, struct{}{}, 10)
+// Authorize 生成支付宝授权链接
+func (a *ali) Authorize(ctx context.Context, state string) (string, error) {
 	u, e := a.client().PublicAppAuthorize([]string{"auth_user"}, a.returnUrl, state)
 	if e != nil {
 		return "", e
@@ -95,11 +94,6 @@ func (a *ali) GetLoginURL(ctx context.Context, state string) (string, error) {
 
 // Callback alipay 用户授权回调，使用授权码换取 access_token
 func (a *ali) Callback(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {
-	// 检查state是否存在,并在使用完成后移除
-	if _, e := web.StateCache.Fetch(ctx, state); e != nil {
-		return nil, types.NewError(conv.String2Int(string(alipay.CodeMissingParam)),
-			"state is not exist")
-	}
 	_res, e := a.client().SystemOauthToken(ctx,
 		alipay.SystemOauthToken{
 			Code:      code,
@@ -120,9 +114,8 @@ func (a *ali) Callback(ctx context.Context, code, state string) (*web.OauthToken
 			OpenId:       _res.OpenId,
 			UnionId:      _res.UnionId,
 		}
-		// 保存token
-		e = web.StateCache.Save(ctx, state, _token)
-		return _token, e
+
+		return _token, nil
 	}
 	return nil, types.NewError(conv.String2Int(string(_res.Code)),
 		_res.Error.Error())
@@ -165,6 +158,6 @@ func (a *ali) GetUserInfo(ctx context.Context, token string) (*web.UserInfoRsp, 
 		_res.Error.Error())
 }
 
-func (a *ali) Notify(ctx context.Context, req *alipay.Notification) (bool, error) {
-	return false, nil
+func (a *ali) GetPlatform() string {
+	return "alipay"
 }
