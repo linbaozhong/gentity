@@ -51,7 +51,7 @@ func WithPrefix(prefix string) option {
 // WithExpired 设置过期时间
 func WithExpired(duration time.Duration) option {
 	return func(o *syncMap) {
-		o.duration = int64(duration.Seconds())
+		o.duration = time.Now().Unix() + int64(duration.Seconds())
 	}
 }
 

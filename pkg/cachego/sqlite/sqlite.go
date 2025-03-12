@@ -75,7 +75,7 @@ func WithInterval(d time.Duration) option {
 // WithExpired 设置过期时间
 func WithExpired(duration time.Duration) option {
 	return func(o *sqlite) {
-		o.duration = int64(duration.Seconds())
+		o.duration = time.Now().Unix() + int64(duration.Seconds())
 	}
 }
 
@@ -141,7 +141,7 @@ func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value any, lifeTi
 
 	duration := s.duration
 	if len(lifeTime) > 0 {
-		duration = int64(lifeTime[0].Seconds())
+		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
 
 	result, err := s.db.ExecContext(ctx, "INSERT INTO "+s.name+"(value, expire,key) VALUES(?, ?, ?)", value, time.Now().Unix()+duration, s.getKey(key))
@@ -227,7 +227,7 @@ func (s *sqlite) Save(ctx context.Context, key string, value any, lifeTime ...ti
 	)
 	duration := s.duration
 	if len(lifeTime) > 0 {
-		duration = int64(lifeTime[0].Seconds())
+		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
 	// 查询是否存在
 	if s.Contains(ctx, key) {
