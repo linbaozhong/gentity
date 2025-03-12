@@ -86,7 +86,7 @@ func (sm *syncMap) read(ctx context.Context, key string) (*syncMapItem, error) {
 
 // Contains checks if cached key exists in SyncMap storage
 func (sm *syncMap) Contains(ctx context.Context, key string) bool {
-	return sm.storage.Has(key)
+	return sm.storage.Has(sm.getKey(key))
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
@@ -131,7 +131,7 @@ func (sm *syncMap) Fetch(ctx context.Context, key string) ([]byte, error) {
 func (sm *syncMap) FetchMulti(ctx context.Context, keys ...string) ([][]byte, error) {
 	vals := make([][]byte, 0, len(keys))
 	for _, key := range keys {
-		if b, err := sm.Fetch(ctx, sm.getKey(key)); err == nil {
+		if b, err := sm.Fetch(ctx, key); err == nil {
 			vals = append(vals, b)
 		} else {
 			vals = append(vals, nil)
