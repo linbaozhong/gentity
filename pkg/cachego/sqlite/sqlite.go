@@ -144,7 +144,7 @@ func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value any, lifeTi
 		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
 
-	result, err := s.db.ExecContext(ctx, "INSERT INTO "+s.name+"(value, expire,key) VALUES(?, ?, ?)", value, time.Now().Unix()+duration, s.getKey(key))
+	result, err := s.db.ExecContext(ctx, "INSERT INTO "+s.name+"(value, expire,key) VALUES(?, ?, ?)", value, duration, s.getKey(key))
 	if err != nil {
 		return false
 	}
