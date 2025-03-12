@@ -63,7 +63,7 @@ func New(driver *memcache.Client, opts ...option) cachego.Cache {
 
 // Contains checks if cached key exists in Memcached storage
 func (m *memcached) Contains(ctx context.Context, key string) bool {
-	_, err := m.Fetch(ctx, m.getKey(key))
+	_, err := m.Fetch(ctx, key)
 	return err == nil
 }
 
