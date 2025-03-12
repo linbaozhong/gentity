@@ -65,7 +65,7 @@ func New(opts ...option) cachego.Cache {
 }
 
 func (sm *syncMap) read(ctx context.Context, key string) (*syncMapItem, error) {
-	v, ok := sm.storage.Get(key)
+	v, ok := sm.storage.Get(sm.getKey(key))
 	if !ok {
 		return nil, cachego.ErrCacheMiss
 	}
@@ -119,7 +119,7 @@ func (sm *syncMap) PrefixDelete(ctx context.Context, prefix string) error {
 
 // Fetch retrieves the cached value from key of the SyncMap storage
 func (sm *syncMap) Fetch(ctx context.Context, key string) ([]byte, error) {
-	item, err := sm.read(ctx, sm.getKey(key))
+	item, err := sm.read(ctx, key)
 	if err != nil {
 		return nil, err
 	}
