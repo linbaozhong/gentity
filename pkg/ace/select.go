@@ -75,6 +75,7 @@ func newSelect(db Executer, tableName string) *Selector {
 	return obj
 }
 
+// Free 释放 Selector 对象，将其重置并放回对象池。
 func (s *Selector) Free() {
 	if s == nil || s.table == "" {
 		return
@@ -104,6 +105,7 @@ func (s *Selector) Free() {
 	selectPool.Put(s)
 }
 
+// String 返回 Selector 对象的 SQL 语句和参数的字符串表示。
 func (s *Selector) String() string {
 	if s.commandString.Len() == 0 {
 		s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.mergeParams()))
@@ -111,19 +113,22 @@ func (s *Selector) String() string {
 	return s.commandString.String()
 }
 
+// SetTableName 设置 Selector 对象的表名。
 func (s *Selector) SetTableName(n string) {
 	s.table = n
 }
 
+// GetTableName 获取 Selector 对象的表名。
 func (s *Selector) GetTableName() string {
 	return s.table
 }
 
+// GetCols 获取 Selector 对象要查询的列。
 func (s *Selector) GetCols() []dialect.Field {
 	return s.cols
 }
 
-// distinct
+// Distinct 设置查询结果去重，并指定去重的列。
 func (s *Selector) Distinct(cols ...dialect.Field) *Selector {
 	s.distinct = true
 	for _, col := range cols {
@@ -133,7 +138,7 @@ func (s *Selector) Distinct(cols ...dialect.Field) *Selector {
 	return s
 }
 
-// cols 字段
+// Cols 指定要查询的列
 func (s *Selector) Cols(cols ...dialect.Field) *Selector {
 	for _, col := range cols {
 		s.cols = append(s.cols, col)
@@ -141,7 +146,7 @@ func (s *Selector) Cols(cols ...dialect.Field) *Selector {
 	return s
 }
 
-// Omits 忽略字段
+// Omits 忽略指定的列
 func (s *Selector) Omits(cols ...dialect.Field) *Selector {
 	for _, col := range cols {
 		s.omits = append(s.omits, col)
@@ -149,7 +154,13 @@ func (s *Selector) Omits(cols ...dialect.Field) *Selector {
 	return s
 }
 
-// Funcs 聚合函数
+// Omit Deprecated: 此方法已弃用，请使用Omits
+// 忽略指定的列
+func (s *Selector) Omit(cols ...dialect.Field) *Selector {
+	return s.Omits(cols...)
+}
+
+// Funcs 添加聚合函数到查询中
 func (s *Selector) Funcs(fns ...dialect.Function) *Selector {
 	for _, fn := range fns {
 		s.funcs = append(s.funcs, fn())
@@ -157,7 +168,7 @@ func (s *Selector) Funcs(fns ...dialect.Function) *Selector {
 	return s
 }
 
-// Join 连接
+// Join 添加连接查询条件
 func (s *Selector) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) *Selector {
 	if s.err != nil {
 		return s
@@ -186,14 +197,17 @@ func (s *Selector) Join(joinType dialect.JoinType, left, right dialect.Field, fn
 	return s
 }
 
+// LeftJoin 添加左连接查询条件。
 func (s *Selector) LeftJoin(left, right dialect.Field, fns ...dialect.Condition) *Selector {
 	return s.Join(dialect.Left_Join, left, right, fns...)
 }
+
+// RightJoin 添加右连接查询条件。
 func (s *Selector) RightJoin(left, right dialect.Field, fns ...dialect.Condition) *Selector {
 	return s.Join(dialect.Right_Join, left, right, fns...)
 }
 
-// Where
+// Where 添加查询条件。
 func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 	if len(fns) == 0 || s.err != nil {
 		return s
@@ -225,7 +239,7 @@ func (s *Selector) Where(fns ...dialect.Condition) *Selector {
 	return s
 }
 
-// And
+// And 添加 AND 查询条件。
 func (s *Selector) And(fns ...dialect.Condition) *Selector {
 	if len(fns) == 0 || s.err != nil {
 		return s
@@ -256,7 +270,7 @@ func (s *Selector) And(fns ...dialect.Condition) *Selector {
 	return s
 }
 
-// Or
+// Or 添加 OR 查询条件。
 func (s *Selector) Or(fns ...dialect.Condition) *Selector {
 	if len(fns) == 0 || s.err != nil {
 		return s
@@ -308,12 +322,12 @@ func (s *Selector) OrderField(ords ...dialect.Order) *Selector {
 	return s.OrderFunc(ords...)
 }
 
-// Order
+// Order 指定查询结果的排序字段，默认升序。
 func (s *Selector) Order(cols ...dialect.Field) *Selector {
 	return s.Asc(cols...)
 }
 
-// Order Asc
+// Asc 指定查询结果按指定列升序排序。
 func (s *Selector) Asc(cols ...dialect.Field) *Selector {
 	if len(cols) == 0 {
 		return s
@@ -327,7 +341,7 @@ func (s *Selector) Asc(cols ...dialect.Field) *Selector {
 	return s
 }
 
-// Order Desc
+// Desc
 func (s *Selector) Desc(cols ...dialect.Field) *Selector {
 	if len(cols) == 0 {
 		return s
@@ -409,79 +423,6 @@ func (s *Selector) Page(pageIndex, pageSize uint) *Selector {
 	return s.Limit(pageSize, (pageIndex-1)*pageSize)
 }
 
-// parse
-func (s *Selector) parse() []dialect.Field {
-	s.command.WriteString("SELECT ")
-
-	var cols = util.SliceDiff(s.cols, s.omits)
-	colens := len(cols)
-	funlens := len(s.funcs)
-	if colens+funlens == 0 {
-		s.command.WriteString("*")
-	} else {
-		if s.distinct {
-			s.command.WriteString("DISTINCT ")
-		}
-		for i, col := range cols {
-			if i > 0 {
-				s.command.WriteString(",")
-			}
-			s.command.WriteString(col.Quote())
-		}
-		if colens > 0 && funlens > 0 {
-			s.command.WriteString(",")
-		}
-		s.command.WriteString(strings.Join(s.funcs, ","))
-	}
-
-	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
-	for _, j := range s.join {
-		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	}
-
-	// WHERE
-	if s.where.Len() > 0 {
-		s.command.WriteString(" WHERE " + s.where.String())
-	}
-	// GROUP BY
-	if s.groupBy.Len() > 0 {
-		s.command.WriteString(" GROUP BY " + s.groupBy.String())
-		// HAVING
-		if s.having.Len() > 0 {
-			s.command.WriteString(" HAVING " + s.having.String())
-			s.whereParams = append(s.whereParams, s.havingParams...)
-		}
-	}
-	// ORDER BY
-	if s.orderBy.Len() > 0 {
-		s.command.WriteString(" ORDER BY " + s.orderBy.String())
-	}
-
-	// LIMIT
-	if s.limit != "" {
-		s.command.WriteString(s.limit)
-	}
-
-	return cols
-}
-
-// query
-func (s *Selector) query(ctx context.Context) (*sql.Rows, error) {
-	_ = s.parse()
-
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	if err != nil {
-		return nil, err
-	}
-	if s.db.IsDB() {
-		defer stmt.Close()
-	}
-
-	row, err := stmt.QueryContext(ctx, s.mergeParams()...)
-	return row, err
-}
-
 // Query
 func (se *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 	s := se.Clone()
@@ -505,15 +446,16 @@ func (se *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
 
 	_ = s.parse()
 
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	if err != nil {
-		return nil, err
-	}
-	if s.db.IsDB() {
-		defer stmt.Close()
-	}
-
-	return stmt.QueryRowContext(ctx, s.mergeParams()...), nil
+	// stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if s.db.IsDB() {
+	// 	defer stmt.Close()
+	// }
+	//
+	// return stmt.QueryRowContext(ctx, s.mergeParams()...), nil
+	return s.row(ctx, s.command.String(), s.mergeParams()...)
 }
 
 // Get 返回单个数据，dest 必须是指针
@@ -691,15 +633,19 @@ func (se *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64
 		s.command.WriteString(s.limit)
 	}
 
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	// stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	// if err != nil {
+	// 	return 0, err
+	// }
+	// if s.db.IsDB() {
+	// 	defer stmt.Close()
+	// }
+	//
+	// row := stmt.QueryRowContext(ctx, s.mergeParams()...)
+	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
 	if err != nil {
 		return 0, err
 	}
-	if s.db.IsDB() {
-		defer stmt.Close()
-	}
-
-	row := stmt.QueryRowContext(ctx, s.mergeParams()...)
 	var count int64
 	err = row.Scan(&count)
 	if err != nil {
@@ -740,15 +686,20 @@ func (se *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...diale
 		s.command.WriteString(s.limit)
 	}
 
-	stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	// stmt, err := s.db.PrepareContext(ctx, s.command.String())
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if s.db.IsDB() {
+	// 	defer stmt.Close()
+	// }
+	//
+	// row := stmt.QueryRowContext(ctx, s.mergeParams()...)
+	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
 	if err != nil {
 		return nil, err
 	}
-	if s.db.IsDB() {
-		defer stmt.Close()
-	}
 
-	row := stmt.QueryRowContext(ctx, s.mergeParams()...)
 	var sum = make([]any, len(cols))
 	err = row.Scan(sum...)
 	if err != nil {
@@ -762,6 +713,63 @@ func (se *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...diale
 	return sums, nil
 }
 
+// Select 执行原生的 SQL 查询
+// 此方法接受一个上下文、原生 SQL 语句和对应的参数，返回查询结果和可能的错误
+func (se *Selector) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
+	s := se.Clone()
+	defer s.Free()
+
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	return s.rows(ctx, sqlStr, args...)
+}
+
+// SelectMap 执行原生 SQL 查询并返回 map[string]any
+func (se *Selector) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
+	rows, err := se.Select(ctx, sqlStr, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	dest := make(map[string]any)
+	return dest, r.MapScan(dest)
+}
+
+// SelectSlice 执行原生 SQL 查询并返回 []any
+func (se *Selector) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
+	rows, err := se.Select(ctx, sqlStr, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	return r.SliceScan()
+}
+
+// SelectModel 执行原生 SQL 查询并返回实现 dialect.Modeler 接口的结构体
+func (se *Selector) SelectModel(ctx context.Context, dest any, sqlStr string, args ...any) error {
+	rows, err := se.Select(ctx, sqlStr, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
+	// 否则，调用 scanAny 方法
+	if d, ok := dest.(dialect.Modeler); ok {
+		vals := d.AssignPtr()
+		return r.Scan(vals...)
+	}
+	return r.scanAny(dest, false)
+}
+
+// Clone 克隆 Selector
 func (s *Selector) Clone() Selector {
 	return *s
 }
@@ -778,4 +786,92 @@ func (s *Selector) mergeParams() []any {
 		return s.joinParams
 	}
 	return s.whereParams
+}
+
+// parse
+func (s *Selector) parse() []dialect.Field {
+	s.command.WriteString("SELECT ")
+
+	var cols = util.SliceDiff(s.cols, s.omits)
+	colens := len(cols)
+	funlens := len(s.funcs)
+	if colens+funlens == 0 {
+		s.command.WriteString("*")
+	} else {
+		if s.distinct {
+			s.command.WriteString("DISTINCT ")
+		}
+		for i, col := range cols {
+			if i > 0 {
+				s.command.WriteString(",")
+			}
+			s.command.WriteString(col.Quote())
+		}
+		if colens > 0 && funlens > 0 {
+			s.command.WriteString(",")
+		}
+		s.command.WriteString(strings.Join(s.funcs, ","))
+	}
+
+	// FROM TABLE
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	for _, j := range s.join {
+		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	}
+
+	// WHERE
+	if s.where.Len() > 0 {
+		s.command.WriteString(" WHERE " + s.where.String())
+	}
+	// GROUP BY
+	if s.groupBy.Len() > 0 {
+		s.command.WriteString(" GROUP BY " + s.groupBy.String())
+		// HAVING
+		if s.having.Len() > 0 {
+			s.command.WriteString(" HAVING " + s.having.String())
+			s.whereParams = append(s.whereParams, s.havingParams...)
+		}
+	}
+	// ORDER BY
+	if s.orderBy.Len() > 0 {
+		s.command.WriteString(" ORDER BY " + s.orderBy.String())
+	}
+
+	// LIMIT
+	if s.limit != "" {
+		s.command.WriteString(s.limit)
+	}
+
+	return cols
+}
+
+// query
+func (s *Selector) query(ctx context.Context) (*sql.Rows, error) {
+	_ = s.parse()
+	return s.rows(ctx, s.command.String(), s.mergeParams()...)
+}
+
+func (s *Selector) rows(ctx context.Context, sql string, params ...any) (*sql.Rows, error) {
+	stmt, err := s.db.PrepareContext(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
+
+	rows, err := stmt.QueryContext(ctx, params...)
+	return rows, err
+}
+
+func (s *Selector) row(ctx context.Context, sql string, params ...any) (*sql.Row, error) {
+	stmt, err := s.db.PrepareContext(ctx, sql)
+	if err != nil {
+		return nil, err
+	}
+	if s.db.IsDB() {
+		defer stmt.Close()
+	}
+
+	return stmt.QueryRowContext(ctx, s.mergeParams()...), nil
 }

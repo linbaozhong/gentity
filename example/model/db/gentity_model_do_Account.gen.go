@@ -163,10 +163,7 @@ func (p *Account) Scan(rows *sql.Rows, args ...dialect.Field) ([]Account, bool, 
 		log.Error(e)
 		return nil, false, e
 	}
-	if len(accounts) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
-	return accounts, true, nil
+	return accounts, len(accounts) > 0, nil
 }
 
 func (p *Account) AssignValues(args ...dialect.Field) ([]string, []any) {

@@ -235,10 +235,7 @@ func (p *Company) Scan(rows *sql.Rows, args ...dialect.Field) ([]Company, bool, 
 		log.Error(e)
 		return nil, false, e
 	}
-	if len(companys) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
-	return companys, true, nil
+	return companys, len(companys) > 0, nil
 }
 
 func (p *Company) AssignValues(args ...dialect.Field) ([]string, []any) {

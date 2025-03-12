@@ -219,10 +219,7 @@ func (p *CompanyStamp) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanySta
 		log.Error(e)
 		return nil, false, e
 	}
-	if len(company_stamps) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
-	return company_stamps, true, nil
+	return company_stamps, len(company_stamps) > 0, nil
 }
 
 func (p *CompanyStamp) AssignValues(args ...dialect.Field) ([]string, []any) {

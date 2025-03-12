@@ -203,10 +203,7 @@ func (p *DocumentTemplate) Scan(rows *sql.Rows, args ...dialect.Field) ([]Docume
 		log.Error(e)
 		return nil, false, e
 	}
-	if len(document_templates) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
-	return document_templates, true, nil
+	return document_templates, len(document_templates) > 0, nil
 }
 
 func (p *DocumentTemplate) AssignValues(args ...dialect.Field) ([]string, []any) {

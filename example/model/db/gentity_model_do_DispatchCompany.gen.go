@@ -179,10 +179,7 @@ func (p *DispatchCompany) Scan(rows *sql.Rows, args ...dialect.Field) ([]Dispatc
 		log.Error(e)
 		return nil, false, e
 	}
-	if len(dispatch_companys) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
-	return dispatch_companys, true, nil
+	return dispatch_companys, len(dispatch_companys) > 0, nil
 }
 
 func (p *DispatchCompany) AssignValues(args ...dialect.Field) ([]string, []any) {

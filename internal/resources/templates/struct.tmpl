@@ -150,10 +150,7 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]{{.Stru
 		log.Error(e)
 		return nil, false, e
 	}
-	if len({{.TableName}}s) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
-	return {{.TableName}}s, true, nil
+	return {{.TableName}}s, len({{.TableName}}s) > 0, nil
 }
 
 func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {

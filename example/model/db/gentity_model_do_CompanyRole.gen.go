@@ -171,10 +171,7 @@ func (p *CompanyRole) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyRole
 		log.Error(e)
 		return nil, false, e
 	}
-	if len(company_roles) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
-	return company_roles, true, nil
+	return company_roles, len(company_roles) > 0, nil
 }
 
 func (p *CompanyRole) AssignValues(args ...dialect.Field) ([]string, []any) {

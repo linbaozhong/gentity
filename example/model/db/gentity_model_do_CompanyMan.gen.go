@@ -187,10 +187,7 @@ func (p *CompanyMan) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyMan, 
 		log.Error(e)
 		return nil, false, e
 	}
-	if len(company_mans) == 0 {
-		return nil, false, sql.ErrNoRows
-	}
-	return company_mans, true, nil
+	return company_mans, len(company_mans) > 0, nil
 }
 
 func (p *CompanyMan) AssignValues(args ...dialect.Field) ([]string, []any) {

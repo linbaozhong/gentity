@@ -211,6 +211,11 @@ func (p *daoDocumentTemplate) SelectAll(ctx context.Context, s *ace.Selector) ([
 	}
 
 	_cols := s.GetCols()
+	if len(_cols) == 0 {
+		_cols = tbldocumenttemplate.ReadableFields
+		s.Cols(_cols...)
+	}
+
 	_rows, e := s.Query(ctx)
 	if e != nil {
 		log.Error(e)
@@ -251,10 +256,10 @@ func (p *daoDocumentTemplate) Get4Cols(ctx context.Context, cols []dialect.Field
 
 	e = _row.Scan(_obj.AssignPtr(cols...)...)
 	switch e {
-	case sql.ErrNoRows:
-		return _obj, false, nil
 	case nil:
 		return _obj, true, nil
+	case sql.ErrNoRows:
+		return _obj, false, nil
 	default:
 		log.Error(e)
 		return _obj, false, e
@@ -317,10 +322,10 @@ func (p *daoDocumentTemplate) GetFirstCell(ctx context.Context, col dialect.Fiel
 	var _v any
 	e = _row.Scan(&_v)
 	switch e {
-	case sql.ErrNoRows:
-		return _v, false, nil
 	case nil:
 		return _v, true, nil
+	case sql.ErrNoRows:
+		return _v, false, nil
 	default:
 		log.Error(e)
 		return _v, false, e
@@ -405,10 +410,10 @@ func (p *daoDocumentTemplate) Exists(ctx context.Context, cond ...dialect.Condit
 	var id types.BigInt
 	e = _row.Scan(&id)
 	switch e {
-	case sql.ErrNoRows:
-		return false, nil
 	case nil:
 		return true, nil
+	case sql.ErrNoRows:
+		return false, nil
 	default:
 		return false, e
 	}
