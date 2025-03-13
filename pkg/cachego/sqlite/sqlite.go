@@ -97,6 +97,7 @@ func New(ctx context.Context, opts ...option) cachego.Cache {
 		db:       cacheDB,
 		name:     cacheTableName,
 		interval: cacheCleanupInterval,
+		lastTime: time.Now(),
 	}
 
 	for _, opt := range opts {
@@ -163,14 +164,11 @@ func (s *sqlite) PrefixDelete(ctx context.Context, prefix string) error {
 }
 
 func (s *sqlite) Fetch(ctx context.Context, key string) ([]byte, error) {
-	s.lastTime = time.Now()
-
 	var value []byte
 	err := s.db.QueryRowContext(ctx, "SELECT value FROM "+s.name+" WHERE key = ? AND expire > ?",
 		s.getKey(key),
 		time.Now().Unix(),
 	).Scan(&value)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, cachego.ErrCacheMiss
@@ -181,7 +179,6 @@ func (s *sqlite) Fetch(ctx context.Context, key string) ([]byte, error) {
 }
 
 func (s *sqlite) FetchMulti(ctx context.Context, keys ...string) ([][]byte, error) {
-	s.lastTime = time.Now()
 	var (
 		l           = len(keys)
 		vals        = make([][]byte, 0, l)
@@ -239,7 +236,7 @@ func (s *sqlite) Save(ctx context.Context, key string, value any, lifeTime ...ti
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, value, time.Now().Unix()+duration, s.getKey(key))
+	_, err = stmt.ExecContext(ctx, value, duration, s.getKey(key))
 	if err != nil {
 		return err
 	}
@@ -280,6 +277,7 @@ func (s *sqlite) cleanup(ctx context.Context) {
 		case <-cleanTimer.C:
 			if time.Since(s.lastTime) > s.interval {
 				s.db.ExecContext(ctx, "DELETE FROM "+s.name+" WHERE expire < ?", time.Now().Unix())
+				s.lastTime = time.Now()
 			}
 			// 重置定时器。
 			cleanTimer.Reset(s.interval)
