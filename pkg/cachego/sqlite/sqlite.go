@@ -17,7 +17,6 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/log"
 	_ "github.com/mattn/go-sqlite3"
@@ -276,7 +275,7 @@ func (s *sqlite) cleanup(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done(): // 如果上下文被取消，退出并清理goroutine。
-			fmt.Println("cleanup exit")
+			log.Info("sqlite cache exit")
 			return
 		case <-cleanTimer.C:
 			if time.Since(s.lastTime) > s.interval {

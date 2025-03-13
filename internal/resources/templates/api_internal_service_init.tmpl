@@ -2,30 +2,39 @@ package service
 
 import (
 	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"sync"
 )
 
+type service struct{}
+
 var (
 	db       *ace.DB
 	openOnce sync.Once
+	serve    *service
 )
 
-func Open() error {
+func init() {
+	// 注册服务启动器
+	app.RegisterServiceLauncher(serve)
+}
+
+func (s *service) Launch() error {
+	// 启动服务
+	var e error
 	openOnce.Do(func() {
-		var e error
 		db, e = ace.Connect("mysql",
 			"user:password@tcp(0.0.0.0:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local")
 		if e != nil {
-			log.Fatal(e)
+			return
 		}
 		db.SetMaxOpenConns(50)
 		db.SetMaxIdleConns(25)
 		db.SetDebug(true)
 	})
-	return nil
-}
-
-func GetDB() *ace.DB {
-	return db
+	if e != nil {
+		log.Fatal(e)
+	}
+	return e
 }

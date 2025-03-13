@@ -8,7 +8,6 @@ import (
 	"github.com/linbaozhong/gentity/pkg/log"
 	"os"
 	"{{.ModulePath}}/internal/router"
-	"{{.ModulePath}}/internal/service"
 	"time"
 )
 
@@ -27,9 +26,12 @@ func main() {
 	}
 
 	log.Register(false)
-	log.Info(fmt.Sprintf("%s %s %s 服务已开启", "{{.ModulePath}} Api", "0.1", _port))
-	// 启动API服务
-	_app := router.Init()
+	log.Info(fmt.Sprintf("%s %s %s 服务开启中...", "{{.ModulePath}} Api", "0.1", _port))
+
+	// 启动前置服务
+	app.Launch()
+	// 启动路由服务
+	_service := router.Init()
 
 	_idleConnsClosed := make(chan struct{})
 	api.OnInterrupt(func() {
@@ -37,21 +39,17 @@ func main() {
 		_ctx, _cancel := context.WithTimeout(context.Background(), _timeout)
 		defer _cancel()
 		// close all hosts.
-		_app.Shutdown(_ctx)
-		closing("{{.ModulePath}} Api", "0.1", _port)
+		_service.Shutdown(_ctx)
+		// 关闭其他服务
+		app.Close()
+		log.Fatal(fmt.Sprintf("%s %s %s 服务已关闭", "{{.ModulePath}} Api", "0.1", _port))
 		close(_idleConnsClosed)
 	})
 
-	service.Open()
-
-	if e := _app.Listen(_port); e != nil {
+	if e := _service.Listen(_port); e != nil {
 		log.Error(e)
 	}
 
 	// 优雅地关闭
 	<-_idleConnsClosed
-}
-func closing(name, ver, addr string) {
-	app.Close()
-	log.Fatal(fmt.Sprintf("%s %s %s 服务已关闭", name, ver, addr))
 }

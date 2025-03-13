@@ -82,12 +82,10 @@ func Connect(driverName, dns string) (*DB, error) {
 	dialect.Register(driverName)
 	db, e := sql.Open(driverName, dns)
 	if e != nil {
-		log.Panic(e)
 		return nil, e
 	}
 	if e = db.Ping(); e != nil {
 		db.Close()
-		log.Panic(e)
 		return nil, e
 	}
 

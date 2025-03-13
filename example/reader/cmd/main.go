@@ -8,7 +8,6 @@ import (
 	"github.com/linbaozhong/gentity/pkg/log"
 	"os"
 	"reader/internal/router"
-	"reader/internal/service"
 	"time"
 )
 
@@ -42,7 +41,7 @@ func main() {
 		close(idleConnsClosed)
 	})
 
-	service.Open()
+	app.Launch()
 
 	if err := _app.Listen(port); err != nil {
 		log.Error(err)
