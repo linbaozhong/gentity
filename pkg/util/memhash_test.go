@@ -42,7 +42,9 @@ func BenchmarkMemHash(b *testing.B) {
 	}
 }
 
+type myint float64
+
 func TestIIF(t *testing.T) {
-	var b = false
-	t.Log(IIF(b, 0.33, 4.0))
+	var b myint = 22
+	t.Log(IIF(false, b, 4.03))
 }
