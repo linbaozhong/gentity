@@ -122,7 +122,7 @@ func Bytes2Any[T b2a](b []byte, r T) error {
 
 // Any2Bytes 泛型数据类型
 type a2b interface {
-	string | bool | []byte | time.Time | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64 | any
+	~string | ~bool | ~[]byte | time.Time | ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~float32 | ~float64 | any
 }
 
 func Any2Bytes[T a2b](s T) ([]byte, error) {
