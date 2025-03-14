@@ -1,14 +1,10 @@
 package conv
 
 import (
+	"encoding/json"
 	"fmt"
-	jsoniter "github.com/json-iterator/go"
 	"strconv"
 	"time"
-)
-
-var (
-	json = jsoniter.ConfigCompatibleWithStandardLibrary
 )
 
 func Any2Time(s any, def ...time.Time) time.Time {

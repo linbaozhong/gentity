@@ -2,6 +2,7 @@ package conv
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"math"
 	"runtime"
