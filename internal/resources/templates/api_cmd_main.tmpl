@@ -8,6 +8,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/log"
 	"os"
 	"{{.ModulePath}}/internal/router"
+	"{{.ModulePath}}/internal/service"
 	"time"
 )
 
@@ -29,7 +30,7 @@ func main() {
 	log.Info(fmt.Sprintf("%s %s %s 服务开启中...", "{{.ModulePath}} Api", "0.1", _port))
 
 	// 启动前置服务
-	app.Launch()
+	Prepare()
 	// 启动路由服务
 	_service := router.Init()
 
@@ -41,7 +42,7 @@ func main() {
 		// close all hosts.
 		_service.Shutdown(_ctx)
 		// 关闭其他服务
-		app.Close()
+		Finished()
 		log.Fatal(fmt.Sprintf("%s %s %s 服务已关闭", "{{.ModulePath}} Api", "0.1", _port))
 		close(_idleConnsClosed)
 	})
@@ -52,4 +53,16 @@ func main() {
 
 	// 优雅地关闭
 	<-_idleConnsClosed
+}
+
+
+// Prepare 系统启动所需要的必须服务
+func Prepare() {
+	// 连接数据库
+	service.Connected()
+}
+
+// Finished 系统关闭后结束所有其他的服务
+func Finished() {
+	app.Close()
 }
