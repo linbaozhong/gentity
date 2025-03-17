@@ -14,6 +14,11 @@
 
 package sse
 
+import (
+	"github.com/r3labs/sse/v2"
+	"net/http"
+)
+
 var (
 	manager *ServerManager
 )
@@ -21,4 +26,12 @@ var (
 func Start() error {
 	manager = NewServerManager()
 	return nil
+}
+
+func Publish(theme string) *sse.Stream {
+	return manager.server.CreateStream(theme)
+}
+
+func ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	manager.server.ServeHTTP(w, r)
 }

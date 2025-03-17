@@ -50,10 +50,6 @@ func (m *ServerManager) GetGroup(groupName string) *ClientGroup {
 	return group
 }
 
-func (m *ServerManager) Subscribe(theme string) *sse.Stream {
-	return m.server.CreateStream(theme)
-}
-
 // Broadcast 向所有客户端广播消息
 func (m *ServerManager) Broadcast(eventType []byte, data any) {
 	message, err := json.Marshal(data)
