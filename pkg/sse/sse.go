@@ -15,23 +15,35 @@
 package sse
 
 import (
-	"github.com/r3labs/sse/v2"
-	"net/http"
+	"github.com/linbaozhong/gentity/pkg/api"
+	"github.com/linbaozhong/sse/v2"
 )
 
 var (
-	manager *ServerManager
+	_sseServer *sse.Server
 )
 
 func Start() error {
-	manager = NewServerManager()
+	_sseServer = sse.New()
 	return nil
 }
 
-func Publish(theme string) *sse.Stream {
-	return manager.server.CreateStream(theme)
+func Close() {
+	if _sseServer == nil {
+		return
+	}
+	_sseServer.Close()
 }
 
-func ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	manager.server.ServeHTTP(w, r)
+func ServeHTTP(ctx api.Context, clientID, lastEventId string) {
+	if _sseServer == nil {
+		Start()
+	}
+	w := ctx.ResponseWriter()
+	r := ctx.Request()
+	query := r.URL.Query()
+	query.Set("stream", clientID)
+	r.URL.RawQuery = query.Encode()
+	r.Header.Set("Last-Event-ID", lastEventId)
+	_sseServer.ServeHTTP(w, r)
 }

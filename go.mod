@@ -15,6 +15,7 @@ require (
 	github.com/linbaozhong/alipay/v3 v3.0.0-20250306030940-16a57d710961
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/orcaman/concurrent-map/v2 v2.0.1
+	github.com/r3labs/sse/v2 v2.10.0
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/spf13/cobra v1.8.1
 	github.com/tidwall/match v1.1.1
@@ -29,15 +30,11 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
 	github.com/CloudyKit/jet/v6 v6.2.0 // indirect
-	github.com/GeertJohan/go.rice v1.0.3 // indirect
 	github.com/Joker/jade v1.1.3 // indirect
 	github.com/Shopify/goreferrer v0.0.0-20220729165902-8cddb4f5de06 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/azer/debug v0.0.0-20141116004914-4769e572857f // indirect
-	github.com/azer/go-style v0.0.0-20130627093536-14e31c5abbe5 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/daaku/go.zipexe v1.0.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
@@ -57,12 +54,11 @@ require (
 	github.com/kataras/sitemap v0.0.6 // indirect
 	github.com/kataras/tunnel v0.0.4 // indirect
 	github.com/klauspost/compress v1.17.7 // indirect
+	github.com/linbaozhong/sse/v2 v2.10.0 // indirect
 	github.com/mailgun/raymond/v2 v2.0.48 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
-	github.com/mroth/sseserver v1.1.2 // indirect
-	github.com/r3labs/sse/v2 v2.10.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
