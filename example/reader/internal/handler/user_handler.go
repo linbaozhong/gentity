@@ -17,6 +17,7 @@ func (u *user) RegisterRoute(group api.Party) {
 
 	g.Post("/user_register", u.userRegister)
 	g.Get("/get", u.get)
+	g.Get("/sse", u.sse)
 }
 
 // @Summary 增加用工企业
@@ -33,4 +34,8 @@ func (u *user) userRegister(c api.Context) {
 
 func (u *user) get(c api.Context) {
 	api.Get(c, userService.GetUser)
+}
+
+func (u *user) sse(c api.Context) {
+	api.SSE(c)
 }

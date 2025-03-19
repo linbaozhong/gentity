@@ -17,6 +17,8 @@ package api
 import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/sse"
+	"github.com/linbaozhong/gentity/pkg/token"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
@@ -203,5 +205,25 @@ func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) err
 		return e
 	}
 	ctx.Redirect(resp)
+	return nil
+}
+
+// SSE Server Side Event 请求
+// token: 客户端token
+// last_event_id: 上次的event id
+func SSE(ctx Context) error {
+	var (
+		_clientId    string
+		_lastEventId string
+	)
+	values := ctx.Request().URL.Query()
+
+	_tk := values.Get("token")
+	if len(_tk) > 0 {
+		_clientId, _, _ = token.GetIDAndTokenFromCipher(_tk)
+	}
+
+	_lastEventId = values.Get("last_event_id")
+	sse.ServeHTTP(ctx, _clientId, _lastEventId)
 	return nil
 }

@@ -19,6 +19,11 @@ import (
 	"github.com/linbaozhong/sse/v2"
 )
 
+type Payload struct {
+	Token       string `json:"token"`
+	LastEventId string `json:"lastEventId"`
+}
+
 var (
 	_sseServer *sse.Server
 )
@@ -41,9 +46,13 @@ func ServeHTTP(ctx api.Context, clientID, lastEventId string) {
 	}
 	w := ctx.ResponseWriter()
 	r := ctx.Request()
+
 	query := r.URL.Query()
 	query.Set("stream", clientID)
 	r.URL.RawQuery = query.Encode()
 	r.Header.Set("Last-Event-ID", lastEventId)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	_sseServer.ServeHTTP(w, r)
 }
