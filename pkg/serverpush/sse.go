@@ -23,8 +23,30 @@ var (
 	_sseServer *sse.Server
 )
 
-func Start() error {
+// option 服务端推送配置
+type option func(*sse.Server)
+
+// WithAutoStream 是否自动创建流, 即当客户端连接后是否自动创建新的流
+func WithAutoStream(autoStream bool) option {
+	return func(s *sse.Server) {
+		s.AutoStream = autoStream
+	}
+}
+
+// WithAutoReplay 是否自动重放, 即当客户端断开并重新连接后是否自动重放事件
+func WithAutoReplay(autoReplay bool) option {
+	return func(s *sse.Server) {
+		s.AutoReplay = autoReplay
+	}
+}
+
+// Start 启动服务
+// 初始化sse服务
+func Start(opts ...option) error {
 	_sseServer = sse.New()
+	for _, opt := range opts {
+		opt(_sseServer)
+	}
 	return nil
 }
 
