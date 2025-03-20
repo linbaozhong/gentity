@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/linbaozhong/gentity/pkg/api"
-	"github.com/linbaozhong/gentity/pkg/sse"
+	"github.com/linbaozhong/gentity/pkg/serverpush"
 	"github.com/linbaozhong/gentity/pkg/token"
 	_ "reader/internal/model/dto"
 	userService "reader/internal/service/user"
@@ -48,5 +48,5 @@ func (u *user) sse(c api.Context) {
 	}
 
 	_lastEventId := values.Get("last_event_id")
-	sse.ServeHTTP(c, _clientId, _lastEventId)
+	serverpush.ServeHTTP(c, _clientId, _lastEventId)
 }

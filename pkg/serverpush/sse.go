@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sse
+package serverpush
 
 import (
 	"github.com/linbaozhong/gentity/pkg/api"
@@ -33,6 +33,19 @@ func Close() {
 		return
 	}
 	_sseServer.Close()
+}
+
+// Push 推送事件
+// streamID: 流ID
+// event: 事件
+func Push(streamID string, event *sse.Event) {
+	_sseServer.Publish(streamID, event)
+}
+
+// Boardcast 广播事件
+// event: 事件
+func Boardcast(event *sse.Event) {
+	_sseServer.Boardcast(event)
 }
 
 // ServeHTTP 服务端推送

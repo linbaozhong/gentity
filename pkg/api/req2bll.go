@@ -17,7 +17,7 @@ package api
 import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"github.com/linbaozhong/gentity/pkg/sse"
+	"github.com/linbaozhong/gentity/pkg/serverpush"
 	"github.com/linbaozhong/gentity/pkg/token"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
@@ -224,6 +224,6 @@ func SSE(ctx Context) error {
 	}
 
 	_lastEventId = values.Get("last_event_id")
-	sse.ServeHTTP(ctx, _clientId, _lastEventId)
+	serverpush.ServeHTTP(ctx, _clientId, _lastEventId)
 	return nil
 }

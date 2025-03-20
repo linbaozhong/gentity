@@ -13,7 +13,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/linbaozhong/alipay/v3 v3.0.0-20250306030940-16a57d710961
-	github.com/linbaozhong/sse/v2 v2.10.2
+	github.com/linbaozhong/sse/v2 v2.10.3
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/redis/go-redis/v9 v9.5.1
