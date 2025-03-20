@@ -60,6 +60,9 @@ func Close() {
 // CreateStream 创建流
 // streamID: 流ID
 func CreateStream(streamID string) {
+	if _sseServer == nil {
+		Start(WithAutoStream(true), WithAutoReplay(true))
+	}
 	_sseServer.CreateStream(streamID)
 }
 
@@ -67,12 +70,18 @@ func CreateStream(streamID string) {
 // streamID: 流ID
 // event: 事件
 func Push(streamID string, event *sse.Event) {
+	if _sseServer == nil {
+		Start(WithAutoStream(true), WithAutoReplay(true))
+	}
 	_sseServer.Publish(streamID, event)
 }
 
 // Boardcast 广播事件
 // event: 事件
 func Boardcast(event *sse.Event) {
+	if _sseServer == nil {
+		Start(WithAutoStream(true), WithAutoReplay(true))
+	}
 	_sseServer.Boardcast(event)
 }
 
@@ -81,7 +90,7 @@ func Boardcast(event *sse.Event) {
 // lastEventId: 上次的event id
 func ServeHTTP(ctx api.Context, streamID, lastEventId string) {
 	if _sseServer == nil {
-		Start()
+		Start(WithAutoStream(true), WithAutoReplay(true))
 	}
 
 	ctx.Header("Access-Control-Allow-Origin", "*")
