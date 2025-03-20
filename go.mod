@@ -13,10 +13,11 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/linbaozhong/alipay/v3 v3.0.0-20250306030940-16a57d710961
+	github.com/linbaozhong/sse/v2 v2.10.2
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/orcaman/concurrent-map/v2 v2.0.1
-	github.com/r3labs/sse/v2 v2.10.0
 	github.com/redis/go-redis/v9 v9.5.1
+	github.com/sekrat/aescrypter v1.0.0
 	github.com/spf13/cobra v1.8.1
 	github.com/tidwall/match v1.1.1
 	github.com/tidwall/pretty v1.2.0
@@ -54,14 +55,12 @@ require (
 	github.com/kataras/sitemap v0.0.6 // indirect
 	github.com/kataras/tunnel v0.0.4 // indirect
 	github.com/klauspost/compress v1.17.7 // indirect
-	github.com/linbaozhong/sse/v2 v2.10.0 // indirect
 	github.com/mailgun/raymond/v2 v2.0.48 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
-	github.com/sekrat/aescrypter v1.0.0 // indirect
 	github.com/sekrat/sekrat v1.0.1 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/smartwalle/alipay/v3 v3.2.25 // indirect

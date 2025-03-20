@@ -19,11 +19,6 @@ import (
 	"github.com/linbaozhong/sse/v2"
 )
 
-type Payload struct {
-	Token       string `json:"token"`
-	LastEventId string `json:"lastEventId"`
-}
-
 var (
 	_sseServer *sse.Server
 )
@@ -40,19 +35,21 @@ func Close() {
 	_sseServer.Close()
 }
 
-func ServeHTTP(ctx api.Context, clientID, lastEventId string) {
+// ServeHTTP 服务端推送
+// streamID: 流ID
+// lastEventId: 上次的event id
+func ServeHTTP(ctx api.Context, streamID, lastEventId string) {
 	if _sseServer == nil {
 		Start()
 	}
-	w := ctx.ResponseWriter()
+
+	ctx.Header("Access-Control-Allow-Origin", "*")
+
 	r := ctx.Request()
-
 	query := r.URL.Query()
-	query.Set("stream", clientID)
+	query.Set(sse.StreamKey, streamID)
+	query.Set(sse.LastEventIdKey, lastEventId)
 	r.URL.RawQuery = query.Encode()
-	r.Header.Set("Last-Event-ID", lastEventId)
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	_sseServer.ServeHTTP(w, r)
+	_sseServer.ServeHTTP(ctx.ResponseWriter(), r)
 }

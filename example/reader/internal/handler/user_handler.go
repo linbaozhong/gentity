@@ -2,6 +2,8 @@ package handler
 
 import (
 	"github.com/linbaozhong/gentity/pkg/api"
+	"github.com/linbaozhong/gentity/pkg/sse"
+	"github.com/linbaozhong/gentity/pkg/token"
 	_ "reader/internal/model/dto"
 	userService "reader/internal/service/user"
 )
@@ -37,5 +39,14 @@ func (u *user) get(c api.Context) {
 }
 
 func (u *user) sse(c api.Context) {
-	api.SSE(c)
+	var _clientId string
+	values := c.Request().URL.Query()
+
+	_tk := values.Get("token")
+	if _tk != "" {
+		_clientId, _, _ = token.GetIDAndTokenFromCipher(_tk)
+	}
+
+	_lastEventId := values.Get("last_event_id")
+	sse.ServeHTTP(c, _clientId, _lastEventId)
 }
