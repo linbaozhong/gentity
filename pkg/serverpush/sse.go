@@ -57,6 +57,12 @@ func Close() {
 	_sseServer.Close()
 }
 
+// CreateStream 创建流
+// streamID: 流ID
+func CreateStream(streamID string) {
+	_sseServer.CreateStream(streamID)
+}
+
 // Push 推送事件
 // streamID: 流ID
 // event: 事件
