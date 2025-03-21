@@ -190,6 +190,19 @@ func (p *CompanyMan) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyMan, 
 	return company_mans, len(company_mans) > 0, nil
 }
 
+// RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
+// 如果 args 为空，则赋值所有可写字段
+// 如果 args 不为空，则只赋值 args 中的字段
+func (p *CompanyMan) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+	if len(args) == 0 {
+		args = tblcompanyman.WritableFields
+	}
+	return p.AssignValues(args...)
+}
+
+// AssignValues 向数据库写入数据前，为表列赋值。
+// 如果 args 为空，则将非零值赋与可写字段
+// 如果 args 不为空，则只赋值 args 中的字段
 func (p *CompanyMan) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)

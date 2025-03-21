@@ -37,6 +37,7 @@ type (
 		TableName() string
 		AssignPtr(args ...Field) []any
 		AssignValues(args ...Field) ([]string, []any)
+		RawAssignValues(args ...Field) ([]string, []any)
 		AssignKeys() (Field, any)
 		AssignPrimaryKeyValues(result sql.Result) error
 	}

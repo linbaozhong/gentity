@@ -197,7 +197,7 @@ func (c *Creator) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sq
 	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
 
 	var _cols []string
-	_cols, c.params = beans[0].AssignValues(c.affect...)
+	_cols, c.params = beans[0].RawAssignValues(c.affect...)
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
@@ -223,7 +223,7 @@ func (c *Creator) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sq
 			if bean == nil {
 				return nil, dialect.ErrBeanEmpty
 			}
-			_, c.params = bean.AssignValues(c.affect...)
+			_, c.params = bean.RawAssignValues(c.affect...)
 			result, err = stmt.ExecContext(ctx, c.params...)
 			if err != nil {
 				return nil, err

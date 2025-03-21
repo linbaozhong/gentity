@@ -336,7 +336,7 @@ func (u *Updater) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sq
 	}
 
 	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
-	cols, vals := beans[0].AssignValues(u.affect...)
+	cols, vals := beans[0].RawAssignValues(u.affect...)
 	for i, col := range cols {
 		if i > 0 {
 			u.command.WriteString(",")
@@ -374,7 +374,7 @@ func (u *Updater) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sq
 			if bean == nil {
 				return nil, dialect.ErrBeanEmpty
 			}
-			_, vals = bean.AssignValues(u.affect...)
+			_, vals = bean.RawAssignValues(u.affect...)
 			u.params = u.params[:0]
 			u.params = append(u.params, vals...)
 			//

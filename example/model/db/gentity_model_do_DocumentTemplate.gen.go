@@ -206,6 +206,19 @@ func (p *DocumentTemplate) Scan(rows *sql.Rows, args ...dialect.Field) ([]Docume
 	return document_templates, len(document_templates) > 0, nil
 }
 
+// RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
+// 如果 args 为空，则赋值所有可写字段
+// 如果 args 不为空，则只赋值 args 中的字段
+func (p *DocumentTemplate) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+	if len(args) == 0 {
+		args = tbldocumenttemplate.WritableFields
+	}
+	return p.AssignValues(args...)
+}
+
+// AssignValues 向数据库写入数据前，为表列赋值。
+// 如果 args 为空，则将非零值赋与可写字段
+// 如果 args 不为空，则只赋值 args 中的字段
 func (p *DocumentTemplate) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)

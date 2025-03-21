@@ -174,6 +174,19 @@ func (p *CompanyRole) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyRole
 	return company_roles, len(company_roles) > 0, nil
 }
 
+// RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
+// 如果 args 为空，则赋值所有可写字段
+// 如果 args 不为空，则只赋值 args 中的字段
+func (p *CompanyRole) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+	if len(args) == 0 {
+		args = tblcompanyrole.WritableFields
+	}
+	return p.AssignValues(args...)
+}
+
+// AssignValues 向数据库写入数据前，为表列赋值。
+// 如果 args 为空，则将非零值赋与可写字段
+// 如果 args 不为空，则只赋值 args 中的字段
 func (p *CompanyRole) AssignValues(args ...dialect.Field) ([]string, []any) {
 	var (
 		_lens = len(args)
