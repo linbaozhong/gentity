@@ -18,8 +18,8 @@ serverpush.Close()
 ```
 ## 3. 推送消息
 ```go
-// 推送消息
-serverpush.Push("test", "hello world")
+// 推送消息,
+serverpush.Push("streamId", "hello world")
 ```
 ## 4. 广播消息
 ```go
@@ -49,29 +49,29 @@ func (s *sevent) RegisterRoute(group api.Party) {
 }
 
 func (s *sevent) connect(c api.Context) {
-	var _clientId string
+	var _streamId string
 	
 	values := c.Request().URL.Query()
 	// 从查询参数中获取名为 "tk" 的值，并从加密的令牌中解析出 ID 和令牌
 	_tk := values.Get("tk")
 	if _tk != "" {
-		_clientId, _, _ = token.GetIDAndTokenFromCipher(_tk)
+		_streamId, _, _ = token.GetIDAndTokenFromCipher(_tk)
 	}
 	// 从查询参数中获取名为 "event_id" 的值，
 	_lastEventId := values.Get("event_id")
 	// 启动一个 goroutine，在 1 秒后向客户端模拟推送事件
 	go func() {
 		time.Sleep(time.Second)
-		serverpush.Push(_clientId, &sse.Event{
+		serverpush.Push(_streamId, &sse.Event{
 			Data: []byte("hello world"),
 		})
-		serverpush.Push(_clientId, &sse.Event{
+		serverpush.Push(_streamId, &sse.Event{
 			Event: []byte("login"),
 			Data:  []byte("welcome"),
 		})
 	}()
 	// 调用 serverpush 包的 ServeHTTP 函数，处理 SSE 请求
-	serverpush.ServeHTTP(c, _clientId, _lastEventId)
+	serverpush.ServeHTTP(c, _streamId, _lastEventId)
 }
 
 ```
