@@ -771,7 +771,8 @@ func (se *Selector) SelectModel(ctx context.Context, dest any, sqlStr string, ar
 
 // Clone 克隆 Selector
 func (s *Selector) Clone() *Selector {
-	return &(*s)
+	_s := *s
+	return &_s
 }
 
 // 合并参数
