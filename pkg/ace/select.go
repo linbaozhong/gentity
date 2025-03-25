@@ -429,8 +429,7 @@ func (s *Selector) Page(pageIndex, pageSize uint) *Selector {
 }
 
 // Query
-func (se *Selector) Query(ctx context.Context) (*sql.Rows, error) {
-	s := se.Clone()
+func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -441,8 +440,7 @@ func (se *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 }
 
 // QueryRow
-func (se *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
-	s := se.Clone()
+func (s *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -464,8 +462,7 @@ func (se *Selector) QueryRow(ctx context.Context) (*sql.Row, error) {
 }
 
 // Get 返回单个数据，dest 必须是指针
-func (se *Selector) Get(ctx context.Context, dest any) error {
-	s := se.Clone()
+func (s *Selector) Get(ctx context.Context, dest any) error {
 	defer s.Free()
 
 	if s.err != nil {
@@ -491,8 +488,7 @@ func (se *Selector) Get(ctx context.Context, dest any) error {
 }
 
 // Gets 返回数据切片，dest 必须是slice指针
-func (se *Selector) Gets(ctx context.Context, dest any) error {
-	s := se.Clone()
+func (s *Selector) Gets(ctx context.Context, dest any) error {
 	defer s.Free()
 
 	if s.err != nil {
@@ -509,8 +505,7 @@ func (se *Selector) Gets(ctx context.Context, dest any) error {
 }
 
 // Map 返回 map[string]any，用于列数未知的情况
-func (se *Selector) Map(ctx context.Context) (map[string]any, error) {
-	s := se.Clone()
+func (s *Selector) Map(ctx context.Context) (map[string]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -531,8 +526,7 @@ func (se *Selector) Map(ctx context.Context) (map[string]any, error) {
 }
 
 // Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
-func (se *Selector) Maps(ctx context.Context) ([]map[string]any, error) {
-	s := se.Clone()
+func (s *Selector) Maps(ctx context.Context) ([]map[string]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -561,8 +555,7 @@ func (se *Selector) Maps(ctx context.Context) ([]map[string]any, error) {
 }
 
 // Slice 返回切片 []any，用于列数未知的情况
-func (se *Selector) Slice(ctx context.Context) ([]any, error) {
-	s := se.Clone()
+func (s *Selector) Slice(ctx context.Context) ([]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -582,8 +575,7 @@ func (se *Selector) Slice(ctx context.Context) ([]any, error) {
 }
 
 // Slices 返回 []any 的切片 [][]any，用于列数未知的情况
-func (se *Selector) Slices(ctx context.Context) ([][]any, error) {
-	s := se.Clone()
+func (s *Selector) Slices(ctx context.Context) ([][]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -611,8 +603,7 @@ func (se *Selector) Slices(ctx context.Context) ([][]any, error) {
 }
 
 // Count
-func (se *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	s := se.Clone()
+func (s *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -660,8 +651,7 @@ func (se *Selector) Count(ctx context.Context, cond ...dialect.Condition) (int64
 }
 
 // Sum
-func (se *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	s := se.Clone()
+func (s *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -720,8 +710,7 @@ func (se *Selector) Sum(ctx context.Context, cols []dialect.Field, cond ...diale
 
 // Select 执行原生的 SQL 查询
 // 此方法接受一个上下文、原生 SQL 语句和对应的参数，返回查询结果和可能的错误
-func (se *Selector) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
-	s := se.Clone()
+func (s *Selector) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
 	defer s.Free()
 
 	if s.err != nil {
