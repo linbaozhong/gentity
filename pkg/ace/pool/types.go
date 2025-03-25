@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ace
+package pool
 
 import (
 	"sync/atomic"
@@ -21,11 +21,15 @@ import (
 var atomic_uint64 uint64
 
 type (
+	// 定义一个私有类型，用于禁止拷贝
+	noCopy struct{}
+
 	Model struct {
+		_        noCopy
 		ace_uuid uint64 `json:"-"` // 内部留用，禁止外部赋值
 	}
 
-	Modeler interface {
+	PoolModeler interface {
 		UUID() uint64
 		Reset()
 	}
@@ -38,5 +42,6 @@ func (a *Model) UUID() uint64 {
 	return a.ace_uuid
 }
 
-func (p *Model) Lock()   {}
-func (p *Model) Unlock() {}
+// 实现一个 Lock 方法，让 noCopy 实现 sync.Locker 接口
+func (*noCopy) Lock()   {}
+func (*noCopy) Unlock() {}

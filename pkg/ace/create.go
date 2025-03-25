@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 	"sync"
@@ -27,6 +28,7 @@ import (
 
 type (
 	Creator struct {
+		pool.Model
 		db            Executer
 		table         string
 		affect        []dialect.Field
@@ -42,6 +44,7 @@ var (
 	createPool = sync.Pool{
 		New: func() any {
 			obj := &Creator{}
+			obj.UUID()
 			return obj
 		},
 	}
@@ -73,13 +76,15 @@ func (c *Creator) Free() {
 		log.Info(c.String())
 	}
 
-	c.table = ""
-	c.affect = c.affect[:0]
-	c.cols = c.cols[:0]
-	c.command.Reset()
-	c.params = c.params[:0]
-
 	createPool.Put(c)
+}
+
+func (c *Creator) Reset() {
+	c.table = ""
+	c.affect = []dialect.Field{} // c.affect[:0]
+	c.cols = []dialect.Field{}   // c.cols[:0]
+	c.command.Reset()
+	c.params = []any{} // c.params[:0]
 }
 
 func (c *Creator) String() string {

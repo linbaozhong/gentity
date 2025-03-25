@@ -12,41 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ace
+package pool
 
 import (
 	"fmt"
-	"sync"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"testing"
 )
 
 type A struct {
+	Model
 	Name string
+	Age  int
 }
 
-var pool = sync.Pool{
-	New: func() any {
-		fmt.Print("New \t")
-		return &A{}
-	},
-}
+var poolA = New(app.Context, func() any {
+	_obj := &A{}
+	_obj.UUID()
+	return _obj
+})
 
 func NewA() *A {
-	obj := pool.Get().(*A)
+	obj := poolA.Get().(*A)
 	// time.Sleep(time.Millisecond)
 	// _obj.Name = time.Now().String()
-	fmt.Print("\t\t")
-
 	return obj
 }
-func Dispose(x *A) {
-	pool.Put(x)
-	x = nil
+func (a *A) Reset() {
+	a = nil
 }
 func (a *A) Free() {
-	Dispose(a)
+	a.Reset()
+	poolA.Put(a)
 }
 
+func (a *A) Clone() *A {
+	_a := *a
+	_a.UUID()
+	return &_a
+	// return &(*a)
+}
+
+func TestClone(t *testing.T) {
+	_a := NewA()
+	_a.Name = "hello"
+	_b := _a.Clone()
+	_b.Age = 123
+	fmt.Println(&_a, _a, &_b, _b)
+	_c := *_a
+	_a.Free()
+	_b.Free()
+	_c.Free()
+}
 func TestType(t *testing.T) {
 	a := NewA()
 	a.Name = "hello"

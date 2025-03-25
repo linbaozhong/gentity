@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 	"sync"
@@ -27,6 +28,7 @@ import (
 
 type (
 	Deleter struct {
+		pool.Model
 		db            Executer
 		table         string
 		where         strings.Builder
@@ -41,6 +43,7 @@ var (
 	deletePool = sync.Pool{
 		New: func() any {
 			obj := &Deleter{}
+			obj.UUID()
 			return obj
 		},
 	}
@@ -73,12 +76,14 @@ func (d *Deleter) Free() {
 		log.Info(d.String())
 	}
 
+	deletePool.Put(d)
+}
+
+func (d *Deleter) Reset() {
 	d.table = ""
 	d.where.Reset()
-	d.whereParams = d.whereParams[:0]
+	d.whereParams = []any{} // d.whereParams[:0]
 	d.command.Reset()
-
-	deletePool.Put(d)
 }
 
 func (d *Deleter) String() string {

@@ -3,7 +3,6 @@ package pool
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"github.com/orcaman/concurrent-map/v2"
 	"strconv"
@@ -17,7 +16,7 @@ type objPool struct {
 
 	pool *sync.Pool // 底层的对象池，用于存储和管理对象。
 	// keys 用于跟踪对象的唯一标识符，防止重复对象被放入池中。
-	keys cmap.ConcurrentMap[uint64, time.Time] //*sync.Map
+	keys cmap.ConcurrentMap[uint64, time.Time] // *sync.Map
 	// expire 定义对象在池中的最大存活时间。
 	expire time.Duration
 	// interval 定义清理过程的运行间隔。
@@ -36,7 +35,7 @@ func New(ctx context.Context, fn func() any, opts ...opt) *objPool {
 		pool: &sync.Pool{New: fn},
 		keys: cmap.NewWithCustomShardingFunction[uint64, time.Time](func(key uint64) uint32 {
 			return uint32(util.MemHashString(strconv.FormatUint(key, 10)))
-		}), //&sync.Map{},
+		}), // &sync.Map{},
 		expire:   2 * time.Minute, // 默认对象过期时间为2分钟。
 		interval: time.Minute,     // 默认清理间隔为1分钟。
 	}
@@ -74,7 +73,7 @@ func (p *objPool) Get() any {
 		return p.pool.New()
 	}
 	// 尝试将对象断言为types.Modeler类型。
-	if m, ok := obj.(ace.Modeler); ok {
+	if m, ok := obj.(PoolModeler); ok {
 		// 如果对象类型正确，重置其状态，并从keys中删除对应的UUID。
 		p.keys.Remove(m.UUID())
 		m.Reset()
@@ -85,7 +84,7 @@ func (p *objPool) Get() any {
 }
 
 // Put 将对象放回对象池中。如果对象已存在（基于UUID），则不放入。
-func (p *objPool) Put(obj ace.Modeler) {
+func (p *objPool) Put(obj PoolModeler) {
 	// 忽略nil对象。
 	if obj == nil {
 		return

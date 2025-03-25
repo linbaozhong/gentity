@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 	"sync"
@@ -27,6 +28,7 @@ import (
 
 type (
 	Updater struct {
+		pool.Model
 		db            Executer
 		table         string
 		affect        []dialect.Field
@@ -49,6 +51,7 @@ var (
 	updatePool = sync.Pool{
 		New: func() any {
 			obj := &Updater{}
+			obj.UUID()
 			return obj
 		},
 	}
@@ -81,16 +84,18 @@ func (u *Updater) Free() {
 		log.Info(u.String())
 	}
 
-	u.table = ""
-	u.affect = u.affect[:0]
-	u.cols = u.cols[:0]
-	u.exprCols = u.exprCols[:0]
-	u.where.Reset()
-	u.whereParams = u.whereParams[:0]
-	u.command.Reset()
-	u.params = u.params[:0]
-
 	updatePool.Put(u)
+}
+
+func (u *Updater) Reset() {
+	u.table = ""
+	u.affect = []dialect.Field{} // u.affect[:0]
+	u.cols = []dialect.Field{}   // u.cols[:0]
+	u.exprCols = []expr{}        // u.exprCols[:0]
+	u.where.Reset()
+	u.whereParams = []any{} // u.whereParams[:0]
+	u.command.Reset()
+	u.params = []any{} // u.params[:0]
 }
 
 func (u *Updater) String() string {

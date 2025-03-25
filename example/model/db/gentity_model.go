@@ -1,13 +1,13 @@
 package db
 
 import (
-	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
 // tablename company
 type Company struct {
-	ace.Model
+	pool.Model
 	Id               types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                       //
 	LongName         types.String `json:"long_name,omitempty" db:"'long_name' size:100"`                // 全称
 	ShortName        types.String `json:"short_name,omitempty" db:"'short_name' size:100"`              // 简称
@@ -27,7 +27,7 @@ type Company struct {
 
 // tablename company_fadada
 type CompanyFadada struct {
-	ace.Model
+	pool.Model
 	Id                types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                                 // 企业id
 	CompanyName       types.String `json:"company_name,omitempty" db:"'company_name' size:100"`               // 企业名称
 	CustomerId        types.String `json:"customer_id,omitempty" db:"'customer_id' size:100"`                 // 客户编号
@@ -46,7 +46,7 @@ type CompanyFadada struct {
 
 // tablename company_role
 type CompanyRole struct {
-	ace.Model
+	pool.Model
 	Id        types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`         //
 	CompanyId types.BigInt `json:"company_id,omitempty" db:"'company_id' size:20"` // 公司id
 	Name      types.String `json:"name,omitempty" db:"'name' size:10"`             // 角色名称
@@ -58,7 +58,7 @@ type CompanyRole struct {
 
 // tablename company_stamp
 type CompanyStamp struct {
-	ace.Model
+	pool.Model
 	Id          types.Money  `json:"id,omitempty" db:"'id' pk size:19"`                   // 签章图片ID，法大大生成
 	CompanyId   types.Money  `json:"company_id,omitempty" db:"'company_id' size:19"`      // 公司id
 	Url         types.String `json:"url,omitempty" db:"'url' size:100"`                   // 印章路径
@@ -76,7 +76,7 @@ type CompanyStamp struct {
 
 // tablename dispatch_company
 type DispatchCompany struct {
-	ace.Model
+	pool.Model
 	Id        types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`         //
 	CompanyId types.BigInt `json:"company_id,omitempty" db:"'company_id' size:20"` // 企业表id
 	Name      types.String `json:"name,omitempty" db:"'name' size:100"`            // 名称
@@ -89,7 +89,7 @@ type DispatchCompany struct {
 
 // tablename document_template
 type DocumentTemplate struct {
-	ace.Model
+	pool.Model
 	Id       types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`           //
 	Genre    types.Int8   `json:"genre,omitempty" db:"'genre' size:3"`              // 类型   1合同属性  2薪酬确认单
 	Company  types.Money  `json:"company,omitempty" db:"'company' size:19"`         // 企业id   0为系统文件  默认分配文件使用的字段，该模板可手动分配给其他企业
@@ -105,7 +105,7 @@ type DocumentTemplate struct {
 
 // tablename account
 type Account struct {
-	ace.Model
+	pool.Model
 	Id        types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`          //
 	LoginName types.String `json:"login_name,omitempty" db:"'login_name' size:200"` // 登录名（手机号）
 	Password  types.String `json:"password,omitempty" db:"'password' size:50"`      // 密码
@@ -116,7 +116,7 @@ type Account struct {
 
 // tablename company_document
 type CompanyDocument struct {
-	ace.Model
+	pool.Model
 	Id           types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`               //
 	CompanyId    types.BigInt `json:"company_id,omitempty" db:"'company_id' size:20"`       // 企业id   0为系统文件
 	TemplateId   types.Money  `json:"template_id,omitempty" db:"'template_id' size:19"`     // document_template表id
@@ -135,7 +135,7 @@ type CompanyDocument struct {
 
 // tablename company_man
 type CompanyMan struct {
-	ace.Model
+	pool.Model
 	Id        types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`         // 操作员id
 	AccountId types.BigInt `json:"account_id,omitempty" db:"'account_id' size:20"` // 账号表id
 	CompanyId types.BigInt `json:"company_id,omitempty" db:"'company_id' size:20"` // 企业表id
@@ -149,7 +149,7 @@ type CompanyMan struct {
 
 // tablename company_rule
 type CompanyRule struct {
-	ace.Model
+	pool.Model
 	Id        types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`        //
 	Pid       types.BigInt `json:"pid,omitempty" db:"'pid' size:20"`              // 父级id
 	Path      types.String `json:"path,omitempty" db:"'path' size:45"`            // 标识

@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"strconv"
@@ -29,6 +30,7 @@ import (
 
 type (
 	Selector struct {
+		pool.Model
 		db            Executer
 		table         string
 		join          [][3]string
@@ -54,6 +56,7 @@ var (
 	selectPool = sync.Pool{
 		New: func() any {
 			obj := &Selector{}
+			obj.UUID()
 			return obj
 		},
 	}
@@ -86,23 +89,25 @@ func (s *Selector) Free() {
 		log.Info(s.String())
 	}
 
+	selectPool.Put(s)
+}
+
+func (s *Selector) Reset() {
 	s.table = ""
-	s.cols = s.cols[:0]
-	s.funcs = s.funcs[:0]
+	s.cols = []dialect.Field{} // s.cols[:0]
+	s.funcs = []string{}       // s.funcs[:0]
 	s.distinct = false
-	s.join = s.join[:0]
-	s.joinParams = s.joinParams[:0]
-	s.omits = s.omits[:0]
+	s.join = [][3]string{}      // s.join[:0]
+	s.joinParams = []any{}      // s.joinParams[:0]
+	s.omits = []dialect.Field{} // s.omits[:0]
 	s.where.Reset()
-	s.whereParams = s.whereParams[:0]
+	s.whereParams = []any{} // s.whereParams[:0]
 	s.groupBy.Reset()
 	s.having.Reset()
-	s.havingParams = s.havingParams[:0]
+	s.havingParams = []any{} // s.havingParams[:0]
 	s.orderBy.Reset()
 	s.limit = ""
 	s.command.Reset()
-
-	selectPool.Put(s)
 }
 
 // String 返回 Selector 对象的 SQL 语句和参数的字符串表示。
