@@ -20,7 +20,10 @@ import (
 	"time"
 )
 
-const HasCacheKey = "_HAS_CACHE_"
+const (
+	hasCacheKey      = "_HAS_CACHE_"
+	authorizationKey = "Authorization"
+)
 
 type cacheKey struct {
 	Key      string
@@ -35,14 +38,14 @@ var (
 // 注意：如果缓存存在，会直接返回，不会再执行后续的逻辑。
 func ReadCache(ctx Context, lefetime ...time.Duration) bool {
 	_vals := ctx.Request().URL.Query()
-	_vals.Set("_t", "")
+	_vals.Set("_t", ctx.GetHeader(authorizationKey))
 	_key := _vals.Encode()
 
 	duration := time.Second * 30
 	if len(lefetime) > 0 {
 		duration = lefetime[0]
 	}
-	ctx.Values().Set(HasCacheKey, cacheKey{
+	ctx.Values().Set(hasCacheKey, cacheKey{
 		Key:      _key,
 		Duration: duration,
 	})
@@ -62,7 +65,7 @@ func ReadCache(ctx Context, lefetime ...time.Duration) bool {
 }
 
 func setCache(ctx Context, resp any) {
-	if _cacheKey := ctx.Values().Get(HasCacheKey); _cacheKey != nil {
+	if _cacheKey := ctx.Values().Get(hasCacheKey); _cacheKey != nil {
 		if _key, ok := _cacheKey.(cacheKey); ok {
 			respCache.Save(ctx, _key.Key, resp, _key.Duration)
 		}

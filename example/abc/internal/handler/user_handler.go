@@ -2,9 +2,7 @@ package handler
 
 import (
 	userService "abc/internal/service/user"
-	"fmt"
 	"github.com/linbaozhong/gentity/pkg/api"
-	"time"
 )
 
 type user struct{}
@@ -25,9 +23,8 @@ func (u *user) userRegister(c api.Context) {
 }
 
 func (u *user) get(c api.Context) {
-	if api.ReadCache(c, time.Second*5) {
+	if api.ReadCache(c) {
 		return
 	}
-	fmt.Println("------------------- get")
 	api.Get(c, userService.GetUser)
 }
