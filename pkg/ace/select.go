@@ -84,7 +84,6 @@ func (s *Selector) Free() {
 		return
 	}
 
-	_ = s.String()
 	if s.db.Debug() {
 		log.Info(s.String())
 	}
