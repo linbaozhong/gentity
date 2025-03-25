@@ -79,7 +79,7 @@ func (d *Deleter) Free() {
 func (d *Deleter) Reset() {
 	d.table = ""
 	d.where.Reset()
-	d.whereParams = []any{} // d.whereParams[:0]
+	d.whereParams = d.whereParams[:0] // []any{} // d.whereParams[:0]
 	d.command.Reset()
 }
 

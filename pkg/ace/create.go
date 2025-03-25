@@ -78,10 +78,10 @@ func (c *Creator) Free() {
 
 func (c *Creator) Reset() {
 	c.table = ""
-	c.affect = []dialect.Field{} // c.affect[:0]
-	c.cols = []dialect.Field{}   // c.cols[:0]
+	c.affect = c.affect[:0] // []dialect.Field{} // c.affect[:0]
+	c.cols = c.cols[:0]     // []dialect.Field{}   // c.cols[:0]
 	c.command.Reset()
-	c.params = []any{} // c.params[:0]
+	c.params = c.params[:0] // []any{} // c.params[:0]
 }
 
 func (c *Creator) String() string {

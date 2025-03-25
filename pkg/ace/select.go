@@ -91,17 +91,17 @@ func (s *Selector) Free() {
 
 func (s *Selector) Reset() {
 	s.table = ""
-	s.cols = []dialect.Field{} // s.cols[:0]
-	s.funcs = []string{}       // s.funcs[:0]
+	s.cols = s.cols[:0]   // []dialect.Field{} // s.cols[:0]
+	s.funcs = s.funcs[:0] // []string{}       // s.funcs[:0]
 	s.distinct = false
-	s.join = [][3]string{}      // s.join[:0]
-	s.joinParams = []any{}      // s.joinParams[:0]
-	s.omits = []dialect.Field{} // s.omits[:0]
+	s.join = s.join[:0]             // [][3]string{}      // s.join[:0]
+	s.joinParams = s.joinParams[:0] // []any{}      // s.joinParams[:0]
+	s.omits = s.omits[:0]           // []dialect.Field{} // s.omits[:0]
 	s.where.Reset()
-	s.whereParams = []any{} // s.whereParams[:0]
+	s.whereParams = s.whereParams[:0] // []any{} // s.whereParams[:0]
 	s.groupBy.Reset()
 	s.having.Reset()
-	s.havingParams = []any{} // s.havingParams[:0]
+	s.havingParams = s.havingParams[:0] // []any{} // s.havingParams[:0]
 	s.orderBy.Reset()
 	s.limit = ""
 	s.command.Reset()
@@ -763,6 +763,13 @@ func (se *Selector) SelectModel(ctx context.Context, dest any, sqlStr string, ar
 // Clone 克隆 Selector
 func (s *Selector) Clone() *Selector {
 	_s := *s
+	_s.cols = append([]dialect.Field(nil), s.cols...)
+	_s.funcs = append([]string(nil), s.funcs...)
+	_s.join = append([][3]string(nil), s.join...)
+	_s.joinParams = append([]any(nil), s.joinParams...)
+	_s.omits = append([]dialect.Field(nil), s.omits...)
+	_s.whereParams = append([]any(nil), s.whereParams...)
+	_s.havingParams = append([]any(nil), s.havingParams...)
 	return &_s
 }
 
