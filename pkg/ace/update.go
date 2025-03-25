@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
-	"sync"
 )
 
 type (
@@ -48,13 +48,11 @@ type (
 )
 
 var (
-	updatePool = sync.Pool{
-		New: func() any {
-			obj := &Updater{}
-			obj.UUID()
-			return obj
-		},
-	}
+	updatePool = pool.New(app.Context, func() any {
+		obj := &Updater{}
+		obj.UUID()
+		return obj
+	})
 )
 
 // Updater

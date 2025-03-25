@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
-	"sync"
 )
 
 type (
@@ -41,13 +41,11 @@ type (
 )
 
 var (
-	createPool = sync.Pool{
-		New: func() any {
-			obj := &Creator{}
-			obj.UUID()
-			return obj
-		},
-	}
+	createPool = pool.New(app.Context, func() any {
+		obj := &Creator{}
+		obj.UUID()
+		return obj
+	})
 )
 
 // Creator

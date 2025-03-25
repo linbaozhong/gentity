@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type (
@@ -53,13 +53,11 @@ type (
 )
 
 var (
-	selectPool = sync.Pool{
-		New: func() any {
-			obj := &Selector{}
-			obj.UUID()
-			return obj
-		},
-	}
+	selectPool = pool.New(app.Context, func() any {
+		obj := &Selector{}
+		obj.UUID()
+		return obj
+	})
 )
 
 // Selector
