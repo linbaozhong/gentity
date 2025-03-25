@@ -33,6 +33,7 @@ func Fail(c Context, e error, args ...any) error {
 	} else {
 		j.Info = fmt.Sprintf("%s", args[0])
 	}
+
 	return c.JSON(j)
 }
 
@@ -43,6 +44,6 @@ func Ok(c Context, args ...any) error {
 	if len(args) > 0 {
 		j.Data = args[0]
 	}
-
+	setCache(c, j)
 	return c.JSON(j)
 }

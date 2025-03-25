@@ -35,6 +35,9 @@ func (u *user) userRegister(c api.Context) {
 }
 
 func (u *user) get(c api.Context) {
+	if api.ReadCache(c) {
+		return
+	}
 	api.Get(c, userService.GetUser)
 }
 

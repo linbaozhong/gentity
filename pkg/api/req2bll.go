@@ -176,6 +176,27 @@ func GetX[A, B any](
 	return logicProcessingX(ctx, &req, &resp, read, fn)
 }
 
+func GetWithCache[A, B any](
+	ctx Context,
+	fn func(ctx Context, req *A, resp *B) error,
+) error {
+	var (
+		req  A
+		resp B
+		read = func(ctx Context, req *A) error {
+			Initiate(ctx, req)
+
+			if ctx.Request().URL.RawQuery == "" {
+				return ReadForm(ctx, req)
+			} else {
+				return ReadQuery(ctx, req)
+			}
+		}
+	)
+
+	return logicProcessingX(ctx, &req, &resp, read, fn)
+}
+
 func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) error) error {
 	var (
 		req  A

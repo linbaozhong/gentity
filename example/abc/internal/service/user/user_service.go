@@ -18,7 +18,7 @@ func UserRegister(c context.Context, in *dto.UserRegisterReq, out *dto.UserRegis
 
 func GetUser(c context.Context, in *dto.GetUserReq, out *dto.GetUserResp) error {
 	// todo: 在这里做用户查询，返回用户信息
-	fmt.Println("UserRegister:", in)
+	fmt.Println("GetUser:", in)
 
 	out.UserID = 12345678
 	out.UserName = "哈利蔺特"
