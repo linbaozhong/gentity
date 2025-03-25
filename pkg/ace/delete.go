@@ -71,7 +71,6 @@ func (d *Deleter) Free() {
 		return
 	}
 
-	_ = d.String()
 	if d.db.Debug() {
 		log.Info(d.String())
 	}

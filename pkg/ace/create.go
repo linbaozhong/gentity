@@ -71,7 +71,6 @@ func (c *Creator) Free() {
 		return
 	}
 
-	_ = c.String()
 	if c.db.Debug() {
 		log.Info(c.String())
 	}
