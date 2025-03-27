@@ -103,3 +103,15 @@ func TestNil(t *testing.T) {
 	a = nil
 	fmt.Println(a == nil)
 }
+
+func TestSlice(t *testing.T) {
+	a := []int{1, 2, 3}
+	b := a[1:]
+	fmt.Println(a, b)
+	b[0] = 100
+	fmt.Println(a, b)
+	b = append([]int(nil), a...)
+	fmt.Println(a, b)
+	b[0] = 200
+	fmt.Println(a, b)
+}

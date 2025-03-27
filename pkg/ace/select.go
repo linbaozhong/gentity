@@ -425,6 +425,19 @@ func (s *Selector) Page(pageIndex, pageSize uint) *Selector {
 	return s.Limit(pageSize, (pageIndex-1)*pageSize)
 }
 
+// Clone 克隆 Selector
+func (s *Selector) Clone() *Selector {
+	_s := *s
+	_s.cols = append([]dialect.Field(nil), s.cols...)
+	_s.funcs = append([]string(nil), s.funcs...)
+	_s.join = append([][3]string(nil), s.join...)
+	_s.joinParams = append([]any(nil), s.joinParams...)
+	_s.omits = append([]dialect.Field(nil), s.omits...)
+	_s.whereParams = append([]any(nil), s.whereParams...)
+	_s.havingParams = append([]any(nil), s.havingParams...)
+	return &_s
+}
+
 // Query
 func (s *Selector) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
@@ -758,19 +771,6 @@ func (se *Selector) SelectModel(ctx context.Context, dest any, sqlStr string, ar
 		return r.Scan(vals...)
 	}
 	return r.scanAny(dest, false)
-}
-
-// Clone 克隆 Selector
-func (s *Selector) Clone() *Selector {
-	_s := *s
-	_s.cols = append([]dialect.Field(nil), s.cols...)
-	_s.funcs = append([]string(nil), s.funcs...)
-	_s.join = append([][3]string(nil), s.join...)
-	_s.joinParams = append([]any(nil), s.joinParams...)
-	_s.omits = append([]dialect.Field(nil), s.omits...)
-	_s.whereParams = append([]any(nil), s.whereParams...)
-	_s.havingParams = append([]any(nil), s.havingParams...)
-	return &_s
 }
 
 // 合并参数
