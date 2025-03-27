@@ -94,6 +94,7 @@ func Or(fns ...dialect.Condition) dialect.Condition {
 		return buf.String(), params
 	}
 }
+
 func And(fns ...dialect.Condition) dialect.Condition {
 	return func() (string, any) {
 		if len(fns) == 0 {
