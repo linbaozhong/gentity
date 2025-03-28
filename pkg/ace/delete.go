@@ -27,7 +27,7 @@ import (
 )
 
 type (
-	Deleter struct {
+	Delete struct {
 		pool.Model
 		db            Executer
 		table         string
@@ -41,15 +41,15 @@ type (
 
 var (
 	deletePool = pool.New(app.Context, func() any {
-		obj := &Deleter{}
+		obj := &Delete{}
 		obj.UUID()
 		return obj
 	})
 )
 
-// Deleter
-func newDelete(db Executer, tableName string) *Deleter {
-	obj := deletePool.Get().(*Deleter)
+// Delete
+func newDelete(db Executer, tableName string) *Delete {
+	obj := deletePool.Get().(*Delete)
 	if db == nil || tableName == "" {
 		obj.err = errors.New("db or table is nil")
 		return obj
@@ -64,7 +64,7 @@ func newDelete(db Executer, tableName string) *Deleter {
 
 }
 
-func (d *Deleter) Free() {
+func (d *Delete) Free() {
 	if d == nil || d.table == "" {
 		return
 	}
@@ -76,14 +76,14 @@ func (d *Deleter) Free() {
 	deletePool.Put(d)
 }
 
-func (d *Deleter) Reset() {
+func (d *Delete) Reset() {
 	d.table = ""
 	d.where.Reset()
 	d.whereParams = d.whereParams[:0] // []any{} // d.whereParams[:0]
 	d.command.Reset()
 }
 
-func (d *Deleter) String() string {
+func (d *Delete) String() string {
 	if d.commandString.Len() == 0 {
 		d.commandString.WriteString(fmt.Sprintf("%s  %v \n", d.command.String(), d.whereParams))
 	}
@@ -91,7 +91,7 @@ func (d *Deleter) String() string {
 }
 
 // Where
-func (d *Deleter) Where(fns ...dialect.Condition) *Deleter {
+func (d *Delete) Where(fns ...dialect.Condition) *Delete {
 	if len(fns) == 0 || d.err != nil {
 		return d
 	}
@@ -123,7 +123,7 @@ func (d *Deleter) Where(fns ...dialect.Condition) *Deleter {
 }
 
 // And
-func (d *Deleter) And(fns ...dialect.Condition) *Deleter {
+func (d *Delete) And(fns ...dialect.Condition) *Delete {
 	if len(fns) == 0 || d.err != nil {
 		return d
 	}
@@ -155,7 +155,7 @@ func (d *Deleter) And(fns ...dialect.Condition) *Deleter {
 }
 
 // Or
-func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
+func (d *Delete) Or(fns ...dialect.Condition) *Delete {
 	if len(fns) == 0 || d.err != nil {
 		return d
 	}
@@ -187,7 +187,7 @@ func (d *Deleter) Or(fns ...dialect.Condition) *Deleter {
 }
 
 // Exec
-func (d *Deleter) Exec(ctx context.Context) (sql.Result, error) {
+func (d *Delete) Exec(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
 
 	if d.err != nil {

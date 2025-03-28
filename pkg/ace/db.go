@@ -116,18 +116,18 @@ func (s *DB) IsDB() bool {
 	return true
 }
 
-func (s *DB) C(tableName string) *Creator {
+func (s *DB) C(tableName string) *Create {
 	return newCreate(s, tableName)
 }
 
-func (s *DB) U(tableName string) *Updater {
+func (s *DB) U(tableName string) *Update {
 	return NewUpdate(s, tableName)
 }
 
-func (s *DB) D(tableName string) *Deleter {
+func (s *DB) D(tableName string) *Delete {
 	return newDelete(s, tableName)
 }
 
-func (s *DB) R(tableName string) *Selector {
+func (s *DB) R(tableName string) *Select {
 	return newSelect(s, tableName)
 }

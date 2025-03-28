@@ -27,7 +27,7 @@ import (
 )
 
 type (
-	Updater struct {
+	Update struct {
 		pool.Model
 		db            Executer
 		table         string
@@ -49,15 +49,15 @@ type (
 
 var (
 	updatePool = pool.New(app.Context, func() any {
-		obj := &Updater{}
+		obj := &Update{}
 		obj.UUID()
 		return obj
 	})
 )
 
-// Updater
-func NewUpdate(db Executer, tableName string) *Updater {
-	obj := updatePool.Get().(*Updater)
+// Update
+func NewUpdate(db Executer, tableName string) *Update {
+	obj := updatePool.Get().(*Update)
 	if db == nil || tableName == "" {
 		obj.err = errors.New("db or table is nil")
 		return obj
@@ -72,7 +72,7 @@ func NewUpdate(db Executer, tableName string) *Updater {
 
 }
 
-func (u *Updater) Free() {
+func (u *Update) Free() {
 	if u == nil || u.table == "" {
 		return
 	}
@@ -84,7 +84,7 @@ func (u *Updater) Free() {
 	updatePool.Put(u)
 }
 
-func (u *Updater) Reset() {
+func (u *Update) Reset() {
 	u.table = ""
 	u.affect = u.affect[:0]     // []dialect.Field{} // u.affect[:0]
 	u.cols = u.cols[:0]         // []dialect.Field{}   // u.cols[:0]
@@ -95,7 +95,7 @@ func (u *Updater) Reset() {
 	u.params = u.params[:0] // []any{} // u.params[:0]
 }
 
-func (u *Updater) String() string {
+func (u *Update) String() string {
 	if u.table == "" {
 		u.commandString.WriteString(fmt.Sprintf("%s  %v \n", u.command.String(), u.params))
 	}
@@ -103,7 +103,7 @@ func (u *Updater) String() string {
 }
 
 // Set
-func (u *Updater) Set(fns ...dialect.Setter) *Updater {
+func (u *Update) Set(fns ...dialect.Setter) *Update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -120,7 +120,7 @@ func (u *Updater) Set(fns ...dialect.Setter) *Updater {
 	return u
 }
 
-func (u *Updater) SetExpr(fns ...dialect.ExprSetter) *Updater {
+func (u *Update) SetExpr(fns ...dialect.ExprSetter) *Update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -137,7 +137,7 @@ func (u *Updater) SetExpr(fns ...dialect.ExprSetter) *Updater {
 }
 
 // Where
-func (u *Updater) Where(fns ...dialect.Condition) *Updater {
+func (u *Update) Where(fns ...dialect.Condition) *Update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -169,7 +169,7 @@ func (u *Updater) Where(fns ...dialect.Condition) *Updater {
 }
 
 // And
-func (u *Updater) And(fns ...dialect.Condition) *Updater {
+func (u *Update) And(fns ...dialect.Condition) *Update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -201,7 +201,7 @@ func (u *Updater) And(fns ...dialect.Condition) *Updater {
 }
 
 // Or
-func (u *Updater) Or(fns ...dialect.Condition) *Updater {
+func (u *Update) Or(fns ...dialect.Condition) *Update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -232,7 +232,7 @@ func (u *Updater) Or(fns ...dialect.Condition) *Updater {
 	return u
 }
 
-func (u *Updater) Cols(cols ...dialect.Field) *Updater {
+func (u *Update) Cols(cols ...dialect.Field) *Update {
 	for _, col := range cols {
 		u.affect = append(u.affect, col)
 	}
@@ -240,7 +240,7 @@ func (u *Updater) Cols(cols ...dialect.Field) *Updater {
 }
 
 // Exec
-func (u *Updater) Exec(ctx context.Context) (sql.Result, error) {
+func (u *Update) Exec(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
 
 	if u.err != nil {
@@ -282,7 +282,7 @@ func (u *Updater) Exec(ctx context.Context) (sql.Result, error) {
 }
 
 // Struct
-func (u *Updater) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
+func (u *Update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
 	if u.err != nil {
@@ -325,7 +325,7 @@ func (u *Updater) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result,
 }
 
 // Struct 执行更新,请不要在事务中使用
-func (u *Updater) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
+func (u *Update) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
 	if u.err != nil {

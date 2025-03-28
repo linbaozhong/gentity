@@ -30,7 +30,7 @@ type accounter interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Selector) ([]db.Account, bool, error)
+	SelectAll(ctx context.Context, s *ace.Select) ([]db.Account, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.Account, bool, error)
 	// Find 分页查询，返回一个slice
@@ -64,22 +64,22 @@ func Account(exec ...ace.Executer) accounter {
 }
 
 // C Create account
-func (p *daoAccount) C() *ace.Creator {
+func (p *daoAccount) C() *ace.Create {
 	return p.db.C(db.AccountTableName)
 }
 
 // R Read account
-func (p *daoAccount) R() *ace.Selector {
+func (p *daoAccount) R() *ace.Select {
 	return p.db.R(db.AccountTableName)
 }
 
 // U Update account
-func (p *daoAccount) U() *ace.Updater {
+func (p *daoAccount) U() *ace.Update {
 	return p.db.U(db.AccountTableName)
 }
 
 // D Delete account
-func (p *daoAccount) D() *ace.Deleter {
+func (p *daoAccount) D() *ace.Delete {
 	return p.db.D(db.AccountTableName)
 }
 
@@ -205,7 +205,7 @@ func (p *daoAccount) DeleteById(ctx context.Context, id types.BigInt) (bool, err
 }
 
 // SelectAll 查询所有
-func (p *daoAccount) SelectAll(ctx context.Context, s *ace.Selector) ([]db.Account, bool, error) {
+func (p *daoAccount) SelectAll(ctx context.Context, s *ace.Select) ([]db.Account, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.AccountTableName)
 	}
