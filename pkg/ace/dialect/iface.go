@@ -33,8 +33,12 @@ var (
 type (
 	JoinType string
 
-	Modeler interface {
+	TableNamer interface {
 		TableName() string
+	}
+
+	Modeler interface {
+		TableNamer
 		AssignPtr(args ...Field) []any
 		AssignValues(args ...Field) ([]string, []any)
 		RawAssignValues(args ...Field) ([]string, []any)
