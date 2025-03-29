@@ -5,43 +5,42 @@ package dao
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/example/model/db"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
+	"github.com/linbaozhong/gentity/example/model/define/table/tblusersinfo"
+	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/orm"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
-type companyer interface {
+type users_infoer interface {
 	dialect.Daoer
 	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
-	InsertOne(ctx context.Context, bean *db.Company, cols ...dialect.Field) (bool, error)
+	InsertOne(ctx context.Context, bean *do.UsersInfo, cols ...dialect.Field) (bool, error)
 	// InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 	// cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
-	InsertBatch(ctx context.Context, beans []*db.Company, cols ...dialect.Field) (int64, error)
+	InsertBatch(ctx context.Context, beans []*do.UsersInfo, cols ...dialect.Field) (int64, error)
 	// UpdateById 按主键更新一条数据
 	UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新,禁止在事务中使用
 	// cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
-	UpdateBatch(ctx context.Context, beans []*db.Company, cols ...dialect.Field) (bool, error)
+	UpdateBatch(ctx context.Context, beans []*do.UsersInfo, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Selector) ([]db.Company, bool, error)
+	SelectAll(ctx context.Context, s *ace.Select) ([]do.UsersInfo, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
-	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.Company, bool, error)
+	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]do.UsersInfo, bool, error)
 	// Find 分页查询，返回一个slice
-	Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]db.Company, bool, error)
+	Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]do.UsersInfo, bool, error)
 	// Get4Cols 读取一个对象的指定列
-	Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.Company, bool, error)
+	Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*do.UsersInfo, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.Company, bool, error)
+	GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*do.UsersInfo, bool, error)
 	// Get 按条件读取一个对象
-	Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*db.Company, bool, error)
+	Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*do.UsersInfo, bool, error)
 	// GetFirstCell 按条件读取第一行的第一个字段
 	GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error)
 	//
@@ -50,12 +49,12 @@ type companyer interface {
 	Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error)
 }
 
-type daoCompany struct {
+type daoUsersInfo struct {
 	db ace.Executer
 }
 
-func Company(exec ...ace.Executer) companyer {
-	_obj := &daoCompany{}
+func UsersInfo(exec ...ace.Executer) users_infoer {
+	_obj := &daoUsersInfo{}
 	if len(exec) > 0 {
 		_obj.db = exec[0]
 	} else {
@@ -64,28 +63,28 @@ func Company(exec ...ace.Executer) companyer {
 	return _obj
 }
 
-// C Create company
-func (p *daoCompany) C() *ace.Creator {
-	return p.db.C(db.CompanyTableName)
+// C Create users_info
+func (p *daoUsersInfo) C() *ace.Create {
+	return p.db.C(do.UsersInfoTableName)
 }
 
-// R Read company
-func (p *daoCompany) R() *ace.Selector {
-	return p.db.R(db.CompanyTableName)
+// R Read users_info
+func (p *daoUsersInfo) R() *ace.Select {
+	return p.db.R(do.UsersInfoTableName)
 }
 
-// U Update company
-func (p *daoCompany) U() *orm.Updater {
-	return p.db.U(db.CompanyTableName)
+// U Update users_info
+func (p *daoUsersInfo) U() *ace.Update {
+	return p.db.U(do.UsersInfoTableName)
 }
 
-// D Delete company
-func (p *daoCompany) D() *orm.Deleter {
-	return p.db.D(db.CompanyTableName)
+// D Delete users_info
+func (p *daoUsersInfo) D() *ace.Delete {
+	return p.db.D(do.UsersInfoTableName)
 }
 
 // Insert 返回 LastInsertId
-func (p *daoCompany) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
+func (p *daoUsersInfo) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
@@ -101,7 +100,7 @@ func (p *daoCompany) Insert(ctx context.Context, sets ...dialect.Setter) (int64,
 
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
-func (p *daoCompany) InsertOne(ctx context.Context, bean *db.Company, cols ...dialect.Field) (bool, error) {
+func (p *daoUsersInfo) InsertOne(ctx context.Context, bean *do.UsersInfo, cols ...dialect.Field) (bool, error) {
 	_result, e := p.C().
 		Cols(cols...).
 		Struct(ctx, bean)
@@ -118,7 +117,7 @@ func (p *daoCompany) InsertOne(ctx context.Context, bean *db.Company, cols ...di
 
 // InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 // cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
-func (p *daoCompany) InsertBatch(ctx context.Context, beans []*db.Company, cols ...dialect.Field) (int64, error) {
+func (p *daoUsersInfo) InsertBatch(ctx context.Context, beans []*do.UsersInfo, cols ...dialect.Field) (int64, error) {
 	_lens := len(beans)
 	if _lens == 0 {
 		return 0, dialect.ErrBeanEmpty
@@ -139,7 +138,7 @@ func (p *daoCompany) InsertBatch(ctx context.Context, beans []*db.Company, cols 
 }
 
 // Update
-func (p *daoCompany) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
+func (p *daoUsersInfo) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
@@ -156,16 +155,16 @@ func (p *daoCompany) Update(ctx context.Context, sets []dialect.Setter, cond ...
 }
 
 // UpdateById
-func (p *daoCompany) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error) {
+func (p *daoUsersInfo) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
 		sets,
-		tblcompany.PrimaryKey.Eq(id),
+		tblusersinfo.PrimaryKey.Eq(id),
 	)
 }
 
 // UpdateBatch 批量更新,禁止在事务中使用
 // cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
-func (p *daoCompany) UpdateBatch(ctx context.Context, beans []*db.Company, cols ...dialect.Field) (bool, error) {
+func (p *daoUsersInfo) UpdateBatch(ctx context.Context, beans []*do.UsersInfo, cols ...dialect.Field) (bool, error) {
 	_lens := len(beans)
 	if _lens == 0 {
 		return false, dialect.ErrBeanEmpty
@@ -186,7 +185,7 @@ func (p *daoCompany) UpdateBatch(ctx context.Context, beans []*db.Company, cols 
 }
 
 // Delete
-func (p *daoCompany) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+func (p *daoUsersInfo) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	_result, e := p.D().
 		Where(cond...).
 		Exec(ctx)
@@ -199,21 +198,21 @@ func (p *daoCompany) Delete(ctx context.Context, cond ...dialect.Condition) (boo
 }
 
 // DeleteById
-func (p *daoCompany) DeleteById(ctx context.Context, id types.BigInt) (bool, error) {
+func (p *daoUsersInfo) DeleteById(ctx context.Context, id types.BigInt) (bool, error) {
 	return p.Delete(ctx,
-		tblcompany.PrimaryKey.Eq(id),
+		tblusersinfo.PrimaryKey.Eq(id),
 	)
 }
 
 // SelectAll 查询所有
-func (p *daoCompany) SelectAll(ctx context.Context, s *ace.Selector) ([]db.Company, bool, error) {
+func (p *daoUsersInfo) SelectAll(ctx context.Context, s *ace.Select) ([]do.UsersInfo, bool, error) {
 	if len(s.GetTableName()) == 0 {
-		s.SetTableName(db.CompanyTableName)
+		s.SetTableName(do.UsersInfoTableName)
 	}
 
 	_cols := s.GetCols()
 	if len(_cols) == 0 {
-		_cols = tblcompany.ReadableFields
+		_cols = tblusersinfo.ReadableFields
 		s.Cols(_cols...)
 	}
 
@@ -224,7 +223,7 @@ func (p *daoCompany) SelectAll(ctx context.Context, s *ace.Selector) ([]db.Compa
 	}
 	defer _rows.Close()
 
-	_obj := db.NewCompany()
+	_obj := do.NewUsersInfo()
 	_objs, has, e := _obj.Scan(_rows, _cols...)
 	if has {
 		return _objs, true, nil
@@ -237,10 +236,10 @@ func (p *daoCompany) SelectAll(ctx context.Context, s *ace.Selector) ([]db.Compa
 }
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoCompany) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.Company, bool, error) {
+func (p *daoUsersInfo) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*do.UsersInfo, bool, error) {
 	_c := p.R()
 	if len(cols) == 0 {
-		_c.Cols(tblcompany.ReadableFields...)
+		_c.Cols(tblusersinfo.ReadableFields...)
 	} else {
 		_c.Cols(cols...)
 	}
@@ -253,7 +252,7 @@ func (p *daoCompany) Get4Cols(ctx context.Context, cols []dialect.Field, cond []
 		return nil, false, e
 	}
 
-	_obj := db.NewCompany()
+	_obj := do.NewUsersInfo()
 
 	e = _row.Scan(_obj.AssignPtr(cols...)...)
 	switch e {
@@ -267,11 +266,11 @@ func (p *daoCompany) Get4Cols(ctx context.Context, cols []dialect.Field, cond []
 	}
 }
 
-// Find4Cols 分页获取company slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoCompany) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.Company, bool, error) {
+// Find4Cols 分页获取users_info slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *daoUsersInfo) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]do.UsersInfo, bool, error) {
 	_c := p.R()
 	if len(cols) == 0 {
-		_c.Cols(tblcompany.ReadableFields...)
+		_c.Cols(tblusersinfo.ReadableFields...)
 	} else {
 		_c.Cols(cols...)
 	}
@@ -286,7 +285,7 @@ func (p *daoCompany) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 	}
 	defer _rows.Close()
 
-	_obj := db.NewCompany()
+	_obj := do.NewUsersInfo()
 
 	_objs, has, e := _obj.Scan(_rows, cols...)
 	if has {
@@ -299,18 +298,18 @@ func (p *daoCompany) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 	return _objs, false, e
 }
 
-// GetByID 按主键读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoCompany) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.Company, bool, error) {
-	return p.Get4Cols(ctx, cols, []dialect.Condition{tblcompany.PrimaryKey.Eq(id)})
+// GetByID 按主键读取一个users_info对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *daoUsersInfo) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*do.UsersInfo, bool, error) {
+	return p.Get4Cols(ctx, cols, []dialect.Condition{tblusersinfo.PrimaryKey.Eq(id)})
 }
 
-// Get 按条件读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoCompany) Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*db.Company, bool, error) {
+// Get 按条件读取一个users_info对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *daoUsersInfo) Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*do.UsersInfo, bool, error) {
 	return p.Get4Cols(ctx, []dialect.Field{}, cond, sort...)
 }
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoCompany) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
+func (p *daoUsersInfo) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
 	_c := p.R().Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
@@ -333,14 +332,14 @@ func (p *daoCompany) GetFirstCell(ctx context.Context, col dialect.Field, cond [
 	}
 }
 
-// Find 按条件读取一个company slice对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoCompany) Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]db.Company, bool, error) {
+// Find 按条件读取一个users_info slice对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *daoUsersInfo) Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]do.UsersInfo, bool, error) {
 	return p.Find4Cols(ctx, pageIndex, pageSize, []dialect.Field{}, cond, sort...)
 }
 
 // IDs
-func (p *daoCompany) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tblcompany.PrimaryKey)
+func (p *daoUsersInfo) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
+	_c := p.R().Cols(tblusersinfo.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoCompany) IDs(ctx context.Context, cond []dialect.Condition, sort ...
 }
 
 // Columns
-func (p *daoCompany) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
+func (p *daoUsersInfo) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
 	_c := p.R().Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
@@ -390,18 +389,18 @@ func (p *daoCompany) Columns(ctx context.Context, col dialect.Field, cond []dial
 }
 
 // Count
-func (p *daoCompany) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
+func (p *daoUsersInfo) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	return p.R().Count(ctx, cond...)
 }
 
 // Sum
-func (p *daoCompany) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+func (p *daoUsersInfo) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	return p.R().Sum(ctx, cols, cond...)
 }
 
 // Exists
-func (p *daoCompany) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tblcompany.PrimaryKey).Where(cond...)
+func (p *daoUsersInfo) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+	_c := p.R().Cols(tblusersinfo.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)

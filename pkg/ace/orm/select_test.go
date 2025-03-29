@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ace
+package orm
 
 import (
-	"github.com/linbaozhong/gentity/pkg/ace/orm"
 	"testing"
 )
 
 func TestBuilder(t *testing.T) {
-	orm := orm.New()
-	orm.Create("")
+	orm := New()
+	orm.Where()
 
 }
 
-func where(w orm.Wherer) {
+func where(w Wherer) {
 
 }

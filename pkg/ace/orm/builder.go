@@ -66,6 +66,8 @@ type (
 		Free()
 		String() string
 		Clone() Builder
+		Set(fns ...dialect.Setter) Builder
+		SetExpr(fns ...dialect.ExprSetter) Builder
 		Wherer
 		Orderer
 		Grouper
@@ -128,6 +130,7 @@ func (o *orm) Free() {
 		return
 	}
 
+	_ = o.String()
 	if o.db.Debug() {
 		log.Info(o.String())
 	}

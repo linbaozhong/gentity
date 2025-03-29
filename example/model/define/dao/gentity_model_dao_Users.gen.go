@@ -5,43 +5,42 @@ package dao
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/example/model/db"
-	"github.com/linbaozhong/gentity/example/model/define/table/tbldocumenttemplate"
+	"github.com/linbaozhong/gentity/example/model/define/table/tblusers"
+	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/orm"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
-type document_templateer interface {
+type userser interface {
 	dialect.Daoer
 	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
-	InsertOne(ctx context.Context, bean *db.DocumentTemplate, cols ...dialect.Field) (bool, error)
+	InsertOne(ctx context.Context, bean *do.Users, cols ...dialect.Field) (bool, error)
 	// InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 	// cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
-	InsertBatch(ctx context.Context, beans []*db.DocumentTemplate, cols ...dialect.Field) (int64, error)
+	InsertBatch(ctx context.Context, beans []*do.Users, cols ...dialect.Field) (int64, error)
 	// UpdateById 按主键更新一条数据
 	UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error)
 	// UpdateBatch 批量更新,禁止在事务中使用
 	// cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
-	UpdateBatch(ctx context.Context, beans []*db.DocumentTemplate, cols ...dialect.Field) (bool, error)
+	UpdateBatch(ctx context.Context, beans []*do.Users, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Selector) ([]db.DocumentTemplate, bool, error)
+	SelectAll(ctx context.Context, s *ace.Select) ([]do.Users, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
-	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.DocumentTemplate, bool, error)
+	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]do.Users, bool, error)
 	// Find 分页查询，返回一个slice
-	Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]db.DocumentTemplate, bool, error)
+	Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]do.Users, bool, error)
 	// Get4Cols 读取一个对象的指定列
-	Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.DocumentTemplate, bool, error)
+	Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*do.Users, bool, error)
 	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.DocumentTemplate, bool, error)
+	GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*do.Users, bool, error)
 	// Get 按条件读取一个对象
-	Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*db.DocumentTemplate, bool, error)
+	Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*do.Users, bool, error)
 	// GetFirstCell 按条件读取第一行的第一个字段
 	GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error)
 	//
@@ -50,12 +49,12 @@ type document_templateer interface {
 	Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error)
 }
 
-type daoDocumentTemplate struct {
+type daoUsers struct {
 	db ace.Executer
 }
 
-func DocumentTemplate(exec ...ace.Executer) document_templateer {
-	_obj := &daoDocumentTemplate{}
+func Users(exec ...ace.Executer) userser {
+	_obj := &daoUsers{}
 	if len(exec) > 0 {
 		_obj.db = exec[0]
 	} else {
@@ -64,28 +63,28 @@ func DocumentTemplate(exec ...ace.Executer) document_templateer {
 	return _obj
 }
 
-// C Create document_template
-func (p *daoDocumentTemplate) C() *ace.Creator {
-	return p.db.C(db.DocumentTemplateTableName)
+// C Create users
+func (p *daoUsers) C() *ace.Create {
+	return p.db.C(do.UsersTableName)
 }
 
-// R Read document_template
-func (p *daoDocumentTemplate) R() *ace.Selector {
-	return p.db.R(db.DocumentTemplateTableName)
+// R Read users
+func (p *daoUsers) R() *ace.Select {
+	return p.db.R(do.UsersTableName)
 }
 
-// U Update document_template
-func (p *daoDocumentTemplate) U() *orm.Updater {
-	return p.db.U(db.DocumentTemplateTableName)
+// U Update users
+func (p *daoUsers) U() *ace.Update {
+	return p.db.U(do.UsersTableName)
 }
 
-// D Delete document_template
-func (p *daoDocumentTemplate) D() *orm.Deleter {
-	return p.db.D(db.DocumentTemplateTableName)
+// D Delete users
+func (p *daoUsers) D() *ace.Delete {
+	return p.db.D(do.UsersTableName)
 }
 
 // Insert 返回 LastInsertId
-func (p *daoDocumentTemplate) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
+func (p *daoUsers) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
@@ -101,7 +100,7 @@ func (p *daoDocumentTemplate) Insert(ctx context.Context, sets ...dialect.Setter
 
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
-func (p *daoDocumentTemplate) InsertOne(ctx context.Context, bean *db.DocumentTemplate, cols ...dialect.Field) (bool, error) {
+func (p *daoUsers) InsertOne(ctx context.Context, bean *do.Users, cols ...dialect.Field) (bool, error) {
 	_result, e := p.C().
 		Cols(cols...).
 		Struct(ctx, bean)
@@ -118,7 +117,7 @@ func (p *daoDocumentTemplate) InsertOne(ctx context.Context, bean *db.DocumentTe
 
 // InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 // cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
-func (p *daoDocumentTemplate) InsertBatch(ctx context.Context, beans []*db.DocumentTemplate, cols ...dialect.Field) (int64, error) {
+func (p *daoUsers) InsertBatch(ctx context.Context, beans []*do.Users, cols ...dialect.Field) (int64, error) {
 	_lens := len(beans)
 	if _lens == 0 {
 		return 0, dialect.ErrBeanEmpty
@@ -139,7 +138,7 @@ func (p *daoDocumentTemplate) InsertBatch(ctx context.Context, beans []*db.Docum
 }
 
 // Update
-func (p *daoDocumentTemplate) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
+func (p *daoUsers) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
@@ -156,16 +155,16 @@ func (p *daoDocumentTemplate) Update(ctx context.Context, sets []dialect.Setter,
 }
 
 // UpdateById
-func (p *daoDocumentTemplate) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error) {
+func (p *daoUsers) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
 		sets,
-		tbldocumenttemplate.PrimaryKey.Eq(id),
+		tblusers.PrimaryKey.Eq(id),
 	)
 }
 
 // UpdateBatch 批量更新,禁止在事务中使用
 // cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
-func (p *daoDocumentTemplate) UpdateBatch(ctx context.Context, beans []*db.DocumentTemplate, cols ...dialect.Field) (bool, error) {
+func (p *daoUsers) UpdateBatch(ctx context.Context, beans []*do.Users, cols ...dialect.Field) (bool, error) {
 	_lens := len(beans)
 	if _lens == 0 {
 		return false, dialect.ErrBeanEmpty
@@ -186,7 +185,7 @@ func (p *daoDocumentTemplate) UpdateBatch(ctx context.Context, beans []*db.Docum
 }
 
 // Delete
-func (p *daoDocumentTemplate) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+func (p *daoUsers) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	_result, e := p.D().
 		Where(cond...).
 		Exec(ctx)
@@ -199,21 +198,21 @@ func (p *daoDocumentTemplate) Delete(ctx context.Context, cond ...dialect.Condit
 }
 
 // DeleteById
-func (p *daoDocumentTemplate) DeleteById(ctx context.Context, id types.BigInt) (bool, error) {
+func (p *daoUsers) DeleteById(ctx context.Context, id types.BigInt) (bool, error) {
 	return p.Delete(ctx,
-		tbldocumenttemplate.PrimaryKey.Eq(id),
+		tblusers.PrimaryKey.Eq(id),
 	)
 }
 
 // SelectAll 查询所有
-func (p *daoDocumentTemplate) SelectAll(ctx context.Context, s *ace.Selector) ([]db.DocumentTemplate, bool, error) {
+func (p *daoUsers) SelectAll(ctx context.Context, s *ace.Select) ([]do.Users, bool, error) {
 	if len(s.GetTableName()) == 0 {
-		s.SetTableName(db.DocumentTemplateTableName)
+		s.SetTableName(do.UsersTableName)
 	}
 
 	_cols := s.GetCols()
 	if len(_cols) == 0 {
-		_cols = tbldocumenttemplate.ReadableFields
+		_cols = tblusers.ReadableFields
 		s.Cols(_cols...)
 	}
 
@@ -224,7 +223,7 @@ func (p *daoDocumentTemplate) SelectAll(ctx context.Context, s *ace.Selector) ([
 	}
 	defer _rows.Close()
 
-	_obj := db.NewDocumentTemplate()
+	_obj := do.NewUsers()
 	_objs, has, e := _obj.Scan(_rows, _cols...)
 	if has {
 		return _objs, true, nil
@@ -237,10 +236,10 @@ func (p *daoDocumentTemplate) SelectAll(ctx context.Context, s *ace.Selector) ([
 }
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoDocumentTemplate) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.DocumentTemplate, bool, error) {
+func (p *daoUsers) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*do.Users, bool, error) {
 	_c := p.R()
 	if len(cols) == 0 {
-		_c.Cols(tbldocumenttemplate.ReadableFields...)
+		_c.Cols(tblusers.ReadableFields...)
 	} else {
 		_c.Cols(cols...)
 	}
@@ -253,7 +252,7 @@ func (p *daoDocumentTemplate) Get4Cols(ctx context.Context, cols []dialect.Field
 		return nil, false, e
 	}
 
-	_obj := db.NewDocumentTemplate()
+	_obj := do.NewUsers()
 
 	e = _row.Scan(_obj.AssignPtr(cols...)...)
 	switch e {
@@ -267,11 +266,11 @@ func (p *daoDocumentTemplate) Get4Cols(ctx context.Context, cols []dialect.Field
 	}
 }
 
-// Find4Cols 分页获取document_template slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoDocumentTemplate) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.DocumentTemplate, bool, error) {
+// Find4Cols 分页获取users slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *daoUsers) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]do.Users, bool, error) {
 	_c := p.R()
 	if len(cols) == 0 {
-		_c.Cols(tbldocumenttemplate.ReadableFields...)
+		_c.Cols(tblusers.ReadableFields...)
 	} else {
 		_c.Cols(cols...)
 	}
@@ -286,7 +285,7 @@ func (p *daoDocumentTemplate) Find4Cols(ctx context.Context, pageIndex, pageSize
 	}
 	defer _rows.Close()
 
-	_obj := db.NewDocumentTemplate()
+	_obj := do.NewUsers()
 
 	_objs, has, e := _obj.Scan(_rows, cols...)
 	if has {
@@ -299,18 +298,18 @@ func (p *daoDocumentTemplate) Find4Cols(ctx context.Context, pageIndex, pageSize
 	return _objs, false, e
 }
 
-// GetByID 按主键读取一个document_template对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoDocumentTemplate) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.DocumentTemplate, bool, error) {
-	return p.Get4Cols(ctx, cols, []dialect.Condition{tbldocumenttemplate.PrimaryKey.Eq(id)})
+// GetByID 按主键读取一个users对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *daoUsers) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*do.Users, bool, error) {
+	return p.Get4Cols(ctx, cols, []dialect.Condition{tblusers.PrimaryKey.Eq(id)})
 }
 
-// Get 按条件读取一个document_template对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoDocumentTemplate) Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*db.DocumentTemplate, bool, error) {
+// Get 按条件读取一个users对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *daoUsers) Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*do.Users, bool, error) {
 	return p.Get4Cols(ctx, []dialect.Field{}, cond, sort...)
 }
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoDocumentTemplate) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
+func (p *daoUsers) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
 	_c := p.R().Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
@@ -333,14 +332,14 @@ func (p *daoDocumentTemplate) GetFirstCell(ctx context.Context, col dialect.Fiel
 	}
 }
 
-// Find 按条件读取一个document_template slice对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *daoDocumentTemplate) Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]db.DocumentTemplate, bool, error) {
+// Find 按条件读取一个users slice对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *daoUsers) Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]do.Users, bool, error) {
 	return p.Find4Cols(ctx, pageIndex, pageSize, []dialect.Field{}, cond, sort...)
 }
 
 // IDs
-func (p *daoDocumentTemplate) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tbldocumenttemplate.PrimaryKey)
+func (p *daoUsers) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
+	_c := p.R().Cols(tblusers.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoDocumentTemplate) IDs(ctx context.Context, cond []dialect.Condition,
 }
 
 // Columns
-func (p *daoDocumentTemplate) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
+func (p *daoUsers) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
 	_c := p.R().Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
@@ -390,18 +389,18 @@ func (p *daoDocumentTemplate) Columns(ctx context.Context, col dialect.Field, co
 }
 
 // Count
-func (p *daoDocumentTemplate) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
+func (p *daoUsers) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	return p.R().Count(ctx, cond...)
 }
 
 // Sum
-func (p *daoDocumentTemplate) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+func (p *daoUsers) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	return p.R().Sum(ctx, cols, cond...)
 }
 
 // Exists
-func (p *daoDocumentTemplate) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tbldocumenttemplate.PrimaryKey).Where(cond...)
+func (p *daoUsers) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+	_c := p.R().Cols(tblusers.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)

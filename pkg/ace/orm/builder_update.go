@@ -82,6 +82,7 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	u.params = append(u.params, u.whereParams...)
+	return nil, nil
 	return stmt.ExecContext(ctx, u.params...)
 }
 

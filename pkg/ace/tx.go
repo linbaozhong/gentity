@@ -17,7 +17,6 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/pkg/ace/orm"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 )
@@ -35,16 +34,16 @@ type (
 func (t *Tx) Mapper() *reflectx.Mapper {
 	return t.mapper
 }
-func (t *Tx) C(tableName string) *Creator {
+func (t *Tx) C(tableName string) *Create {
 	return newCreate(t, tableName)
 }
-func (t *Tx) U(tableName string) *orm.Updater {
+func (t *Tx) U(tableName string) *Update {
 	return NewUpdate(t, tableName)
 }
-func (t *Tx) D(tableName string) *orm.Deleter {
+func (t *Tx) D(tableName string) *Delete {
 	return newDelete(t, tableName)
 }
-func (t *Tx) R(tableName string) *Selector {
+func (t *Tx) R(tableName string) *Select {
 	return newSelect(t, tableName)
 }
 func (t *Tx) Cache(name string) cachego.Cache {
