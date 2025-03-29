@@ -18,5 +18,10 @@ import "testing"
 
 func TestBuilder(t *testing.T) {
 	orm := New()
-	orm.C("")
+	orm.Create("")
+
+}
+
+func where(w Wherer) {
+
 }

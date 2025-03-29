@@ -22,25 +22,25 @@ import (
 )
 
 type Creater interface {
-	Insert(ctx context.Context) (sql.Result, error)
-	InsertStruct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
-	InsertBatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
+	Exec(ctx context.Context) (sql.Result, error)
+	Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
+	BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
 }
 
-type cc struct {
+type create struct {
 	*orm
 }
 
-// C 创建插入器
-func (c *orm) C(name string) Creater {
-	c.table = name
-	return &cc{
-		orm: c,
+// Create 创建插入器
+func (o *orm) Create(a any) Creater {
+	o.setTable(a)
+	return &create{
+		orm: o,
 	}
 }
 
-// Insert 执行插入
-func (c *cc) Insert(ctx context.Context) (sql.Result, error) {
+// Exec 执行插入
+func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	defer c.Free()
 
 	// if c.err != nil {
@@ -74,7 +74,7 @@ func (c *cc) Insert(ctx context.Context) (sql.Result, error) {
 }
 
 // InsertStruct 执行插入一个结构体
-func (c *cc) InsertStruct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
+func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
 
 	// if c.err != nil {
@@ -104,7 +104,7 @@ func (c *cc) InsertStruct(ctx context.Context, bean dialect.Modeler) (sql.Result
 }
 
 // InsertBatchStruct 执行批量插入，请不要在事务中使用
-func (c *cc) InsertBatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
+func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
 
 	// if c.err != nil {

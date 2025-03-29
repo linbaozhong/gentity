@@ -22,24 +22,24 @@ import (
 )
 
 type Updater interface {
-	Update(ctx context.Context) (sql.Result, error)
-	UpdateStruct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
-	UpdateBatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
+	Exec(ctx context.Context) (sql.Result, error)
+	Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
+	BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
 }
-type uu struct {
+type update struct {
 	*orm
 }
 
 // Update 更新器
-func (c *orm) U(name string) Updater {
-	c.table = name
-	return &uu{
-		orm: c,
+func (o *orm) Update(a any) Updater {
+	o.setTable(a)
+	return &update{
+		orm: o,
 	}
 }
 
-// Update 执行更新
-func (u *uu) Update(ctx context.Context) (sql.Result, error) {
+// Exec 执行更新
+func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
 
 	// if u.err != nil {
@@ -81,7 +81,7 @@ func (u *uu) Update(ctx context.Context) (sql.Result, error) {
 }
 
 // UpdateStruct 更新一个结构体
-func (u *uu) UpdateStruct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
+func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
 	// if u.err != nil {
@@ -124,7 +124,7 @@ func (u *uu) UpdateStruct(ctx context.Context, bean dialect.Modeler) (sql.Result
 }
 
 // UpdateBatchStruct 执行批量更新,请不要在事务中使用
-func (u *uu) UpdateBatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
+func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
 	// if u.err != nil {

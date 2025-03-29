@@ -51,20 +51,20 @@ type Reader interface {
 	// SelectStruct 执行原生查询，返回结构体对象
 	SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error
 }
-type rr struct {
+type read struct {
 	*orm
 }
 
-// R 创建查询器
-func (s *orm) R(name string) Reader {
-	s.table = name
-	return &rr{
-		orm: s,
+// Read 创建查询器
+func (o *orm) Read(a any) Reader {
+	o.setTable(a)
+	return &read{
+		orm: o,
 	}
 }
 
 // Query
-func (s *rr) Query(ctx context.Context) (*sql.Rows, error) {
+func (s *read) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
 	//
 	// if s.err != nil {
@@ -75,7 +75,7 @@ func (s *rr) Query(ctx context.Context) (*sql.Rows, error) {
 }
 
 // QueryRow
-func (s *rr) QueryRow(ctx context.Context) (*sql.Row, error) {
+func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -88,7 +88,7 @@ func (s *rr) QueryRow(ctx context.Context) (*sql.Row, error) {
 }
 
 // Get 返回单个数据，dest 必须是指针
-func (s *rr) Get(ctx context.Context, dest any) error {
+func (s *read) Get(ctx context.Context, dest any) error {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -114,7 +114,7 @@ func (s *rr) Get(ctx context.Context, dest any) error {
 }
 
 // Gets 返回数据切片，dest 必须是slice指针
-func (s *rr) Gets(ctx context.Context, dest any) error {
+func (s *read) Gets(ctx context.Context, dest any) error {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -131,7 +131,7 @@ func (s *rr) Gets(ctx context.Context, dest any) error {
 }
 
 // Map 返回 map[string]any，用于列数未知的情况
-func (s *rr) Map(ctx context.Context) (map[string]any, error) {
+func (s *read) Map(ctx context.Context) (map[string]any, error) {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -152,7 +152,7 @@ func (s *rr) Map(ctx context.Context) (map[string]any, error) {
 }
 
 // Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
-func (s *rr) Maps(ctx context.Context) ([]map[string]any, error) {
+func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -181,7 +181,7 @@ func (s *rr) Maps(ctx context.Context) ([]map[string]any, error) {
 }
 
 // Slice 返回切片 []any，用于列数未知的情况
-func (s *rr) Slice(ctx context.Context) ([]any, error) {
+func (s *read) Slice(ctx context.Context) ([]any, error) {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -201,7 +201,7 @@ func (s *rr) Slice(ctx context.Context) ([]any, error) {
 }
 
 // Slices 返回 []any 的切片 [][]any，用于列数未知的情况
-func (s *rr) Slices(ctx context.Context) ([][]any, error) {
+func (s *read) Slices(ctx context.Context) ([][]any, error) {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -229,7 +229,7 @@ func (s *rr) Slices(ctx context.Context) ([][]any, error) {
 }
 
 // Count
-func (s *rr) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
+func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -255,15 +255,6 @@ func (s *rr) Count(ctx context.Context, cond ...dialect.Condition) (int64, error
 		s.command.WriteString(s.limit)
 	}
 
-	// stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// if s.db.IsDB() {
-	// 	defer stmt.Close()
-	// }
-	//
-	// row := stmt.QueryRowContext(ctx, s.mergeParams()...)
 	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
 	if err != nil {
 		return 0, err
@@ -277,7 +268,7 @@ func (s *rr) Count(ctx context.Context, cond ...dialect.Condition) (int64, error
 }
 
 // Sum
-func (s *rr) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -307,15 +298,6 @@ func (s *rr) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Cond
 		s.command.WriteString(s.limit)
 	}
 
-	// stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if s.db.IsDB() {
-	// 	defer stmt.Close()
-	// }
-	//
-	// row := stmt.QueryRowContext(ctx, s.mergeParams()...)
 	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
 	if err != nil {
 		return nil, err
@@ -336,7 +318,7 @@ func (s *rr) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Cond
 
 // Select 执行原生的 SQL 查询
 // 此方法接受一个上下文、原生 SQL 语句和对应的参数，返回查询结果和可能的错误
-func (s *rr) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
+func (s *read) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
 	defer s.Free()
 
 	// if s.err != nil {
@@ -347,7 +329,7 @@ func (s *rr) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows,
 }
 
 // SelectMap 执行原生 SQL 查询并返回 map[string]any
-func (se *rr) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
+func (se *read) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
 	rows, err := se.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
@@ -360,7 +342,7 @@ func (se *rr) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[st
 }
 
 // SelectSlice 执行原生 SQL 查询并返回 []any
-func (se *rr) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
+func (se *read) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
 	rows, err := se.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
@@ -372,7 +354,7 @@ func (se *rr) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]an
 }
 
 // SelectStruct 执行原生 SQL 查询并返回实现 dialect.Modeler 接口的结构体
-func (se *rr) SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error {
+func (se *read) SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error {
 	rows, err := se.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return err

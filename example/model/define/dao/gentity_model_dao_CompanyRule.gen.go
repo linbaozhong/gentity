@@ -19,13 +19,13 @@ type company_ruleer interface {
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.CompanyRule, cols ...dialect.Field) (bool, error)
-	// InsertBatch 批量插入多条数据,返回 RowsAffected
-	// cols: 要插入的列名
+	// InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
+	// cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
 	InsertBatch(ctx context.Context, beans []*db.CompanyRule, cols ...dialect.Field) (int64, error)
 	// UpdateById 按主键更新一条数据
 	UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error)
-	// UpdateBatch 批量更新多条数据
-	// cols: 要更新的列名
+	// UpdateBatch 批量更新,禁止在事务中使用
+	// cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
 	UpdateBatch(ctx context.Context, beans []*db.CompanyRule, cols ...dialect.Field) (bool, error)
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
@@ -116,7 +116,7 @@ func (p *daoCompanyRule) InsertOne(ctx context.Context, bean *db.CompanyRule, co
 }
 
 // InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
-// cols: 要插入的列名
+// cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
 func (p *daoCompanyRule) InsertBatch(ctx context.Context, beans []*db.CompanyRule, cols ...dialect.Field) (int64, error) {
 	_lens := len(beans)
 	if _lens == 0 {
@@ -163,7 +163,7 @@ func (p *daoCompanyRule) UpdateById(ctx context.Context, id types.BigInt, sets .
 }
 
 // UpdateBatch 批量更新,禁止在事务中使用
-// cols: 要更新的列名
+// cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
 func (p *daoCompanyRule) UpdateBatch(ctx context.Context, beans []*db.CompanyRule, cols ...dialect.Field) (bool, error) {
 	_lens := len(beans)
 	if _lens == 0 {

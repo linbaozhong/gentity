@@ -21,22 +21,22 @@ import (
 )
 
 type Deleter interface {
-	Delete(ctx context.Context) (sql.Result, error)
+	Exec(ctx context.Context) (sql.Result, error)
 }
-type dd struct {
+type delete struct {
 	*orm
 }
 
-// D 删除器
-func (d *orm) D(name string) Deleter {
-	d.table = name
-	return &dd{
-		orm: d,
+// Delete 删除器
+func (o *orm) Delete(a any) Deleter {
+	o.setTable(a)
+	return &delete{
+		orm: o,
 	}
 }
 
-// Delete 执行删除
-func (d *dd) Delete(ctx context.Context) (sql.Result, error) {
+// Exec 执行删除
+func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
 
 	// if d.err != nil {
