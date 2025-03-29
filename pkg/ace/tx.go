@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"github.com/linbaozhong/gentity/pkg/ace/orm"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 )
@@ -37,10 +38,10 @@ func (t *Tx) Mapper() *reflectx.Mapper {
 func (t *Tx) C(tableName string) *Creator {
 	return newCreate(t, tableName)
 }
-func (t *Tx) U(tableName string) *Updater {
+func (t *Tx) U(tableName string) *orm.Updater {
 	return NewUpdate(t, tableName)
 }
-func (t *Tx) D(tableName string) *Deleter {
+func (t *Tx) D(tableName string) *orm.Deleter {
 	return newDelete(t, tableName)
 }
 func (t *Tx) R(tableName string) *Selector {

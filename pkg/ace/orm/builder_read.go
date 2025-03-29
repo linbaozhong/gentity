@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ace
+package orm
 
 import (
 	"context"
 	"database/sql"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -164,7 +165,7 @@ func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 		return nil, err
 	}
 
-	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	rs := &ace.Rows{Rows: rows, Mapper: s.db.Mapper()}
 	defer rs.Close()
 
 	dests := make([]map[string]any, 0)
@@ -213,7 +214,7 @@ func (s *read) Slices(ctx context.Context) ([][]any, error) {
 		return nil, err
 	}
 
-	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	rs := &ace.Rows{Rows: rows, Mapper: s.db.Mapper()}
 	defer rs.Close()
 
 	dests := make([][]any, 0)

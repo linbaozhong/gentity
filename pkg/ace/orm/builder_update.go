@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ace
+package orm
 
 import (
 	"context"
 	"database/sql"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -28,6 +29,10 @@ type Updater interface {
 }
 type update struct {
 	*orm
+}
+type expr struct {
+	colName string
+	arg     any
 }
 
 // Update 更新器
@@ -156,7 +161,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	u.params = append(u.params, u.whereParams...)
 
 	// 启动事务批量执行更新
-	ret, err := u.db.Transaction(ctx, func(tx *Tx) (any, error) {
+	ret, err := u.db.Transaction(ctx, func(tx *ace.Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, u.command.String())
 		if err != nil {
 			return nil, err
