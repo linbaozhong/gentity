@@ -15,16 +15,15 @@
 package orm
 
 import (
-	"github.com/linbaozhong/gentity/pkg/ace/builder"
 	"testing"
 )
 
 func TestBuilder(t *testing.T) {
-	orm := builder.New()
-	orm.Create("")
+	o := New()
+	o.Create("")
 
 }
 
-func where(w builder.Wherer) {
+func where(w Wherer) {
 
 }
