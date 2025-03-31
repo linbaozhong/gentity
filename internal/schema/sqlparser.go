@@ -80,6 +80,12 @@ func reader2Struct(r io.Reader, packageName string) ([]byte, error) {
 			if col.AutoIncr {
 				buf.WriteString(" auto")
 			}
+			if v, ok := col.Default.(string); ok && len(v) > 0 {
+				if strings.HasPrefix(v, "current_timestamp") {
+					buf.WriteString(" <-")
+				}
+			}
+
 			buf.WriteString(ParseFieldSize(col))
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.TrimSpace(col.Comment)))
 		}
@@ -123,6 +129,9 @@ func DB2Struct(tables map[string][]*sqlparser.Column, packageName string) ([]byt
 			}
 			if col.AutoIncr {
 				buf.WriteString(" auto")
+			}
+			if strings.HasPrefix(col.Extra, "DEFAULT_GENERATED") {
+				buf.WriteString(" <-")
 			}
 			buf.WriteString(ParseFieldSize(col))
 			buf.WriteString(fmt.Sprintf("\"`	// %s\n", strings.ReplaceAll(col.Comment, "\n", "")))

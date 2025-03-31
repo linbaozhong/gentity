@@ -8,6 +8,7 @@ import (
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyman"
 	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace/builder"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -74,12 +75,12 @@ func (p *daoCompanyMan) R() *ace.Selector {
 }
 
 // U Update company_man
-func (p *daoCompanyMan) U() *ace.Updater {
+func (p *daoCompanyMan) U() *builder.Updater {
 	return p.db.U(db.CompanyManTableName)
 }
 
 // D Delete company_man
-func (p *daoCompanyMan) D() *ace.Deleter {
+func (p *daoCompanyMan) D() *builder.Deleter {
 	return p.db.D(db.CompanyManTableName)
 }
 

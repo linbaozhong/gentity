@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ace
+package builder
 
 import (
 	"context"
 	"database/sql"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -103,7 +104,7 @@ func (s *read) Get(ctx context.Context, dest any) error {
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	r := &ace.Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
 	if d, ok := dest.(dialect.Modeler); ok {
@@ -127,7 +128,7 @@ func (s *read) Gets(ctx context.Context, dest any) error {
 	}
 	defer rows.Close()
 
-	return scanAll(rows, dest, false)
+	return ace.scanAll(rows, dest, false)
 }
 
 // Map 返回 map[string]any，用于列数未知的情况
@@ -146,7 +147,7 @@ func (s *read) Map(ctx context.Context) (map[string]any, error) {
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	r := &ace.Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	dest := make(map[string]any)
 	return dest, r.MapScan(dest)
 }
@@ -164,7 +165,7 @@ func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 		return nil, err
 	}
 
-	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	rs := &ace.Rows{Rows: rows, Mapper: s.db.Mapper()}
 	defer rs.Close()
 
 	dests := make([]map[string]any, 0)
@@ -196,7 +197,7 @@ func (s *read) Slice(ctx context.Context) ([]any, error) {
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	r := &ace.Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	return r.SliceScan()
 }
 
@@ -213,7 +214,7 @@ func (s *read) Slices(ctx context.Context) ([][]any, error) {
 		return nil, err
 	}
 
-	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	rs := &ace.Rows{Rows: rows, Mapper: s.db.Mapper()}
 	defer rs.Close()
 
 	dests := make([][]any, 0)
@@ -336,7 +337,7 @@ func (se *read) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &ace.Row{rows: rows, err: err, Mapper: se.db.Mapper()}
 	dest := make(map[string]any)
 	return dest, r.MapScan(dest)
 }
@@ -349,7 +350,7 @@ func (se *read) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &ace.Row{rows: rows, err: err, Mapper: se.db.Mapper()}
 	return r.SliceScan()
 }
 
@@ -361,7 +362,7 @@ func (se *read) SelectStruct(ctx context.Context, dest any, sqlStr string, args 
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &ace.Row{rows: rows, err: err, Mapper: se.db.Mapper()}
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
 	if d, ok := dest.(dialect.Modeler); ok {

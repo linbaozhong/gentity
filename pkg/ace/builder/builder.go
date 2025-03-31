@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ace
+package builder
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
@@ -78,7 +79,7 @@ type (
 
 	orm struct {
 		pool.Model
-		db            Executer
+		db            ace.Executer
 		table         string
 		join          [][3]string
 		joinParams    []any
@@ -109,12 +110,12 @@ var (
 	})
 )
 
-func New(x ...Executer) Builder {
+func New(x ...ace.Executer) Builder {
 	obj := ormPool.Get().(*orm)
 	if len(x) > 0 {
 		obj.db = x[0]
 	} else {
-		obj.db = GetDB()
+		obj.db = ace.GetDB()
 	}
 
 	obj.commandString.Reset()
@@ -131,7 +132,7 @@ func (o *orm) Free() {
 		log.Info(o.String())
 	}
 
-	selectPool.Put(o)
+	ormPool.Put(o)
 }
 
 func (o *orm) Reset() {
@@ -180,15 +181,15 @@ func (o *orm) setTable(a any) Builder {
 	return o
 }
 
-//// GetTableName 获取 orm 对象的表名。
-//func (s *orm) GetTableName() string {
+// // GetTableName 获取 orm 对象的表名。
+// func (s *orm) GetTableName() string {
 //	return s.table
-//}
+// }
 //
-//// GetCols 获取 orm 对象要查询的列。
-//func (s *orm) GetCols() []dialect.Field {
+// // GetCols 获取 orm 对象要查询的列。
+// func (s *orm) GetCols() []dialect.Field {
 //	return s.cols
-//}
+// }
 
 // Distinct 设置查询结果去重，并指定去重的列。
 func (o *orm) Distinct(cols ...dialect.Field) Builder {

@@ -14,14 +14,17 @@
 
 package ace
 
-import "testing"
+import (
+	"github.com/linbaozhong/gentity/pkg/ace/builder"
+	"testing"
+)
 
 func TestBuilder(t *testing.T) {
-	orm := New()
+	orm := builder.New()
 	orm.Create("")
 
 }
 
-func where(w Wherer) {
+func where(w builder.Wherer) {
 
 }

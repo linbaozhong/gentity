@@ -8,6 +8,7 @@ import (
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanystamp"
 	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace/builder"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -74,12 +75,12 @@ func (p *daoCompanyStamp) R() *ace.Selector {
 }
 
 // U Update company_stamp
-func (p *daoCompanyStamp) U() *ace.Updater {
+func (p *daoCompanyStamp) U() *builder.Updater {
 	return p.db.U(db.CompanyStampTableName)
 }
 
 // D Delete company_stamp
-func (p *daoCompanyStamp) D() *ace.Deleter {
+func (p *daoCompanyStamp) D() *builder.Deleter {
 	return p.db.D(db.CompanyStampTableName)
 }
 

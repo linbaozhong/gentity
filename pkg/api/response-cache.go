@@ -37,9 +37,10 @@ var (
 // ReadCache 读取缓存。
 // 注意：如果缓存存在，会直接返回，不会再执行后续的逻辑。
 func ReadCache(ctx Context, lefetime ...time.Duration) bool {
-	_vals := ctx.Request().URL.Query()
+	_url := ctx.Request().URL
+	_vals := _url.Query()
 	_vals.Set("_t", ctx.GetHeader(authorizationKey))
-	_key := _vals.Encode()
+	_key := _url.Path + "?" + _vals.Encode()
 
 	duration := time.Second * 30
 	if len(lefetime) > 0 {
