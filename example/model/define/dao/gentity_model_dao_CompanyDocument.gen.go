@@ -8,7 +8,6 @@ import (
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanydocument"
 	"github.com/linbaozhong/gentity/pkg/ace"
-	"github.com/linbaozhong/gentity/pkg/ace/builder"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -31,7 +30,7 @@ type company_documenter interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Selector) ([]db.CompanyDocument, bool, error)
+	SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyDocument, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyDocument, bool, error)
 	// Find 分页查询，返回一个slice
@@ -65,22 +64,22 @@ func CompanyDocument(exec ...ace.Executer) company_documenter {
 }
 
 // C Create company_document
-func (p *daoCompanyDocument) C() *ace.Creator {
+func (p *daoCompanyDocument) C() *ace.Create {
 	return p.db.C(db.CompanyDocumentTableName)
 }
 
 // R Read company_document
-func (p *daoCompanyDocument) R() *ace.Selector {
+func (p *daoCompanyDocument) R() *ace.Select {
 	return p.db.R(db.CompanyDocumentTableName)
 }
 
 // U Update company_document
-func (p *daoCompanyDocument) U() *builder.Updater {
+func (p *daoCompanyDocument) U() *ace.Update {
 	return p.db.U(db.CompanyDocumentTableName)
 }
 
 // D Delete company_document
-func (p *daoCompanyDocument) D() *builder.Deleter {
+func (p *daoCompanyDocument) D() *ace.Delete {
 	return p.db.D(db.CompanyDocumentTableName)
 }
 
@@ -206,7 +205,7 @@ func (p *daoCompanyDocument) DeleteById(ctx context.Context, id types.BigInt) (b
 }
 
 // SelectAll 查询所有
-func (p *daoCompanyDocument) SelectAll(ctx context.Context, s *ace.Selector) ([]db.CompanyDocument, bool, error) {
+func (p *daoCompanyDocument) SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyDocument, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyDocumentTableName)
 	}

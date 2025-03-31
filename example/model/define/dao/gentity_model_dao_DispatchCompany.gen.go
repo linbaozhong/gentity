@@ -8,7 +8,6 @@ import (
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tbldispatchcompany"
 	"github.com/linbaozhong/gentity/pkg/ace"
-	"github.com/linbaozhong/gentity/pkg/ace/builder"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -31,7 +30,7 @@ type dispatch_companyer interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Selector) ([]db.DispatchCompany, bool, error)
+	SelectAll(ctx context.Context, s *ace.Select) ([]db.DispatchCompany, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.DispatchCompany, bool, error)
 	// Find 分页查询，返回一个slice
@@ -65,22 +64,22 @@ func DispatchCompany(exec ...ace.Executer) dispatch_companyer {
 }
 
 // C Create dispatch_company
-func (p *daoDispatchCompany) C() *ace.Creator {
+func (p *daoDispatchCompany) C() *ace.Create {
 	return p.db.C(db.DispatchCompanyTableName)
 }
 
 // R Read dispatch_company
-func (p *daoDispatchCompany) R() *ace.Selector {
+func (p *daoDispatchCompany) R() *ace.Select {
 	return p.db.R(db.DispatchCompanyTableName)
 }
 
 // U Update dispatch_company
-func (p *daoDispatchCompany) U() *builder.Updater {
+func (p *daoDispatchCompany) U() *ace.Update {
 	return p.db.U(db.DispatchCompanyTableName)
 }
 
 // D Delete dispatch_company
-func (p *daoDispatchCompany) D() *builder.Deleter {
+func (p *daoDispatchCompany) D() *ace.Delete {
 	return p.db.D(db.DispatchCompanyTableName)
 }
 
@@ -206,7 +205,7 @@ func (p *daoDispatchCompany) DeleteById(ctx context.Context, id types.BigInt) (b
 }
 
 // SelectAll 查询所有
-func (p *daoDispatchCompany) SelectAll(ctx context.Context, s *ace.Selector) ([]db.DispatchCompany, bool, error) {
+func (p *daoDispatchCompany) SelectAll(ctx context.Context, s *ace.Select) ([]db.DispatchCompany, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.DispatchCompanyTableName)
 	}

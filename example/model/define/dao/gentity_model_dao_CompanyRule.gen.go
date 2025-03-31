@@ -8,7 +8,6 @@ import (
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyrule"
 	"github.com/linbaozhong/gentity/pkg/ace"
-	"github.com/linbaozhong/gentity/pkg/ace/builder"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -31,7 +30,7 @@ type company_ruleer interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Selector) ([]db.CompanyRule, bool, error)
+	SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyRule, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyRule, bool, error)
 	// Find 分页查询，返回一个slice
@@ -65,22 +64,22 @@ func CompanyRule(exec ...ace.Executer) company_ruleer {
 }
 
 // C Create company_rule
-func (p *daoCompanyRule) C() *ace.Creator {
+func (p *daoCompanyRule) C() *ace.Create {
 	return p.db.C(db.CompanyRuleTableName)
 }
 
 // R Read company_rule
-func (p *daoCompanyRule) R() *ace.Selector {
+func (p *daoCompanyRule) R() *ace.Select {
 	return p.db.R(db.CompanyRuleTableName)
 }
 
 // U Update company_rule
-func (p *daoCompanyRule) U() *builder.Updater {
+func (p *daoCompanyRule) U() *ace.Update {
 	return p.db.U(db.CompanyRuleTableName)
 }
 
 // D Delete company_rule
-func (p *daoCompanyRule) D() *builder.Deleter {
+func (p *daoCompanyRule) D() *ace.Delete {
 	return p.db.D(db.CompanyRuleTableName)
 }
 
@@ -206,7 +205,7 @@ func (p *daoCompanyRule) DeleteById(ctx context.Context, id types.BigInt) (bool,
 }
 
 // SelectAll 查询所有
-func (p *daoCompanyRule) SelectAll(ctx context.Context, s *ace.Selector) ([]db.CompanyRule, bool, error) {
+func (p *daoCompanyRule) SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyRule, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyRuleTableName)
 	}

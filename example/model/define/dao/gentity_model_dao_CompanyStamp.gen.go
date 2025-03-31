@@ -8,7 +8,6 @@ import (
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanystamp"
 	"github.com/linbaozhong/gentity/pkg/ace"
-	"github.com/linbaozhong/gentity/pkg/ace/builder"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -31,7 +30,7 @@ type company_stamper interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.Money) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Selector) ([]db.CompanyStamp, bool, error)
+	SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyStamp, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyStamp, bool, error)
 	// Find 分页查询，返回一个slice
@@ -65,22 +64,22 @@ func CompanyStamp(exec ...ace.Executer) company_stamper {
 }
 
 // C Create company_stamp
-func (p *daoCompanyStamp) C() *ace.Creator {
+func (p *daoCompanyStamp) C() *ace.Create {
 	return p.db.C(db.CompanyStampTableName)
 }
 
 // R Read company_stamp
-func (p *daoCompanyStamp) R() *ace.Selector {
+func (p *daoCompanyStamp) R() *ace.Select {
 	return p.db.R(db.CompanyStampTableName)
 }
 
 // U Update company_stamp
-func (p *daoCompanyStamp) U() *builder.Updater {
+func (p *daoCompanyStamp) U() *ace.Update {
 	return p.db.U(db.CompanyStampTableName)
 }
 
 // D Delete company_stamp
-func (p *daoCompanyStamp) D() *builder.Deleter {
+func (p *daoCompanyStamp) D() *ace.Delete {
 	return p.db.D(db.CompanyStampTableName)
 }
 
@@ -206,7 +205,7 @@ func (p *daoCompanyStamp) DeleteById(ctx context.Context, id types.Money) (bool,
 }
 
 // SelectAll 查询所有
-func (p *daoCompanyStamp) SelectAll(ctx context.Context, s *ace.Selector) ([]db.CompanyStamp, bool, error) {
+func (p *daoCompanyStamp) SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyStamp, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyStampTableName)
 	}

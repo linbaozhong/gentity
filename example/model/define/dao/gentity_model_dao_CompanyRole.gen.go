@@ -8,7 +8,6 @@ import (
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyrole"
 	"github.com/linbaozhong/gentity/pkg/ace"
-	"github.com/linbaozhong/gentity/pkg/ace/builder"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -31,7 +30,7 @@ type company_roleer interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Selector) ([]db.CompanyRole, bool, error)
+	SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyRole, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyRole, bool, error)
 	// Find 分页查询，返回一个slice
@@ -65,22 +64,22 @@ func CompanyRole(exec ...ace.Executer) company_roleer {
 }
 
 // C Create company_role
-func (p *daoCompanyRole) C() *ace.Creator {
+func (p *daoCompanyRole) C() *ace.Create {
 	return p.db.C(db.CompanyRoleTableName)
 }
 
 // R Read company_role
-func (p *daoCompanyRole) R() *ace.Selector {
+func (p *daoCompanyRole) R() *ace.Select {
 	return p.db.R(db.CompanyRoleTableName)
 }
 
 // U Update company_role
-func (p *daoCompanyRole) U() *builder.Updater {
+func (p *daoCompanyRole) U() *ace.Update {
 	return p.db.U(db.CompanyRoleTableName)
 }
 
 // D Delete company_role
-func (p *daoCompanyRole) D() *builder.Deleter {
+func (p *daoCompanyRole) D() *ace.Delete {
 	return p.db.D(db.CompanyRoleTableName)
 }
 
@@ -206,7 +205,7 @@ func (p *daoCompanyRole) DeleteById(ctx context.Context, id types.BigInt) (bool,
 }
 
 // SelectAll 查询所有
-func (p *daoCompanyRole) SelectAll(ctx context.Context, s *ace.Selector) ([]db.CompanyRole, bool, error) {
+func (p *daoCompanyRole) SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyRole, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyRoleTableName)
 	}

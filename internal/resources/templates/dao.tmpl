@@ -45,7 +45,7 @@ type {{$tablename}}er interface {
 	// DeleteById 按主键删除一条数据
     DeleteById(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Selector) ([]{{$package}}.{{$structName}}, bool, error)
+	SelectAll(ctx context.Context, s *ace.Select) ([]{{$package}}.{{$structName}}, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]{{$package}}.{{$structName}}, bool, error)
 	// Find 分页查询，返回一个slice
@@ -98,22 +98,22 @@ func {{$structName}}(exec ...ace.Executer) {{$tablename}}er {
 }
 
 // C Create {{$tablename}}
-func (p *dao{{$structName}}) C() *ace.Creator {
+func (p *dao{{$structName}}) C() *ace.Create {
 	return p.db.C({{$package}}.{{$structName}}TableName)
 }
 
 // R Read {{$tablename}}
-func (p *dao{{$structName}}) R() *ace.Selector{
+func (p *dao{{$structName}}) R() *ace.Select{
 	return p.db.R({{$package}}.{{$structName}}TableName)
 }
 
 // U Update {{$tablename}}
-func (p *dao{{$structName}}) U() *ace.Updater{
+func (p *dao{{$structName}}) U() *ace.Update{
 	return p.db.U({{$package}}.{{$structName}}TableName)
 }
 
 // D Delete {{$tablename}}
-func (p *dao{{$structName}}) D() *ace.Deleter{
+func (p *dao{{$structName}}) D() *ace.Delete{
 	return p.db.D({{$package}}.{{$structName}}TableName)
 }
 
@@ -240,7 +240,7 @@ func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}}
 }
 
 // SelectAll 查询所有
-func (p *dao{{$structName}}) SelectAll(ctx context.Context, s *ace.Selector) ([]{{$package}}.{{$structName}}, bool, error) {
+func (p *dao{{$structName}}) SelectAll(ctx context.Context, s *ace.Select) ([]{{$package}}.{{$structName}}, bool, error) {
 	if len(s.GetTableName()) == 0{
 		s.SetTableName({{$package}}.{{$structName}}TableName)
 	}
