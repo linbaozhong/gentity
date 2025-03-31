@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package builder
+package orm
 
 import (
 	"context"
@@ -27,13 +27,12 @@ type Updater interface {
 	Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
 	BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
 }
+type update struct {
+	*orm
+}
 type expr struct {
 	colName string
 	arg     any
-}
-
-type update struct {
-	*orm
 }
 
 // Update 更新器
@@ -83,6 +82,7 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	u.params = append(u.params, u.whereParams...)
+	return nil, nil
 	return stmt.ExecContext(ctx, u.params...)
 }
 

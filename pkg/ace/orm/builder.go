@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package builder
+package orm
 
 import (
 	"context"
@@ -66,6 +66,8 @@ type (
 		Free()
 		String() string
 		Clone() Builder
+		Set(fns ...dialect.Setter) Builder
+		SetExpr(fns ...dialect.ExprSetter) Builder
 		Wherer
 		Orderer
 		Grouper
@@ -128,6 +130,7 @@ func (o *orm) Free() {
 		return
 	}
 
+	_ = o.String()
 	if o.db.Debug() {
 		log.Info(o.String())
 	}
@@ -181,15 +184,15 @@ func (o *orm) setTable(a any) Builder {
 	return o
 }
 
-// // GetTableName 获取 orm 对象的表名。
-// func (s *orm) GetTableName() string {
+//// GetTableName 获取 orm 对象的表名。
+//func (s *orm) GetTableName() string {
 //	return s.table
-// }
+//}
 //
-// // GetCols 获取 orm 对象要查询的列。
-// func (s *orm) GetCols() []dialect.Field {
+//// GetCols 获取 orm 对象要查询的列。
+//func (s *orm) GetCols() []dialect.Field {
 //	return s.cols
-// }
+//}
 
 // Distinct 设置查询结果去重，并指定去重的列。
 func (o *orm) Distinct(cols ...dialect.Field) Builder {
