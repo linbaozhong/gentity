@@ -17,6 +17,7 @@ package orm
 import (
 	"context"
 	"database/sql"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
@@ -28,8 +29,8 @@ type delete struct {
 }
 
 // Delete 删除器
-func (o *orm) Delete(a any) Deleter {
-	o.setTable(a)
+func (o *orm) Delete(x ...ace.Executer) Deleter {
+	o.connect(x...)
 	return &delete{
 		orm: o,
 	}

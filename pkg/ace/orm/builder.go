@@ -47,7 +47,17 @@ type (
 		Having(fns ...dialect.Condition) Builder
 	}
 
-	Selecter interface {
+	Columner interface {
+		Cols(cols ...dialect.Field) Builder
+		Funcs(fns ...dialect.Function) Builder
+		Omits(cols ...dialect.Field) Builder
+	}
+
+	SelectBuilder interface {
+		Columner
+		Wherer
+		Orderer
+		Grouper
 		Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) Builder
 		LeftJoin(left, right dialect.Field, fns ...dialect.Condition) Builder
 		RightJoin(left, right dialect.Field, fns ...dialect.Condition) Builder
@@ -56,27 +66,35 @@ type (
 		Distinct(cols ...dialect.Field) Builder
 	}
 
-	Columner interface {
-		Cols(cols ...dialect.Field) Builder
-		Funcs(fns ...dialect.Function) Builder
-		Omits(cols ...dialect.Field) Builder
+	CreateBuilder interface {
+		Columner
+		Set(fns ...dialect.Setter) Builder
+		SetExpr(fns ...dialect.ExprSetter) Builder
+	}
+
+	UpdateBuilder interface {
+		Columner
+		Set(fns ...dialect.Setter) Builder
+		SetExpr(fns ...dialect.ExprSetter) Builder
+		Wherer
+	}
+
+	DeleteBuilder interface {
+		Wherer
 	}
 
 	Builder interface {
+		setTable(a any) Builder
 		Free()
 		String() string
 		Clone() Builder
 		Set(fns ...dialect.Setter) Builder
 		SetExpr(fns ...dialect.ExprSetter) Builder
-		Wherer
-		Orderer
-		Grouper
-		Selecter
-		Columner
-		Create(a any) Creater
-		Delete(a any) Deleter
-		Read(a any) Reader
-		Update(a any) Updater
+		SelectBuilder
+		Create(x ...ace.Executer) Creater
+		Delete(x ...ace.Executer) Deleter
+		Read(x ...ace.Executer) Reader
+		Update(x ...ace.Executer) Updater
 	}
 
 	orm struct {
@@ -112,13 +130,8 @@ var (
 	})
 )
 
-func New(x ...ace.Executer) Builder {
+func New() Builder {
 	obj := ormPool.Get().(*orm)
-	if len(x) > 0 {
-		obj.db = x[0]
-	} else {
-		obj.db = ace.GetDB()
-	}
 
 	obj.commandString.Reset()
 	return obj
@@ -184,15 +197,25 @@ func (o *orm) setTable(a any) Builder {
 	return o
 }
 
-//// GetTableName 获取 orm 对象的表名。
-//func (s *orm) GetTableName() string {
+// connect 连接数据库
+func (o *orm) connect(x ...ace.Executer) Builder {
+	if len(x) > 0 {
+		o.db = x[0]
+	} else {
+		o.db = ace.GetDB()
+	}
+	return o
+}
+
+// // GetTableName 获取 orm 对象的表名。
+// func (s *orm) GetTableName() string {
 //	return s.table
-//}
+// }
 //
-//// GetCols 获取 orm 对象要查询的列。
-//func (s *orm) GetCols() []dialect.Field {
+// // GetCols 获取 orm 对象要查询的列。
+// func (s *orm) GetCols() []dialect.Field {
 //	return s.cols
-//}
+// }
 
 // Distinct 设置查询结果去重，并指定去重的列。
 func (o *orm) Distinct(cols ...dialect.Field) Builder {
@@ -403,7 +426,7 @@ func (o *orm) Asc(cols ...dialect.Field) Builder {
 	return o
 }
 
-// Desc
+// Desc 指定查询结果按指定列降序排序
 func (o *orm) Desc(cols ...dialect.Field) Builder {
 	if len(cols) == 0 {
 		return o
@@ -417,7 +440,7 @@ func (o *orm) Desc(cols ...dialect.Field) Builder {
 	return o
 }
 
-// Group
+// Group 指定查询结果的分组字段
 func (o *orm) Group(cols ...dialect.Field) Builder {
 	if len(cols) == 0 {
 		return o
@@ -431,7 +454,7 @@ func (o *orm) Group(cols ...dialect.Field) Builder {
 	return o
 }
 
-// Group Having
+// Having 指定查询结果的分组条件
 func (o *orm) Having(fns ...dialect.Condition) Builder {
 	if len(fns) == 0 {
 		return o

@@ -33,8 +33,8 @@ type create struct {
 }
 
 // Create 创建插入器
-func (o *orm) Create(a any) Creater {
-	o.setTable(a)
+func (o *orm) Create(x ...ace.Executer) Creater {
+	o.connect(x...)
 	return &create{
 		orm: o,
 	}

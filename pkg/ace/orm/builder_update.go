@@ -36,8 +36,8 @@ type expr struct {
 }
 
 // Update 更新器
-func (o *orm) Update(a any) Updater {
-	o.setTable(a)
+func (o *orm) Update(x ...ace.Executer) Updater {
+	o.connect(x...)
 	return &update{
 		orm: o,
 	}

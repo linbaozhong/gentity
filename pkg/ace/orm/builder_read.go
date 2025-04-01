@@ -17,6 +17,7 @@ package orm
 import (
 	"context"
 	"database/sql"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -56,8 +57,8 @@ type read struct {
 }
 
 // Read 创建查询器
-func (o *orm) Read(a any) Reader {
-	o.setTable(a)
+func (o *orm) Read(x ...ace.Executer) Reader {
+	o.connect(x...)
 	return &read{
 		orm: o,
 	}

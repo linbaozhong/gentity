@@ -15,15 +15,11 @@
 package orm
 
 import (
+	"context"
+	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
 	"testing"
 )
 
 func TestBuilder(t *testing.T) {
-	o := New()
-	o.Create("")
-
-}
-
-func where(w Wherer) {
-
+	Set(tblaccount.State.Set(1)).Where(tblaccount.Id.Eq(1)).Update().Exec(context.Background())
 }
