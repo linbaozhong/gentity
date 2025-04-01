@@ -48,6 +48,9 @@ type (
 	}
 
 	Columner interface {
+		Table(a any) Builder
+		GetTableName() string
+		GetCols() []dialect.Field
 		Cols(cols ...dialect.Field) Builder
 		Funcs(fns ...dialect.Function) Builder
 		Omits(cols ...dialect.Field) Builder
@@ -83,22 +86,20 @@ type (
 	}
 
 	DeleteBuilder interface {
+		Table(a any) Builder
+		GetTableName() string
 		Wherer
 		Delete(x ...ace.Executer) Deleter
 	}
 
 	Builder interface {
-		setTable(a any) Builder
 		Free()
 		String() string
 		Clone() Builder
-		Set(fns ...dialect.Setter) Builder
-		SetExpr(fns ...dialect.ExprSetter) Builder
 		SelectBuilder
-		// Create(x ...ace.Executer) Creater
-		// Delete(x ...ace.Executer) Deleter
-		// Read(x ...ace.Executer) Reader
-		// Update(x ...ace.Executer) Updater
+		CreateBuilder
+		UpdateBuilder
+		DeleteBuilder
 	}
 
 	orm struct {
@@ -184,7 +185,7 @@ func (o *orm) String() string {
 }
 
 // Table 设置 orm 对象的表名。
-func (o *orm) setTable(a any) Builder {
+func (o *orm) Table(a any) Builder {
 	switch v := a.(type) {
 	case string:
 		o.table = v
@@ -211,15 +212,15 @@ func (o *orm) connect(x ...ace.Executer) Builder {
 	return o
 }
 
-// // GetTableName 获取 orm 对象的表名。
-// func (s *orm) GetTableName() string {
-//	return s.table
-// }
-//
-// // GetCols 获取 orm 对象要查询的列。
-// func (s *orm) GetCols() []dialect.Field {
-//	return s.cols
-// }
+// GetTableName 获取 orm 对象的表名。
+func (s *orm) GetTableName() string {
+	return s.table
+}
+
+// GetCols 获取 orm 对象要查询的列。
+func (s *orm) GetCols() []dialect.Field {
+	return s.cols
+}
 
 // Distinct 设置查询结果去重，并指定去重的列。
 func (o *orm) Distinct(cols ...dialect.Field) Builder {

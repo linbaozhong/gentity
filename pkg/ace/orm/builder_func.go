@@ -18,7 +18,7 @@ import "github.com/linbaozhong/gentity/pkg/ace/dialect"
 
 // Table 设置表名
 func Table(t any) Builder {
-	return New().setTable(t)
+	return New().Table(t)
 }
 
 // Select 设置查询字段
