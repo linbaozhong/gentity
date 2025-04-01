@@ -64,12 +64,14 @@ type (
 		Page(pageIndex, pageSize uint) Builder
 		Limit(size uint, start ...uint) Builder
 		Distinct(cols ...dialect.Field) Builder
+		Read(x ...ace.Executer) Reader
 	}
 
 	CreateBuilder interface {
 		Columner
 		Set(fns ...dialect.Setter) Builder
 		SetExpr(fns ...dialect.ExprSetter) Builder
+		Create(x ...ace.Executer) Creater
 	}
 
 	UpdateBuilder interface {
@@ -77,10 +79,12 @@ type (
 		Set(fns ...dialect.Setter) Builder
 		SetExpr(fns ...dialect.ExprSetter) Builder
 		Wherer
+		Update(x ...ace.Executer) Updater
 	}
 
 	DeleteBuilder interface {
 		Wherer
+		Delete(x ...ace.Executer) Deleter
 	}
 
 	Builder interface {
@@ -91,10 +95,10 @@ type (
 		Set(fns ...dialect.Setter) Builder
 		SetExpr(fns ...dialect.ExprSetter) Builder
 		SelectBuilder
-		Create(x ...ace.Executer) Creater
-		Delete(x ...ace.Executer) Deleter
-		Read(x ...ace.Executer) Reader
-		Update(x ...ace.Executer) Updater
+		// Create(x ...ace.Executer) Creater
+		// Delete(x ...ace.Executer) Deleter
+		// Read(x ...ace.Executer) Reader
+		// Update(x ...ace.Executer) Updater
 	}
 
 	orm struct {
