@@ -30,7 +30,7 @@ type companyer interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.Company, bool, error)
+	SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.Company, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.Company, bool, error)
 	// Find 分页查询，返回一个slice
@@ -68,8 +68,8 @@ func (p *daoCompany) C() ace.CreateBuilder {
 	return p.db.C(db.CompanyTableName)
 }
 
-// R Read company
-func (p *daoCompany) R() ace.ReadBuilder {
+// R Select company
+func (p *daoCompany) R() ace.SelectBuilder {
 	return p.db.R(db.CompanyTableName)
 }
 
@@ -205,7 +205,7 @@ func (p *daoCompany) DeleteById(ctx context.Context, id types.BigInt) (bool, err
 }
 
 // SelectAll 查询所有
-func (p *daoCompany) SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.Company, bool, error) {
+func (p *daoCompany) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.Company, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyTableName)
 	}

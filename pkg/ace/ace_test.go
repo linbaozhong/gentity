@@ -17,11 +17,11 @@ package ace
 import "testing"
 
 func TestSelect(t *testing.T) {
-	s := Select()
+	s := Stmt()
 	s.Where()
 }
 
 func TestRead(t *testing.T) {
-	s := Read()
+	s := Select()
 	s.Where()
 }

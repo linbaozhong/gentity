@@ -128,6 +128,6 @@ func (s *DB) D(tableName string) DeleteBuilder {
 	return newDelete(s, tableName)
 }
 
-func (s *DB) R(tableName string) ReadBuilder {
-	return newRead(s, tableName)
+func (s *DB) R(tableName string) SelectBuilder {
+	return newSelect(s, tableName)
 }

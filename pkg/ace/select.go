@@ -30,7 +30,7 @@ import (
 )
 
 type (
-	SelectBuilder interface {
+	StmtBuilder interface {
 		Free()
 		Reset()
 		String() string
@@ -57,8 +57,8 @@ type (
 		Page(pageIndex, pageSize uint) *read
 		Clone() *read
 	}
-	ReadBuilder interface {
-		SelectBuilder
+	SelectBuilder interface {
+		StmtBuilder
 		// Query
 		Query(ctx context.Context) (*sql.Rows, error)
 		// QueryRow
@@ -119,7 +119,7 @@ var (
 	})
 )
 
-func newSelect() ReadBuilder {
+func newStmt() StmtBuilder {
 	obj := selectPool.Get().(*read)
 	obj.commandString.Reset()
 
@@ -127,7 +127,7 @@ func newSelect() ReadBuilder {
 }
 
 // read
-func newRead(db Executer, tableName string) *read {
+func newSelect(db Executer, tableName string) SelectBuilder {
 	obj := selectPool.Get().(*read)
 	if db == nil || tableName == "" {
 		obj.err = errors.New("db or table is nil")

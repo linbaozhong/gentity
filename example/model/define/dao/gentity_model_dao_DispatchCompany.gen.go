@@ -30,7 +30,7 @@ type dispatch_companyer interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.DispatchCompany, bool, error)
+	SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.DispatchCompany, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.DispatchCompany, bool, error)
 	// Find 分页查询，返回一个slice
@@ -68,8 +68,8 @@ func (p *daoDispatchCompany) C() ace.CreateBuilder {
 	return p.db.C(db.DispatchCompanyTableName)
 }
 
-// R Read dispatch_company
-func (p *daoDispatchCompany) R() ace.ReadBuilder {
+// R Select dispatch_company
+func (p *daoDispatchCompany) R() ace.SelectBuilder {
 	return p.db.R(db.DispatchCompanyTableName)
 }
 
@@ -205,7 +205,7 @@ func (p *daoDispatchCompany) DeleteById(ctx context.Context, id types.BigInt) (b
 }
 
 // SelectAll 查询所有
-func (p *daoDispatchCompany) SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.DispatchCompany, bool, error) {
+func (p *daoDispatchCompany) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.DispatchCompany, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.DispatchCompanyTableName)
 	}

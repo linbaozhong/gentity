@@ -26,7 +26,7 @@ type (
 		// C create 命令体
 		C() CreateBuilder
 		// R read 命令体
-		R() ReadBuilder
+		R() SelectBuilder
 		// U update 命令体
 		U() UpdateBuilder
 		// D delete 命令体
@@ -47,6 +47,6 @@ type (
 		C(tableName string) CreateBuilder
 		D(tableName string) DeleteBuilder
 		U(tableName string) UpdateBuilder
-		R(tableName string) ReadBuilder
+		R(tableName string) SelectBuilder
 	}
 )

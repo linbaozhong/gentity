@@ -30,7 +30,7 @@ type company_stamper interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.Money) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.CompanyStamp, bool, error)
+	SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.CompanyStamp, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyStamp, bool, error)
 	// Find 分页查询，返回一个slice
@@ -68,8 +68,8 @@ func (p *daoCompanyStamp) C() ace.CreateBuilder {
 	return p.db.C(db.CompanyStampTableName)
 }
 
-// R Read company_stamp
-func (p *daoCompanyStamp) R() ace.ReadBuilder {
+// R Select company_stamp
+func (p *daoCompanyStamp) R() ace.SelectBuilder {
 	return p.db.R(db.CompanyStampTableName)
 }
 
@@ -205,7 +205,7 @@ func (p *daoCompanyStamp) DeleteById(ctx context.Context, id types.Money) (bool,
 }
 
 // SelectAll 查询所有
-func (p *daoCompanyStamp) SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.CompanyStamp, bool, error) {
+func (p *daoCompanyStamp) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.CompanyStamp, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyStampTableName)
 	}

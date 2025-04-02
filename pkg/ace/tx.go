@@ -43,8 +43,8 @@ func (t *Tx) U(tableName string) UpdateBuilder {
 func (t *Tx) D(tableName string) DeleteBuilder {
 	return newDelete(t, tableName)
 }
-func (t *Tx) R(tableName string) ReadBuilder {
-	return newRead(t, tableName)
+func (t *Tx) R(tableName string) SelectBuilder {
+	return newSelect(t, tableName)
 }
 func (t *Tx) Cache(name string) cachego.Cache {
 	return t.cache(name)

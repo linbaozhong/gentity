@@ -30,7 +30,7 @@ type company_roleer interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.CompanyRole, bool, error)
+	SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.CompanyRole, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyRole, bool, error)
 	// Find 分页查询，返回一个slice
@@ -68,8 +68,8 @@ func (p *daoCompanyRole) C() ace.CreateBuilder {
 	return p.db.C(db.CompanyRoleTableName)
 }
 
-// R Read company_role
-func (p *daoCompanyRole) R() ace.ReadBuilder {
+// R Select company_role
+func (p *daoCompanyRole) R() ace.SelectBuilder {
 	return p.db.R(db.CompanyRoleTableName)
 }
 
@@ -205,7 +205,7 @@ func (p *daoCompanyRole) DeleteById(ctx context.Context, id types.BigInt) (bool,
 }
 
 // SelectAll 查询所有
-func (p *daoCompanyRole) SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.CompanyRole, bool, error) {
+func (p *daoCompanyRole) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.CompanyRole, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyRoleTableName)
 	}

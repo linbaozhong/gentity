@@ -22,17 +22,17 @@ func Create(x ...Executer) CreateBuilder {
 	return newCreate(GetDB(), "")
 }
 
-// Select
-func Select() SelectBuilder {
-	return newSelect()
+// Stmt
+func Stmt() StmtBuilder {
+	return newStmt()
 }
 
-// Read
-func Read(x ...Executer) ReadBuilder {
+// Select
+func Select(x ...Executer) SelectBuilder {
 	if len(x) > 0 {
-		return newRead(x[0], "")
+		return newSelect(x[0], "")
 	}
-	return newRead(GetDB(), "")
+	return newSelect(GetDB(), "")
 }
 
 // Update
