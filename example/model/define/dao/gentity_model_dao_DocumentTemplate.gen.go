@@ -30,7 +30,7 @@ type document_templateer interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Select) ([]db.DocumentTemplate, bool, error)
+	SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.DocumentTemplate, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.DocumentTemplate, bool, error)
 	// Find 分页查询，返回一个slice
@@ -64,22 +64,22 @@ func DocumentTemplate(exec ...ace.Executer) document_templateer {
 }
 
 // C Create document_template
-func (p *daoDocumentTemplate) C() *ace.Create {
+func (p *daoDocumentTemplate) C() ace.CreateBuilder {
 	return p.db.C(db.DocumentTemplateTableName)
 }
 
 // R Read document_template
-func (p *daoDocumentTemplate) R() *ace.Select {
+func (p *daoDocumentTemplate) R() ace.ReadBuilder {
 	return p.db.R(db.DocumentTemplateTableName)
 }
 
 // U Update document_template
-func (p *daoDocumentTemplate) U() *ace.Update {
+func (p *daoDocumentTemplate) U() ace.UpdateBuilder {
 	return p.db.U(db.DocumentTemplateTableName)
 }
 
 // D Delete document_template
-func (p *daoDocumentTemplate) D() *ace.Delete {
+func (p *daoDocumentTemplate) D() ace.DeleteBuilder {
 	return p.db.D(db.DocumentTemplateTableName)
 }
 
@@ -205,7 +205,7 @@ func (p *daoDocumentTemplate) DeleteById(ctx context.Context, id types.BigInt) (
 }
 
 // SelectAll 查询所有
-func (p *daoDocumentTemplate) SelectAll(ctx context.Context, s *ace.Select) ([]db.DocumentTemplate, bool, error) {
+func (p *daoDocumentTemplate) SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.DocumentTemplate, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.DocumentTemplateTableName)
 	}

@@ -30,7 +30,7 @@ type companyer interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Select) ([]db.Company, bool, error)
+	SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.Company, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.Company, bool, error)
 	// Find 分页查询，返回一个slice
@@ -64,22 +64,22 @@ func Company(exec ...ace.Executer) companyer {
 }
 
 // C Create company
-func (p *daoCompany) C() *ace.Create {
+func (p *daoCompany) C() ace.CreateBuilder {
 	return p.db.C(db.CompanyTableName)
 }
 
 // R Read company
-func (p *daoCompany) R() *ace.Select {
+func (p *daoCompany) R() ace.ReadBuilder {
 	return p.db.R(db.CompanyTableName)
 }
 
 // U Update company
-func (p *daoCompany) U() *ace.Update {
+func (p *daoCompany) U() ace.UpdateBuilder {
 	return p.db.U(db.CompanyTableName)
 }
 
 // D Delete company
-func (p *daoCompany) D() *ace.Delete {
+func (p *daoCompany) D() ace.DeleteBuilder {
 	return p.db.D(db.CompanyTableName)
 }
 
@@ -205,7 +205,7 @@ func (p *daoCompany) DeleteById(ctx context.Context, id types.BigInt) (bool, err
 }
 
 // SelectAll 查询所有
-func (p *daoCompany) SelectAll(ctx context.Context, s *ace.Select) ([]db.Company, bool, error) {
+func (p *daoCompany) SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.Company, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyTableName)
 	}

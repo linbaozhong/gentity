@@ -27,7 +27,17 @@ import (
 )
 
 type (
-	Create struct {
+	CreateBuilder interface {
+		Free()
+		Reset()
+		String() string
+		Set(fns ...dialect.Setter) *create
+		Cols(cols ...dialect.Field) *create
+		Exec(ctx context.Context) (sql.Result, error)
+		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
+		StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
+	}
+	create struct {
 		pool.Model
 		db            Executer
 		table         string
@@ -42,15 +52,15 @@ type (
 
 var (
 	createPool = pool.New(app.Context, func() any {
-		obj := &Create{}
+		obj := &create{}
 		obj.UUID()
 		return obj
 	})
 )
 
-// Create
-func newCreate(db Executer, tableName string) *Create {
-	obj := createPool.Get().(*Create)
+// create
+func newCreate(db Executer, tableName string) CreateBuilder {
+	obj := createPool.Get().(*create)
 	if db == nil || tableName == "" {
 		obj.err = errors.New("db or table is nil")
 		return obj
@@ -64,7 +74,7 @@ func newCreate(db Executer, tableName string) *Create {
 	return obj
 }
 
-func (c *Create) Free() {
+func (c *create) Free() {
 	if c == nil || c.table == "" {
 		return
 	}
@@ -77,7 +87,7 @@ func (c *Create) Free() {
 	createPool.Put(c)
 }
 
-func (c *Create) Reset() {
+func (c *create) Reset() {
 	c.table = ""
 	c.affect = c.affect[:0] // []dialect.Field{} // c.affect[:0]
 	c.cols = c.cols[:0]     // []dialect.Field{}   // c.cols[:0]
@@ -85,7 +95,7 @@ func (c *Create) Reset() {
 	c.params = c.params[:0] // []any{} // c.params[:0]
 }
 
-func (c *Create) String() string {
+func (c *create) String() string {
 	if c.commandString.Len() == 0 {
 		c.commandString.WriteString(fmt.Sprintf("%s  %v \n", c.command.String(), c.params))
 	}
@@ -93,7 +103,7 @@ func (c *Create) String() string {
 }
 
 // Sets
-func (c *Create) Set(fns ...dialect.Setter) *Create {
+func (c *create) Set(fns ...dialect.Setter) *create {
 	if len(fns) == 0 || c.err != nil {
 		return c
 	}
@@ -113,7 +123,7 @@ func (c *Create) Set(fns ...dialect.Setter) *Create {
 	return c
 }
 
-func (c *Create) Cols(cols ...dialect.Field) *Create {
+func (c *create) Cols(cols ...dialect.Field) *create {
 	for _, col := range cols {
 		c.affect = append(c.affect, col)
 	}
@@ -121,7 +131,7 @@ func (c *Create) Cols(cols ...dialect.Field) *Create {
 }
 
 // Exec
-func (c *Create) Exec(ctx context.Context) (sql.Result, error) {
+func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	defer c.Free()
 
 	if c.err != nil {
@@ -155,7 +165,7 @@ func (c *Create) Exec(ctx context.Context) (sql.Result, error) {
 }
 
 // Struct
-func (c *Create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
+func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
 
 	if c.err != nil {
@@ -185,7 +195,7 @@ func (c *Create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 }
 
 // Struct 执行批量插入，请不要在事务中使用
-func (c *Create) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
+func (c *create) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
 
 	if c.err != nil {

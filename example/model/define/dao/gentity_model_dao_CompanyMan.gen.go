@@ -30,7 +30,7 @@ type company_maner interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyMan, bool, error)
+	SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.CompanyMan, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyMan, bool, error)
 	// Find 分页查询，返回一个slice
@@ -64,22 +64,22 @@ func CompanyMan(exec ...ace.Executer) company_maner {
 }
 
 // C Create company_man
-func (p *daoCompanyMan) C() *ace.Create {
+func (p *daoCompanyMan) C() ace.CreateBuilder {
 	return p.db.C(db.CompanyManTableName)
 }
 
 // R Read company_man
-func (p *daoCompanyMan) R() *ace.Select {
+func (p *daoCompanyMan) R() ace.ReadBuilder {
 	return p.db.R(db.CompanyManTableName)
 }
 
 // U Update company_man
-func (p *daoCompanyMan) U() *ace.Update {
+func (p *daoCompanyMan) U() ace.UpdateBuilder {
 	return p.db.U(db.CompanyManTableName)
 }
 
 // D Delete company_man
-func (p *daoCompanyMan) D() *ace.Delete {
+func (p *daoCompanyMan) D() ace.DeleteBuilder {
 	return p.db.D(db.CompanyManTableName)
 }
 
@@ -205,7 +205,7 @@ func (p *daoCompanyMan) DeleteById(ctx context.Context, id types.BigInt) (bool, 
 }
 
 // SelectAll 查询所有
-func (p *daoCompanyMan) SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyMan, bool, error) {
+func (p *daoCompanyMan) SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.CompanyMan, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyManTableName)
 	}

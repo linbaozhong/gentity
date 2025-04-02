@@ -23,14 +23,14 @@ import (
 
 type (
 	Cruder interface {
-		// C Create 命令体
-		C() *Create
-		// R Read 命令体
-		R() *Select
-		// U Update 命令体
-		U() *Update
-		// D Delete 命令体
-		D() *Delete
+		// C create 命令体
+		C() CreateBuilder
+		// R read 命令体
+		R() ReadBuilder
+		// U update 命令体
+		U() UpdateBuilder
+		// D delete 命令体
+		D() DeleteBuilder
 	}
 
 	Executer interface {
@@ -44,9 +44,9 @@ type (
 		Debug() bool
 		Cache(string) cachego.Cache
 		IsDB() bool
-		C(tableName string) *Create
-		D(tableName string) *Delete
-		U(tableName string) *Update
-		R(tableName string) *Select
+		C(tableName string) CreateBuilder
+		D(tableName string) DeleteBuilder
+		U(tableName string) UpdateBuilder
+		R(tableName string) ReadBuilder
 	}
 )

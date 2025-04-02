@@ -27,7 +27,21 @@ import (
 )
 
 type (
-	Update struct {
+	UpdateBuilder interface {
+		Free()
+		Reset()
+		String() string
+		Set(fns ...dialect.Setter) *update
+		SetExpr(fns ...dialect.ExprSetter) *update
+		Where(fns ...dialect.Condition) *update
+		And(fns ...dialect.Condition) *update
+		Or(fns ...dialect.Condition) *update
+		Cols(cols ...dialect.Field) *update
+		Exec(ctx context.Context) (sql.Result, error)
+		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
+		StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
+	}
+	update struct {
 		pool.Model
 		db            Executer
 		table         string
@@ -49,15 +63,15 @@ type (
 
 var (
 	updatePool = pool.New(app.Context, func() any {
-		obj := &Update{}
+		obj := &update{}
 		obj.UUID()
 		return obj
 	})
 )
 
-// Update
-func NewUpdate(db Executer, tableName string) *Update {
-	obj := updatePool.Get().(*Update)
+// update
+func newUpdate(db Executer, tableName string) *update {
+	obj := updatePool.Get().(*update)
 	if db == nil || tableName == "" {
 		obj.err = errors.New("db or table is nil")
 		return obj
@@ -72,7 +86,7 @@ func NewUpdate(db Executer, tableName string) *Update {
 
 }
 
-func (u *Update) Free() {
+func (u *update) Free() {
 	if u == nil || u.table == "" {
 		return
 	}
@@ -85,7 +99,7 @@ func (u *Update) Free() {
 	updatePool.Put(u)
 }
 
-func (u *Update) Reset() {
+func (u *update) Reset() {
 	u.table = ""
 	u.affect = u.affect[:0]     // []dialect.Field{} // u.affect[:0]
 	u.cols = u.cols[:0]         // []dialect.Field{}   // u.cols[:0]
@@ -96,7 +110,7 @@ func (u *Update) Reset() {
 	u.params = u.params[:0] // []any{} // u.params[:0]
 }
 
-func (u *Update) String() string {
+func (u *update) String() string {
 	if u.table == "" {
 		u.commandString.WriteString(fmt.Sprintf("%s  %v \n", u.command.String(), u.params))
 	}
@@ -104,7 +118,7 @@ func (u *Update) String() string {
 }
 
 // Set
-func (u *Update) Set(fns ...dialect.Setter) *Update {
+func (u *update) Set(fns ...dialect.Setter) *update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -121,7 +135,7 @@ func (u *Update) Set(fns ...dialect.Setter) *Update {
 	return u
 }
 
-func (u *Update) SetExpr(fns ...dialect.ExprSetter) *Update {
+func (u *update) SetExpr(fns ...dialect.ExprSetter) *update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -138,7 +152,7 @@ func (u *Update) SetExpr(fns ...dialect.ExprSetter) *Update {
 }
 
 // Where
-func (u *Update) Where(fns ...dialect.Condition) *Update {
+func (u *update) Where(fns ...dialect.Condition) *update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -170,7 +184,7 @@ func (u *Update) Where(fns ...dialect.Condition) *Update {
 }
 
 // And
-func (u *Update) And(fns ...dialect.Condition) *Update {
+func (u *update) And(fns ...dialect.Condition) *update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -202,7 +216,7 @@ func (u *Update) And(fns ...dialect.Condition) *Update {
 }
 
 // Or
-func (u *Update) Or(fns ...dialect.Condition) *Update {
+func (u *update) Or(fns ...dialect.Condition) *update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}
@@ -233,7 +247,7 @@ func (u *Update) Or(fns ...dialect.Condition) *Update {
 	return u
 }
 
-func (u *Update) Cols(cols ...dialect.Field) *Update {
+func (u *update) Cols(cols ...dialect.Field) *update {
 	for _, col := range cols {
 		u.affect = append(u.affect, col)
 	}
@@ -241,7 +255,7 @@ func (u *Update) Cols(cols ...dialect.Field) *Update {
 }
 
 // Exec
-func (u *Update) Exec(ctx context.Context) (sql.Result, error) {
+func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
 
 	if u.err != nil {
@@ -283,7 +297,7 @@ func (u *Update) Exec(ctx context.Context) (sql.Result, error) {
 }
 
 // Struct
-func (u *Update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
+func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
 	if u.err != nil {
@@ -326,7 +340,7 @@ func (u *Update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 }
 
 // Struct 执行更新,请不要在事务中使用
-func (u *Update) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
+func (u *update) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
 	if u.err != nil {

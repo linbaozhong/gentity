@@ -30,7 +30,7 @@ type company_fadadaer interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyFadada, bool, error)
+	SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.CompanyFadada, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyFadada, bool, error)
 	// Find 分页查询，返回一个slice
@@ -64,22 +64,22 @@ func CompanyFadada(exec ...ace.Executer) company_fadadaer {
 }
 
 // C Create company_fadada
-func (p *daoCompanyFadada) C() *ace.Create {
+func (p *daoCompanyFadada) C() ace.CreateBuilder {
 	return p.db.C(db.CompanyFadadaTableName)
 }
 
 // R Read company_fadada
-func (p *daoCompanyFadada) R() *ace.Select {
+func (p *daoCompanyFadada) R() ace.ReadBuilder {
 	return p.db.R(db.CompanyFadadaTableName)
 }
 
 // U Update company_fadada
-func (p *daoCompanyFadada) U() *ace.Update {
+func (p *daoCompanyFadada) U() ace.UpdateBuilder {
 	return p.db.U(db.CompanyFadadaTableName)
 }
 
 // D Delete company_fadada
-func (p *daoCompanyFadada) D() *ace.Delete {
+func (p *daoCompanyFadada) D() ace.DeleteBuilder {
 	return p.db.D(db.CompanyFadadaTableName)
 }
 
@@ -205,7 +205,7 @@ func (p *daoCompanyFadada) DeleteById(ctx context.Context, id types.BigInt) (boo
 }
 
 // SelectAll 查询所有
-func (p *daoCompanyFadada) SelectAll(ctx context.Context, s *ace.Select) ([]db.CompanyFadada, bool, error) {
+func (p *daoCompanyFadada) SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.CompanyFadada, bool, error) {
 	if len(s.GetTableName()) == 0 {
 		s.SetTableName(db.CompanyFadadaTableName)
 	}

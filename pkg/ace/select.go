@@ -24,12 +24,71 @@ import (
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/util"
+	"reflect"
 	"strconv"
 	"strings"
 )
 
 type (
-	Select struct {
+	SelectBuilder interface {
+		Free()
+		Reset()
+		String() string
+		SetTableName(n any) *read
+		GetTableName() string
+		GetCols() []dialect.Field
+		Distinct(cols ...dialect.Field) *read
+		Cols(cols ...dialect.Field) *read
+		Omits(cols ...dialect.Field) *read
+		Funcs(fns ...dialect.Function) *read
+		Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) *read
+		LeftJoin(left, right dialect.Field, fns ...dialect.Condition) *read
+		RightJoin(left, right dialect.Field, fns ...dialect.Condition) *read
+		Where(fns ...dialect.Condition) *read
+		And(fns ...dialect.Condition) *read
+		Or(fns ...dialect.Condition) *read
+		OrderFunc(ords ...dialect.Order) *read
+		Order(cols ...dialect.Field) *read
+		Asc(cols ...dialect.Field) *read
+		Desc(cols ...dialect.Field) *read
+		Group(cols ...dialect.Field) *read
+		Having(fns ...dialect.Condition) *read
+		Limit(size uint, start ...uint) *read
+		Page(pageIndex, pageSize uint) *read
+		Clone() *read
+	}
+	ReadBuilder interface {
+		SelectBuilder
+		// Query
+		Query(ctx context.Context) (*sql.Rows, error)
+		// QueryRow
+		QueryRow(ctx context.Context) (*sql.Row, error)
+		// Get
+		Get(ctx context.Context, dest any) error
+		// Gets
+		Gets(ctx context.Context, dest any) error
+		// Map
+		Map(ctx context.Context) (map[string]any, error)
+		// Maps
+		Maps(ctx context.Context) ([]map[string]any, error)
+		// 	Slice
+		Slice(ctx context.Context) ([]any, error)
+		// 	Slices
+		Slices(ctx context.Context) ([][]any, error)
+		// Count 返回数量
+		Count(ctx context.Context, cond ...dialect.Condition) (int64, error)
+		// Sum 返回总和
+		Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error)
+		// read 执行原生查询，返回指定列的数据
+		Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error)
+		// SelectMap 执行原生查询，返回 map[string]any
+		SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error)
+		// SelectSlice 执行原生查询，返回 []any
+		SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error)
+		// SelectStruct 执行原生查询，返回结构体对象
+		SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error
+	}
+	read struct {
 		pool.Model
 		db            Executer
 		table         string
@@ -54,15 +113,22 @@ type (
 
 var (
 	selectPool = pool.New(app.Context, func() any {
-		obj := &Select{}
+		obj := &read{}
 		obj.UUID()
 		return obj
 	})
 )
 
-// Select
-func newSelect(db Executer, tableName string) *Select {
-	obj := selectPool.Get().(*Select)
+func newSelect() ReadBuilder {
+	obj := selectPool.Get().(*read)
+	obj.commandString.Reset()
+
+	return obj
+}
+
+// read
+func newRead(db Executer, tableName string) *read {
+	obj := selectPool.Get().(*read)
 	if db == nil || tableName == "" {
 		obj.err = errors.New("db or table is nil")
 		return obj
@@ -76,8 +142,8 @@ func newSelect(db Executer, tableName string) *Select {
 	return obj
 }
 
-// Free 释放 Select 对象，将其重置并放回对象池。
-func (s *Select) Free() {
+// Free 释放 read 对象，将其重置并放回对象池。
+func (s *read) Free() {
 	if s == nil || s.table == "" {
 		return
 	}
@@ -90,7 +156,7 @@ func (s *Select) Free() {
 	selectPool.Put(s)
 }
 
-func (s *Select) Reset() {
+func (s *read) Reset() {
 	s.table = ""
 	s.cols = s.cols[:0]   // []dialect.Field{} // s.cols[:0]
 	s.funcs = s.funcs[:0] // []string{}       // s.funcs[:0]
@@ -108,31 +174,44 @@ func (s *Select) Reset() {
 	s.command.Reset()
 }
 
-// String 返回 Select 对象的 SQL 语句和参数的字符串表示。
-func (s *Select) String() string {
+// String 返回 read 对象的 SQL 语句和参数的字符串表示。
+func (s *read) String() string {
 	if s.commandString.Len() == 0 {
 		s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.mergeParams()))
 	}
 	return s.commandString.String()
 }
 
-// SetTableName 设置 Select 对象的表名。
-func (s *Select) SetTableName(n string) {
-	s.table = n
+// SetTableName 设置 read 对象的表名。
+func (s *read) SetTableName(n any) *read {
+	switch v := n.(type) {
+	case string:
+		s.table = v
+	case dialect.TableNamer:
+		s.table = v.TableName()
+	default:
+		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
+		value := reflect.ValueOf(n)
+		if value.Kind() == reflect.Ptr {
+			value = value.Elem()
+		}
+		s.table = value.Type().Name()
+	}
+	return s
 }
 
-// GetTableName 获取 Select 对象的表名。
-func (s *Select) GetTableName() string {
+// GetTableName 获取 read 对象的表名。
+func (s *read) GetTableName() string {
 	return s.table
 }
 
-// GetCols 获取 Select 对象要查询的列。
-func (s *Select) GetCols() []dialect.Field {
+// GetCols 获取 read 对象要查询的列。
+func (s *read) GetCols() []dialect.Field {
 	return s.cols
 }
 
 // Distinct 设置查询结果去重，并指定去重的列。
-func (s *Select) Distinct(cols ...dialect.Field) *Select {
+func (s *read) Distinct(cols ...dialect.Field) *read {
 	s.distinct = true
 	for _, col := range cols {
 		s.cols = append(s.cols, col)
@@ -142,7 +221,7 @@ func (s *Select) Distinct(cols ...dialect.Field) *Select {
 }
 
 // Cols 指定要查询的列
-func (s *Select) Cols(cols ...dialect.Field) *Select {
+func (s *read) Cols(cols ...dialect.Field) *read {
 	for _, col := range cols {
 		s.cols = append(s.cols, col)
 	}
@@ -150,7 +229,7 @@ func (s *Select) Cols(cols ...dialect.Field) *Select {
 }
 
 // Omits 忽略指定的列
-func (s *Select) Omits(cols ...dialect.Field) *Select {
+func (s *read) Omits(cols ...dialect.Field) *read {
 	for _, col := range cols {
 		s.omits = append(s.omits, col)
 	}
@@ -159,12 +238,12 @@ func (s *Select) Omits(cols ...dialect.Field) *Select {
 
 // Omit Deprecated: 此方法已弃用，请使用Omits
 // 忽略指定的列
-func (s *Select) Omit(cols ...dialect.Field) *Select {
+func (s *read) Omit(cols ...dialect.Field) *read {
 	return s.Omits(cols...)
 }
 
 // Funcs 添加聚合函数到查询中
-func (s *Select) Funcs(fns ...dialect.Function) *Select {
+func (s *read) Funcs(fns ...dialect.Function) *read {
 	for _, fn := range fns {
 		s.funcs = append(s.funcs, fn())
 	}
@@ -172,7 +251,7 @@ func (s *Select) Funcs(fns ...dialect.Function) *Select {
 }
 
 // Join 添加连接查询条件
-func (s *Select) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) *Select {
+func (s *read) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) *read {
 	if s.err != nil {
 		return s
 	}
@@ -201,17 +280,17 @@ func (s *Select) Join(joinType dialect.JoinType, left, right dialect.Field, fns 
 }
 
 // LeftJoin 添加左连接查询条件。
-func (s *Select) LeftJoin(left, right dialect.Field, fns ...dialect.Condition) *Select {
+func (s *read) LeftJoin(left, right dialect.Field, fns ...dialect.Condition) *read {
 	return s.Join(dialect.Left_Join, left, right, fns...)
 }
 
 // RightJoin 添加右连接查询条件。
-func (s *Select) RightJoin(left, right dialect.Field, fns ...dialect.Condition) *Select {
+func (s *read) RightJoin(left, right dialect.Field, fns ...dialect.Condition) *read {
 	return s.Join(dialect.Right_Join, left, right, fns...)
 }
 
 // Where 添加查询条件。
-func (s *Select) Where(fns ...dialect.Condition) *Select {
+func (s *read) Where(fns ...dialect.Condition) *read {
 	if len(fns) == 0 || s.err != nil {
 		return s
 	}
@@ -243,7 +322,7 @@ func (s *Select) Where(fns ...dialect.Condition) *Select {
 }
 
 // And 添加 AND 查询条件。
-func (s *Select) And(fns ...dialect.Condition) *Select {
+func (s *read) And(fns ...dialect.Condition) *read {
 	if len(fns) == 0 || s.err != nil {
 		return s
 	}
@@ -274,7 +353,7 @@ func (s *Select) And(fns ...dialect.Condition) *Select {
 }
 
 // Or 添加 OR 查询条件。
-func (s *Select) Or(fns ...dialect.Condition) *Select {
+func (s *read) Or(fns ...dialect.Condition) *read {
 	if len(fns) == 0 || s.err != nil {
 		return s
 	}
@@ -307,7 +386,7 @@ func (s *Select) Or(fns ...dialect.Condition) *Select {
 
 // OrderFunc 方法用于根据传入的排序规则函数设置排序规则
 // 它会遍历传入的排序规则函数，根据规则函数的返回值调用 Asc 或 Desc 方法
-func (s *Select) OrderFunc(ords ...dialect.Order) *Select {
+func (s *read) OrderFunc(ords ...dialect.Order) *read {
 	for _, ord := range ords {
 		sord, fs := ord()
 		if sord == dialect.Operator_Desc {
@@ -321,17 +400,17 @@ func (s *Select) OrderFunc(ords ...dialect.Order) *Select {
 
 // OrderField
 // Deprecated: 此方法后续版本可能会被移除，建议使用 OrderFunc 方法
-func (s *Select) OrderField(ords ...dialect.Order) *Select {
+func (s *read) OrderField(ords ...dialect.Order) *read {
 	return s.OrderFunc(ords...)
 }
 
 // Order 指定查询结果的排序字段，默认升序。
-func (s *Select) Order(cols ...dialect.Field) *Select {
+func (s *read) Order(cols ...dialect.Field) *read {
 	return s.Asc(cols...)
 }
 
 // Asc 指定查询结果按指定列升序排序。
-func (s *Select) Asc(cols ...dialect.Field) *Select {
+func (s *read) Asc(cols ...dialect.Field) *read {
 	if len(cols) == 0 {
 		return s
 	}
@@ -345,7 +424,7 @@ func (s *Select) Asc(cols ...dialect.Field) *Select {
 }
 
 // Desc
-func (s *Select) Desc(cols ...dialect.Field) *Select {
+func (s *read) Desc(cols ...dialect.Field) *read {
 	if len(cols) == 0 {
 		return s
 	}
@@ -359,7 +438,7 @@ func (s *Select) Desc(cols ...dialect.Field) *Select {
 }
 
 // Group
-func (s *Select) Group(cols ...dialect.Field) *Select {
+func (s *read) Group(cols ...dialect.Field) *read {
 	if len(cols) == 0 {
 		return s
 	}
@@ -373,7 +452,7 @@ func (s *Select) Group(cols ...dialect.Field) *Select {
 }
 
 // Group Having
-func (s *Select) Having(fns ...dialect.Condition) *Select {
+func (s *read) Having(fns ...dialect.Condition) *read {
 	if len(fns) == 0 || s.err != nil {
 		return s
 	}
@@ -399,7 +478,7 @@ func (s *Select) Having(fns ...dialect.Condition) *Select {
 // Limit
 // size 大小
 // start 开始位置
-func (s *Select) Limit(size uint, start ...uint) *Select {
+func (s *read) Limit(size uint, start ...uint) *read {
 	if size == 0 {
 		s.limit = ""
 		return s
@@ -416,7 +495,7 @@ func (s *Select) Limit(size uint, start ...uint) *Select {
 // Page
 // pageIndex 页码
 // pageSize 页大小
-func (s *Select) Page(pageIndex, pageSize uint) *Select {
+func (s *read) Page(pageIndex, pageSize uint) *read {
 	if pageSize == 0 {
 		return s.Limit(0)
 	}
@@ -426,8 +505,8 @@ func (s *Select) Page(pageIndex, pageSize uint) *Select {
 	return s.Limit(pageSize, (pageIndex-1)*pageSize)
 }
 
-// Clone 克隆 Select
-func (s *Select) Clone() *Select {
+// Clone 克隆 read
+func (s *read) Clone() *read {
 	_s := *s
 	_s.cols = append([]dialect.Field(nil), s.cols...)
 	_s.funcs = append([]string(nil), s.funcs...)
@@ -440,7 +519,7 @@ func (s *Select) Clone() *Select {
 }
 
 // Query
-func (s *Select) Query(ctx context.Context) (*sql.Rows, error) {
+func (s *read) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -451,7 +530,7 @@ func (s *Select) Query(ctx context.Context) (*sql.Rows, error) {
 }
 
 // QueryRow
-func (s *Select) QueryRow(ctx context.Context) (*sql.Row, error) {
+func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -473,7 +552,7 @@ func (s *Select) QueryRow(ctx context.Context) (*sql.Row, error) {
 }
 
 // Get 返回单个数据，dest 必须是指针
-func (s *Select) Get(ctx context.Context, dest any) error {
+func (s *read) Get(ctx context.Context, dest any) error {
 	defer s.Free()
 
 	if s.err != nil {
@@ -499,7 +578,7 @@ func (s *Select) Get(ctx context.Context, dest any) error {
 }
 
 // Gets 返回数据切片，dest 必须是slice指针
-func (s *Select) Gets(ctx context.Context, dest any) error {
+func (s *read) Gets(ctx context.Context, dest any) error {
 	defer s.Free()
 
 	if s.err != nil {
@@ -516,7 +595,7 @@ func (s *Select) Gets(ctx context.Context, dest any) error {
 }
 
 // Map 返回 map[string]any，用于列数未知的情况
-func (s *Select) Map(ctx context.Context) (map[string]any, error) {
+func (s *read) Map(ctx context.Context) (map[string]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -537,7 +616,7 @@ func (s *Select) Map(ctx context.Context) (map[string]any, error) {
 }
 
 // Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
-func (s *Select) Maps(ctx context.Context) ([]map[string]any, error) {
+func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -566,7 +645,7 @@ func (s *Select) Maps(ctx context.Context) ([]map[string]any, error) {
 }
 
 // Slice 返回切片 []any，用于列数未知的情况
-func (s *Select) Slice(ctx context.Context) ([]any, error) {
+func (s *read) Slice(ctx context.Context) ([]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -586,7 +665,7 @@ func (s *Select) Slice(ctx context.Context) ([]any, error) {
 }
 
 // Slices 返回 []any 的切片 [][]any，用于列数未知的情况
-func (s *Select) Slices(ctx context.Context) ([][]any, error) {
+func (s *read) Slices(ctx context.Context) ([][]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -614,7 +693,7 @@ func (s *Select) Slices(ctx context.Context) ([][]any, error) {
 }
 
 // Count
-func (s *Select) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
+func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -662,7 +741,7 @@ func (s *Select) Count(ctx context.Context, cond ...dialect.Condition) (int64, e
 }
 
 // Sum
-func (s *Select) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -719,9 +798,9 @@ func (s *Select) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.
 	return sums, nil
 }
 
-// Select 执行原生的 SQL 查询
+// read 执行原生的 SQL 查询
 // 此方法接受一个上下文、原生 SQL 语句和对应的参数，返回查询结果和可能的错误
-func (s *Select) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
+func (s *read) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
 	defer s.Free()
 
 	if s.err != nil {
@@ -732,7 +811,7 @@ func (s *Select) Select(ctx context.Context, sqlStr string, args ...any) (*sql.R
 }
 
 // SelectMap 执行原生 SQL 查询并返回 map[string]any
-func (se *Select) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
+func (se *read) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
 	rows, err := se.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
@@ -745,7 +824,7 @@ func (se *Select) SelectMap(ctx context.Context, sqlStr string, args ...any) (ma
 }
 
 // SelectSlice 执行原生 SQL 查询并返回 []any
-func (se *Select) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
+func (se *read) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
 	rows, err := se.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
@@ -756,8 +835,8 @@ func (se *Select) SelectSlice(ctx context.Context, sqlStr string, args ...any) (
 	return r.SliceScan()
 }
 
-// SelectModel 执行原生 SQL 查询并返回实现 dialect.Modeler 接口的结构体
-func (se *Select) SelectModel(ctx context.Context, dest any, sqlStr string, args ...any) error {
+// SelectStruct 执行原生 SQL 查询并返回实现 dialect.Modeler 接口的结构体
+func (se *read) SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error {
 	rows, err := se.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return err
@@ -775,7 +854,7 @@ func (se *Select) SelectModel(ctx context.Context, dest any, sqlStr string, args
 }
 
 // 合并参数
-func (s *Select) mergeParams() []any {
+func (s *read) mergeParams() []any {
 	if len(s.joinParams) > 0 {
 		if len(s.whereParams) > 0 {
 			var params = make([]any, len(s.joinParams)+len(s.whereParams))
@@ -789,7 +868,7 @@ func (s *Select) mergeParams() []any {
 }
 
 // parse
-func (s *Select) parse() []dialect.Field {
+func (s *read) parse() []dialect.Field {
 	s.command.WriteString("SELECT ")
 
 	var cols = util.SliceDiff(s.cols, s.omits)
@@ -846,12 +925,12 @@ func (s *Select) parse() []dialect.Field {
 }
 
 // query
-func (s *Select) query(ctx context.Context) (*sql.Rows, error) {
+func (s *read) query(ctx context.Context) (*sql.Rows, error) {
 	_ = s.parse()
 	return s.rows(ctx, s.command.String(), s.mergeParams()...)
 }
 
-func (s *Select) rows(ctx context.Context, sql string, params ...any) (*sql.Rows, error) {
+func (s *read) rows(ctx context.Context, sql string, params ...any) (*sql.Rows, error) {
 	stmt, err := s.db.PrepareContext(ctx, sql)
 	if err != nil {
 		return nil, err
@@ -864,7 +943,7 @@ func (s *Select) rows(ctx context.Context, sql string, params ...any) (*sql.Rows
 	return rows, err
 }
 
-func (s *Select) row(ctx context.Context, sql string, params ...any) (*sql.Row, error) {
+func (s *read) row(ctx context.Context, sql string, params ...any) (*sql.Row, error) {
 	stmt, err := s.db.PrepareContext(ctx, sql)
 	if err != nil {
 		return nil, err

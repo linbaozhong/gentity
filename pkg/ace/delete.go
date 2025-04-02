@@ -27,7 +27,16 @@ import (
 )
 
 type (
-	Delete struct {
+	DeleteBuilder interface {
+		Free()
+		Reset()
+		String() string
+		Where(fns ...dialect.Condition) *delete
+		And(fns ...dialect.Condition) *delete
+		Or(fns ...dialect.Condition) *delete
+		Exec(ctx context.Context) (sql.Result, error)
+	}
+	delete struct {
 		pool.Model
 		db            Executer
 		table         string
@@ -41,15 +50,15 @@ type (
 
 var (
 	deletePool = pool.New(app.Context, func() any {
-		obj := &Delete{}
+		obj := &delete{}
 		obj.UUID()
 		return obj
 	})
 )
 
-// Delete
-func newDelete(db Executer, tableName string) *Delete {
-	obj := deletePool.Get().(*Delete)
+// delete
+func newDelete(db Executer, tableName string) DeleteBuilder {
+	obj := deletePool.Get().(*delete)
 	if db == nil || tableName == "" {
 		obj.err = errors.New("db or table is nil")
 		return obj
@@ -64,7 +73,7 @@ func newDelete(db Executer, tableName string) *Delete {
 
 }
 
-func (d *Delete) Free() {
+func (d *delete) Free() {
 	if d == nil || d.table == "" {
 		return
 	}
@@ -77,14 +86,14 @@ func (d *Delete) Free() {
 	deletePool.Put(d)
 }
 
-func (d *Delete) Reset() {
+func (d *delete) Reset() {
 	d.table = ""
 	d.where.Reset()
 	d.whereParams = d.whereParams[:0] // []any{} // d.whereParams[:0]
 	d.command.Reset()
 }
 
-func (d *Delete) String() string {
+func (d *delete) String() string {
 	if d.commandString.Len() == 0 {
 		d.commandString.WriteString(fmt.Sprintf("%s  %v \n", d.command.String(), d.whereParams))
 	}
@@ -92,7 +101,7 @@ func (d *Delete) String() string {
 }
 
 // Where
-func (d *Delete) Where(fns ...dialect.Condition) *Delete {
+func (d *delete) Where(fns ...dialect.Condition) *delete {
 	if len(fns) == 0 || d.err != nil {
 		return d
 	}
@@ -124,7 +133,7 @@ func (d *Delete) Where(fns ...dialect.Condition) *Delete {
 }
 
 // And
-func (d *Delete) And(fns ...dialect.Condition) *Delete {
+func (d *delete) And(fns ...dialect.Condition) *delete {
 	if len(fns) == 0 || d.err != nil {
 		return d
 	}
@@ -156,7 +165,7 @@ func (d *Delete) And(fns ...dialect.Condition) *Delete {
 }
 
 // Or
-func (d *Delete) Or(fns ...dialect.Condition) *Delete {
+func (d *delete) Or(fns ...dialect.Condition) *delete {
 	if len(fns) == 0 || d.err != nil {
 		return d
 	}
@@ -188,7 +197,7 @@ func (d *Delete) Or(fns ...dialect.Condition) *Delete {
 }
 
 // Exec
-func (d *Delete) Exec(ctx context.Context) (sql.Result, error) {
+func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
 
 	if d.err != nil {
