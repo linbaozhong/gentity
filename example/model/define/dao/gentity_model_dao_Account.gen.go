@@ -9,14 +9,13 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/orm"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
 type accounter interface {
 	dialect.Daoer
-	// ace.Cruder
+	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.Account, cols ...dialect.Field) (bool, error)
@@ -31,7 +30,7 @@ type accounter interface {
 	// DeleteById 按主键删除一条数据
 	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
 	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s *ace.Select) ([]db.Account, bool, error)
+	SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.Account, bool, error)
 	// Find4Cols 分页查询指定列，返回一个slice
 	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.Account, bool, error)
 	// Find 分页查询，返回一个slice
@@ -65,22 +64,22 @@ func Account(exec ...ace.Executer) accounter {
 }
 
 // C Create account
-func (p *daoAccount) C() *ace.Create {
+func (p *daoAccount) C() ace.CreateBuilder {
 	return p.db.C(db.AccountTableName)
 }
 
 // R Read account
-func (p *daoAccount) R() *ace.Select {
+func (p *daoAccount) R() ace.ReadBuilder {
 	return p.db.R(db.AccountTableName)
 }
 
 // U Update account
-func (p *daoAccount) U() *ace.Update {
+func (p *daoAccount) U() ace.UpdateBuilder {
 	return p.db.U(db.AccountTableName)
 }
 
 // D Delete account
-func (p *daoAccount) D() *ace.Delete {
+func (p *daoAccount) D() ace.DeleteBuilder {
 	return p.db.D(db.AccountTableName)
 }
 
@@ -89,10 +88,9 @@ func (p *daoAccount) Insert(ctx context.Context, sets ...dialect.Setter) (int64,
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	// _result, e := p.C().
-	// 	Set(sets...).
-	// 	Exec(ctx)
-	_result, e := orm.Table(db.AccountTableName).Set(sets...).Create(p.db).Exec(ctx)
+	_result, e := p.C().
+		Set(sets...).
+		Exec(ctx)
 	if e != nil {
 		log.Error(e)
 		return 0, e
@@ -207,9 +205,9 @@ func (p *daoAccount) DeleteById(ctx context.Context, id types.BigInt) (bool, err
 }
 
 // SelectAll 查询所有
-func (p *daoAccount) SelectAll(ctx context.Context, s orm.SelectBuilder) ([]db.Account, bool, error) {
+func (p *daoAccount) SelectAll(ctx context.Context, s ace.ReadBuilder) ([]db.Account, bool, error) {
 	if len(s.GetTableName()) == 0 {
-		s.Table(db.AccountTableName)
+		s.SetTableName(db.AccountTableName)
 	}
 
 	_cols := s.GetCols()
@@ -218,7 +216,7 @@ func (p *daoAccount) SelectAll(ctx context.Context, s orm.SelectBuilder) ([]db.A
 		s.Cols(_cols...)
 	}
 
-	_rows, e := s.Read(p.db).Query(ctx)
+	_rows, e := s.Query(ctx)
 	if e != nil {
 		log.Error(e)
 		return nil, false, e
@@ -235,33 +233,6 @@ func (p *daoAccount) SelectAll(ctx context.Context, s orm.SelectBuilder) ([]db.A
 	}
 	log.Error(e)
 	return _objs, false, e
-}
-
-func (p *daoAccount) get(ctx context.Context, s orm.SelectBuilder) (*db.Account, bool, error) {
-	if len(s.GetTableName()) == 0 {
-		s.Table(db.AccountTableName)
-	}
-	_cols := s.GetCols()
-	if len(_cols) == 0 {
-		_cols = tblaccount.ReadableFields
-		s.Cols(_cols...)
-	}
-	_row, e := s.Read(p.db).QueryRow(ctx)
-	if e != nil {
-		log.Error(e)
-		return nil, false, e
-	}
-	_obj := db.NewAccount()
-	e = _row.Scan(_obj.AssignPtr(_cols...)...)
-	switch e {
-	case nil:
-		return _obj, true, nil
-	case sql.ErrNoRows:
-		return _obj, false, nil
-	default:
-		log.Error(e)
-		return _obj, false, e
-	}
 }
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
@@ -329,18 +300,12 @@ func (p *daoAccount) Find4Cols(ctx context.Context, pageIndex, pageSize uint, co
 
 // GetByID 按主键读取一个account对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoAccount) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.Account, bool, error) {
-	// return p.Get4Cols(ctx, cols, []dialect.Condition{tblaccount.PrimaryKey.Eq(id)})
-	return p.get(ctx, orm.Table(db.AccountTableName).
-		Cols(cols...).
-		Where(tblaccount.PrimaryKey.Eq(id)))
+	return p.Get4Cols(ctx, cols, []dialect.Condition{tblaccount.PrimaryKey.Eq(id)})
 }
 
 // Get 按条件读取一个account对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoAccount) Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*db.Account, bool, error) {
-	// return p.Get4Cols(ctx, []dialect.Field{}, cond, sort...)
-	return p.get(ctx, orm.Table(db.AccountTableName).
-		Where(cond...).
-		OrderFunc(sort...))
+	return p.Get4Cols(ctx, []dialect.Field{}, cond, sort...)
 }
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
