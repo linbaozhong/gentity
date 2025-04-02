@@ -52,6 +52,7 @@ type Reader interface {
 	// SelectStruct 执行原生查询，返回结构体对象
 	SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error
 }
+
 type read struct {
 	*orm
 }

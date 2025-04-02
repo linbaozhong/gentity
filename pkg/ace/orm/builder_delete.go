@@ -21,9 +21,12 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
+// Deleter 删除器
 type Deleter interface {
 	Exec(ctx context.Context) (sql.Result, error)
 }
+
+// delete 删除器
 type delete struct {
 	*orm
 }

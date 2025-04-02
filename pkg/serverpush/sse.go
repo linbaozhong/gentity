@@ -16,11 +16,14 @@ package serverpush
 
 import (
 	"github.com/linbaozhong/gentity/pkg/api"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/sse/v2"
+	"sync"
 )
 
 var (
 	_sseServer *sse.Server
+	_sseOnce   sync.Once
 )
 
 // option 服务端推送配置
@@ -43,18 +46,14 @@ func WithAutoReplay(autoReplay bool) option {
 // Start 启动服务
 // 初始化sse服务
 func Start(opts ...option) error {
-	_sseServer = sse.New()
-	for _, opt := range opts {
-		opt(_sseServer)
-	}
+	_sseOnce.Do(func() {
+		_sseServer = sse.New()
+		for _, opt := range opts {
+			opt(_sseServer)
+		}
+		app.RegisterServiceCloser(_sseServer)
+	})
 	return nil
-}
-
-func Close() {
-	if _sseServer == nil {
-		return
-	}
-	_sseServer.Close()
 }
 
 // CreateStream 创建流

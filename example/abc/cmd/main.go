@@ -69,7 +69,5 @@ func Prepare() {
 
 // Finished 系统关闭后结束所有其他的服务
 func Finished() {
-	// 关闭推送服务
-	serverpush.Close()
 	app.Close()
 }

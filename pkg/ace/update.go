@@ -77,6 +77,7 @@ func (u *Update) Free() {
 		return
 	}
 
+	_ = u.String()
 	if u.db.Debug() {
 		log.Info(u.String())
 	}

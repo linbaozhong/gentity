@@ -20,6 +20,10 @@ import (
 	"testing"
 )
 
-func TestBuilder(t *testing.T) {
+func TestUpdater(t *testing.T) {
 	Set(tblaccount.State.Set(1)).Where(tblaccount.Id.Eq(1)).Update().Exec(context.Background())
+
+}
+func TestSelecter(t *testing.T) {
+
 }

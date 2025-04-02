@@ -69,6 +69,7 @@ func (d *Delete) Free() {
 		return
 	}
 
+	_ = d.String()
 	if d.db.Debug() {
 		log.Info(d.String())
 	}

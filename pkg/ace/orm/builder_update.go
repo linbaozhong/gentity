@@ -27,9 +27,11 @@ type Updater interface {
 	Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
 	BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
 }
+
 type update struct {
 	*orm
 }
+
 type expr struct {
 	colName string
 	arg     any
@@ -86,7 +88,7 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	return stmt.ExecContext(ctx, u.params...)
 }
 
-// UpdateStruct 更新一个结构体
+// Struct 更新一个结构体
 func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
@@ -129,7 +131,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	return result, nil
 }
 
-// UpdateBatchStruct 执行批量更新,请不要在事务中使用
+// BatchStruct 执行批量更新,请不要在事务中使用
 func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 

@@ -82,7 +82,7 @@ type (
 		Set(fns ...dialect.Setter) Builder
 		SetExpr(fns ...dialect.ExprSetter) Builder
 		Wherer
-		Update(x ...ace.Executer) Updater
+		Updater
 	}
 
 	DeleteBuilder interface {
@@ -96,9 +96,16 @@ type (
 		Free()
 		String() string
 		Clone() Builder
+
+		Columner
+		Set(fns ...dialect.Setter) Builder
+		SetExpr(fns ...dialect.ExprSetter) Builder
+		Wherer
+
 		SelectBuilder
 		CreateBuilder
-		UpdateBuilder
+		Update(x ...ace.Executer) Updater
+		// UpdateBuilder
 		DeleteBuilder
 	}
 
