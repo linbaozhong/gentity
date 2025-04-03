@@ -22,17 +22,6 @@ import (
 )
 
 type (
-	Cruder interface {
-		// C create 命令体
-		C() CreateBuilder
-		// R read 命令体
-		R() SelectBuilder
-		// U update 命令体
-		U() UpdateBuilder
-		// D delete 命令体
-		D() DeleteBuilder
-	}
-
 	Executer interface {
 		Mapper() *reflectx.Mapper
 		// BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
@@ -44,9 +33,9 @@ type (
 		Debug() bool
 		Cache(string) cachego.Cache
 		IsDB() bool
-		C(tableName string) CreateBuilder
-		D(tableName string) DeleteBuilder
-		U(tableName string) UpdateBuilder
-		R(tableName string) SelectBuilder
+		Create() CreateBuilder
+		Delete() DeleteBuilder
+		Update() UpdateBuilder
+		Select() SelectBuilder
 	}
 )

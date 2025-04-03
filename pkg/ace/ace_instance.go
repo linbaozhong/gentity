@@ -17,9 +17,9 @@ package ace
 // Create
 func Create(x ...Executer) CreateBuilder {
 	if len(x) > 0 {
-		return newCreate(x[0], "")
+		return newCreate(x[0])
 	}
-	return newCreate(GetDB(), "")
+	return newCreate(GetDB())
 }
 
 // Stmt
@@ -30,23 +30,23 @@ func Stmt() StmtBuilder {
 // Select
 func Select(x ...Executer) SelectBuilder {
 	if len(x) > 0 {
-		return newSelect(x[0], "")
+		return newSelect(x[0])
 	}
-	return newSelect(GetDB(), "")
+	return newSelect(GetDB())
 }
 
 // Update
 func Update(x ...Executer) UpdateBuilder {
 	if len(x) > 0 {
-		return newUpdate(x[0], "")
+		return newUpdate(x[0])
 	}
-	return newUpdate(GetDB(), "")
+	return newUpdate(GetDB())
 }
 
 // Delete
 func Delete(x ...Executer) DeleteBuilder {
 	if len(x) > 0 {
-		return newDelete(x[0], "")
+		return newDelete(x[0])
 	}
-	return newDelete(GetDB(), "")
+	return newDelete(GetDB())
 }

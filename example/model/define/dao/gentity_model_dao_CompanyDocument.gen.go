@@ -15,7 +15,6 @@ import (
 
 type company_documenter interface {
 	dialect.Daoer
-	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.CompanyDocument, cols ...dialect.Field) (bool, error)
@@ -63,24 +62,24 @@ func CompanyDocument(exec ...ace.Executer) company_documenter {
 	return _obj
 }
 
-// C Create company_document
-func (p *daoCompanyDocument) C() ace.CreateBuilder {
-	return p.db.C(db.CompanyDocumentTableName)
+// Create company_document
+func CompanyDocumentCreate(exec ...ace.Executer) ace.CreateBuilder {
+	return ace.Create(exec...).Table(db.CompanyDocumentTableName)
 }
 
-// R Select company_document
-func (p *daoCompanyDocument) R() ace.SelectBuilder {
-	return p.db.R(db.CompanyDocumentTableName)
+// Select company_document
+func CompanyDocumentSelect(exec ...ace.Executer) ace.SelectBuilder {
+	return ace.Select(exec...).Table(db.CompanyDocumentTableName)
 }
 
-// U Update company_document
-func (p *daoCompanyDocument) U() ace.UpdateBuilder {
-	return p.db.U(db.CompanyDocumentTableName)
+// Update company_document
+func CompanyDocumentUpdate(exec ...ace.Executer) ace.UpdateBuilder {
+	return ace.Update(exec...).Table(db.CompanyDocumentTableName)
 }
 
-// D Delete company_document
-func (p *daoCompanyDocument) D() ace.DeleteBuilder {
-	return p.db.D(db.CompanyDocumentTableName)
+// Delete company_document
+func CompanyDocumentDelete(exec ...ace.Executer) ace.DeleteBuilder {
+	return ace.Delete(exec...).Table(db.CompanyDocumentTableName)
 }
 
 // Insert 返回 LastInsertId
@@ -88,8 +87,8 @@ func (p *daoCompanyDocument) Insert(ctx context.Context, sets ...dialect.Setter)
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.C().
-		Set(sets...).
+	_result, e := CompanyDocumentCreate(p.db).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -101,7 +100,7 @@ func (p *daoCompanyDocument) Insert(ctx context.Context, sets ...dialect.Setter)
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *daoCompanyDocument) InsertOne(ctx context.Context, bean *db.CompanyDocument, cols ...dialect.Field) (bool, error) {
-	_result, e := p.C().
+	_result, e := CompanyDocumentCreate(p.db).
 		Cols(cols...).
 		Struct(ctx, bean)
 	if e != nil {
@@ -126,9 +125,9 @@ func (p *daoCompanyDocument) InsertBatch(ctx context.Context, beans []*db.Compan
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.C().
+	_result, e := CompanyDocumentCreate(p.db).
 		Cols(cols...).
-		StructBatch(ctx, _args...)
+		BatchStruct(ctx, _args...)
 	if e != nil {
 		log.Error(e)
 		return 0, e
@@ -142,9 +141,9 @@ func (p *daoCompanyDocument) Update(ctx context.Context, sets []dialect.Setter, 
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	_result, e := p.U().
+	_result, e := CompanyDocumentUpdate(p.db).
 		Where(cond...).
-		Set(sets...).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -173,7 +172,7 @@ func (p *daoCompanyDocument) UpdateBatch(ctx context.Context, beans []*db.Compan
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.U().
+	_result, e := CompanyDocumentUpdate(p.db).
 		Cols(cols...).
 		StructBatch(ctx, _args...)
 	if e != nil {
@@ -186,7 +185,7 @@ func (p *daoCompanyDocument) UpdateBatch(ctx context.Context, beans []*db.Compan
 
 // Delete
 func (p *daoCompanyDocument) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_result, e := p.D().
+	_result, e := CompanyDocumentDelete(p.db).
 		Where(cond...).
 		Exec(ctx)
 	if e != nil {
@@ -237,7 +236,7 @@ func (p *daoCompanyDocument) SelectAll(ctx context.Context, s ace.SelectBuilder)
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyDocument) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.CompanyDocument, bool, error) {
-	_c := p.R()
+	_c := CompanyDocumentSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompanydocument.ReadableFields...)
 	} else {
@@ -268,7 +267,7 @@ func (p *daoCompanyDocument) Get4Cols(ctx context.Context, cols []dialect.Field,
 
 // Find4Cols 分页获取company_document slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyDocument) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyDocument, bool, error) {
-	_c := p.R()
+	_c := CompanyDocumentSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompanydocument.ReadableFields...)
 	} else {
@@ -310,7 +309,7 @@ func (p *daoCompanyDocument) Get(ctx context.Context, cond []dialect.Condition, 
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyDocument) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
-	_c := p.R().Cols(col)
+	_c := CompanyDocumentSelect(p.db).Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		QueryRow(ctx)
@@ -339,7 +338,7 @@ func (p *daoCompanyDocument) Find(ctx context.Context, pageIndex, pageSize uint,
 
 // IDs
 func (p *daoCompanyDocument) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tblcompanydocument.PrimaryKey)
+	_c := CompanyDocumentSelect(p.db).Cols(tblcompanydocument.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoCompanyDocument) IDs(ctx context.Context, cond []dialect.Condition, 
 
 // Columns
 func (p *daoCompanyDocument) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(col)
+	_c := CompanyDocumentSelect(p.db).Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		OrderFunc(sort...).
@@ -390,17 +389,17 @@ func (p *daoCompanyDocument) Columns(ctx context.Context, col dialect.Field, con
 
 // Count
 func (p *daoCompanyDocument) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return p.R().Count(ctx, cond...)
+	return CompanyDocumentSelect(p.db).Count(ctx, cond...)
 }
 
 // Sum
 func (p *daoCompanyDocument) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return p.R().Sum(ctx, cols, cond...)
+	return CompanyDocumentSelect(p.db).Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *daoCompanyDocument) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tblcompanydocument.PrimaryKey).Where(cond...)
+	_c := CompanyDocumentSelect(p.db).Cols(tblcompanydocument.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)

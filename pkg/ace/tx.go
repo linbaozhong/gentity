@@ -34,17 +34,17 @@ type (
 func (t *Tx) Mapper() *reflectx.Mapper {
 	return t.mapper
 }
-func (t *Tx) C(tableName string) CreateBuilder {
-	return newCreate(t, tableName)
+func (t *Tx) Create() CreateBuilder {
+	return newCreate(t)
 }
-func (t *Tx) U(tableName string) UpdateBuilder {
-	return newUpdate(t, tableName)
+func (t *Tx) Update() UpdateBuilder {
+	return newUpdate(t)
 }
-func (t *Tx) D(tableName string) DeleteBuilder {
-	return newDelete(t, tableName)
+func (t *Tx) Delete() DeleteBuilder {
+	return newDelete(t)
 }
-func (t *Tx) R(tableName string) SelectBuilder {
-	return newSelect(t, tableName)
+func (t *Tx) Select() SelectBuilder {
+	return newSelect(t)
 }
 func (t *Tx) Cache(name string) cachego.Cache {
 	return t.cache(name)

@@ -15,7 +15,6 @@ import (
 
 type accounter interface {
 	dialect.Daoer
-	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.Account, cols ...dialect.Field) (bool, error)
@@ -63,24 +62,24 @@ func Account(exec ...ace.Executer) accounter {
 	return _obj
 }
 
-// C Create account
-func (p *daoAccount) C() ace.CreateBuilder {
-	return p.db.C(db.AccountTableName)
+// Create account
+func AccountCreate(exec ...ace.Executer) ace.CreateBuilder {
+	return ace.Create(exec...).Table(db.AccountTableName)
 }
 
-// R Select account
-func (p *daoAccount) R() ace.SelectBuilder {
-	return p.db.R(db.AccountTableName)
+// Select account
+func AccountSelect(exec ...ace.Executer) ace.SelectBuilder {
+	return ace.Select(exec...).Table(db.AccountTableName)
 }
 
-// U Update account
-func (p *daoAccount) U() ace.UpdateBuilder {
-	return p.db.U(db.AccountTableName)
+// Update account
+func AccountUpdate(exec ...ace.Executer) ace.UpdateBuilder {
+	return ace.Update(exec...).Table(db.AccountTableName)
 }
 
-// D Delete account
-func (p *daoAccount) D() ace.DeleteBuilder {
-	return p.db.D(db.AccountTableName)
+// Delete account
+func AccountDelete(exec ...ace.Executer) ace.DeleteBuilder {
+	return ace.Delete(exec...).Table(db.AccountTableName)
 }
 
 // Insert 返回 LastInsertId
@@ -88,8 +87,8 @@ func (p *daoAccount) Insert(ctx context.Context, sets ...dialect.Setter) (int64,
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.C().
-		Set(sets...).
+	_result, e := AccountCreate(p.db).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -101,7 +100,7 @@ func (p *daoAccount) Insert(ctx context.Context, sets ...dialect.Setter) (int64,
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *daoAccount) InsertOne(ctx context.Context, bean *db.Account, cols ...dialect.Field) (bool, error) {
-	_result, e := p.C().
+	_result, e := AccountCreate(p.db).
 		Cols(cols...).
 		Struct(ctx, bean)
 	if e != nil {
@@ -126,9 +125,9 @@ func (p *daoAccount) InsertBatch(ctx context.Context, beans []*db.Account, cols 
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.C().
+	_result, e := AccountCreate(p.db).
 		Cols(cols...).
-		StructBatch(ctx, _args...)
+		BatchStruct(ctx, _args...)
 	if e != nil {
 		log.Error(e)
 		return 0, e
@@ -142,9 +141,9 @@ func (p *daoAccount) Update(ctx context.Context, sets []dialect.Setter, cond ...
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	_result, e := p.U().
+	_result, e := AccountUpdate(p.db).
 		Where(cond...).
-		Set(sets...).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -173,7 +172,7 @@ func (p *daoAccount) UpdateBatch(ctx context.Context, beans []*db.Account, cols 
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.U().
+	_result, e := AccountUpdate(p.db).
 		Cols(cols...).
 		StructBatch(ctx, _args...)
 	if e != nil {
@@ -186,7 +185,7 @@ func (p *daoAccount) UpdateBatch(ctx context.Context, beans []*db.Account, cols 
 
 // Delete
 func (p *daoAccount) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_result, e := p.D().
+	_result, e := AccountDelete(p.db).
 		Where(cond...).
 		Exec(ctx)
 	if e != nil {
@@ -237,7 +236,7 @@ func (p *daoAccount) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.A
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoAccount) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.Account, bool, error) {
-	_c := p.R()
+	_c := AccountSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblaccount.ReadableFields...)
 	} else {
@@ -268,7 +267,7 @@ func (p *daoAccount) Get4Cols(ctx context.Context, cols []dialect.Field, cond []
 
 // Find4Cols 分页获取account slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoAccount) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.Account, bool, error) {
-	_c := p.R()
+	_c := AccountSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblaccount.ReadableFields...)
 	} else {
@@ -310,7 +309,7 @@ func (p *daoAccount) Get(ctx context.Context, cond []dialect.Condition, sort ...
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoAccount) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
-	_c := p.R().Cols(col)
+	_c := AccountSelect(p.db).Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		QueryRow(ctx)
@@ -339,7 +338,7 @@ func (p *daoAccount) Find(ctx context.Context, pageIndex, pageSize uint, cond []
 
 // IDs
 func (p *daoAccount) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tblaccount.PrimaryKey)
+	_c := AccountSelect(p.db).Cols(tblaccount.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoAccount) IDs(ctx context.Context, cond []dialect.Condition, sort ...
 
 // Columns
 func (p *daoAccount) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(col)
+	_c := AccountSelect(p.db).Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		OrderFunc(sort...).
@@ -390,17 +389,17 @@ func (p *daoAccount) Columns(ctx context.Context, col dialect.Field, cond []dial
 
 // Count
 func (p *daoAccount) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return p.R().Count(ctx, cond...)
+	return AccountSelect(p.db).Count(ctx, cond...)
 }
 
 // Sum
 func (p *daoAccount) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return p.R().Sum(ctx, cols, cond...)
+	return AccountSelect(p.db).Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *daoAccount) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tblaccount.PrimaryKey).Where(cond...)
+	_c := AccountSelect(p.db).Cols(tblaccount.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)

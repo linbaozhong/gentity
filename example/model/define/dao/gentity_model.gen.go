@@ -26,3 +26,31 @@ func GetIdHashKey(key any) string {
 func GetIdsHashKey(key any) string {
 	return cachego.GetHashKey("s:", key)
 }
+
+// //////////////////////////
+func getExec(exec ...ace.Executer) ace.Executer {
+	if len(exec) > 0 {
+		return exec[0]
+	}
+	return ace.GetDB()
+}
+
+// Create
+func Create(exec ...ace.Executer) ace.CreateBuilder {
+	return getExec(exec...).Create()
+}
+
+// Select
+func Select(exec ...ace.Executer) ace.SelectBuilder {
+	return getExec(exec...).Select()
+}
+
+// Update
+func Update(exec ...ace.Executer) ace.UpdateBuilder {
+	return getExec(exec...).Update()
+}
+
+// Delete
+func Delete(exec ...ace.Executer) ace.DeleteBuilder {
+	return getExec(exec...).Delete()
+}

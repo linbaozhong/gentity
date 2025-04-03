@@ -15,7 +15,6 @@ import (
 
 type company_stamper interface {
 	dialect.Daoer
-	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.CompanyStamp, cols ...dialect.Field) (bool, error)
@@ -63,24 +62,24 @@ func CompanyStamp(exec ...ace.Executer) company_stamper {
 	return _obj
 }
 
-// C Create company_stamp
-func (p *daoCompanyStamp) C() ace.CreateBuilder {
-	return p.db.C(db.CompanyStampTableName)
+// Create company_stamp
+func CompanyStampCreate(exec ...ace.Executer) ace.CreateBuilder {
+	return ace.Create(exec...).Table(db.CompanyStampTableName)
 }
 
-// R Select company_stamp
-func (p *daoCompanyStamp) R() ace.SelectBuilder {
-	return p.db.R(db.CompanyStampTableName)
+// Select company_stamp
+func CompanyStampSelect(exec ...ace.Executer) ace.SelectBuilder {
+	return ace.Select(exec...).Table(db.CompanyStampTableName)
 }
 
-// U Update company_stamp
-func (p *daoCompanyStamp) U() ace.UpdateBuilder {
-	return p.db.U(db.CompanyStampTableName)
+// Update company_stamp
+func CompanyStampUpdate(exec ...ace.Executer) ace.UpdateBuilder {
+	return ace.Update(exec...).Table(db.CompanyStampTableName)
 }
 
-// D Delete company_stamp
-func (p *daoCompanyStamp) D() ace.DeleteBuilder {
-	return p.db.D(db.CompanyStampTableName)
+// Delete company_stamp
+func CompanyStampDelete(exec ...ace.Executer) ace.DeleteBuilder {
+	return ace.Delete(exec...).Table(db.CompanyStampTableName)
 }
 
 // Insert 返回 LastInsertId
@@ -88,8 +87,8 @@ func (p *daoCompanyStamp) Insert(ctx context.Context, sets ...dialect.Setter) (i
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.C().
-		Set(sets...).
+	_result, e := CompanyStampCreate(p.db).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -101,7 +100,7 @@ func (p *daoCompanyStamp) Insert(ctx context.Context, sets ...dialect.Setter) (i
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *daoCompanyStamp) InsertOne(ctx context.Context, bean *db.CompanyStamp, cols ...dialect.Field) (bool, error) {
-	_result, e := p.C().
+	_result, e := CompanyStampCreate(p.db).
 		Cols(cols...).
 		Struct(ctx, bean)
 	if e != nil {
@@ -126,9 +125,9 @@ func (p *daoCompanyStamp) InsertBatch(ctx context.Context, beans []*db.CompanySt
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.C().
+	_result, e := CompanyStampCreate(p.db).
 		Cols(cols...).
-		StructBatch(ctx, _args...)
+		BatchStruct(ctx, _args...)
 	if e != nil {
 		log.Error(e)
 		return 0, e
@@ -142,9 +141,9 @@ func (p *daoCompanyStamp) Update(ctx context.Context, sets []dialect.Setter, con
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	_result, e := p.U().
+	_result, e := CompanyStampUpdate(p.db).
 		Where(cond...).
-		Set(sets...).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -173,7 +172,7 @@ func (p *daoCompanyStamp) UpdateBatch(ctx context.Context, beans []*db.CompanySt
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.U().
+	_result, e := CompanyStampUpdate(p.db).
 		Cols(cols...).
 		StructBatch(ctx, _args...)
 	if e != nil {
@@ -186,7 +185,7 @@ func (p *daoCompanyStamp) UpdateBatch(ctx context.Context, beans []*db.CompanySt
 
 // Delete
 func (p *daoCompanyStamp) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_result, e := p.D().
+	_result, e := CompanyStampDelete(p.db).
 		Where(cond...).
 		Exec(ctx)
 	if e != nil {
@@ -237,7 +236,7 @@ func (p *daoCompanyStamp) SelectAll(ctx context.Context, s ace.SelectBuilder) ([
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyStamp) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.CompanyStamp, bool, error) {
-	_c := p.R()
+	_c := CompanyStampSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompanystamp.ReadableFields...)
 	} else {
@@ -268,7 +267,7 @@ func (p *daoCompanyStamp) Get4Cols(ctx context.Context, cols []dialect.Field, co
 
 // Find4Cols 分页获取company_stamp slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyStamp) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyStamp, bool, error) {
-	_c := p.R()
+	_c := CompanyStampSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompanystamp.ReadableFields...)
 	} else {
@@ -310,7 +309,7 @@ func (p *daoCompanyStamp) Get(ctx context.Context, cond []dialect.Condition, sor
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyStamp) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
-	_c := p.R().Cols(col)
+	_c := CompanyStampSelect(p.db).Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		QueryRow(ctx)
@@ -339,7 +338,7 @@ func (p *daoCompanyStamp) Find(ctx context.Context, pageIndex, pageSize uint, co
 
 // IDs
 func (p *daoCompanyStamp) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tblcompanystamp.PrimaryKey)
+	_c := CompanyStampSelect(p.db).Cols(tblcompanystamp.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoCompanyStamp) IDs(ctx context.Context, cond []dialect.Condition, sor
 
 // Columns
 func (p *daoCompanyStamp) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(col)
+	_c := CompanyStampSelect(p.db).Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		OrderFunc(sort...).
@@ -390,17 +389,17 @@ func (p *daoCompanyStamp) Columns(ctx context.Context, col dialect.Field, cond [
 
 // Count
 func (p *daoCompanyStamp) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return p.R().Count(ctx, cond...)
+	return CompanyStampSelect(p.db).Count(ctx, cond...)
 }
 
 // Sum
 func (p *daoCompanyStamp) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return p.R().Sum(ctx, cols, cond...)
+	return CompanyStampSelect(p.db).Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *daoCompanyStamp) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tblcompanystamp.PrimaryKey).Where(cond...)
+	_c := CompanyStampSelect(p.db).Cols(tblcompanystamp.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)

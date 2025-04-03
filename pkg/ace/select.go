@@ -17,7 +17,6 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
@@ -59,6 +58,8 @@ type (
 	}
 	SelectBuilder interface {
 		StmtBuilder
+		// Table
+		Table(name any) *read
 		// Query
 		Query(ctx context.Context) (*sql.Rows, error)
 		// QueryRow
@@ -107,7 +108,6 @@ type (
 		whereParams   []any
 		command       strings.Builder
 		commandString strings.Builder
-		err           error
 	}
 )
 
@@ -127,16 +127,14 @@ func newStmt() StmtBuilder {
 }
 
 // read
-func newSelect(db Executer, tableName string) SelectBuilder {
+func newSelect(dbs ...Executer) SelectBuilder {
 	obj := selectPool.Get().(*read)
-	if db == nil || tableName == "" {
-		obj.err = errors.New("db or table is nil")
-		return obj
+	if len(dbs) > 0 {
+		obj.db = dbs[0]
+	} else {
+		obj.db = GetDB()
 	}
 
-	obj.db = db
-	obj.table = tableName
-	obj.err = nil
 	obj.commandString.Reset()
 
 	return obj
@@ -252,10 +250,6 @@ func (s *read) Funcs(fns ...dialect.Function) *read {
 
 // Join 添加连接查询条件
 func (s *read) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) *read {
-	if s.err != nil {
-		return s
-	}
-
 	var on strings.Builder
 	for _, fn := range fns {
 		on.WriteString(dialect.Operator_and)
@@ -291,7 +285,7 @@ func (s *read) RightJoin(left, right dialect.Field, fns ...dialect.Condition) *r
 
 // Where 添加查询条件。
 func (s *read) Where(fns ...dialect.Condition) *read {
-	if len(fns) == 0 || s.err != nil {
+	if len(fns) == 0 {
 		return s
 	}
 
@@ -323,7 +317,7 @@ func (s *read) Where(fns ...dialect.Condition) *read {
 
 // And 添加 AND 查询条件。
 func (s *read) And(fns ...dialect.Condition) *read {
-	if len(fns) == 0 || s.err != nil {
+	if len(fns) == 0 {
 		return s
 	}
 
@@ -354,7 +348,7 @@ func (s *read) And(fns ...dialect.Condition) *read {
 
 // Or 添加 OR 查询条件。
 func (s *read) Or(fns ...dialect.Condition) *read {
-	if len(fns) == 0 || s.err != nil {
+	if len(fns) == 0 {
 		return s
 	}
 
@@ -453,7 +447,7 @@ func (s *read) Group(cols ...dialect.Field) *read {
 
 // Group Having
 func (s *read) Having(fns ...dialect.Condition) *read {
-	if len(fns) == 0 || s.err != nil {
+	if len(fns) == 0 {
 		return s
 	}
 
@@ -463,10 +457,6 @@ func (s *read) Having(fns ...dialect.Condition) *read {
 			s.having.WriteString(dialect.Operator_and)
 		}
 		cond, val := fn()
-		// if v, ok := val.(error); ok {
-		//	s.err = v
-		//	return s
-		// }
 		s.having.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			s.havingParams = append(s.havingParams, vals...)
@@ -518,14 +508,27 @@ func (s *read) Clone() *read {
 	return &_s
 }
 
+// Table 设置 orm 对象的表名。
+func (s *read) Table(a any) *read {
+	switch v := a.(type) {
+	case string:
+		s.table = v
+	case dialect.TableNamer:
+		s.table = v.TableName()
+	default:
+		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
+		value := reflect.ValueOf(a)
+		if value.Kind() == reflect.Ptr {
+			value = value.Elem()
+		}
+		s.table = value.Type().Name()
+	}
+	return s
+}
+
 // Query
 func (s *read) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
-
-	if s.err != nil {
-		return nil, s.err
-	}
-
 	return s.query(ctx)
 }
 
@@ -533,31 +536,14 @@ func (s *read) Query(ctx context.Context) (*sql.Rows, error) {
 func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 	defer s.Free()
 
-	if s.err != nil {
-		return nil, s.err
-	}
-
 	_ = s.parse()
 
-	// stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if s.db.IsDB() {
-	// 	defer stmt.Close()
-	// }
-	//
-	// return stmt.QueryRowContext(ctx, s.mergeParams()...), nil
 	return s.row(ctx, s.command.String(), s.mergeParams()...)
 }
 
 // Get 返回单个数据，dest 必须是指针
 func (s *read) Get(ctx context.Context, dest any) error {
 	defer s.Free()
-
-	if s.err != nil {
-		return s.err
-	}
 
 	s.Limit(1)
 
@@ -581,10 +567,6 @@ func (s *read) Get(ctx context.Context, dest any) error {
 func (s *read) Gets(ctx context.Context, dest any) error {
 	defer s.Free()
 
-	if s.err != nil {
-		return s.err
-	}
-
 	rows, err := s.query(ctx)
 	if err != nil {
 		return err
@@ -597,10 +579,6 @@ func (s *read) Gets(ctx context.Context, dest any) error {
 // Map 返回 map[string]any，用于列数未知的情况
 func (s *read) Map(ctx context.Context) (map[string]any, error) {
 	defer s.Free()
-
-	if s.err != nil {
-		return nil, s.err
-	}
 
 	s.Limit(1)
 
@@ -618,10 +596,6 @@ func (s *read) Map(ctx context.Context) (map[string]any, error) {
 // Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
 func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 	defer s.Free()
-
-	if s.err != nil {
-		return nil, s.err
-	}
 
 	rows, err := s.query(ctx)
 	if err != nil {
@@ -648,10 +622,6 @@ func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 func (s *read) Slice(ctx context.Context) ([]any, error) {
 	defer s.Free()
 
-	if s.err != nil {
-		return nil, s.err
-	}
-
 	s.Limit(1)
 
 	rows, err := s.query(ctx)
@@ -667,10 +637,6 @@ func (s *read) Slice(ctx context.Context) ([]any, error) {
 // Slices 返回 []any 的切片 [][]any，用于列数未知的情况
 func (s *read) Slices(ctx context.Context) ([][]any, error) {
 	defer s.Free()
-
-	if s.err != nil {
-		return nil, s.err
-	}
 
 	rows, err := s.query(ctx)
 	if err != nil {
@@ -696,10 +662,6 @@ func (s *read) Slices(ctx context.Context) ([][]any, error) {
 func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
 
-	if s.err != nil {
-		return 0, s.err
-	}
-
 	s.Where(cond...)
 	s.command.WriteString("SELECT COUNT(*)")
 
@@ -719,15 +681,6 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 		s.command.WriteString(s.limit)
 	}
 
-	// stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// if s.db.IsDB() {
-	// 	defer stmt.Close()
-	// }
-	//
-	// row := stmt.QueryRowContext(ctx, s.mergeParams()...)
 	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
 	if err != nil {
 		return 0, err
@@ -743,10 +696,6 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 // Sum
 func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer s.Free()
-
-	if s.err != nil {
-		return nil, s.err
-	}
 
 	for _, col := range cols {
 		s.Funcs(col.Sum())
@@ -771,15 +720,6 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 		s.command.WriteString(s.limit)
 	}
 
-	// stmt, err := s.db.PrepareContext(ctx, s.command.String())
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if s.db.IsDB() {
-	// 	defer stmt.Close()
-	// }
-	//
-	// row := stmt.QueryRowContext(ctx, s.mergeParams()...)
 	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
 	if err != nil {
 		return nil, err
@@ -802,10 +742,6 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 // 此方法接受一个上下文、原生 SQL 语句和对应的参数，返回查询结果和可能的错误
 func (s *read) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
 	defer s.Free()
-
-	if s.err != nil {
-		return nil, s.err
-	}
 
 	return s.rows(ctx, sqlStr, args...)
 }

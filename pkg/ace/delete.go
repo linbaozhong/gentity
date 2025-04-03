@@ -17,12 +17,12 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"reflect"
 	"strings"
 )
 
@@ -31,6 +31,7 @@ type (
 		Free()
 		Reset()
 		String() string
+		Table(name any) *delete
 		Where(fns ...dialect.Condition) *delete
 		And(fns ...dialect.Condition) *delete
 		Or(fns ...dialect.Condition) *delete
@@ -44,7 +45,6 @@ type (
 		whereParams   []any
 		command       strings.Builder
 		commandString strings.Builder
-		err           error
 	}
 )
 
@@ -57,16 +57,14 @@ var (
 )
 
 // delete
-func newDelete(db Executer, tableName string) DeleteBuilder {
+func newDelete(dbs ...Executer) DeleteBuilder {
 	obj := deletePool.Get().(*delete)
-	if db == nil || tableName == "" {
-		obj.err = errors.New("db or table is nil")
-		return obj
+	if len(dbs) > 0 {
+		obj.db = dbs[0]
+	} else {
+		obj.db = GetDB()
 	}
 
-	obj.db = db
-	obj.table = tableName
-	obj.err = nil
 	obj.commandString.Reset()
 
 	return obj
@@ -93,6 +91,24 @@ func (d *delete) Reset() {
 	d.command.Reset()
 }
 
+// Table 设置表名
+func (d *delete) Table(a any) *delete {
+	switch v := a.(type) {
+	case string:
+		d.table = v
+	case dialect.TableNamer:
+		d.table = v.TableName()
+	default:
+		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
+		value := reflect.ValueOf(a)
+		if value.Kind() == reflect.Ptr {
+			value = value.Elem()
+		}
+		d.table = value.Type().Name()
+	}
+	return d
+}
+
 func (d *delete) String() string {
 	if d.commandString.Len() == 0 {
 		d.commandString.WriteString(fmt.Sprintf("%s  %v \n", d.command.String(), d.whereParams))
@@ -102,7 +118,7 @@ func (d *delete) String() string {
 
 // Where
 func (d *delete) Where(fns ...dialect.Condition) *delete {
-	if len(fns) == 0 || d.err != nil {
+	if len(fns) == 0 {
 		return d
 	}
 
@@ -134,7 +150,7 @@ func (d *delete) Where(fns ...dialect.Condition) *delete {
 
 // And
 func (d *delete) And(fns ...dialect.Condition) *delete {
-	if len(fns) == 0 || d.err != nil {
+	if len(fns) == 0 {
 		return d
 	}
 
@@ -166,7 +182,7 @@ func (d *delete) And(fns ...dialect.Condition) *delete {
 
 // Or
 func (d *delete) Or(fns ...dialect.Condition) *delete {
-	if len(fns) == 0 || d.err != nil {
+	if len(fns) == 0 {
 		return d
 	}
 
@@ -199,10 +215,6 @@ func (d *delete) Or(fns ...dialect.Condition) *delete {
 // Exec
 func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
-
-	if d.err != nil {
-		return nil, d.err
-	}
 
 	d.command.WriteString("DELETE FROM " + dialect.Quote_Char + d.table + dialect.Quote_Char)
 	// WHERE

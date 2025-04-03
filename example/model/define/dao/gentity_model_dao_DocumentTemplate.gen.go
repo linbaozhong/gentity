@@ -15,7 +15,6 @@ import (
 
 type document_templateer interface {
 	dialect.Daoer
-	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.DocumentTemplate, cols ...dialect.Field) (bool, error)
@@ -63,24 +62,24 @@ func DocumentTemplate(exec ...ace.Executer) document_templateer {
 	return _obj
 }
 
-// C Create document_template
-func (p *daoDocumentTemplate) C() ace.CreateBuilder {
-	return p.db.C(db.DocumentTemplateTableName)
+// Create document_template
+func DocumentTemplateCreate(exec ...ace.Executer) ace.CreateBuilder {
+	return ace.Create(exec...).Table(db.DocumentTemplateTableName)
 }
 
-// R Select document_template
-func (p *daoDocumentTemplate) R() ace.SelectBuilder {
-	return p.db.R(db.DocumentTemplateTableName)
+// Select document_template
+func DocumentTemplateSelect(exec ...ace.Executer) ace.SelectBuilder {
+	return ace.Select(exec...).Table(db.DocumentTemplateTableName)
 }
 
-// U Update document_template
-func (p *daoDocumentTemplate) U() ace.UpdateBuilder {
-	return p.db.U(db.DocumentTemplateTableName)
+// Update document_template
+func DocumentTemplateUpdate(exec ...ace.Executer) ace.UpdateBuilder {
+	return ace.Update(exec...).Table(db.DocumentTemplateTableName)
 }
 
-// D Delete document_template
-func (p *daoDocumentTemplate) D() ace.DeleteBuilder {
-	return p.db.D(db.DocumentTemplateTableName)
+// Delete document_template
+func DocumentTemplateDelete(exec ...ace.Executer) ace.DeleteBuilder {
+	return ace.Delete(exec...).Table(db.DocumentTemplateTableName)
 }
 
 // Insert 返回 LastInsertId
@@ -88,8 +87,8 @@ func (p *daoDocumentTemplate) Insert(ctx context.Context, sets ...dialect.Setter
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.C().
-		Set(sets...).
+	_result, e := DocumentTemplateCreate(p.db).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -101,7 +100,7 @@ func (p *daoDocumentTemplate) Insert(ctx context.Context, sets ...dialect.Setter
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *daoDocumentTemplate) InsertOne(ctx context.Context, bean *db.DocumentTemplate, cols ...dialect.Field) (bool, error) {
-	_result, e := p.C().
+	_result, e := DocumentTemplateCreate(p.db).
 		Cols(cols...).
 		Struct(ctx, bean)
 	if e != nil {
@@ -126,9 +125,9 @@ func (p *daoDocumentTemplate) InsertBatch(ctx context.Context, beans []*db.Docum
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.C().
+	_result, e := DocumentTemplateCreate(p.db).
 		Cols(cols...).
-		StructBatch(ctx, _args...)
+		BatchStruct(ctx, _args...)
 	if e != nil {
 		log.Error(e)
 		return 0, e
@@ -142,9 +141,9 @@ func (p *daoDocumentTemplate) Update(ctx context.Context, sets []dialect.Setter,
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	_result, e := p.U().
+	_result, e := DocumentTemplateUpdate(p.db).
 		Where(cond...).
-		Set(sets...).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -173,7 +172,7 @@ func (p *daoDocumentTemplate) UpdateBatch(ctx context.Context, beans []*db.Docum
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.U().
+	_result, e := DocumentTemplateUpdate(p.db).
 		Cols(cols...).
 		StructBatch(ctx, _args...)
 	if e != nil {
@@ -186,7 +185,7 @@ func (p *daoDocumentTemplate) UpdateBatch(ctx context.Context, beans []*db.Docum
 
 // Delete
 func (p *daoDocumentTemplate) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_result, e := p.D().
+	_result, e := DocumentTemplateDelete(p.db).
 		Where(cond...).
 		Exec(ctx)
 	if e != nil {
@@ -237,7 +236,7 @@ func (p *daoDocumentTemplate) SelectAll(ctx context.Context, s ace.SelectBuilder
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoDocumentTemplate) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.DocumentTemplate, bool, error) {
-	_c := p.R()
+	_c := DocumentTemplateSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tbldocumenttemplate.ReadableFields...)
 	} else {
@@ -268,7 +267,7 @@ func (p *daoDocumentTemplate) Get4Cols(ctx context.Context, cols []dialect.Field
 
 // Find4Cols 分页获取document_template slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoDocumentTemplate) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.DocumentTemplate, bool, error) {
-	_c := p.R()
+	_c := DocumentTemplateSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tbldocumenttemplate.ReadableFields...)
 	} else {
@@ -310,7 +309,7 @@ func (p *daoDocumentTemplate) Get(ctx context.Context, cond []dialect.Condition,
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoDocumentTemplate) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
-	_c := p.R().Cols(col)
+	_c := DocumentTemplateSelect(p.db).Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		QueryRow(ctx)
@@ -339,7 +338,7 @@ func (p *daoDocumentTemplate) Find(ctx context.Context, pageIndex, pageSize uint
 
 // IDs
 func (p *daoDocumentTemplate) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tbldocumenttemplate.PrimaryKey)
+	_c := DocumentTemplateSelect(p.db).Cols(tbldocumenttemplate.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoDocumentTemplate) IDs(ctx context.Context, cond []dialect.Condition,
 
 // Columns
 func (p *daoDocumentTemplate) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(col)
+	_c := DocumentTemplateSelect(p.db).Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		OrderFunc(sort...).
@@ -390,17 +389,17 @@ func (p *daoDocumentTemplate) Columns(ctx context.Context, col dialect.Field, co
 
 // Count
 func (p *daoDocumentTemplate) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return p.R().Count(ctx, cond...)
+	return DocumentTemplateSelect(p.db).Count(ctx, cond...)
 }
 
 // Sum
 func (p *daoDocumentTemplate) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return p.R().Sum(ctx, cols, cond...)
+	return DocumentTemplateSelect(p.db).Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *daoDocumentTemplate) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tbldocumenttemplate.PrimaryKey).Where(cond...)
+	_c := DocumentTemplateSelect(p.db).Cols(tbldocumenttemplate.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)

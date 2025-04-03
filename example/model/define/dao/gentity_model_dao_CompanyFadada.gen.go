@@ -15,7 +15,6 @@ import (
 
 type company_fadadaer interface {
 	dialect.Daoer
-	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.CompanyFadada, cols ...dialect.Field) (bool, error)
@@ -63,24 +62,24 @@ func CompanyFadada(exec ...ace.Executer) company_fadadaer {
 	return _obj
 }
 
-// C Create company_fadada
-func (p *daoCompanyFadada) C() ace.CreateBuilder {
-	return p.db.C(db.CompanyFadadaTableName)
+// Create company_fadada
+func CompanyFadadaCreate(exec ...ace.Executer) ace.CreateBuilder {
+	return ace.Create(exec...).Table(db.CompanyFadadaTableName)
 }
 
-// R Select company_fadada
-func (p *daoCompanyFadada) R() ace.SelectBuilder {
-	return p.db.R(db.CompanyFadadaTableName)
+// Select company_fadada
+func CompanyFadadaSelect(exec ...ace.Executer) ace.SelectBuilder {
+	return ace.Select(exec...).Table(db.CompanyFadadaTableName)
 }
 
-// U Update company_fadada
-func (p *daoCompanyFadada) U() ace.UpdateBuilder {
-	return p.db.U(db.CompanyFadadaTableName)
+// Update company_fadada
+func CompanyFadadaUpdate(exec ...ace.Executer) ace.UpdateBuilder {
+	return ace.Update(exec...).Table(db.CompanyFadadaTableName)
 }
 
-// D Delete company_fadada
-func (p *daoCompanyFadada) D() ace.DeleteBuilder {
-	return p.db.D(db.CompanyFadadaTableName)
+// Delete company_fadada
+func CompanyFadadaDelete(exec ...ace.Executer) ace.DeleteBuilder {
+	return ace.Delete(exec...).Table(db.CompanyFadadaTableName)
 }
 
 // Insert 返回 LastInsertId
@@ -88,8 +87,8 @@ func (p *daoCompanyFadada) Insert(ctx context.Context, sets ...dialect.Setter) (
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.C().
-		Set(sets...).
+	_result, e := CompanyFadadaCreate(p.db).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -101,7 +100,7 @@ func (p *daoCompanyFadada) Insert(ctx context.Context, sets ...dialect.Setter) (
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *daoCompanyFadada) InsertOne(ctx context.Context, bean *db.CompanyFadada, cols ...dialect.Field) (bool, error) {
-	_result, e := p.C().
+	_result, e := CompanyFadadaCreate(p.db).
 		Cols(cols...).
 		Struct(ctx, bean)
 	if e != nil {
@@ -126,9 +125,9 @@ func (p *daoCompanyFadada) InsertBatch(ctx context.Context, beans []*db.CompanyF
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.C().
+	_result, e := CompanyFadadaCreate(p.db).
 		Cols(cols...).
-		StructBatch(ctx, _args...)
+		BatchStruct(ctx, _args...)
 	if e != nil {
 		log.Error(e)
 		return 0, e
@@ -142,9 +141,9 @@ func (p *daoCompanyFadada) Update(ctx context.Context, sets []dialect.Setter, co
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	_result, e := p.U().
+	_result, e := CompanyFadadaUpdate(p.db).
 		Where(cond...).
-		Set(sets...).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -173,7 +172,7 @@ func (p *daoCompanyFadada) UpdateBatch(ctx context.Context, beans []*db.CompanyF
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.U().
+	_result, e := CompanyFadadaUpdate(p.db).
 		Cols(cols...).
 		StructBatch(ctx, _args...)
 	if e != nil {
@@ -186,7 +185,7 @@ func (p *daoCompanyFadada) UpdateBatch(ctx context.Context, beans []*db.CompanyF
 
 // Delete
 func (p *daoCompanyFadada) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_result, e := p.D().
+	_result, e := CompanyFadadaDelete(p.db).
 		Where(cond...).
 		Exec(ctx)
 	if e != nil {
@@ -237,7 +236,7 @@ func (p *daoCompanyFadada) SelectAll(ctx context.Context, s ace.SelectBuilder) (
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyFadada) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.CompanyFadada, bool, error) {
-	_c := p.R()
+	_c := CompanyFadadaSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompanyfadada.ReadableFields...)
 	} else {
@@ -268,7 +267,7 @@ func (p *daoCompanyFadada) Get4Cols(ctx context.Context, cols []dialect.Field, c
 
 // Find4Cols 分页获取company_fadada slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyFadada) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyFadada, bool, error) {
-	_c := p.R()
+	_c := CompanyFadadaSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompanyfadada.ReadableFields...)
 	} else {
@@ -310,7 +309,7 @@ func (p *daoCompanyFadada) Get(ctx context.Context, cond []dialect.Condition, so
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyFadada) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
-	_c := p.R().Cols(col)
+	_c := CompanyFadadaSelect(p.db).Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		QueryRow(ctx)
@@ -339,7 +338,7 @@ func (p *daoCompanyFadada) Find(ctx context.Context, pageIndex, pageSize uint, c
 
 // IDs
 func (p *daoCompanyFadada) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tblcompanyfadada.PrimaryKey)
+	_c := CompanyFadadaSelect(p.db).Cols(tblcompanyfadada.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoCompanyFadada) IDs(ctx context.Context, cond []dialect.Condition, so
 
 // Columns
 func (p *daoCompanyFadada) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(col)
+	_c := CompanyFadadaSelect(p.db).Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		OrderFunc(sort...).
@@ -390,17 +389,17 @@ func (p *daoCompanyFadada) Columns(ctx context.Context, col dialect.Field, cond 
 
 // Count
 func (p *daoCompanyFadada) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return p.R().Count(ctx, cond...)
+	return CompanyFadadaSelect(p.db).Count(ctx, cond...)
 }
 
 // Sum
 func (p *daoCompanyFadada) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return p.R().Sum(ctx, cols, cond...)
+	return CompanyFadadaSelect(p.db).Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *daoCompanyFadada) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tblcompanyfadada.PrimaryKey).Where(cond...)
+	_c := CompanyFadadaSelect(p.db).Cols(tblcompanyfadada.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)

@@ -15,7 +15,6 @@ import (
 
 type company_roleer interface {
 	dialect.Daoer
-	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.CompanyRole, cols ...dialect.Field) (bool, error)
@@ -63,24 +62,24 @@ func CompanyRole(exec ...ace.Executer) company_roleer {
 	return _obj
 }
 
-// C Create company_role
-func (p *daoCompanyRole) C() ace.CreateBuilder {
-	return p.db.C(db.CompanyRoleTableName)
+// Create company_role
+func CompanyRoleCreate(exec ...ace.Executer) ace.CreateBuilder {
+	return ace.Create(exec...).Table(db.CompanyRoleTableName)
 }
 
-// R Select company_role
-func (p *daoCompanyRole) R() ace.SelectBuilder {
-	return p.db.R(db.CompanyRoleTableName)
+// Select company_role
+func CompanyRoleSelect(exec ...ace.Executer) ace.SelectBuilder {
+	return ace.Select(exec...).Table(db.CompanyRoleTableName)
 }
 
-// U Update company_role
-func (p *daoCompanyRole) U() ace.UpdateBuilder {
-	return p.db.U(db.CompanyRoleTableName)
+// Update company_role
+func CompanyRoleUpdate(exec ...ace.Executer) ace.UpdateBuilder {
+	return ace.Update(exec...).Table(db.CompanyRoleTableName)
 }
 
-// D Delete company_role
-func (p *daoCompanyRole) D() ace.DeleteBuilder {
-	return p.db.D(db.CompanyRoleTableName)
+// Delete company_role
+func CompanyRoleDelete(exec ...ace.Executer) ace.DeleteBuilder {
+	return ace.Delete(exec...).Table(db.CompanyRoleTableName)
 }
 
 // Insert 返回 LastInsertId
@@ -88,8 +87,8 @@ func (p *daoCompanyRole) Insert(ctx context.Context, sets ...dialect.Setter) (in
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.C().
-		Set(sets...).
+	_result, e := CompanyRoleCreate(p.db).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -101,7 +100,7 @@ func (p *daoCompanyRole) Insert(ctx context.Context, sets ...dialect.Setter) (in
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *daoCompanyRole) InsertOne(ctx context.Context, bean *db.CompanyRole, cols ...dialect.Field) (bool, error) {
-	_result, e := p.C().
+	_result, e := CompanyRoleCreate(p.db).
 		Cols(cols...).
 		Struct(ctx, bean)
 	if e != nil {
@@ -126,9 +125,9 @@ func (p *daoCompanyRole) InsertBatch(ctx context.Context, beans []*db.CompanyRol
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.C().
+	_result, e := CompanyRoleCreate(p.db).
 		Cols(cols...).
-		StructBatch(ctx, _args...)
+		BatchStruct(ctx, _args...)
 	if e != nil {
 		log.Error(e)
 		return 0, e
@@ -142,9 +141,9 @@ func (p *daoCompanyRole) Update(ctx context.Context, sets []dialect.Setter, cond
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	_result, e := p.U().
+	_result, e := CompanyRoleUpdate(p.db).
 		Where(cond...).
-		Set(sets...).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -173,7 +172,7 @@ func (p *daoCompanyRole) UpdateBatch(ctx context.Context, beans []*db.CompanyRol
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.U().
+	_result, e := CompanyRoleUpdate(p.db).
 		Cols(cols...).
 		StructBatch(ctx, _args...)
 	if e != nil {
@@ -186,7 +185,7 @@ func (p *daoCompanyRole) UpdateBatch(ctx context.Context, beans []*db.CompanyRol
 
 // Delete
 func (p *daoCompanyRole) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_result, e := p.D().
+	_result, e := CompanyRoleDelete(p.db).
 		Where(cond...).
 		Exec(ctx)
 	if e != nil {
@@ -237,7 +236,7 @@ func (p *daoCompanyRole) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyRole) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.CompanyRole, bool, error) {
-	_c := p.R()
+	_c := CompanyRoleSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompanyrole.ReadableFields...)
 	} else {
@@ -268,7 +267,7 @@ func (p *daoCompanyRole) Get4Cols(ctx context.Context, cols []dialect.Field, con
 
 // Find4Cols 分页获取company_role slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyRole) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyRole, bool, error) {
-	_c := p.R()
+	_c := CompanyRoleSelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompanyrole.ReadableFields...)
 	} else {
@@ -310,7 +309,7 @@ func (p *daoCompanyRole) Get(ctx context.Context, cond []dialect.Condition, sort
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompanyRole) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
-	_c := p.R().Cols(col)
+	_c := CompanyRoleSelect(p.db).Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		QueryRow(ctx)
@@ -339,7 +338,7 @@ func (p *daoCompanyRole) Find(ctx context.Context, pageIndex, pageSize uint, con
 
 // IDs
 func (p *daoCompanyRole) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tblcompanyrole.PrimaryKey)
+	_c := CompanyRoleSelect(p.db).Cols(tblcompanyrole.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoCompanyRole) IDs(ctx context.Context, cond []dialect.Condition, sort
 
 // Columns
 func (p *daoCompanyRole) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(col)
+	_c := CompanyRoleSelect(p.db).Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		OrderFunc(sort...).
@@ -390,17 +389,17 @@ func (p *daoCompanyRole) Columns(ctx context.Context, col dialect.Field, cond []
 
 // Count
 func (p *daoCompanyRole) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return p.R().Count(ctx, cond...)
+	return CompanyRoleSelect(p.db).Count(ctx, cond...)
 }
 
 // Sum
 func (p *daoCompanyRole) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return p.R().Sum(ctx, cols, cond...)
+	return CompanyRoleSelect(p.db).Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *daoCompanyRole) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tblcompanyrole.PrimaryKey).Where(cond...)
+	_c := CompanyRoleSelect(p.db).Cols(tblcompanyrole.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)

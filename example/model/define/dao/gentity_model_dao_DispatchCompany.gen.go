@@ -15,7 +15,6 @@ import (
 
 type dispatch_companyer interface {
 	dialect.Daoer
-	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.DispatchCompany, cols ...dialect.Field) (bool, error)
@@ -63,24 +62,24 @@ func DispatchCompany(exec ...ace.Executer) dispatch_companyer {
 	return _obj
 }
 
-// C Create dispatch_company
-func (p *daoDispatchCompany) C() ace.CreateBuilder {
-	return p.db.C(db.DispatchCompanyTableName)
+// Create dispatch_company
+func DispatchCompanyCreate(exec ...ace.Executer) ace.CreateBuilder {
+	return ace.Create(exec...).Table(db.DispatchCompanyTableName)
 }
 
-// R Select dispatch_company
-func (p *daoDispatchCompany) R() ace.SelectBuilder {
-	return p.db.R(db.DispatchCompanyTableName)
+// Select dispatch_company
+func DispatchCompanySelect(exec ...ace.Executer) ace.SelectBuilder {
+	return ace.Select(exec...).Table(db.DispatchCompanyTableName)
 }
 
-// U Update dispatch_company
-func (p *daoDispatchCompany) U() ace.UpdateBuilder {
-	return p.db.U(db.DispatchCompanyTableName)
+// Update dispatch_company
+func DispatchCompanyUpdate(exec ...ace.Executer) ace.UpdateBuilder {
+	return ace.Update(exec...).Table(db.DispatchCompanyTableName)
 }
 
-// D Delete dispatch_company
-func (p *daoDispatchCompany) D() ace.DeleteBuilder {
-	return p.db.D(db.DispatchCompanyTableName)
+// Delete dispatch_company
+func DispatchCompanyDelete(exec ...ace.Executer) ace.DeleteBuilder {
+	return ace.Delete(exec...).Table(db.DispatchCompanyTableName)
 }
 
 // Insert 返回 LastInsertId
@@ -88,8 +87,8 @@ func (p *daoDispatchCompany) Insert(ctx context.Context, sets ...dialect.Setter)
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.C().
-		Set(sets...).
+	_result, e := DispatchCompanyCreate(p.db).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -101,7 +100,7 @@ func (p *daoDispatchCompany) Insert(ctx context.Context, sets ...dialect.Setter)
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *daoDispatchCompany) InsertOne(ctx context.Context, bean *db.DispatchCompany, cols ...dialect.Field) (bool, error) {
-	_result, e := p.C().
+	_result, e := DispatchCompanyCreate(p.db).
 		Cols(cols...).
 		Struct(ctx, bean)
 	if e != nil {
@@ -126,9 +125,9 @@ func (p *daoDispatchCompany) InsertBatch(ctx context.Context, beans []*db.Dispat
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.C().
+	_result, e := DispatchCompanyCreate(p.db).
 		Cols(cols...).
-		StructBatch(ctx, _args...)
+		BatchStruct(ctx, _args...)
 	if e != nil {
 		log.Error(e)
 		return 0, e
@@ -142,9 +141,9 @@ func (p *daoDispatchCompany) Update(ctx context.Context, sets []dialect.Setter, 
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	_result, e := p.U().
+	_result, e := DispatchCompanyUpdate(p.db).
 		Where(cond...).
-		Set(sets...).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -173,7 +172,7 @@ func (p *daoDispatchCompany) UpdateBatch(ctx context.Context, beans []*db.Dispat
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.U().
+	_result, e := DispatchCompanyUpdate(p.db).
 		Cols(cols...).
 		StructBatch(ctx, _args...)
 	if e != nil {
@@ -186,7 +185,7 @@ func (p *daoDispatchCompany) UpdateBatch(ctx context.Context, beans []*db.Dispat
 
 // Delete
 func (p *daoDispatchCompany) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_result, e := p.D().
+	_result, e := DispatchCompanyDelete(p.db).
 		Where(cond...).
 		Exec(ctx)
 	if e != nil {
@@ -237,7 +236,7 @@ func (p *daoDispatchCompany) SelectAll(ctx context.Context, s ace.SelectBuilder)
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoDispatchCompany) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.DispatchCompany, bool, error) {
-	_c := p.R()
+	_c := DispatchCompanySelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tbldispatchcompany.ReadableFields...)
 	} else {
@@ -268,7 +267,7 @@ func (p *daoDispatchCompany) Get4Cols(ctx context.Context, cols []dialect.Field,
 
 // Find4Cols 分页获取dispatch_company slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoDispatchCompany) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.DispatchCompany, bool, error) {
-	_c := p.R()
+	_c := DispatchCompanySelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tbldispatchcompany.ReadableFields...)
 	} else {
@@ -310,7 +309,7 @@ func (p *daoDispatchCompany) Get(ctx context.Context, cond []dialect.Condition, 
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoDispatchCompany) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
-	_c := p.R().Cols(col)
+	_c := DispatchCompanySelect(p.db).Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		QueryRow(ctx)
@@ -339,7 +338,7 @@ func (p *daoDispatchCompany) Find(ctx context.Context, pageIndex, pageSize uint,
 
 // IDs
 func (p *daoDispatchCompany) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tbldispatchcompany.PrimaryKey)
+	_c := DispatchCompanySelect(p.db).Cols(tbldispatchcompany.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoDispatchCompany) IDs(ctx context.Context, cond []dialect.Condition, 
 
 // Columns
 func (p *daoDispatchCompany) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(col)
+	_c := DispatchCompanySelect(p.db).Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		OrderFunc(sort...).
@@ -390,17 +389,17 @@ func (p *daoDispatchCompany) Columns(ctx context.Context, col dialect.Field, con
 
 // Count
 func (p *daoDispatchCompany) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return p.R().Count(ctx, cond...)
+	return DispatchCompanySelect(p.db).Count(ctx, cond...)
 }
 
 // Sum
 func (p *daoDispatchCompany) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return p.R().Sum(ctx, cols, cond...)
+	return DispatchCompanySelect(p.db).Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *daoDispatchCompany) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tbldispatchcompany.PrimaryKey).Where(cond...)
+	_c := DispatchCompanySelect(p.db).Cols(tbldispatchcompany.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)

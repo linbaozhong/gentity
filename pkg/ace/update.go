@@ -17,12 +17,12 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"reflect"
 	"strings"
 )
 
@@ -31,7 +31,8 @@ type (
 		Free()
 		Reset()
 		String() string
-		Set(fns ...dialect.Setter) *update
+		Table(name any) *update
+		Sets(fns ...dialect.Setter) *update
 		SetExpr(fns ...dialect.ExprSetter) *update
 		Where(fns ...dialect.Condition) *update
 		And(fns ...dialect.Condition) *update
@@ -70,15 +71,14 @@ var (
 )
 
 // update
-func newUpdate(db Executer, tableName string) *update {
+func newUpdate(dbs ...Executer) *update {
 	obj := updatePool.Get().(*update)
-	if db == nil || tableName == "" {
-		obj.err = errors.New("db or table is nil")
-		return obj
+	if len(dbs) > 0 {
+		obj.db = dbs[0]
+	} else {
+		obj.db = GetDB()
 	}
 
-	obj.db = db
-	obj.table = tableName
 	obj.err = nil
 	obj.commandString.Reset()
 
@@ -117,8 +117,26 @@ func (u *update) String() string {
 	return u.commandString.String()
 }
 
+// Table 设置表名
+func (u *update) Table(a any) *update {
+	switch v := a.(type) {
+	case string:
+		u.table = v
+	case dialect.TableNamer:
+		u.table = v.TableName()
+	default:
+		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
+		value := reflect.ValueOf(a)
+		if value.Kind() == reflect.Ptr {
+			value = value.Elem()
+		}
+		u.table = value.Type().Name()
+	}
+	return u
+}
+
 // Set
-func (u *update) Set(fns ...dialect.Setter) *update {
+func (u *update) Sets(fns ...dialect.Setter) *update {
 	if len(fns) == 0 || u.err != nil {
 		return u
 	}

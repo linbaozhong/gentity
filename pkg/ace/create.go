@@ -17,12 +17,12 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"reflect"
 	"strings"
 )
 
@@ -31,11 +31,12 @@ type (
 		Free()
 		Reset()
 		String() string
-		Set(fns ...dialect.Setter) *create
+		Table(name any) *create
+		Sets(fns ...dialect.Setter) *create
 		Cols(cols ...dialect.Field) *create
 		Exec(ctx context.Context) (sql.Result, error)
 		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
-		StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
+		BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
 	}
 	create struct {
 		pool.Model
@@ -46,7 +47,6 @@ type (
 		params        []any
 		command       strings.Builder
 		commandString strings.Builder
-		err           error
 	}
 )
 
@@ -59,16 +59,14 @@ var (
 )
 
 // create
-func newCreate(db Executer, tableName string) CreateBuilder {
+func newCreate(dbs ...Executer) CreateBuilder {
 	obj := createPool.Get().(*create)
-	if db == nil || tableName == "" {
-		obj.err = errors.New("db or table is nil")
-		return obj
+	if len(dbs) > 0 {
+		obj.db = dbs[0]
+	} else {
+		obj.db = GetDB()
 	}
 
-	obj.db = db
-	obj.table = tableName
-	obj.err = nil
 	obj.commandString.Reset()
 
 	return obj
@@ -102,9 +100,27 @@ func (c *create) String() string {
 	return c.commandString.String()
 }
 
-// Sets
-func (c *create) Set(fns ...dialect.Setter) *create {
-	if len(fns) == 0 || c.err != nil {
+// Table 设置表名
+func (c *create) Table(a any) *create {
+	switch v := a.(type) {
+	case string:
+		c.table = v
+	case dialect.TableNamer:
+		c.table = v.TableName()
+	default:
+		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
+		value := reflect.ValueOf(a)
+		if value.Kind() == reflect.Ptr {
+			value = value.Elem()
+		}
+		c.table = value.Type().Name()
+	}
+	return c
+}
+
+// Sets 设置列名和值
+func (c *create) Sets(fns ...dialect.Setter) *create {
+	if len(fns) == 0 {
 		return c
 	}
 
@@ -123,6 +139,7 @@ func (c *create) Set(fns ...dialect.Setter) *create {
 	return c
 }
 
+// Cols 设置列名
 func (c *create) Cols(cols ...dialect.Field) *create {
 	for _, col := range cols {
 		c.affect = append(c.affect, col)
@@ -133,10 +150,6 @@ func (c *create) Cols(cols ...dialect.Field) *create {
 // Exec
 func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	defer c.Free()
-
-	if c.err != nil {
-		return nil, c.err
-	}
 
 	lens := len(c.cols)
 	if lens == 0 {
@@ -164,13 +177,9 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	return stmt.ExecContext(ctx, c.params...)
 }
 
-// Struct
+// Struct 执行插入，请不要在事务中使用; bean 必须是指针类型
 func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
-
-	if c.err != nil {
-		return nil, c.err
-	}
 
 	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
 
@@ -194,13 +203,9 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	return result, nil
 }
 
-// Struct 执行批量插入，请不要在事务中使用
-func (c *create) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
+// BatchStruct 执行批量插入，请不要在事务中使用
+func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
-
-	if c.err != nil {
-		return nil, c.err
-	}
 
 	lens := len(beans)
 	if lens == 0 {

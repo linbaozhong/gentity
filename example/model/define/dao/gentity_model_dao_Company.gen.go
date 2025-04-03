@@ -15,7 +15,6 @@ import (
 
 type companyer interface {
 	dialect.Daoer
-	ace.Cruder
 	// InsertOne 插入一条数据，返回 LastInsertId
 	// cols: 要插入的列名
 	InsertOne(ctx context.Context, bean *db.Company, cols ...dialect.Field) (bool, error)
@@ -63,24 +62,24 @@ func Company(exec ...ace.Executer) companyer {
 	return _obj
 }
 
-// C Create company
-func (p *daoCompany) C() ace.CreateBuilder {
-	return p.db.C(db.CompanyTableName)
+// Create company
+func CompanyCreate(exec ...ace.Executer) ace.CreateBuilder {
+	return ace.Create(exec...).Table(db.CompanyTableName)
 }
 
-// R Select company
-func (p *daoCompany) R() ace.SelectBuilder {
-	return p.db.R(db.CompanyTableName)
+// Select company
+func CompanySelect(exec ...ace.Executer) ace.SelectBuilder {
+	return ace.Select(exec...).Table(db.CompanyTableName)
 }
 
-// U Update company
-func (p *daoCompany) U() ace.UpdateBuilder {
-	return p.db.U(db.CompanyTableName)
+// Update company
+func CompanyUpdate(exec ...ace.Executer) ace.UpdateBuilder {
+	return ace.Update(exec...).Table(db.CompanyTableName)
 }
 
-// D Delete company
-func (p *daoCompany) D() ace.DeleteBuilder {
-	return p.db.D(db.CompanyTableName)
+// Delete company
+func CompanyDelete(exec ...ace.Executer) ace.DeleteBuilder {
+	return ace.Delete(exec...).Table(db.CompanyTableName)
 }
 
 // Insert 返回 LastInsertId
@@ -88,8 +87,8 @@ func (p *daoCompany) Insert(ctx context.Context, sets ...dialect.Setter) (int64,
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.C().
-		Set(sets...).
+	_result, e := CompanyCreate(p.db).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -101,7 +100,7 @@ func (p *daoCompany) Insert(ctx context.Context, sets ...dialect.Setter) (int64,
 // InsertOne 返回 LastInsertId
 // cols: 要插入的列名
 func (p *daoCompany) InsertOne(ctx context.Context, bean *db.Company, cols ...dialect.Field) (bool, error) {
-	_result, e := p.C().
+	_result, e := CompanyCreate(p.db).
 		Cols(cols...).
 		Struct(ctx, bean)
 	if e != nil {
@@ -126,9 +125,9 @@ func (p *daoCompany) InsertBatch(ctx context.Context, beans []*db.Company, cols 
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.C().
+	_result, e := CompanyCreate(p.db).
 		Cols(cols...).
-		StructBatch(ctx, _args...)
+		BatchStruct(ctx, _args...)
 	if e != nil {
 		log.Error(e)
 		return 0, e
@@ -142,9 +141,9 @@ func (p *daoCompany) Update(ctx context.Context, sets []dialect.Setter, cond ...
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	_result, e := p.U().
+	_result, e := CompanyUpdate(p.db).
 		Where(cond...).
-		Set(sets...).
+		Sets(sets...).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -173,7 +172,7 @@ func (p *daoCompany) UpdateBatch(ctx context.Context, beans []*db.Company, cols 
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.U().
+	_result, e := CompanyUpdate(p.db).
 		Cols(cols...).
 		StructBatch(ctx, _args...)
 	if e != nil {
@@ -186,7 +185,7 @@ func (p *daoCompany) UpdateBatch(ctx context.Context, beans []*db.Company, cols 
 
 // Delete
 func (p *daoCompany) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_result, e := p.D().
+	_result, e := CompanyDelete(p.db).
 		Where(cond...).
 		Exec(ctx)
 	if e != nil {
@@ -237,7 +236,7 @@ func (p *daoCompany) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.C
 
 // Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompany) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.Company, bool, error) {
-	_c := p.R()
+	_c := CompanySelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompany.ReadableFields...)
 	} else {
@@ -268,7 +267,7 @@ func (p *daoCompany) Get4Cols(ctx context.Context, cols []dialect.Field, cond []
 
 // Find4Cols 分页获取company slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompany) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.Company, bool, error) {
-	_c := p.R()
+	_c := CompanySelect(p.db)
 	if len(cols) == 0 {
 		_c.Cols(tblcompany.ReadableFields...)
 	} else {
@@ -310,7 +309,7 @@ func (p *daoCompany) Get(ctx context.Context, cond []dialect.Condition, sort ...
 
 // GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *daoCompany) GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
-	_c := p.R().Cols(col)
+	_c := CompanySelect(p.db).Cols(col)
 	_row, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		QueryRow(ctx)
@@ -339,7 +338,7 @@ func (p *daoCompany) Find(ctx context.Context, pageIndex, pageSize uint, cond []
 
 // IDs
 func (p *daoCompany) IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(tblcompany.PrimaryKey)
+	_c := CompanySelect(p.db).Cols(tblcompany.PrimaryKey)
 	_rows, e := _c.Where(cond...).
 		OrderFunc(sort...).
 		Limit(dialect.MaxLimit).
@@ -365,7 +364,7 @@ func (p *daoCompany) IDs(ctx context.Context, cond []dialect.Condition, sort ...
 
 // Columns
 func (p *daoCompany) Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error) {
-	_c := p.R().Cols(col)
+	_c := CompanySelect(p.db).Cols(col)
 	_rows, e := _c.Where(cond...).
 		Limit(dialect.MaxLimit).
 		OrderFunc(sort...).
@@ -390,17 +389,17 @@ func (p *daoCompany) Columns(ctx context.Context, col dialect.Field, cond []dial
 
 // Count
 func (p *daoCompany) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return p.R().Count(ctx, cond...)
+	return CompanySelect(p.db).Count(ctx, cond...)
 }
 
 // Sum
 func (p *daoCompany) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return p.R().Sum(ctx, cols, cond...)
+	return CompanySelect(p.db).Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *daoCompany) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := p.R().Cols(tblcompany.PrimaryKey).Where(cond...)
+	_c := CompanySelect(p.db).Cols(tblcompany.PrimaryKey).Where(cond...)
 	_row, e := _c.QueryRow(ctx)
 	if e != nil {
 		log.Error(e)
