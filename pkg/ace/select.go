@@ -553,13 +553,13 @@ func (s *read) Get(ctx context.Context, dest any) error {
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
 	if d, ok := dest.(dialect.Modeler); ok {
-		vals := d.AssignPtr()
-		return r.Scan(vals...)
+		vals := d.AssignPtr(s.cols...)
+		return rows.Scan(vals...)
 	}
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	return r.scanAny(dest, false)
 }
 
@@ -816,16 +816,22 @@ func (s *read) parse() []dialect.Field {
 		if s.distinct {
 			s.command.WriteString("DISTINCT ")
 		}
-		for i, col := range cols {
-			if i > 0 {
+		if colens > 0 {
+			for i, col := range cols {
+				if i > 0 {
+					s.command.WriteString(",")
+				}
+				s.command.WriteString(col.Quote())
+			}
+			if funlens > 0 {
 				s.command.WriteString(",")
 			}
-			s.command.WriteString(col.Quote())
 		}
-		if colens > 0 && funlens > 0 {
-			s.command.WriteString(",")
+		if funlens > 0 {
+			s.command.WriteString(strings.Join(s.funcs, ","))
+		} else {
+			s.cols = cols
 		}
-		s.command.WriteString(strings.Join(s.funcs, ","))
 	}
 
 	// FROM TABLE
