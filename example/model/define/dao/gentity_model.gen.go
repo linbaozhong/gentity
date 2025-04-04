@@ -8,17 +8,19 @@ import (
 )
 
 var (
+	getExec = ace.GetExec
+
 	Create = ace.Create
 	Delete = ace.Delete
 	Update = ace.Update
 	Select = ace.Select
 
-	getExec = ace.GetExec
-	Sets    = ace.Sets
+	Sets = ace.Sets
 
 	Where = ace.Where
 	Or    = ace.Or
 	And   = ace.And
+
 	Order = ace.Order
 	Asc   = ace.Asc
 	Desc  = ace.Desc

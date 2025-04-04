@@ -13,69 +13,70 @@ import (
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
-type company_fadadaer interface {
-	dialect.Daoer
-	// InsertOne 插入一条数据，返回 LastInsertId
-	// cols: 要插入的列名
-	InsertOne(ctx context.Context, bean *db.CompanyFadada, cols ...dialect.Field) (bool, error)
-	// InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
-	// cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
-	InsertBatch(ctx context.Context, beans []*db.CompanyFadada, cols ...dialect.Field) (int64, error)
-	// UpdateById 按主键更新一条数据
-	UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error)
-	// UpdateBatch 批量更新,禁止在事务中使用
-	// cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
-	UpdateBatch(ctx context.Context, beans []*db.CompanyFadada, cols ...dialect.Field) (bool, error)
-	// DeleteById 按主键删除一条数据
-	DeleteById(ctx context.Context, id types.BigInt) (bool, error)
-	// SelectAll 读取所有数据
-	SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.CompanyFadada, bool, error)
-	// Find4Cols 分页查询指定列，返回一个slice
-	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyFadada, bool, error)
-	// Find 分页查询，返回一个slice
-	Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyFadada, bool, error)
-	// Get4Cols 读取一个对象的指定列
-	Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.CompanyFadada, bool, error)
-	// GetByID 按主键查询，返回一个对象
-	GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*db.CompanyFadada, bool, error)
-	// Get 按条件读取一个对象
-	Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*db.CompanyFadada, bool, error)
-	// GetFirstCell 按条件读取第一行的第一个字段
-	GetFirstCell(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error)
-	//
-	IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error)
-	//
-	Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error)
-}
+//type company_fadadaer interface {
+//	dialect.Daoer
+//	// InsertOne 插入一条数据，返回 LastInsertId
+//	// cols: 要插入的列名
+//	InsertOne(ctx context.Context, bean *db.CompanyFadada, cols ...dialect.Field) (bool, error)
+//	// InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
+//	// cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
+//	InsertBatch(ctx context.Context, beans []*db.CompanyFadada, cols ...dialect.Field) (int64, error)
+//  // UpdateById 按主键更新一条数据
+//	UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error)
+//	// UpdateBatch 批量更新,禁止在事务中使用
+//	// cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
+//	UpdateBatch(ctx context.Context, beans []*db.CompanyFadada, cols ...dialect.Field) (bool, error)
+//	// DeleteById 按主键删除一条数据
+//  DeleteById(ctx context.Context,id types.BigInt) (bool, error)
+//	// SelectAll 读取所有数据
+//	SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.CompanyFadada, bool, error)
+//	// Find4Cols 分页查询指定列，返回一个slice
+//	Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyFadada, bool, error)
+//	// Find 分页查询，返回一个slice
+//	Find(ctx context.Context, pageIndex, pageSize uint, cond []dialect.Condition, sort ...dialect.Order) ([]db.CompanyFadada, bool, error)
+//	// Get4Cols 读取一个对象的指定列
+//	Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*db.CompanyFadada, bool, error)
+//	// GetByID 按主键查询，返回一个对象
+//	GetByID(ctx context.Context,id types.BigInt, cols ...dialect.Field) (*db.CompanyFadada, bool, error)
+//	// Get 按条件读取一个对象
+//	Get(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) (*db.CompanyFadada, bool, error)
+//
+//	// GetFirstCell 按条件读取第一行的第一个字段
+//	GetFirstCell(ctx context.Context,col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (any, bool, error)
+//	//
+//	IDs(ctx context.Context, cond []dialect.Condition, sort ...dialect.Order) ([]any, error)
+//	//
+//	Columns(ctx context.Context, col dialect.Field, cond []dialect.Condition, sort ...dialect.Order) ([]any, error)
+//}
 
 type daoCompanyFadada struct {
 	db ace.Executer
 }
 
-func CompanyFadada(exec ...ace.Executer) company_fadadaer {
+func CompanyFadada(exec ...ace.Executer) *daoCompanyFadada {
 	_obj := &daoCompanyFadada{}
-	_obj.db = getExec(exec...)
+	_obj.db = ace.GetExec(exec...)
 	return _obj
 }
 
 // Create company_fadada
 func CompanyFadadaCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return Create(exec...).Table(db.CompanyFadadaTableName)
+	return ace.Create(exec...).Table(db.CompanyFadadaTableName)
 }
 
 // Select company_fadada
 func CompanyFadadaSelect(exec ...ace.Executer) ace.SelectBuilder {
-	return Select(exec...).Table(db.CompanyFadadaTableName)
+	return ace.Select(exec...).Table(db.CompanyFadadaTableName)
 }
 
 // Update company_fadada
 func CompanyFadadaUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return Update(exec...).Table(db.CompanyFadadaTableName)
+	return ace.Update(exec...).Table(db.CompanyFadadaTableName)
 }
 
 // Delete company_fadada
 func CompanyFadadaDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return Delete(exec...).Table(db.CompanyFadadaTableName)
+	return ace.Delete(exec...).Table(db.CompanyFadadaTableName)
 }
 
 // Insert 返回 LastInsertId
