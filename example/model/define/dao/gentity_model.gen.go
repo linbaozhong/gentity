@@ -8,18 +8,20 @@ import (
 )
 
 var (
-	Where   = ace.Where
-	Or      = ace.Or
-	And     = ace.And
+	Create = ace.Create
+	Delete = ace.Delete
+	Update = ace.Update
+	Select = ace.Select
+
 	getExec = ace.GetExec
-	Create  = ace.Create
-	Delete  = ace.Delete
-	Update  = ace.Update
-	Select  = ace.Select
 	Sets    = ace.Sets
-	Order   = ace.Order
-	Asc     = ace.Asc
-	Desc    = ace.Desc
+
+	Where = ace.Where
+	Or    = ace.Or
+	And   = ace.And
+	Order = ace.Order
+	Asc   = ace.Asc
+	Desc  = ace.Desc
 )
 
 // 生成综合条件cond缓存key

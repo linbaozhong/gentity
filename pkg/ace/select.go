@@ -294,10 +294,14 @@ func (s *read) Where(fns ...dialect.Condition) *read {
 	} else {
 		s.where.WriteString(dialect.Operator_and + "(")
 	}
+
+	orlen := len(dialect.Operator_or)
+	andlen := len(dialect.Operator_and)
+
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
-			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+			if cond[:orlen] == dialect.Operator_or || cond[:andlen] == dialect.Operator_and {
 				s.where.WriteString(" ")
 			} else {
 				s.where.WriteString(dialect.Operator_and)
@@ -326,10 +330,14 @@ func (s *read) And(fns ...dialect.Condition) *read {
 	} else {
 		s.where.WriteString(dialect.Operator_and + "(")
 	}
+
+	orlen := len(dialect.Operator_or)
+	andlen := len(dialect.Operator_and)
+
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
-			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+			if cond[:orlen] == dialect.Operator_or || cond[:andlen] == dialect.Operator_and {
 				s.where.WriteString(" ")
 			} else {
 				s.where.WriteString(dialect.Operator_or)
@@ -358,10 +366,13 @@ func (s *read) Or(fns ...dialect.Condition) *read {
 		s.where.WriteString(dialect.Operator_or + "(")
 	}
 
+	orlen := len(dialect.Operator_or)
+	andlen := len(dialect.Operator_and)
+
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
-			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+			if cond[:orlen] == dialect.Operator_or || cond[:andlen] == dialect.Operator_and {
 				s.where.WriteString(" ")
 			} else {
 				s.where.WriteString(dialect.Operator_and)
