@@ -60,22 +60,22 @@ func CompanyStamp(exec ...ace.Executer) company_stamper {
 
 // Create company_stamp
 func CompanyStampCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table(db.CompanyStampTableName)
+	return Create(exec...).Table(db.CompanyStampTableName)
 }
 
 // Select company_stamp
 func CompanyStampSelect(exec ...ace.Executer) ace.SelectBuilder {
-	return ace.Select(exec...).Table(db.CompanyStampTableName)
+	return Select(exec...).Table(db.CompanyStampTableName)
 }
 
 // Update company_stamp
 func CompanyStampUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return ace.Update(exec...).Table(db.CompanyStampTableName)
+	return Update(exec...).Table(db.CompanyStampTableName)
 }
 
 // Delete company_stamp
 func CompanyStampDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return ace.Delete(exec...).Table(db.CompanyStampTableName)
+	return Delete(exec...).Table(db.CompanyStampTableName)
 }
 
 // Insert 返回 LastInsertId

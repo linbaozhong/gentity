@@ -60,22 +60,22 @@ func CompanyMan(exec ...ace.Executer) company_maner {
 
 // Create company_man
 func CompanyManCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table(db.CompanyManTableName)
+	return Create(exec...).Table(db.CompanyManTableName)
 }
 
 // Select company_man
 func CompanyManSelect(exec ...ace.Executer) ace.SelectBuilder {
-	return ace.Select(exec...).Table(db.CompanyManTableName)
+	return Select(exec...).Table(db.CompanyManTableName)
 }
 
 // Update company_man
 func CompanyManUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return ace.Update(exec...).Table(db.CompanyManTableName)
+	return Update(exec...).Table(db.CompanyManTableName)
 }
 
 // Delete company_man
 func CompanyManDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return ace.Delete(exec...).Table(db.CompanyManTableName)
+	return Delete(exec...).Table(db.CompanyManTableName)
 }
 
 // Insert 返回 LastInsertId

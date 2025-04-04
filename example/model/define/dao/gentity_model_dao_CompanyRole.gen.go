@@ -60,22 +60,22 @@ func CompanyRole(exec ...ace.Executer) company_roleer {
 
 // Create company_role
 func CompanyRoleCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table(db.CompanyRoleTableName)
+	return Create(exec...).Table(db.CompanyRoleTableName)
 }
 
 // Select company_role
 func CompanyRoleSelect(exec ...ace.Executer) ace.SelectBuilder {
-	return ace.Select(exec...).Table(db.CompanyRoleTableName)
+	return Select(exec...).Table(db.CompanyRoleTableName)
 }
 
 // Update company_role
 func CompanyRoleUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return ace.Update(exec...).Table(db.CompanyRoleTableName)
+	return Update(exec...).Table(db.CompanyRoleTableName)
 }
 
 // Delete company_role
 func CompanyRoleDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return ace.Delete(exec...).Table(db.CompanyRoleTableName)
+	return Delete(exec...).Table(db.CompanyRoleTableName)
 }
 
 // Insert 返回 LastInsertId

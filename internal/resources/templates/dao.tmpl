@@ -95,22 +95,22 @@ func {{$structName}}(exec ...ace.Executer) {{$tablename}}er {
 
 // Create {{$tablename}}
 func {{$structName}}Create(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table({{$package}}.{{$structName}}TableName)
+	return Create(exec...).Table({{$package}}.{{$structName}}TableName)
 }
 
 // Select {{$tablename}}
 func {{$structName}}Select(exec ...ace.Executer) ace.SelectBuilder{
-	return ace.Select(exec...).Table({{$package}}.{{$structName}}TableName)
+	return Select(exec...).Table({{$package}}.{{$structName}}TableName)
 }
 
 // Update {{$tablename}}
 func {{$structName}}Update(exec ...ace.Executer) ace.UpdateBuilder{
-	return ace.Update(exec...).Table({{$package}}.{{$structName}}TableName)
+	return Update(exec...).Table({{$package}}.{{$structName}}TableName)
 }
 
 // Delete {{$tablename}}
 func {{$structName}}Delete(exec ...ace.Executer) ace.DeleteBuilder{
-	return ace.Delete(exec...).Table({{$package}}.{{$structName}}TableName)
+	return Delete(exec...).Table({{$package}}.{{$structName}}TableName)
 }
 
 

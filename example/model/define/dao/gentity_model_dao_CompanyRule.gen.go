@@ -60,22 +60,22 @@ func CompanyRule(exec ...ace.Executer) company_ruleer {
 
 // Create company_rule
 func CompanyRuleCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table(db.CompanyRuleTableName)
+	return Create(exec...).Table(db.CompanyRuleTableName)
 }
 
 // Select company_rule
 func CompanyRuleSelect(exec ...ace.Executer) ace.SelectBuilder {
-	return ace.Select(exec...).Table(db.CompanyRuleTableName)
+	return Select(exec...).Table(db.CompanyRuleTableName)
 }
 
 // Update company_rule
 func CompanyRuleUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return ace.Update(exec...).Table(db.CompanyRuleTableName)
+	return Update(exec...).Table(db.CompanyRuleTableName)
 }
 
 // Delete company_rule
 func CompanyRuleDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return ace.Delete(exec...).Table(db.CompanyRuleTableName)
+	return Delete(exec...).Table(db.CompanyRuleTableName)
 }
 
 // Insert 返回 LastInsertId

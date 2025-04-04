@@ -60,22 +60,22 @@ func DocumentTemplate(exec ...ace.Executer) document_templateer {
 
 // Create document_template
 func DocumentTemplateCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table(db.DocumentTemplateTableName)
+	return Create(exec...).Table(db.DocumentTemplateTableName)
 }
 
 // Select document_template
 func DocumentTemplateSelect(exec ...ace.Executer) ace.SelectBuilder {
-	return ace.Select(exec...).Table(db.DocumentTemplateTableName)
+	return Select(exec...).Table(db.DocumentTemplateTableName)
 }
 
 // Update document_template
 func DocumentTemplateUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return ace.Update(exec...).Table(db.DocumentTemplateTableName)
+	return Update(exec...).Table(db.DocumentTemplateTableName)
 }
 
 // Delete document_template
 func DocumentTemplateDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return ace.Delete(exec...).Table(db.DocumentTemplateTableName)
+	return Delete(exec...).Table(db.DocumentTemplateTableName)
 }
 
 // Insert 返回 LastInsertId

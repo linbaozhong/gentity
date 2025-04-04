@@ -60,22 +60,22 @@ func Company(exec ...ace.Executer) companyer {
 
 // Create company
 func CompanyCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table(db.CompanyTableName)
+	return Create(exec...).Table(db.CompanyTableName)
 }
 
 // Select company
 func CompanySelect(exec ...ace.Executer) ace.SelectBuilder {
-	return ace.Select(exec...).Table(db.CompanyTableName)
+	return Select(exec...).Table(db.CompanyTableName)
 }
 
 // Update company
 func CompanyUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return ace.Update(exec...).Table(db.CompanyTableName)
+	return Update(exec...).Table(db.CompanyTableName)
 }
 
 // Delete company
 func CompanyDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return ace.Delete(exec...).Table(db.CompanyTableName)
+	return Delete(exec...).Table(db.CompanyTableName)
 }
 
 // Insert 返回 LastInsertId

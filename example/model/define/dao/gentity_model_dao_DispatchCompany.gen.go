@@ -60,22 +60,22 @@ func DispatchCompany(exec ...ace.Executer) dispatch_companyer {
 
 // Create dispatch_company
 func DispatchCompanyCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table(db.DispatchCompanyTableName)
+	return Create(exec...).Table(db.DispatchCompanyTableName)
 }
 
 // Select dispatch_company
 func DispatchCompanySelect(exec ...ace.Executer) ace.SelectBuilder {
-	return ace.Select(exec...).Table(db.DispatchCompanyTableName)
+	return Select(exec...).Table(db.DispatchCompanyTableName)
 }
 
 // Update dispatch_company
 func DispatchCompanyUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return ace.Update(exec...).Table(db.DispatchCompanyTableName)
+	return Update(exec...).Table(db.DispatchCompanyTableName)
 }
 
 // Delete dispatch_company
 func DispatchCompanyDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return ace.Delete(exec...).Table(db.DispatchCompanyTableName)
+	return Delete(exec...).Table(db.DispatchCompanyTableName)
 }
 
 // Insert 返回 LastInsertId

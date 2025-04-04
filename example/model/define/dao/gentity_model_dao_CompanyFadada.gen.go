@@ -60,22 +60,22 @@ func CompanyFadada(exec ...ace.Executer) company_fadadaer {
 
 // Create company_fadada
 func CompanyFadadaCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table(db.CompanyFadadaTableName)
+	return Create(exec...).Table(db.CompanyFadadaTableName)
 }
 
 // Select company_fadada
 func CompanyFadadaSelect(exec ...ace.Executer) ace.SelectBuilder {
-	return ace.Select(exec...).Table(db.CompanyFadadaTableName)
+	return Select(exec...).Table(db.CompanyFadadaTableName)
 }
 
 // Update company_fadada
 func CompanyFadadaUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return ace.Update(exec...).Table(db.CompanyFadadaTableName)
+	return Update(exec...).Table(db.CompanyFadadaTableName)
 }
 
 // Delete company_fadada
 func CompanyFadadaDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return ace.Delete(exec...).Table(db.CompanyFadadaTableName)
+	return Delete(exec...).Table(db.CompanyFadadaTableName)
 }
 
 // Insert 返回 LastInsertId
