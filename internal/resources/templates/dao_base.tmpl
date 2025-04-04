@@ -8,8 +8,18 @@ import (
 )
 
 var (
+	Where = ace.Where
 	Or = ace.Or
 	And = ace.And
+	getExec = ace.GetExec
+	Create = ace.Create
+	Delete = ace.Delete
+	Update = ace.Update
+	Select = ace.Select
+	Sets = ace.Sets
+	Order = ace.Order
+	Asc = ace.Asc
+	Desc = ace.Desc
 )
 
 // 生成综合条件cond缓存key
@@ -25,32 +35,4 @@ func GetIdHashKey(key any) string {
 // 生成ids缓存key
 func GetIdsHashKey(key any) string {
 	return cachego.GetHashKey("s:", key)
-}
-
-////////////////////////////
-func getExec(exec ...ace.Executer) ace.Executer {
-	if len(exec) > 0 {
-		return exec[0]
-	}
-	return  ace.GetDB()
-}
-
-// Create
-func Create(exec ...ace.Executer) ace.CreateBuilder {
-	return getExec(exec...).Create()
-}
-
-// Select
-func Select(exec ...ace.Executer) ace.SelectBuilder {
-	return getExec(exec...).Select()
-}
-
-// Update
-func Update(exec ...ace.Executer) ace.UpdateBuilder {
-	return getExec(exec...).Update()
-}
-
-// Delete
-func Delete(exec ...ace.Executer) ace.DeleteBuilder {
-	return getExec(exec...).Delete()
 }

@@ -66,6 +66,23 @@ func GetDB() *DB {
 	return _obj
 }
 
+// //////////////////////////
+func GetExec(exec ...Executer) Executer {
+	if len(exec) > 0 {
+		return exec[0]
+	}
+	return GetDB()
+}
+
+// /////////////////
+func Sets(fns ...dialect.Setter) []dialect.Setter {
+	return fns
+}
+
+func Where(fns ...dialect.Condition) []dialect.Condition {
+	return fns
+}
+
 func Or(fns ...dialect.Condition) dialect.Condition {
 	return func() (string, any) {
 		if len(fns) == 0 {
@@ -124,11 +141,9 @@ func And(fns ...dialect.Condition) dialect.Condition {
 	}
 }
 
-// Order 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Field 类型的参数，
-// 并调用 Asc 函数来生成一个升序排序的规则。
-// 返回值为一个实现了 dialect.Order 接口的函数，该函数可以被用于指定查询结果的排序方式。
-func Order(fs ...dialect.Field) dialect.Order {
-	return Asc(fs...)
+// Order 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Order 类型的参数，
+func Order(fs ...dialect.Order) []dialect.Order {
+	return fs
 }
 
 // Asc 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Field 类型的参数，

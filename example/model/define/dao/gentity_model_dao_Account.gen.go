@@ -60,22 +60,22 @@ func Account(exec ...ace.Executer) accounter {
 
 // Create account
 func AccountCreate(exec ...ace.Executer) ace.CreateBuilder {
-	return ace.Create(exec...).Table(db.AccountTableName)
+	return Create(exec...).Table(db.AccountTableName)
 }
 
 // Select account
 func AccountSelect(exec ...ace.Executer) ace.SelectBuilder {
-	return ace.Select(exec...).Table(db.AccountTableName)
+	return Select(exec...).Table(db.AccountTableName)
 }
 
 // Update account
 func AccountUpdate(exec ...ace.Executer) ace.UpdateBuilder {
-	return ace.Update(exec...).Table(db.AccountTableName)
+	return Update(exec...).Table(db.AccountTableName)
 }
 
 // Delete account
 func AccountDelete(exec ...ace.Executer) ace.DeleteBuilder {
-	return ace.Delete(exec...).Table(db.AccountTableName)
+	return Delete(exec...).Table(db.AccountTableName)
 }
 
 // Insert 返回 LastInsertId
