@@ -54,11 +54,7 @@ type daoAccount struct {
 
 func Account(exec ...ace.Executer) accounter {
 	_obj := &daoAccount{}
-	if len(exec) > 0 {
-		_obj.db = exec[0]
-	} else {
-		_obj.db = ace.GetDB()
-	}
+	_obj.db = getExec(exec...)
 	return _obj
 }
 

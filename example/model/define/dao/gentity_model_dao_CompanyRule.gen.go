@@ -54,11 +54,7 @@ type daoCompanyRule struct {
 
 func CompanyRule(exec ...ace.Executer) company_ruleer {
 	_obj := &daoCompanyRule{}
-	if len(exec) > 0 {
-		_obj.db = exec[0]
-	} else {
-		_obj.db = ace.GetDB()
-	}
+	_obj.db = getExec(exec...)
 	return _obj
 }
 
