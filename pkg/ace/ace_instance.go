@@ -19,11 +19,6 @@ func Create(x ...Executer) CreateBuilder {
 	return newCreate(GetExec(x...))
 }
 
-// Stmt
-func Stmt() StmtBuilder {
-	return newStmt()
-}
-
 // Select
 func Select(x ...Executer) SelectBuilder {
 	return newSelect(GetExec(x...))
@@ -37,4 +32,11 @@ func Update(x ...Executer) UpdateBuilder {
 // Delete
 func Delete(x ...Executer) DeleteBuilder {
 	return newDelete(GetExec(x...))
+}
+
+////////////////////
+
+// Stmt
+func Stmt() StmtBuilder {
+	return newStmt()
 }

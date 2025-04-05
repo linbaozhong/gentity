@@ -79,8 +79,8 @@ func Sets(fns ...dialect.Setter) []dialect.Setter {
 	return fns
 }
 
-func Where(fns ...dialect.Condition) []dialect.Condition {
-	return fns
+func Where(fns ...dialect.Condition) StmtBuilder {
+	return newStmt().Where(fns...)
 }
 
 func Or(fns ...dialect.Condition) dialect.Condition {

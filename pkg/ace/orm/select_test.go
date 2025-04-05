@@ -16,6 +16,7 @@ package orm
 
 import (
 	"context"
+	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
 	"testing"
 )
@@ -24,6 +25,16 @@ func TestUpdater(t *testing.T) {
 	Set(tblaccount.State.Set(1)).Where(tblaccount.Id.Eq(1)).Update().Exec(context.Background())
 
 }
-func TestSelecter(t *testing.T) {
 
+func TestSelecter(t *testing.T) {
+	d := db.NewAccount()
+	e := ormSelectbuilder(Where(tblaccount.Id.Eq(1))).Get(context.Background(), d)
+	if e != nil {
+		t.Fatal(e)
+	}
+	t.Log(d)
+}
+
+func ormSelectbuilder(s SelectBuilder) Reader {
+	return s.Read()
 }
