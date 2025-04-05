@@ -492,7 +492,7 @@ func (s *Select) Get(ctx context.Context, dest any) error {
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
 	if d, ok := dest.(dialect.Modeler); ok {
-		vals := d.AssignPtr()
+		vals := d.AssignPtr(s.cols...)
 		return r.Scan(vals...)
 	}
 	return r.scanAny(dest, false)
@@ -732,45 +732,45 @@ func (s *Select) Select(ctx context.Context, sqlStr string, args ...any) (*sql.R
 }
 
 // SelectMap 执行原生 SQL 查询并返回 map[string]any
-func (se *Select) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
-	rows, err := se.Select(ctx, sqlStr, args...)
+func (s *Select) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
+	rows, err := s.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	dest := make(map[string]any)
 	return dest, r.MapScan(dest)
 }
 
 // SelectSlice 执行原生 SQL 查询并返回 []any
-func (se *Select) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
-	rows, err := se.Select(ctx, sqlStr, args...)
+func (s *Select) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
+	rows, err := s.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	return r.SliceScan()
 }
 
 // SelectModel 执行原生 SQL 查询并返回实现 dialect.Modeler 接口的结构体
-func (se *Select) SelectModel(ctx context.Context, dest any, sqlStr string, args ...any) error {
-	rows, err := se.Select(ctx, sqlStr, args...)
+func (s *Select) SelectModel(ctx context.Context, dest any, sqlStr string, args ...any) error {
+	rows, err := s.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
 	if d, ok := dest.(dialect.Modeler); ok {
-		vals := d.AssignPtr()
-		return r.Scan(vals...)
+		vals := d.AssignPtr(s.cols...)
+		return rows.Scan(vals...)
 	}
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	return r.scanAny(dest, false)
 }
 
@@ -793,6 +793,7 @@ func (s *Select) parse() []dialect.Field {
 	s.command.WriteString("SELECT ")
 
 	var cols = util.SliceDiff(s.cols, s.omits)
+	s.cols = cols
 	colens := len(cols)
 	funlens := len(s.funcs)
 	if colens+funlens == 0 {
