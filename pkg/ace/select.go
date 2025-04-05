@@ -758,43 +758,43 @@ func (s *read) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Row
 }
 
 // SelectMap 执行原生 SQL 查询并返回 map[string]any
-func (se *read) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
-	rows, err := se.Select(ctx, sqlStr, args...)
+func (s *read) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
+	rows, err := s.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	dest := make(map[string]any)
 	return dest, r.MapScan(dest)
 }
 
 // SelectSlice 执行原生 SQL 查询并返回 []any
-func (se *read) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
-	rows, err := se.Select(ctx, sqlStr, args...)
+func (s *read) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
+	rows, err := s.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	return r.SliceScan()
 }
 
 // SelectStruct 执行原生 SQL 查询并返回实现 dialect.Modeler 接口的结构体
-func (se *read) SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error {
-	rows, err := se.Select(ctx, sqlStr, args...)
+func (s *read) SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error {
+	rows, err := s.Select(ctx, sqlStr, args...)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
 	if d, ok := dest.(dialect.Modeler); ok {
-		vals := d.AssignPtr()
+		vals := d.AssignPtr(s.cols...)
 		return r.Scan(vals...)
 	}
 	return r.scanAny(dest, false)
