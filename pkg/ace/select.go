@@ -793,7 +793,6 @@ func (s *Select) parse() []dialect.Field {
 	s.command.WriteString("SELECT ")
 
 	var cols = util.SliceDiff(s.cols, s.omits)
-	s.cols = cols
 	colens := len(cols)
 	funlens := len(s.funcs)
 	if colens+funlens == 0 {
@@ -802,16 +801,22 @@ func (s *Select) parse() []dialect.Field {
 		if s.distinct {
 			s.command.WriteString("DISTINCT ")
 		}
-		for i, col := range cols {
-			if i > 0 {
+		if colens > 0 {
+			for i, col := range cols {
+				if i > 0 {
+					s.command.WriteString(",")
+				}
+				s.command.WriteString(col.Quote())
+			}
+			if funlens > 0 {
 				s.command.WriteString(",")
 			}
-			s.command.WriteString(col.Quote())
 		}
-		if colens > 0 && funlens > 0 {
-			s.command.WriteString(",")
+		if funlens > 0 {
+			s.command.WriteString(strings.Join(s.funcs, ","))
+		} else {
+			s.cols = cols
 		}
-		s.command.WriteString(strings.Join(s.funcs, ","))
 	}
 
 	// FROM TABLE
