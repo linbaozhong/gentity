@@ -68,7 +68,7 @@ func generateDao(tds []TempData, prefix string) error {
 	for _, td := range tds {
 		// 写table文件
 		e := td.writeTable(filepath.Join(tablePath, "tbl"+strings.ToLower(td.StructName)))
-		//e := td.writeTable(filepath.Join(daoPath, strings.ToLower(td.StructName)))
+		// e := td.writeTable(filepath.Join(daoPath, strings.ToLower(td.StructName)))
 		if e != nil {
 			showError(e.Error())
 			return e
@@ -82,8 +82,8 @@ func generateDao(tds []TempData, prefix string) error {
 		}
 
 		// 写dal文件
-		//e = td.writeBuild(filepath.Join(daoPath, "dao"+strings.ToLower(td.StructName)))
-		e = td.writeBuild(daoPath)
+		e = td.writeBuild(filepath.Join(daoPath, "dao"+strings.ToLower(td.StructName)))
+		// e = td.writeBuild(daoPath)
 		if e != nil {
 			showError(e.Error())
 			return e

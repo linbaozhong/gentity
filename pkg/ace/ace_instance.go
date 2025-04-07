@@ -34,7 +34,7 @@ func Delete(x ...Executer) DeleteBuilder {
 	return newDelete(GetExec(x...))
 }
 
-////////////////////
+// //////////////////
 
 // Stmt
 func Stmt() StmtBuilder {

@@ -54,7 +54,6 @@ type (
 		whereParams   []any
 		command       strings.Builder
 		commandString strings.Builder
-		err           error
 	}
 	expr struct {
 		colName string
@@ -73,13 +72,7 @@ var (
 // update
 func newUpdate(dbs ...Executer) *update {
 	obj := updatePool.Get().(*update)
-	if len(dbs) > 0 {
-		obj.db = dbs[0]
-	} else {
-		obj.db = GetDB()
-	}
-
-	obj.err = nil
+	obj.db = GetExec(dbs...)
 	obj.commandString.Reset()
 
 	return obj
@@ -137,7 +130,7 @@ func (u *update) Table(a any) *update {
 
 // Set
 func (u *update) Sets(fns ...dialect.Setter) *update {
-	if len(fns) == 0 || u.err != nil {
+	if len(fns) == 0 {
 		return u
 	}
 
@@ -154,7 +147,7 @@ func (u *update) Sets(fns ...dialect.Setter) *update {
 }
 
 func (u *update) SetExpr(fns ...dialect.ExprSetter) *update {
-	if len(fns) == 0 || u.err != nil {
+	if len(fns) == 0 {
 		return u
 	}
 
@@ -171,7 +164,7 @@ func (u *update) SetExpr(fns ...dialect.ExprSetter) *update {
 
 // Where
 func (u *update) Where(fns ...dialect.Condition) *update {
-	if len(fns) == 0 || u.err != nil {
+	if len(fns) == 0 {
 		return u
 	}
 
@@ -203,7 +196,7 @@ func (u *update) Where(fns ...dialect.Condition) *update {
 
 // And
 func (u *update) And(fns ...dialect.Condition) *update {
-	if len(fns) == 0 || u.err != nil {
+	if len(fns) == 0 {
 		return u
 	}
 
@@ -235,7 +228,7 @@ func (u *update) And(fns ...dialect.Condition) *update {
 
 // Or
 func (u *update) Or(fns ...dialect.Condition) *update {
-	if len(fns) == 0 || u.err != nil {
+	if len(fns) == 0 {
 		return u
 	}
 
@@ -276,10 +269,6 @@ func (u *update) Cols(cols ...dialect.Field) *update {
 func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
 
-	if u.err != nil {
-		return nil, u.err
-	}
-
 	lens := len(u.cols) + len(u.exprCols)
 	if lens == 0 {
 		return nil, dialect.ErrCreateEmpty
@@ -317,10 +306,6 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 // Struct
 func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
-
-	if u.err != nil {
-		return nil, u.err
-	}
 
 	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
 	cols, vals := bean.AssignValues(u.affect...)
@@ -360,10 +345,6 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 // Struct 执行更新,请不要在事务中使用
 func (u *update) StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
-
-	if u.err != nil {
-		return nil, u.err
-	}
 
 	lens := len(beans)
 	if lens == 0 {

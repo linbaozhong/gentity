@@ -61,12 +61,7 @@ var (
 // create
 func newCreate(dbs ...Executer) CreateBuilder {
 	obj := createPool.Get().(*create)
-	if len(dbs) > 0 {
-		obj.db = dbs[0]
-	} else {
-		obj.db = GetDB()
-	}
-
+	obj.db = GetExec(dbs...)
 	obj.commandString.Reset()
 
 	return obj
@@ -129,10 +124,6 @@ func (c *create) Sets(fns ...dialect.Setter) *create {
 			continue
 		}
 		s, val := fn()
-		// if v, ok := val.(error); ok {
-		//	c.err = v
-		//	return c
-		// }
 		c.cols = append(c.cols, s)
 		c.params = append(c.params, val)
 	}

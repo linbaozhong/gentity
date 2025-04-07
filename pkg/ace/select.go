@@ -129,12 +129,7 @@ func newStmt() StmtBuilder {
 // read
 func newSelect(dbs ...Executer) SelectBuilder {
 	obj := selectPool.Get().(*read)
-	if len(dbs) > 0 {
-		obj.db = dbs[0]
-	} else {
-		obj.db = GetDB()
-	}
-
+	obj.db = GetExec(dbs...)
 	obj.commandString.Reset()
 
 	return obj

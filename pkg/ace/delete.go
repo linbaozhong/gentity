@@ -59,12 +59,7 @@ var (
 // delete
 func newDelete(dbs ...Executer) DeleteBuilder {
 	obj := deletePool.Get().(*delete)
-	if len(dbs) > 0 {
-		obj.db = dbs[0]
-	} else {
-		obj.db = GetDB()
-	}
-
+	obj.db = GetExec(dbs...)
 	obj.commandString.Reset()
 
 	return obj
