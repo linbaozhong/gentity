@@ -27,9 +27,6 @@ import (
 
 type (
 	DeleteDao interface {
-		Free()
-		Reset()
-		String() string
 		Where(fns ...dialect.Condition) DeleteDao
 		And(fns ...dialect.Condition) DeleteDao
 		Or(fns ...dialect.Condition) DeleteDao
@@ -38,6 +35,9 @@ type (
 	DeleteBuilder interface {
 		DeleteDao
 		Table(name any) DeleteBuilder
+		Free()
+		Reset()
+		String() string
 	}
 	delete struct {
 		pool.Model

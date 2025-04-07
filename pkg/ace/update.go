@@ -27,9 +27,6 @@ import (
 
 type (
 	UpdateDao interface {
-		Free()
-		Reset()
-		String() string
 		Sets(fns ...dialect.Setter) UpdateDao
 		SetExpr(fns ...dialect.ExprSetter) UpdateDao
 		Where(fns ...dialect.Condition) UpdateDao
@@ -43,6 +40,9 @@ type (
 	UpdateBuilder interface {
 		UpdateDao
 		Table(name any) UpdateBuilder
+		Free()
+		Reset()
+		String() string
 	}
 	update struct {
 		pool.Model

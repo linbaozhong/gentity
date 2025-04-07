@@ -27,9 +27,6 @@ import (
 
 type (
 	CreateDao interface {
-		Free()
-		Reset()
-		String() string
 		Sets(fns ...dialect.Setter) CreateDao
 		Cols(cols ...dialect.Field) CreateDao
 		Exec(ctx context.Context) (sql.Result, error)
@@ -39,6 +36,9 @@ type (
 	CreateBuilder interface {
 		CreateDao
 		Table(name any) CreateBuilder
+		Free()
+		Reset()
+		String() string
 	}
 	create struct {
 		pool.Model

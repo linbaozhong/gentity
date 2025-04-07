@@ -29,9 +29,6 @@ import (
 
 type (
 	SelectDao interface {
-		Free()
-		Reset()
-		String() string
 		GetTableName() string
 		GetCols() []dialect.Field
 		Distinct(cols ...dialect.Field) *read
@@ -52,12 +49,15 @@ type (
 		Having(fns ...dialect.Condition) *read
 		Limit(size uint, start ...uint) *read
 		Page(pageIndex, pageSize uint) *read
-		Clone() *read
 	}
 	SelectBuilder interface {
 		SelectDao
+		Free()
+		Reset()
+		String() string
 		// Table
 		Table(name any) SelectBuilder
+		Clone() *read
 		// Query
 		Query(ctx context.Context) (*sql.Rows, error)
 		// QueryRow
