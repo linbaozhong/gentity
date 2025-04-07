@@ -238,7 +238,7 @@ func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}}
 // SelectAll 查询所有
 func (p *dao{{$structName}}) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
 	if len(s.GetTableName()) == 0{
-		s.SetTableName({{$package}}.{{$structName}}TableName)
+		s.Table({{$package}}.{{$structName}}TableName)
 	}
 
 	_cols := s.GetCols()
