@@ -22,20 +22,22 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"reflect"
 	"strings"
 )
 
 type (
-	DeleteBuilder interface {
+	DeleteDao interface {
 		Free()
 		Reset()
 		String() string
-		Table(name any) *delete
-		Where(fns ...dialect.Condition) *delete
-		And(fns ...dialect.Condition) *delete
-		Or(fns ...dialect.Condition) *delete
+		Where(fns ...dialect.Condition) DeleteDao
+		And(fns ...dialect.Condition) DeleteDao
+		Or(fns ...dialect.Condition) DeleteDao
 		Exec(ctx context.Context) (sql.Result, error)
+	}
+	DeleteBuilder interface {
+		DeleteDao
+		Table(name any) DeleteBuilder
 	}
 	delete struct {
 		pool.Model
@@ -87,20 +89,8 @@ func (d *delete) Reset() {
 }
 
 // Table 设置表名
-func (d *delete) Table(a any) *delete {
-	switch v := a.(type) {
-	case string:
-		d.table = v
-	case dialect.TableNamer:
-		d.table = v.TableName()
-	default:
-		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
-		value := reflect.ValueOf(a)
-		if value.Kind() == reflect.Ptr {
-			value = value.Elem()
-		}
-		d.table = value.Type().Name()
-	}
+func (d *delete) Table(n any) DeleteBuilder {
+	Table(&d.table, n)
 	return d
 }
 
@@ -112,7 +102,7 @@ func (d *delete) String() string {
 }
 
 // Where
-func (d *delete) Where(fns ...dialect.Condition) *delete {
+func (d *delete) Where(fns ...dialect.Condition) DeleteDao {
 	if len(fns) == 0 {
 		return d
 	}
@@ -144,7 +134,7 @@ func (d *delete) Where(fns ...dialect.Condition) *delete {
 }
 
 // And
-func (d *delete) And(fns ...dialect.Condition) *delete {
+func (d *delete) And(fns ...dialect.Condition) DeleteDao {
 	if len(fns) == 0 {
 		return d
 	}
@@ -176,7 +166,7 @@ func (d *delete) And(fns ...dialect.Condition) *delete {
 }
 
 // Or
-func (d *delete) Or(fns ...dialect.Condition) *delete {
+func (d *delete) Or(fns ...dialect.Condition) DeleteDao {
 	if len(fns) == 0 {
 		return d
 	}

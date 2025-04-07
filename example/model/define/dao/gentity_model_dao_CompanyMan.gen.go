@@ -203,7 +203,7 @@ func (p *daoCompanyMan) DeleteById(ctx context.Context, id types.BigInt) (bool, 
 // SelectAll 查询所有
 func (p *daoCompanyMan) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.CompanyMan, bool, error) {
 	if len(s.GetTableName()) == 0 {
-		s.SetTableName(db.CompanyManTableName)
+		s.Table(db.CompanyManTableName)
 	}
 
 	_cols := s.GetCols()

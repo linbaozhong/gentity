@@ -79,7 +79,7 @@ func Sets(fns ...dialect.Setter) []dialect.Setter {
 	return fns
 }
 
-func Where(fns ...dialect.Condition) StmtBuilder {
+func Where(fns ...dialect.Condition) SelectDao {
 	return newStmt().Where(fns...)
 }
 

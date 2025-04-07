@@ -23,17 +23,15 @@ import (
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/util"
-	"reflect"
 	"strconv"
 	"strings"
 )
 
 type (
-	StmtBuilder interface {
+	SelectDao interface {
 		Free()
 		Reset()
 		String() string
-		SetTableName(n any) *read
 		GetTableName() string
 		GetCols() []dialect.Field
 		Distinct(cols ...dialect.Field) *read
@@ -57,9 +55,9 @@ type (
 		Clone() *read
 	}
 	SelectBuilder interface {
-		StmtBuilder
+		SelectDao
 		// Table
-		Table(name any) *read
+		Table(name any) SelectBuilder
 		// Query
 		Query(ctx context.Context) (*sql.Rows, error)
 		// QueryRow
@@ -119,7 +117,7 @@ var (
 	})
 )
 
-func newStmt() StmtBuilder {
+func newStmt() SelectDao {
 	obj := selectPool.Get().(*read)
 	obj.commandString.Reset()
 
@@ -176,20 +174,8 @@ func (s *read) String() string {
 }
 
 // SetTableName 设置 read 对象的表名。
-func (s *read) SetTableName(n any) *read {
-	switch v := n.(type) {
-	case string:
-		s.table = v
-	case dialect.TableNamer:
-		s.table = v.TableName()
-	default:
-		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
-		value := reflect.ValueOf(n)
-		if value.Kind() == reflect.Ptr {
-			value = value.Elem()
-		}
-		s.table = value.Type().Name()
-	}
+func (s *read) Table(n any) SelectBuilder {
+	Table(&s.table, n)
 	return s
 }
 
@@ -514,23 +500,23 @@ func (s *read) Clone() *read {
 	return &_s
 }
 
-// Table 设置 orm 对象的表名。
-func (s *read) Table(a any) *read {
-	switch v := a.(type) {
-	case string:
-		s.table = v
-	case dialect.TableNamer:
-		s.table = v.TableName()
-	default:
-		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
-		value := reflect.ValueOf(a)
-		if value.Kind() == reflect.Ptr {
-			value = value.Elem()
-		}
-		s.table = value.Type().Name()
-	}
-	return s
-}
+// // Table 设置 orm 对象的表名。
+// func (s *read) Table(a any) *read {
+// 	switch v := a.(type) {
+// 	case string:
+// 		s.table = v
+// 	case dialect.TableNamer:
+// 		s.table = v.TableName()
+// 	default:
+// 		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
+// 		value := reflect.ValueOf(a)
+// 		if value.Kind() == reflect.Ptr {
+// 			value = value.Elem()
+// 		}
+// 		s.table = value.Type().Name()
+// 	}
+// 	return s
+// }
 
 // Query
 func (s *read) Query(ctx context.Context) (*sql.Rows, error) {

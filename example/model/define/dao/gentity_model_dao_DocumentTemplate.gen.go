@@ -203,7 +203,7 @@ func (p *daoDocumentTemplate) DeleteById(ctx context.Context, id types.BigInt) (
 // SelectAll 查询所有
 func (p *daoDocumentTemplate) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.DocumentTemplate, bool, error) {
 	if len(s.GetTableName()) == 0 {
-		s.SetTableName(db.DocumentTemplateTableName)
+		s.Table(db.DocumentTemplateTableName)
 	}
 
 	_cols := s.GetCols()

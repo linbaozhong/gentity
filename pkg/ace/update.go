@@ -22,25 +22,27 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"reflect"
 	"strings"
 )
 
 type (
-	UpdateBuilder interface {
+	UpdateDao interface {
 		Free()
 		Reset()
 		String() string
-		Table(name any) *update
-		Sets(fns ...dialect.Setter) *update
-		SetExpr(fns ...dialect.ExprSetter) *update
-		Where(fns ...dialect.Condition) *update
-		And(fns ...dialect.Condition) *update
-		Or(fns ...dialect.Condition) *update
-		Cols(cols ...dialect.Field) *update
+		Sets(fns ...dialect.Setter) UpdateDao
+		SetExpr(fns ...dialect.ExprSetter) UpdateDao
+		Where(fns ...dialect.Condition) UpdateDao
+		And(fns ...dialect.Condition) UpdateDao
+		Or(fns ...dialect.Condition) UpdateDao
+		Cols(cols ...dialect.Field) UpdateDao
 		Exec(ctx context.Context) (sql.Result, error)
 		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
 		StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
+	}
+	UpdateBuilder interface {
+		UpdateDao
+		Table(name any) UpdateBuilder
 	}
 	update struct {
 		pool.Model
@@ -70,7 +72,7 @@ var (
 )
 
 // update
-func newUpdate(dbs ...Executer) *update {
+func newUpdate(dbs ...Executer) UpdateBuilder {
 	obj := updatePool.Get().(*update)
 	obj.db = GetExec(dbs...)
 	obj.commandString.Reset()
@@ -111,25 +113,13 @@ func (u *update) String() string {
 }
 
 // Table 设置表名
-func (u *update) Table(a any) *update {
-	switch v := a.(type) {
-	case string:
-		u.table = v
-	case dialect.TableNamer:
-		u.table = v.TableName()
-	default:
-		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
-		value := reflect.ValueOf(a)
-		if value.Kind() == reflect.Ptr {
-			value = value.Elem()
-		}
-		u.table = value.Type().Name()
-	}
+func (u *update) Table(n any) UpdateBuilder {
+	Table(&u.table, n)
 	return u
 }
 
 // Set
-func (u *update) Sets(fns ...dialect.Setter) *update {
+func (u *update) Sets(fns ...dialect.Setter) UpdateDao {
 	if len(fns) == 0 {
 		return u
 	}
@@ -146,7 +136,7 @@ func (u *update) Sets(fns ...dialect.Setter) *update {
 	return u
 }
 
-func (u *update) SetExpr(fns ...dialect.ExprSetter) *update {
+func (u *update) SetExpr(fns ...dialect.ExprSetter) UpdateDao {
 	if len(fns) == 0 {
 		return u
 	}
@@ -163,7 +153,7 @@ func (u *update) SetExpr(fns ...dialect.ExprSetter) *update {
 }
 
 // Where
-func (u *update) Where(fns ...dialect.Condition) *update {
+func (u *update) Where(fns ...dialect.Condition) UpdateDao {
 	if len(fns) == 0 {
 		return u
 	}
@@ -195,7 +185,7 @@ func (u *update) Where(fns ...dialect.Condition) *update {
 }
 
 // And
-func (u *update) And(fns ...dialect.Condition) *update {
+func (u *update) And(fns ...dialect.Condition) UpdateDao {
 	if len(fns) == 0 {
 		return u
 	}
@@ -227,7 +217,7 @@ func (u *update) And(fns ...dialect.Condition) *update {
 }
 
 // Or
-func (u *update) Or(fns ...dialect.Condition) *update {
+func (u *update) Or(fns ...dialect.Condition) UpdateDao {
 	if len(fns) == 0 {
 		return u
 	}
@@ -258,7 +248,7 @@ func (u *update) Or(fns ...dialect.Condition) *update {
 	return u
 }
 
-func (u *update) Cols(cols ...dialect.Field) *update {
+func (u *update) Cols(cols ...dialect.Field) UpdateDao {
 	for _, col := range cols {
 		u.affect = append(u.affect, col)
 	}

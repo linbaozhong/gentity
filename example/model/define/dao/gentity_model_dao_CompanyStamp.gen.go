@@ -203,7 +203,7 @@ func (p *daoCompanyStamp) DeleteById(ctx context.Context, id types.Money) (bool,
 // SelectAll 查询所有
 func (p *daoCompanyStamp) SelectAll(ctx context.Context, s ace.SelectBuilder) ([]db.CompanyStamp, bool, error) {
 	if len(s.GetTableName()) == 0 {
-		s.SetTableName(db.CompanyStampTableName)
+		s.Table(db.CompanyStampTableName)
 	}
 
 	_cols := s.GetCols()

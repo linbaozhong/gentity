@@ -22,21 +22,23 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"reflect"
 	"strings"
 )
 
 type (
-	CreateBuilder interface {
+	CreateDao interface {
 		Free()
 		Reset()
 		String() string
-		Table(name any) *create
-		Sets(fns ...dialect.Setter) *create
-		Cols(cols ...dialect.Field) *create
+		Sets(fns ...dialect.Setter) CreateDao
+		Cols(cols ...dialect.Field) CreateDao
 		Exec(ctx context.Context) (sql.Result, error)
 		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
 		BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
+	}
+	CreateBuilder interface {
+		CreateDao
+		Table(name any) CreateBuilder
 	}
 	create struct {
 		pool.Model
@@ -96,25 +98,13 @@ func (c *create) String() string {
 }
 
 // Table 设置表名
-func (c *create) Table(a any) *create {
-	switch v := a.(type) {
-	case string:
-		c.table = v
-	case dialect.TableNamer:
-		c.table = v.TableName()
-	default:
-		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
-		value := reflect.ValueOf(a)
-		if value.Kind() == reflect.Ptr {
-			value = value.Elem()
-		}
-		c.table = value.Type().Name()
-	}
+func (c *create) Table(n any) CreateBuilder {
+	Table(&c.table, n)
 	return c
 }
 
 // Sets 设置列名和值
-func (c *create) Sets(fns ...dialect.Setter) *create {
+func (c *create) Sets(fns ...dialect.Setter) CreateDao {
 	if len(fns) == 0 {
 		return c
 	}
@@ -131,7 +121,7 @@ func (c *create) Sets(fns ...dialect.Setter) *create {
 }
 
 // Cols 设置列名
-func (c *create) Cols(cols ...dialect.Field) *create {
+func (c *create) Cols(cols ...dialect.Field) CreateDao {
 	for _, col := range cols {
 		c.affect = append(c.affect, col)
 	}
