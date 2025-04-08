@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"testing"
 )
 
@@ -35,6 +36,12 @@ func TestSelecter(t *testing.T) {
 	t.Log(d)
 }
 
-func ormSelectbuilder(s SelectBuilder) Reader {
-	return s.Read()
+func ormSelectbuilder(s SelectBuilder) Selecter {
+	return s.Select()
+}
+
+func TestNew(t *testing.T) {
+	New(WithWhere(tblaccount.Id.Eq(1),
+		dialect.Or(tblaccount.State.Eq(1),
+			tblaccount.State.Eq(2))))
 }

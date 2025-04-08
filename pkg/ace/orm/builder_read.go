@@ -22,7 +22,7 @@ import (
 	"strings"
 )
 
-type Reader interface {
+type Selecter interface {
 	// Query
 	Query(ctx context.Context) (*sql.Rows, error)
 	// QueryRow
@@ -58,7 +58,7 @@ type read struct {
 }
 
 // Read 创建查询器
-func (o *orm) Read(x ...ace.Executer) Reader {
+func (o *orm) Select(x ...ace.Executer) Selecter {
 	o.connect(x...)
 	return &read{
 		orm: o,

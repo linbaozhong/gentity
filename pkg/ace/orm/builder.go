@@ -67,7 +67,7 @@ type (
 		Page(pageIndex, pageSize uint) Builder
 		Limit(size uint, start ...uint) Builder
 		Distinct(cols ...dialect.Field) Builder
-		Read(x ...ace.Executer) Reader
+		Select(x ...ace.Executer) Selecter
 	}
 
 	CreateBuilder interface {
@@ -82,13 +82,20 @@ type (
 		Set(fns ...dialect.Setter) Builder
 		SetExpr(fns ...dialect.ExprSetter) Builder
 		Wherer
-		Updater
+		Update(x ...ace.Executer) Updater
 	}
 
 	DeleteBuilder interface {
 		Table(a any) Builder
 		GetTableName() string
 		Wherer
+		Delete(x ...ace.Executer) Deleter
+	}
+
+	Executer interface {
+		Select(x ...ace.Executer) Selecter
+		Create(x ...ace.Executer) Creater
+		Update(x ...ace.Executer) Updater
 		Delete(x ...ace.Executer) Deleter
 	}
 
@@ -104,8 +111,8 @@ type (
 
 		SelectBuilder
 		CreateBuilder
-		Update(x ...ace.Executer) Updater
-		// UpdateBuilder
+		// Update(x ...ace.Executer) Updater
+		UpdateBuilder
 		DeleteBuilder
 	}
 
@@ -142,10 +149,18 @@ var (
 	})
 )
 
-func New() Builder {
+func new() *orm {
 	obj := ormPool.Get().(*orm)
-
 	obj.commandString.Reset()
+	return obj
+}
+
+func New(opts ...Option) Executer {
+	obj := new()
+
+	for _, opt := range opts {
+		opt(obj)
+	}
 	return obj
 }
 

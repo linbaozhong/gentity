@@ -18,98 +18,98 @@ import "github.com/linbaozhong/gentity/pkg/ace/dialect"
 
 // Table 设置表名
 func Table(t any) Builder {
-	return New().Table(t)
+	return new().Table(t)
 }
 
 // Select 设置查询字段
 func Cols(cols ...dialect.Field) Builder {
-	return New().Cols(cols...)
+	return new().Cols(cols...)
 }
 
 // Distinct 设置去重字段
 func Distinct(cols ...dialect.Field) Builder {
-	return New().Distinct(cols...)
+	return new().Distinct(cols...)
 }
 
 // Omits 设置忽略字段
 func Omits(cols ...dialect.Field) Builder {
-	return New().Omits(cols...)
+	return new().Omits(cols...)
 }
 
 // Funcs 聚合函数查询
 func Funcs(fns ...dialect.Function) Builder {
-	return New().Funcs(fns...)
+	return new().Funcs(fns...)
 }
 
 // Join 设置连接
 func Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) Builder {
-	return New().Join(joinType, left, right, fns...)
+	return new().Join(joinType, left, right, fns...)
 }
 
 // LeftJoin 设置左连接
 func LeftJoin(left, right dialect.Field, fns ...dialect.Condition) Builder {
-	return New().LeftJoin(left, right, fns...)
+	return new().LeftJoin(left, right, fns...)
 }
 
 // RightJoin 设置右连接
 func RightJoin(left, right dialect.Field, fns ...dialect.Condition) Builder {
-	return New().RightJoin(left, right, fns...)
+	return new().RightJoin(left, right, fns...)
 }
 
 // Where 设置条件
 func Where(fns ...dialect.Condition) Builder {
-	return New().Where(fns...)
+	return new().Where(fns...)
 }
 
 // Order 设置排序，默认升序
 func Order(cols ...dialect.Field) Builder {
-	return New().Order(cols...)
+	return new().Order(cols...)
 }
 
 // Asc 指定查询结果按指定列升序排序。
 func Asc(cols ...dialect.Field) Builder {
-	return New().Asc(cols...)
+	return new().Asc(cols...)
 }
 
 // Desc 指定查询结果按指定列降序排序
 func Desc(cols ...dialect.Field) Builder {
-	return New().Desc(cols...)
+	return new().Desc(cols...)
 }
 
 // Group 指定查询结果的分组字段
 func Group(cols ...dialect.Field) Builder {
-	return New().Group(cols...)
+	return new().Group(cols...)
 }
 
 // Having 指定查询结果的分组条件
 func Having(fns ...dialect.Condition) Builder {
-	return New().Having(fns...)
+	return new().Having(fns...)
 }
 
 // Limit
 // size 大小
 // start 开始位置
 func Limit(size uint, start ...uint) Builder {
-	return New().Limit(size, start...)
+	return new().Limit(size, start...)
 }
 
 // Page
 // pageIndex 页码
 // pageSize 页大小
 func Page(pageIndex, pageSize uint) Builder {
-	return New().Page(pageIndex, pageSize)
+	return new().Page(pageIndex, pageSize)
 }
 
 // Set
 // 用于设置更新语句中的字段和值
 // 例如：Set(dialect.F("name", "linbaozhong"))
 func Set(fns ...dialect.Setter) Builder {
-	return New().Set(fns...)
+	return new().Set(fns...)
 }
 
 // SetExpr
 // 用于设置更新语句中的表达式
 // 例如：SetExpr(dialect.Expr("age", "age + 1"))
 func SetExpr(fns ...dialect.ExprSetter) Builder {
-	return New().SetExpr(fns...)
+	return new().SetExpr(fns...)
 }
