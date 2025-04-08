@@ -17,7 +17,7 @@ package ace
 import "testing"
 
 func TestSelect(t *testing.T) {
-	s := Stmt()
+	s := Selector()
 	s.Where()
 }
 

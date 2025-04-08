@@ -79,8 +79,8 @@ func Sets(fns ...dialect.Setter) []dialect.Setter {
 	return fns
 }
 
-func Where(fns ...dialect.Condition) SelectDao {
-	return newStmt().Where(fns...)
+func Where(fns ...dialect.Condition) Selecter {
+	return newSelecter().Where(fns...)
 }
 
 func Or(fns ...dialect.Condition) dialect.Condition {

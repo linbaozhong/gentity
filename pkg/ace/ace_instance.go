@@ -39,8 +39,8 @@ func Delete(x ...Executer) DeleteBuilder {
 	return newDelete(GetExec(x...))
 }
 
-// Table 设置表名
-func Table(p *string, name any) {
+// setTableName 设置表名
+func setTableName(p *string, name any) {
 	switch v := name.(type) {
 	case string:
 		*p = v
@@ -58,7 +58,7 @@ func Table(p *string, name any) {
 
 // //////////////////
 
-// Stmt
-func Stmt() SelectDao {
-	return newStmt()
+// Selector Sql查询构造器
+func Selector() Selecter {
+	return newSelecter()
 }

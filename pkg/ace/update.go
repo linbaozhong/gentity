@@ -26,19 +26,19 @@ import (
 )
 
 type (
-	UpdateDao interface {
-		Sets(fns ...dialect.Setter) UpdateDao
-		SetExpr(fns ...dialect.ExprSetter) UpdateDao
-		Where(fns ...dialect.Condition) UpdateDao
-		And(fns ...dialect.Condition) UpdateDao
-		Or(fns ...dialect.Condition) UpdateDao
-		Cols(cols ...dialect.Field) UpdateDao
+	Updater interface {
+		Sets(fns ...dialect.Setter) Updater
+		SetExpr(fns ...dialect.ExprSetter) Updater
+		Where(fns ...dialect.Condition) Updater
+		And(fns ...dialect.Condition) Updater
+		Or(fns ...dialect.Condition) Updater
+		Cols(cols ...dialect.Field) Updater
 		Exec(ctx context.Context) (sql.Result, error)
 		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
 		StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
 	}
 	UpdateBuilder interface {
-		UpdateDao
+		Updater
 		Table(name any) UpdateBuilder
 		Free()
 		Reset()
@@ -112,14 +112,14 @@ func (u *update) String() string {
 	return u.commandString.String()
 }
 
-// Table 设置表名
+// setTableName 设置表名
 func (u *update) Table(n any) UpdateBuilder {
-	Table(&u.table, n)
+	setTableName(&u.table, n)
 	return u
 }
 
 // Set
-func (u *update) Sets(fns ...dialect.Setter) UpdateDao {
+func (u *update) Sets(fns ...dialect.Setter) Updater {
 	if len(fns) == 0 {
 		return u
 	}
@@ -136,7 +136,7 @@ func (u *update) Sets(fns ...dialect.Setter) UpdateDao {
 	return u
 }
 
-func (u *update) SetExpr(fns ...dialect.ExprSetter) UpdateDao {
+func (u *update) SetExpr(fns ...dialect.ExprSetter) Updater {
 	if len(fns) == 0 {
 		return u
 	}
@@ -153,7 +153,7 @@ func (u *update) SetExpr(fns ...dialect.ExprSetter) UpdateDao {
 }
 
 // Where
-func (u *update) Where(fns ...dialect.Condition) UpdateDao {
+func (u *update) Where(fns ...dialect.Condition) Updater {
 	if len(fns) == 0 {
 		return u
 	}
@@ -185,7 +185,7 @@ func (u *update) Where(fns ...dialect.Condition) UpdateDao {
 }
 
 // And
-func (u *update) And(fns ...dialect.Condition) UpdateDao {
+func (u *update) And(fns ...dialect.Condition) Updater {
 	if len(fns) == 0 {
 		return u
 	}
@@ -217,7 +217,7 @@ func (u *update) And(fns ...dialect.Condition) UpdateDao {
 }
 
 // Or
-func (u *update) Or(fns ...dialect.Condition) UpdateDao {
+func (u *update) Or(fns ...dialect.Condition) Updater {
 	if len(fns) == 0 {
 		return u
 	}
@@ -248,7 +248,7 @@ func (u *update) Or(fns ...dialect.Condition) UpdateDao {
 	return u
 }
 
-func (u *update) Cols(cols ...dialect.Field) UpdateDao {
+func (u *update) Cols(cols ...dialect.Field) Updater {
 	for _, col := range cols {
 		u.affect = append(u.affect, col)
 	}

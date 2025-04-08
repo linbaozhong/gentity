@@ -26,14 +26,14 @@ import (
 )
 
 type (
-	DeleteDao interface {
-		Where(fns ...dialect.Condition) DeleteDao
-		And(fns ...dialect.Condition) DeleteDao
-		Or(fns ...dialect.Condition) DeleteDao
+	Deleter interface {
+		Where(fns ...dialect.Condition) Deleter
+		And(fns ...dialect.Condition) Deleter
+		Or(fns ...dialect.Condition) Deleter
 		Exec(ctx context.Context) (sql.Result, error)
 	}
 	DeleteBuilder interface {
-		DeleteDao
+		Deleter
 		Table(name any) DeleteBuilder
 		Free()
 		Reset()
@@ -88,9 +88,9 @@ func (d *delete) Reset() {
 	d.command.Reset()
 }
 
-// Table 设置表名
+// setTableName 设置表名
 func (d *delete) Table(n any) DeleteBuilder {
-	Table(&d.table, n)
+	setTableName(&d.table, n)
 	return d
 }
 
@@ -102,7 +102,7 @@ func (d *delete) String() string {
 }
 
 // Where
-func (d *delete) Where(fns ...dialect.Condition) DeleteDao {
+func (d *delete) Where(fns ...dialect.Condition) Deleter {
 	if len(fns) == 0 {
 		return d
 	}
@@ -134,7 +134,7 @@ func (d *delete) Where(fns ...dialect.Condition) DeleteDao {
 }
 
 // And
-func (d *delete) And(fns ...dialect.Condition) DeleteDao {
+func (d *delete) And(fns ...dialect.Condition) Deleter {
 	if len(fns) == 0 {
 		return d
 	}
@@ -166,7 +166,7 @@ func (d *delete) And(fns ...dialect.Condition) DeleteDao {
 }
 
 // Or
-func (d *delete) Or(fns ...dialect.Condition) DeleteDao {
+func (d *delete) Or(fns ...dialect.Condition) Deleter {
 	if len(fns) == 0 {
 		return d
 	}

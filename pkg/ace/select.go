@@ -28,7 +28,7 @@ import (
 )
 
 type (
-	SelectDao interface {
+	Selecter interface {
 		GetTableName() string
 		GetCols() []dialect.Field
 		Distinct(cols ...dialect.Field) *read
@@ -51,11 +51,11 @@ type (
 		Page(pageIndex, pageSize uint) *read
 	}
 	SelectBuilder interface {
-		SelectDao
+		Selecter
 		Free()
 		Reset()
 		String() string
-		// Table
+		// setTableName
 		Table(name any) SelectBuilder
 		Clone() *read
 		// Query
@@ -117,7 +117,7 @@ var (
 	})
 )
 
-func newStmt() SelectDao {
+func newSelecter() Selecter {
 	obj := selectPool.Get().(*read)
 	obj.commandString.Reset()
 
@@ -175,7 +175,7 @@ func (s *read) String() string {
 
 // SetTableName 设置 read 对象的表名。
 func (s *read) Table(n any) SelectBuilder {
-	Table(&s.table, n)
+	setTableName(&s.table, n)
 	return s
 }
 
@@ -500,20 +500,20 @@ func (s *read) Clone() *read {
 	return &_s
 }
 
-// // Table 设置 orm 对象的表名。
-// func (s *read) Table(a any) *read {
+// // setTableName 设置 orm 对象的表名。
+// func (s *read) setTableName(a any) *read {
 // 	switch v := a.(type) {
 // 	case string:
-// 		s.table = v
+// 		s.setTableName = v
 // 	case dialect.TableNamer:
-// 		s.table = v.TableName()
+// 		s.setTableName = v.TableName()
 // 	default:
 // 		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
 // 		value := reflect.ValueOf(a)
 // 		if value.Kind() == reflect.Ptr {
 // 			value = value.Elem()
 // 		}
-// 		s.table = value.Type().Name()
+// 		s.setTableName = value.Type().Name()
 // 	}
 // 	return s
 // }
