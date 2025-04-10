@@ -135,10 +135,6 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
-	// if u.err != nil {
-	// 	return nil, u.err
-	// }
-
 	lens := len(beans)
 	if lens == 0 {
 		return nil, dialect.ErrCreateEmpty
