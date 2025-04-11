@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"math"
 	"strconv"
 	"testing"
@@ -35,8 +36,7 @@ type App struct {
 }
 
 func TestTime(t *testing.T) {
-	var a Time
-	t.Log(a)
+	t.Log(conv.String2Time("0000-00-00"))
 }
 
 func TestBase(t *testing.T) {
