@@ -14,18 +14,24 @@
 
 package types
 
-import (
-	"bytes"
-)
+import "fmt"
 
-const (
-	Undefined = "undefined"
-)
+type Bytes []byte
 
-func bytes2String(b []byte) string {
-	s := string(bytes.Trim(b, "\""))
-	if s == Undefined {
-		return ""
+// ////////////////////////////
+// Byte
+func (b *Bytes) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*b = []byte{}
+	case []byte:
+		*b = v
+	default:
+		return fmt.Errorf("unsupported scan type for Byte: %T", src)
 	}
-	return s
+	return nil
+}
+
+func (b Bytes) String() string {
+	return string(b)
 }

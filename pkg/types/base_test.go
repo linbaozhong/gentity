@@ -34,6 +34,11 @@ type App struct {
 	Data    []Smap  `json:"data"`
 }
 
+func TestTime(t *testing.T) {
+	var a Time
+	t.Log(a)
+}
+
 func TestBase(t *testing.T) {
 	a := new(App)
 	a.Id = 1234567
