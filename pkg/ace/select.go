@@ -547,7 +547,10 @@ func (s *read) Get(ctx context.Context, dest any) error {
 
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
-	if d, ok := dest.(dialect.Modeler); ok && rows.Next() {
+	if d, ok := dest.(dialect.Modeler); ok {
+		if !rows.Next() {
+			return sql.ErrNoRows
+		}
 		vals := d.AssignPtr(s.cols...)
 		return rows.Scan(vals...)
 	}
@@ -773,7 +776,10 @@ func (s *read) SelectStruct(ctx context.Context, dest any, sqlStr string, args .
 
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
-	if d, ok := dest.(dialect.Modeler); ok && rows.Next() {
+	if d, ok := dest.(dialect.Modeler); ok {
+		if !rows.Next() {
+			return sql.ErrNoRows
+		}
 		vals := d.AssignPtr(s.cols...)
 		return rows.Scan(vals...)
 	}
