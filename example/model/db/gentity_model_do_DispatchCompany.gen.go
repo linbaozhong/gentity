@@ -295,10 +295,12 @@ func (p *DispatchCompany) AssignValues(args ...dialect.Field) ([]string, []any) 
 	return _cols, _vals
 }
 
+//
 func (p *DispatchCompany) AssignKeys() (dialect.Field, any) {
 	return tbldispatchcompany.PrimaryKey, p.Id
 }
 
+//
 func (p *DispatchCompany) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {

@@ -18,7 +18,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
@@ -67,14 +66,14 @@ type (
 		Page(pageIndex, pageSize uint) Builder
 		Limit(size uint, start ...uint) Builder
 		Distinct(cols ...dialect.Field) Builder
-		Select(x ...ace.Executer) Selecter
+		Select(x ...Executer) Selecter
 	}
 
 	CreateBuilder interface {
 		Columner
 		Set(fns ...dialect.Setter) Builder
 		SetExpr(fns ...dialect.ExprSetter) Builder
-		Create(x ...ace.Executer) Creater
+		Create(x ...Executer) Creater
 	}
 
 	UpdateBuilder interface {
@@ -82,21 +81,14 @@ type (
 		Set(fns ...dialect.Setter) Builder
 		SetExpr(fns ...dialect.ExprSetter) Builder
 		Wherer
-		Update(x ...ace.Executer) Updater
+		Update(x ...Executer) Updater
 	}
 
 	DeleteBuilder interface {
 		Table(a any) Builder
 		GetTableName() string
 		Wherer
-		Delete(x ...ace.Executer) Deleter
-	}
-
-	Executer interface {
-		Select(x ...ace.Executer) Selecter
-		Create(x ...ace.Executer) Creater
-		Update(x ...ace.Executer) Updater
-		Delete(x ...ace.Executer) Deleter
+		Delete(x ...Executer) Deleter
 	}
 
 	Builder interface {
@@ -105,20 +97,17 @@ type (
 		Clone() Builder
 
 		Columner
-		Set(fns ...dialect.Setter) Builder
-		SetExpr(fns ...dialect.ExprSetter) Builder
 		Wherer
 
 		SelectBuilder
 		CreateBuilder
-		// Update(x ...ace.Executer) Updater
 		UpdateBuilder
 		DeleteBuilder
 	}
 
 	orm struct {
 		pool.Model
-		db            ace.Executer
+		db            Executer
 		table         string
 		join          [][3]string
 		joinParams    []any
@@ -155,7 +144,7 @@ func new() *orm {
 	return obj
 }
 
-func New(opts ...Option) Executer {
+func New(opts ...Option) Builder {
 	obj := new()
 
 	for _, opt := range opts {
@@ -225,11 +214,11 @@ func (o *orm) Table(a any) Builder {
 }
 
 // connect 连接数据库
-func (o *orm) connect(x ...ace.Executer) Builder {
+func (o *orm) connect(x ...Executer) Builder {
 	if len(x) > 0 {
 		o.db = x[0]
 	} else {
-		o.db = ace.GetDB()
+		o.db = GetDB()
 	}
 	return o
 }

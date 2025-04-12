@@ -17,7 +17,6 @@ package orm
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -38,7 +37,7 @@ type expr struct {
 }
 
 // Update 更新器
-func (o *orm) Update(x ...ace.Executer) Updater {
+func (o *orm) Update(x ...Executer) Updater {
 	o.connect(x...)
 	return &update{
 		orm: o,
@@ -160,7 +159,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	u.params = append(u.params, u.whereParams...)
 
 	// 启动事务批量执行更新
-	ret, err := u.db.Transaction(ctx, func(tx *ace.Tx) (any, error) {
+	ret, err := u.db.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, u.command.String())
 		if err != nil {
 			return nil, err

@@ -17,7 +17,6 @@ package orm
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -33,7 +32,7 @@ type create struct {
 }
 
 // Create 创建插入器
-func (o *orm) Create(x ...ace.Executer) Creater {
+func (o *orm) Create(x ...Executer) Creater {
 	o.connect(x...)
 	return &create{
 		orm: o,
@@ -127,7 +126,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 
 	// 启动事务批量执行Create
-	ret, err := c.db.Transaction(ctx, func(tx *ace.Tx) (any, error) {
+	ret, err := c.db.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, c.command.String())
 		if err != nil {
 			return nil, err

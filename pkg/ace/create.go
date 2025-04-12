@@ -27,11 +27,9 @@ import (
 
 type (
 	Creater interface {
-		Sets(fns ...dialect.Setter) Creater
-		Cols(cols ...dialect.Field) Creater
-		Exec(ctx context.Context) (sql.Result, error)
-		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
-		BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
+		Sets(fns ...dialect.Setter) *create
+		Cols(cols ...dialect.Field) *create
+		Ready(dbs ...Executer) CreateBuilder
 	}
 	CreateBuilder interface {
 		Creater
@@ -39,6 +37,9 @@ type (
 		Free()
 		Reset()
 		String() string
+		Exec(ctx context.Context) (sql.Result, error)
+		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
+		BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
 	}
 	create struct {
 		pool.Model
@@ -97,6 +98,12 @@ func (c *create) String() string {
 	return c.commandString.String()
 }
 
+// Ready 准备执行
+func (c *create) Ready(dbs ...Executer) CreateBuilder {
+	c.db = GetExec(dbs...)
+	return c
+}
+
 // setTableName 设置表名
 func (c *create) Table(n any) CreateBuilder {
 	setTableName(&c.table, n)
@@ -104,7 +111,7 @@ func (c *create) Table(n any) CreateBuilder {
 }
 
 // Sets 设置列名和值
-func (c *create) Sets(fns ...dialect.Setter) Creater {
+func (c *create) Sets(fns ...dialect.Setter) *create {
 	if len(fns) == 0 {
 		return c
 	}
@@ -121,7 +128,7 @@ func (c *create) Sets(fns ...dialect.Setter) Creater {
 }
 
 // Cols 设置列名
-func (c *create) Cols(cols ...dialect.Field) Creater {
+func (c *create) Cols(cols ...dialect.Field) *create {
 	for _, col := range cols {
 		c.affect = append(c.affect, col)
 	}

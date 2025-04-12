@@ -27,15 +27,13 @@ import (
 
 type (
 	Updater interface {
-		Sets(fns ...dialect.Setter) Updater
-		SetExpr(fns ...dialect.ExprSetter) Updater
-		Where(fns ...dialect.Condition) Updater
-		And(fns ...dialect.Condition) Updater
-		Or(fns ...dialect.Condition) Updater
-		Cols(cols ...dialect.Field) Updater
-		Exec(ctx context.Context) (sql.Result, error)
-		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
-		StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
+		Sets(fns ...dialect.Setter) *update
+		SetExpr(fns ...dialect.ExprSetter) *update
+		Where(fns ...dialect.Condition) *update
+		And(fns ...dialect.Condition) *update
+		Or(fns ...dialect.Condition) *update
+		Cols(cols ...dialect.Field) *update
+		Ready(dbs ...Executer) UpdateBuilder
 	}
 	UpdateBuilder interface {
 		Updater
@@ -43,6 +41,9 @@ type (
 		Free()
 		Reset()
 		String() string
+		Exec(ctx context.Context) (sql.Result, error)
+		Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
+		StructBatch(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error)
 	}
 	update struct {
 		pool.Model
@@ -118,8 +119,15 @@ func (u *update) Table(n any) UpdateBuilder {
 	return u
 }
 
+// Ready 准备执行
+// 该方法会将参数 db 赋值给 u.db，
+func (u *update) Ready(dbs ...Executer) UpdateBuilder {
+	u.db = GetExec(dbs...)
+	return u
+}
+
 // Set
-func (u *update) Sets(fns ...dialect.Setter) Updater {
+func (u *update) Sets(fns ...dialect.Setter) *update {
 	if len(fns) == 0 {
 		return u
 	}
@@ -136,24 +144,20 @@ func (u *update) Sets(fns ...dialect.Setter) Updater {
 	return u
 }
 
-func (u *update) SetExpr(fns ...dialect.ExprSetter) Updater {
+func (u *update) SetExpr(fns ...dialect.ExprSetter) *update {
 	if len(fns) == 0 {
 		return u
 	}
 
 	for _, fn := range fns {
 		s, val := fn()
-		// if v, ok := val.(error); ok {
-		//	u.err = v
-		//	return u
-		// }
 		u.exprCols = append(u.exprCols, expr{colName: s, arg: val})
 	}
 	return u
 }
 
 // Where
-func (u *update) Where(fns ...dialect.Condition) Updater {
+func (u *update) Where(fns ...dialect.Condition) *update {
 	if len(fns) == 0 {
 		return u
 	}
@@ -185,7 +189,7 @@ func (u *update) Where(fns ...dialect.Condition) Updater {
 }
 
 // And
-func (u *update) And(fns ...dialect.Condition) Updater {
+func (u *update) And(fns ...dialect.Condition) *update {
 	if len(fns) == 0 {
 		return u
 	}
@@ -217,7 +221,7 @@ func (u *update) And(fns ...dialect.Condition) Updater {
 }
 
 // Or
-func (u *update) Or(fns ...dialect.Condition) Updater {
+func (u *update) Or(fns ...dialect.Condition) *update {
 	if len(fns) == 0 {
 		return u
 	}
@@ -248,7 +252,7 @@ func (u *update) Or(fns ...dialect.Condition) Updater {
 	return u
 }
 
-func (u *update) Cols(cols ...dialect.Field) Updater {
+func (u *update) Cols(cols ...dialect.Field) *update {
 	for _, col := range cols {
 		u.affect = append(u.affect, col)
 	}

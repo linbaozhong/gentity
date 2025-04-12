@@ -15,6 +15,7 @@
 package main
 
 import (
+	account "github.com/linbaozhong/gentity/example/model/define/dao/daoaccount"
 	"github.com/linbaozhong/gentity/example/model/define/dto"
 	"github.com/linbaozhong/gentity/pkg/ace/dao"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
@@ -38,4 +39,5 @@ func init() {
 
 func main() {
 	dao.Run()
+	account.New()
 }

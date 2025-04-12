@@ -49,6 +49,7 @@ type (
 		Having(fns ...dialect.Condition) *read
 		Limit(size uint, start ...uint) *read
 		Page(pageIndex, pageSize uint) *read
+		Ready(dbs ...Executer) SelectBuilder
 	}
 	SelectBuilder interface {
 		Selecter
@@ -171,6 +172,13 @@ func (s *read) String() string {
 		s.commandString.WriteString(fmt.Sprintf("%s  %v \n", s.command.String(), s.mergeParams()))
 	}
 	return s.commandString.String()
+}
+
+// Ready 准备执行 read 对象的 SQL 语句。
+// 该方法会将参数 db 赋值给 s.db。
+func (s *read) Ready(dbs ...Executer) SelectBuilder {
+	s.db = GetExec(dbs...)
+	return s
 }
 
 // SetTableName 设置 read 对象的表名。

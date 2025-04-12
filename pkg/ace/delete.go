@@ -27,10 +27,10 @@ import (
 
 type (
 	Deleter interface {
-		Where(fns ...dialect.Condition) Deleter
-		And(fns ...dialect.Condition) Deleter
-		Or(fns ...dialect.Condition) Deleter
-		Exec(ctx context.Context) (sql.Result, error)
+		Where(fns ...dialect.Condition) *delete
+		And(fns ...dialect.Condition) *delete
+		Or(fns ...dialect.Condition) *delete
+		Ready(dbs ...Executer) DeleteBuilder
 	}
 	DeleteBuilder interface {
 		Deleter
@@ -38,6 +38,7 @@ type (
 		Free()
 		Reset()
 		String() string
+		Exec(ctx context.Context) (sql.Result, error)
 	}
 	delete struct {
 		pool.Model
@@ -101,8 +102,15 @@ func (d *delete) String() string {
 	return d.commandString.String()
 }
 
+// Ready 准备执行
+// 该方法会将参数 db 赋值给 d.db，
+func (d *delete) Ready(dbs ...Executer) DeleteBuilder {
+	d.db = GetExec(dbs...)
+	return d
+}
+
 // Where
-func (d *delete) Where(fns ...dialect.Condition) Deleter {
+func (d *delete) Where(fns ...dialect.Condition) *delete {
 	if len(fns) == 0 {
 		return d
 	}
@@ -134,7 +142,7 @@ func (d *delete) Where(fns ...dialect.Condition) Deleter {
 }
 
 // And
-func (d *delete) And(fns ...dialect.Condition) Deleter {
+func (d *delete) And(fns ...dialect.Condition) *delete {
 	if len(fns) == 0 {
 		return d
 	}
@@ -166,7 +174,7 @@ func (d *delete) And(fns ...dialect.Condition) Deleter {
 }
 
 // Or
-func (d *delete) Or(fns ...dialect.Condition) Deleter {
+func (d *delete) Or(fns ...dialect.Condition) *delete {
 	if len(fns) == 0 {
 		return d
 	}

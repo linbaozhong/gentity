@@ -17,7 +17,6 @@ package orm
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -44,13 +43,13 @@ type Selecter interface {
 	// Sum 返回总和
 	Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error)
 	// Select 执行原生查询，返回指定列的数据
-	Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error)
+	RawQuery(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error)
 	// SelectMap 执行原生查询，返回 map[string]any
-	SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error)
+	RawQueryMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error)
 	// SelectSlice 执行原生查询，返回 []any
-	SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error)
+	RawQuerySlice(ctx context.Context, sqlStr string, args ...any) ([]any, error)
 	// SelectStruct 执行原生查询，返回结构体对象
-	SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error
+	RawQueryStruct(ctx context.Context, dest any, sqlStr string, args ...any) error
 }
 
 type read struct {
@@ -58,7 +57,7 @@ type read struct {
 }
 
 // Read 创建查询器
-func (o *orm) Select(x ...ace.Executer) Selecter {
+func (o *orm) Select(x ...Executer) Selecter {
 	o.connect(x...)
 	return &read{
 		orm: o,
@@ -283,15 +282,15 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 
 // Select 执行原生的 SQL 查询
 // 此方法接受一个上下文、原生 SQL 语句和对应的参数，返回查询结果和可能的错误
-func (s *read) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
+func (s *read) RawQuery(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
 	defer s.Free()
 
 	return s.rows(ctx, sqlStr, args...)
 }
 
 // SelectMap 执行原生 SQL 查询并返回 map[string]any
-func (se *read) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
-	rows, err := se.Select(ctx, sqlStr, args...)
+func (se *read) RawQueryMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
+	rows, err := se.RawQuery(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -303,8 +302,8 @@ func (se *read) SelectMap(ctx context.Context, sqlStr string, args ...any) (map[
 }
 
 // SelectSlice 执行原生 SQL 查询并返回 []any
-func (se *read) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
-	rows, err := se.Select(ctx, sqlStr, args...)
+func (se *read) RawQuerySlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
+	rows, err := se.RawQuery(ctx, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -315,8 +314,8 @@ func (se *read) SelectSlice(ctx context.Context, sqlStr string, args ...any) ([]
 }
 
 // SelectStruct 执行原生 SQL 查询并返回实现 dialect.Modeler 接口的结构体
-func (se *read) SelectStruct(ctx context.Context, dest any, sqlStr string, args ...any) error {
-	rows, err := se.Select(ctx, sqlStr, args...)
+func (se *read) RawQueryStruct(ctx context.Context, dest any, sqlStr string, args ...any) error {
+	rows, err := se.RawQuery(ctx, sqlStr, args...)
 	if err != nil {
 		return err
 	}
