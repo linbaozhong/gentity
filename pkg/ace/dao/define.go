@@ -15,23 +15,32 @@
 package dao
 
 import (
-	"github.com/linbaozhong/gentity/pkg/ace/orm"
+	"fmt"
 )
 
-type define struct {
+type DataAccessInterface struct {
 	Name        string // 方法名
+	Method      string // DAL方法名，如Get,List,Save,Update,Delete等，默认Get
 	Title       string // 方法标题
 	Description string // 方法描述
-	Input       any    // 方法输入
-	Output      any    // 方法输出
-}
-type Ier interface {
-	orm.SelectBuilder
-	orm.UpdateBuilder
-	orm.DeleteBuilder
-	orm.CreateBuilder
+	Table       string // 表名
+	Input       []any  // 方法输入
+	Output      []any  // 方法输出
 }
 
-var (
-	Defines = make(map[string]Ier)
-)
+var dais = make(map[string]DataAccessInterface)
+
+func RegisterDpi(dai DataAccessInterface) {
+	dais[dai.Name] = dai
+}
+
+func Run() {
+	for _, dai := range dais {
+		if dai.Method == "" {
+			dai.Method = "Get"
+		}
+		fmt.Println(`//`, dai.Title)
+		fmt.Println(`//`, dai.Description)
+		fmt.Println(`func `, dai.Name, `(ctx context.Context,`, `)`)
+	}
+}

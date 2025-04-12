@@ -12,20 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package main
 
 import (
-	"bytes"
+	"github.com/linbaozhong/gentity/example/model/define/dto"
+	"github.com/linbaozhong/gentity/pkg/ace/dao"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
-const (
-	Undefined = "undefined"
-)
+// /////////////////////////
 
-func bytes2String(b []byte) string {
-	s := string(bytes.Trim(b, "\""))
-	if s == Undefined {
-		return ""
-	}
-	return s
+func init() {
+	dao.RegisterDpi(dao.DataAccessInterface{
+		Name:        "GetUser",
+		Title:       "获取一个用户对象",
+		Description: "从数据库中获取一个用户对象",
+		Input: []any{
+			[]dialect.Condition{},
+			[]dialect.Order{},
+		},
+		Output: []any{
+			dto.GetUserResp{},
+		}})
+}
+
+func main() {
+	dao.Run()
 }

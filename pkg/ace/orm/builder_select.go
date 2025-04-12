@@ -68,10 +68,6 @@ func (o *orm) Select(x ...ace.Executer) Selecter {
 // Query
 func (s *read) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
-	//
-	// if s.err != nil {
-	// 	return nil, s.err
-	// }
 
 	return s.query(ctx)
 }
@@ -79,10 +75,6 @@ func (s *read) Query(ctx context.Context) (*sql.Rows, error) {
 // QueryRow
 func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 	defer s.Free()
-
-	// if s.err != nil {
-	// 	return nil, s.err
-	// }
 
 	_ = s.parse()
 
@@ -93,10 +85,6 @@ func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 func (s *read) Get(ctx context.Context, dest any) error {
 	defer s.Free()
 
-	// if s.err != nil {
-	// 	return s.err
-	// }
-
 	s.Limit(1)
 
 	rows, err := s.query(ctx)
@@ -105,23 +93,22 @@ func (s *read) Get(ctx context.Context, dest any) error {
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
 	if d, ok := dest.(dialect.Modeler); ok {
+		if !rows.Next() {
+			return sql.ErrNoRows
+		}
 		vals := d.AssignPtr()
-		return r.Scan(vals...)
+		return rows.Scan(vals...)
 	}
+	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	return r.scanAny(dest, false)
 }
 
 // Gets 返回数据切片，dest 必须是slice指针
 func (s *read) Gets(ctx context.Context, dest any) error {
 	defer s.Free()
-
-	// if s.err != nil {
-	// 	return s.err
-	// }
 
 	rows, err := s.query(ctx)
 	if err != nil {
@@ -135,10 +122,6 @@ func (s *read) Gets(ctx context.Context, dest any) error {
 // Map 返回 map[string]any，用于列数未知的情况
 func (s *read) Map(ctx context.Context) (map[string]any, error) {
 	defer s.Free()
-
-	// if s.err != nil {
-	// 	return nil, s.err
-	// }
 
 	s.Limit(1)
 
@@ -156,10 +139,6 @@ func (s *read) Map(ctx context.Context) (map[string]any, error) {
 // Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
 func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 	defer s.Free()
-
-	// if s.err != nil {
-	// 	return nil, s.err
-	// }
 
 	rows, err := s.query(ctx)
 	if err != nil {
@@ -186,10 +165,6 @@ func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 func (s *read) Slice(ctx context.Context) ([]any, error) {
 	defer s.Free()
 
-	// if s.err != nil {
-	// 	return nil, s.err
-	// }
-
 	s.Limit(1)
 
 	rows, err := s.query(ctx)
@@ -205,10 +180,6 @@ func (s *read) Slice(ctx context.Context) ([]any, error) {
 // Slices 返回 []any 的切片 [][]any，用于列数未知的情况
 func (s *read) Slices(ctx context.Context) ([][]any, error) {
 	defer s.Free()
-
-	// if s.err != nil {
-	// 	return nil, s.err
-	// }
 
 	rows, err := s.query(ctx)
 	if err != nil {
@@ -233,10 +204,6 @@ func (s *read) Slices(ctx context.Context) ([][]any, error) {
 // Count
 func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer s.Free()
-
-	// if s.err != nil {
-	// 	return 0, s.err
-	// }
 
 	s.Where(cond...)
 	s.command.WriteString("SELECT COUNT(*)")
@@ -272,10 +239,6 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 // Sum
 func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer s.Free()
-
-	// if s.err != nil {
-	// 	return nil, s.err
-	// }
 
 	for _, col := range cols {
 		s.Funcs(col.Sum())
@@ -323,10 +286,6 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 func (s *read) Select(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error) {
 	defer s.Free()
 
-	// if s.err != nil {
-	// 	return nil, s.err
-	// }
-
 	return s.rows(ctx, sqlStr, args...)
 }
 
@@ -363,12 +322,15 @@ func (se *read) SelectStruct(ctx context.Context, dest any, sqlStr string, args 
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
 	if d, ok := dest.(dialect.Modeler); ok {
+		if !rows.Next() {
+			return sql.ErrNoRows
+		}
 		vals := d.AssignPtr()
-		return r.Scan(vals...)
+		return rows.Scan(vals...)
 	}
+	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
 	return r.scanAny(dest, false)
 }

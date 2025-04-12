@@ -15,17 +15,38 @@
 package types
 
 import (
-	"bytes"
+	"fmt"
+	"strconv"
 )
 
-const (
-	Undefined = "undefined"
-)
+type String string
 
-func bytes2String(b []byte) string {
-	s := string(bytes.Trim(b, "\""))
-	if s == Undefined {
-		return ""
+// ////////////////////////////
+// String
+func (s *String) Scan(src any) error {
+	switch v := src.(type) {
+	case nil:
+		*s = ""
+	case []byte:
+		*s = String(v)
+	case string:
+		*s = String(v)
+	default:
+		return fmt.Errorf("unsupported scan type for String: %T", src)
 	}
-	return s
+	return nil
+}
+
+func (s String) String() string {
+	return string(s)
+}
+
+func (s String) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.Quote(string(s))), nil
+}
+
+func (s *String) UnmarshalJSON(b []byte) error {
+	c := bytes2String(b)
+	*s = String(c)
+	return nil
 }

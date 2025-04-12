@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"math"
 	"strconv"
 	"testing"
@@ -32,6 +33,10 @@ type App struct {
 	Force   Money   `json:"force,omitempty" db:"'force'"`     //
 	Ctime   Time    `json:"ctime,omitempty" db:"'ctime'"`     //
 	Data    []Smap  `json:"data"`
+}
+
+func TestTime(t *testing.T) {
+	t.Log(conv.String2Time("0000-00-00"))
 }
 
 func TestBase(t *testing.T) {
