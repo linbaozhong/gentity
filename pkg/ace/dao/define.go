@@ -14,6 +14,10 @@
 
 package dao
 
+import (
+	"github.com/linbaozhong/gentity/pkg/ace/orm"
+)
+
 type define struct {
 	Name        string // 方法名
 	Title       string // 方法标题
@@ -21,3 +25,13 @@ type define struct {
 	Input       any    // 方法输入
 	Output      any    // 方法输出
 }
+type Ier interface {
+	orm.SelectBuilder
+	orm.UpdateBuilder
+	orm.DeleteBuilder
+	orm.CreateBuilder
+}
+
+var (
+	Defines = make(map[string]Ier)
+)
