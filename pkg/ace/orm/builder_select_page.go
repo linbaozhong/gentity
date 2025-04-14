@@ -33,13 +33,13 @@ func (o *orm) Limit(size uint, start ...uint) Builder {
 	} else {
 		o.limit = " LIMIT " + strconv.Itoa(int(size))
 	}
-
+	
 	return o
 }
 
 // Page 分页查询
 //
-//	pageIndex 页码
+//	pageIndex 页码, 从1开始
 //	pageSize 页大小
 func (o *orm) Page(pageIndex, pageSize uint) Builder {
 	if pageSize == 0 {
