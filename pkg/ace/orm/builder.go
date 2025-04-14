@@ -295,8 +295,7 @@ func (o *orm) rows(ctx context.Context, sql string, params ...any) (*sql.Rows, e
 		defer stmt.Close()
 	}
 
-	rows, err := stmt.QueryContext(ctx, params...)
-	return rows, err
+	return stmt.QueryContext(ctx, params...)
 }
 
 func (o *orm) row(ctx context.Context, sql string, params ...any) (*sql.Row, error) {

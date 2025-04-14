@@ -99,10 +99,6 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
 
-	// if u.err != nil {
-	// 	return nil, u.err
-	// }
-
 	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
 	cols, vals := bean.AssignValues(u.cols...)
 	for i, col := range cols {
