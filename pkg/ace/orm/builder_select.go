@@ -21,6 +21,20 @@ import (
 	"strings"
 )
 
+type SelectBuilder interface {
+	Columner
+	Wherer
+	Orderer
+	Grouper
+	Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) Builder
+	LeftJoin(left, right dialect.Field, fns ...dialect.Condition) Builder
+	RightJoin(left, right dialect.Field, fns ...dialect.Condition) Builder
+	Page(pageIndex, pageSize uint) Builder
+	Limit(size uint, start ...uint) Builder
+	Distinct(cols ...dialect.Field) Builder
+	Select(x ...Executer) Selecter
+}
+
 type Selecter interface {
 	// Query
 	Query(ctx context.Context) (*sql.Rows, error)

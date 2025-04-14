@@ -21,6 +21,13 @@ import (
 	"strings"
 )
 
+type CreateBuilder interface {
+	Columner
+	Set(fns ...dialect.Setter) Builder
+	SetExpr(fns ...dialect.ExprSetter) Builder
+	Create(x ...Executer) Creater
+}
+
 type Creater interface {
 	Exec(ctx context.Context) (sql.Result, error)
 	Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)

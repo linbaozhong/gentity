@@ -21,6 +21,14 @@ import (
 	"strings"
 )
 
+type UpdateBuilder interface {
+	Columner
+	Set(fns ...dialect.Setter) Builder
+	SetExpr(fns ...dialect.ExprSetter) Builder
+	Wherer
+	Update(x ...Executer) Updater
+}
+
 type Updater interface {
 	Exec(ctx context.Context) (sql.Result, error)
 	Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error)
