@@ -33,7 +33,7 @@ func (o *orm) Limit(size uint, start ...uint) Builder {
 	} else {
 		o.limit = " LIMIT " + strconv.Itoa(int(size))
 	}
-	
+
 	return o
 }
 
