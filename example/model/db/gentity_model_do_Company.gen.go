@@ -414,12 +414,10 @@ func (p *Company) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
-//
 func (p *Company) AssignKeys() (dialect.Field, any) {
 	return tblcompany.PrimaryKey, p.Id
 }
 
-//
 func (p *Company) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {

@@ -380,12 +380,10 @@ func (p *CompanyStamp) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
-//
 func (p *CompanyStamp) AssignKeys() (dialect.Field, any) {
 	return tblcompanystamp.PrimaryKey, p.Id
 }
 
-//
 func (p *CompanyStamp) AssignPrimaryKeyValues(result sql.Result) error {
 	return nil
 }
