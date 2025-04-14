@@ -69,7 +69,7 @@ type ColScanner interface {
 	Err() error
 }
 
-// Queryer is an interface used by Get and read
+// Queryer is an interface used by Get and Select
 type Queryer interface {
 	Query(query string, args ...any) (*sql.Rows, error)
 	Queryx(query string, args ...any) (*Rows, error)
@@ -313,10 +313,10 @@ func (r *Row) Err() error {
 //	return NamedExec(db, query, arg)
 // }
 //
-// // read using this DB.
+// // Select using this DB.
 // // Any placeholder parameters are replaced with supplied args.
-// func (db *DB) read(dest interface{}, query string, args ...interface{}) error {
-//	return read(db, dest, query, args...)
+// func (db *DB) Select(dest interface{}, query string, args ...interface{}) error {
+//	return Select(db, dest, query, args...)
 // }
 //
 // // Get using this DB.
@@ -427,10 +427,10 @@ func (r *Row) Err() error {
 //	return NamedExec(tx, query, arg)
 // }
 //
-// // read within a transaction.
+// // Select within a transaction.
 // // Any placeholder parameters are replaced with supplied args.
-// func (tx *Tx) read(dest interface{}, query string, args ...interface{}) error {
-//	return read(tx, dest, query, args...)
+// func (tx *Tx) Select(dest interface{}, query string, args ...interface{}) error {
+//	return Select(tx, dest, query, args...)
 // }
 //
 // // Queryx within a transaction.
@@ -512,10 +512,10 @@ func (r *Row) Err() error {
 //	return &Stmt{Stmt: s.Stmt, unsafe: true, Mapper: s.Mapper}
 // }
 //
-// // read using the prepared statement.
+// // Select using the prepared statement.
 // // Any placeholder parameters are replaced with supplied args.
-// func (s *Stmt) read(dest interface{}, args ...interface{}) error {
-//	return read(&qStmt{s}, dest, "", args...)
+// func (s *Stmt) Select(dest interface{}, args ...interface{}) error {
+//	return Select(&qStmt{s}, dest, "", args...)
 // }
 //
 // // Get using the prepared statement.
@@ -594,7 +594,7 @@ func (r *Rows) MapScan(dest map[string]any) error {
 }
 
 // StructScan is like sql.Rows.Scan, but scans a single Row into a single Struct.
-// Use this and iterate over Rows manually when the memory load of read() might be
+// Use this and iterate over Rows manually when the memory load of Select() might be
 // prohibitive.  *Rows.StructScan caches the reflect work of matching up column
 // positions to fields to avoid that overhead per scan, which means it is not safe
 // to run StructScan on the same Rows instance with different struct types.
@@ -645,12 +645,12 @@ func (r *Rows) StructScan(dest any) error {
 //	return &Stmt{Stmt: s, unsafe: isUnsafe(p), Mapper: mapperFor(p)}, err
 // }
 
-// // read executes a query using the provided Queryer, and StructScans each row
+// // Select executes a query using the provided Queryer, and StructScans each row
 // // into dest, which must be a slice.  If the slice elements are scannable, then
 // // the result set must have only one column.  Otherwise, StructScan is used.
 // // The *sql.Rows are closed automatically.
 // // Any placeholder parameters are replaced with supplied args.
-// func read(q Queryer, dest interface{}, query string, args ...interface{}) error {
+// func Select(q Queryer, dest interface{}, query string, args ...interface{}) error {
 //	rows, err := q.Queryx(query, args...)
 //	if err != nil {
 //		return err
@@ -870,7 +870,7 @@ func structOnlyError(t reflect.Type) error {
 //
 // and ids will be a list of the id results.  I realize that this is a desirable
 // interface to expose to users, but for now it will only be exposed via changes
-// to `Get` and `read`.  The reason that this has been implemented like this is
+// to `Get` and `Select`.  The reason that this has been implemented like this is
 // this is the only way to not duplicate reflect work in the new API while
 // maintaining backwards compatibility.
 func scanAll(rows rowsi, dest any, structOnly bool) error {

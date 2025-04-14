@@ -397,10 +397,12 @@ func (p *CompanyFadada) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
+//
 func (p *CompanyFadada) AssignKeys() (dialect.Field, any) {
 	return tblcompanyfadada.PrimaryKey, p.Id
 }
 
+//
 func (p *CompanyFadada) AssignPrimaryKeyValues(result sql.Result) error {
 	return nil
 }

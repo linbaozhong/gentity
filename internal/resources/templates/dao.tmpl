@@ -22,46 +22,46 @@ import (
 {{- if ne .RelationX.Name ""}}
 	"{{.ModulePath}}/define/table/tbl{{lower .RelationX.Type}}"
 {{- end}}
-	"github.com/linbaozhong/gentity/pkg/ace/orm"
-	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/log"
-	"github.com/linbaozhong/gentity/pkg/types"
+"github.com/linbaozhong/gentity/pkg/ace"
+"github.com/linbaozhong/gentity/pkg/ace/dialect"
+"github.com/linbaozhong/gentity/pkg/log"
+"github.com/linbaozhong/gentity/pkg/types"
 )
 
 type dao{{$structName}} struct {
-	db    orm.Executer
-	{{- if .HasCache}}
-	cache cachego.Cache
-	sg singleflight.Group
-	{{- end}}
+db    ace.Executer
+{{- if .HasCache}}
+cache cachego.Cache
+sg singleflight.Group
+{{- end}}
 }
 
 // New 实例化dao{{$structName}}
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
-func New(exec ...orm.Executer) *dao{{$structName}} {
-	_obj := &dao{{$structName}}{}
-	_obj.db = orm.GetExec(exec...)
+func New(exec ...ace.Executer) *dao{{$structName}} {
+_obj := &dao{{$structName}}{}
+_obj.db = ace.GetExec(exec...)
 
 {{- if .HasCache}}
-	_obj.cache = _obj.db.Cache({{$package}}.{{$structName}}TableName)
+_obj.cache = _obj.db.Cache({{$package}}.{{$structName}}TableName)
 {{- end}}
-	return _obj
+return _obj
 }
 
 // Ace 构建器
-func Ace() orm.Builder{
-	return orm.Table({{$package}}.{{$structName}}TableName)
+func Ace() ace.Builder{
+return ace.Table({{$package}}.{{$structName}}TableName)
 }
 
 // Insert 返回 LastInsertId
 func (p *dao{{$structName}}) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
-	if len(sets) == 0 {
-		return 0, dialect.ErrSetterEmpty
-	}
-	_result, e := Ace().
-		Set(sets...).
-		Create(p.db).
+if len(sets) == 0 {
+return 0, dialect.ErrSetterEmpty
+}
+_result, e := Ace().
+Set(sets...).
+Create(p.db).
 		Exec(ctx)
 	if e != nil {
 		log.Error(e)
@@ -213,17 +213,17 @@ func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}}
 //  6. 如果没有查询到记录，则返回nil, false, nil
 //  7. 如果查询到记录，则返回记录, true, nil
 //  8. 如果查询到多条记录，则返回第一条记录, true, nil
-func (p *dao{{$structName}}) First(ctx context.Context, s orm.SelectBuilder) (*{{$package}}.{{$structName}}, bool, error) {
-	if len(s.GetTableName()) == 0 {
-		s.Table({{$package}}.{{$structName}}TableName)
-	}
-	_cols := s.GetCols()
-	if len(_cols) == 0 {
-		_cols = tbl{{$structNameLower}}.ReadableFields
-		s.Cols(_cols...)
-	}
-	_row, e := s.Select(p.db).QueryRow(ctx)
-	if e!= nil {
+func (p *dao{{$structName}}) First(ctx context.Context, s ace.SelectBuilder) (*{{$package}}.{{$structName}}, bool, error) {
+if len(s.GetTableName()) == 0 {
+s.Table({{$package}}.{{$structName}}TableName)
+}
+_cols := s.GetCols()
+if len(_cols) == 0 {
+_cols = tbl{{$structNameLower}}.ReadableFields
+s.Cols(_cols...)
+}
+_row, e := s.Select(p.db).QueryRow(ctx)
+if e!= nil {
 		log.Error(e)
 		return nil, false, e
 	}
@@ -285,43 +285,43 @@ func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field,
 // 注意:
 //  1. 如果没有指定表名，则默认使用{{$package}}.{{$structName}}TableName
 //  2. 如果没有指定查询列，则默认使用tbl{{$structNameLower}}.PrimaryKey
-func (p *dao{{$structName}}) Cell(ctx context.Context,s orm.SelectBuilder) (any, bool, error) {
-	if len(s.GetTableName()) == 0 {
-		s.Table({{$package}}.{{$structName}}TableName)
-	}
+func (p *dao{{$structName}}) Cell(ctx context.Context,s ace.SelectBuilder) (any, bool, error) {
+if len(s.GetTableName()) == 0 {
+s.Table({{$package}}.{{$structName}}TableName)
+}
 
-	if len(s.GetCols()) == 0 {
-		s.Cols(tbl{{$structNameLower}}.PrimaryKey)
-	}
-	_row, e := s.Select(p.db).QueryRow(ctx)
-	if e!= nil {
-		log.Error(e)
+if len(s.GetCols()) == 0 {
+s.Cols(tbl{{$structNameLower}}.PrimaryKey)
+}
+_row, e := s.Select(p.db).QueryRow(ctx)
+if e!= nil {
+log.Error(e)
 		return nil, false, e
 	}
 	var _v any
 	e = _row.Scan(&_v)
 	switch e {
 	case nil:
-		return _v, true, nil
-	case sql.ErrNoRows:
-		return _v, false, nil
-	default:
-		log.Error(e)
-		return _v, false, e
-	}
+return _v, true, nil
+case sql.ErrNoRows:
+return _v, false, nil
+default:
+log.Error(e)
+return _v, false, e
+}
 }
 
 // List 查询所有符合条件的记录
-func (p *dao{{$structName}}) List(ctx context.Context, s orm.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
-	if len(s.GetTableName()) == 0{
-		s.Table({{$package}}.{{$structName}}TableName)
-	}
+func (p *dao{{$structName}}) List(ctx context.Context, s ace.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
+if len(s.GetTableName()) == 0{
+s.Table({{$package}}.{{$structName}}TableName)
+}
 
-	_cols := s.GetCols()
-	if len(_cols) == 0 {
-		_cols = tbl{{$structNameLower}}.ReadableFields
-		s.Cols(_cols...)
-	}
+_cols := s.GetCols()
+if len(_cols) == 0 {
+_cols = tbl{{$structNameLower}}.ReadableFields
+s.Cols(_cols...)
+}
 
 	_rows, e := s.Select(p.db).Query(ctx)
 	if e != nil {

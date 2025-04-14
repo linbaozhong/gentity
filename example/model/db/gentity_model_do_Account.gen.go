@@ -261,10 +261,12 @@ func (p *Account) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
+//
 func (p *Account) AssignKeys() (dialect.Field, any) {
 	return tblaccount.PrimaryKey, p.Id
 }
 
+//
 func (p *Account) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {

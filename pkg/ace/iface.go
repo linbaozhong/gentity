@@ -33,9 +33,9 @@ type (
 		Debug() bool
 		Cache(string) cachego.Cache
 		IsDB() bool
-		Create() CreateBuilder
-		Delete() DeleteBuilder
-		Update() UpdateBuilder
-		Select() SelectBuilder
+		//Create() CreateBuilder
+		//Delete() DeleteBuilder
+		//Update() UpdateBuilder
+		//Select() SelectBuilder
 	}
 )

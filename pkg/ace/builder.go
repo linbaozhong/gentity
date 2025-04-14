@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package orm
+package ace
 
 import (
 	"context"
@@ -75,14 +75,14 @@ var (
 	})
 )
 
-func new() *orm {
+func newOrm() *orm {
 	obj := ormPool.Get().(*orm)
 	obj.commandString.Reset()
 	return obj
 }
 
 func New(opts ...Option) Builder {
-	obj := new()
+	obj := newOrm()
 
 	for _, opt := range opts {
 		opt(obj)
