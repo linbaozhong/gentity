@@ -50,10 +50,6 @@ func (o *orm) Create(x ...Executer) Creater {
 func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	defer c.Free()
 
-	// if c.err != nil {
-	// 	return nil, c.err
-	// }
-
 	lens := len(c.cols)
 	if lens == 0 {
 		return nil, dialect.ErrCreateEmpty
@@ -84,10 +80,6 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
 
-	// if c.err != nil {
-	// 	return nil, c.err
-	// }
-
 	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
 
 	var _cols []string
@@ -113,10 +105,6 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 // InsertBatchStruct 执行批量插入，请不要在事务中使用
 func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer c.Free()
-
-	// if c.err != nil {
-	// 	return nil, c.err
-	// }
 
 	lens := len(beans)
 	if lens == 0 {

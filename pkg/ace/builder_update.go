@@ -56,10 +56,6 @@ func (o *orm) Update(x ...Executer) Updater {
 func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
 
-	// if u.err != nil {
-	// 	return nil, u.err
-	// }
-
 	lens := len(u.cols) + len(u.exprCols)
 	if lens == 0 {
 		return nil, dialect.ErrCreateEmpty

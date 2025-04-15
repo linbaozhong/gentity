@@ -153,13 +153,9 @@ func (o *orm) Table(a any) Builder {
 
 // connect 连接数据库
 func (o *orm) connect(x ...Executer) Builder {
-	if o.db != nil {
-		return o
-	}
-
 	if len(x) > 0 {
 		o.db = x[0]
-	} else {
+	} else if o.db == nil {
 		o.db = GetDB()
 	}
 	return o

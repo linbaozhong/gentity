@@ -28,10 +28,10 @@ func TestBuilder(t *testing.T) {
 		t.Error(e)
 	}
 	bld := newOrm().connect(db).Table("company").(*orm)
-	t.Log(bld.db == nil)
+	t.Log(bld.db != nil)
 
 	bld.Free()
-	t.Log(bld.db == nil)
+	t.Log(bld.db != nil)
 
 }
 
