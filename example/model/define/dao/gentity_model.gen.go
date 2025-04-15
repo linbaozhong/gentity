@@ -3,27 +3,7 @@
 package dao
 
 import (
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/cachego"
-)
-
-var (
-	getExec = ace.GetExec
-
-	Create = ace.Create
-	Delete = ace.Delete
-	Update = ace.Update
-	Select = ace.Select
-
-	Sets = ace.Sets
-
-	Where = ace.Where
-	Or    = ace.Or
-	And   = ace.And
-
-	Order = ace.Order
-	Asc   = ace.Asc
-	Desc  = ace.Desc
 )
 
 // 生成综合条件cond缓存key

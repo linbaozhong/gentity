@@ -70,7 +70,7 @@ func WithSet(args ...dialect.Setter) Option {
 }
 
 // WithExpr 用表达式为字段赋值
-func WithExpr(args ...dialect.ExprSetter) Option {
+func WithSetExpr(args ...dialect.ExprSetter) Option {
 	return func(o *orm) {
 		o.SetExpr(args...)
 	}

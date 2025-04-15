@@ -74,11 +74,6 @@ func GetExec(exec ...Executer) Executer {
 	return GetDB()
 }
 
-// /////////////////
-func Sets(fns ...dialect.Setter) []dialect.Setter {
-	return fns
-}
-
 func Or(fns ...dialect.Condition) dialect.Condition {
 	return func() (string, any) {
 		if len(fns) == 0 {
