@@ -166,14 +166,35 @@ func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$packag
 	}
 	_result, e := Builder().
 		Cols(cols...).
-		Update(p.db).
-		BatchStruct(ctx, _args...)
-	if e != nil {
-		log.Error(e)
-		return false, e
-	}
-	_n, e := _result.RowsAffected()
-	return _n >= 0, e
+Update(p.db).
+BatchStruct(ctx, _args...)
+if e != nil {
+log.Error(e)
+return false, e
+}
+_n, e := _result.RowsAffected()
+return _n >= 0, e
+}
+
+// Delete
+func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+_result, e := builder().
+Where(cond...).
+Delete(p.db).
+Exec(ctx)
+if e != nil {
+log.Error(e)
+return false, e
+}
+_n, e := _result.RowsAffected()
+return _n >= 0, e
+}
+
+// DeleteById
+func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (bool, error) {
+return p.Delete(ctx,
+tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
+)
 }
 
 // First 查询第一个符合条件的记录
