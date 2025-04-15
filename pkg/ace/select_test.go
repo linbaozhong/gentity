@@ -45,5 +45,6 @@ func TestNew(t *testing.T) {
 			tblaccount.Id.Eq(1),
 			Or(tblaccount.State.Eq(1),
 				tblaccount.State.Eq(2))),
+		WithOrderBy(Asc(tblaccount.Id)),
 		WithSet(tblaccount.Id.Set(1)))
 }

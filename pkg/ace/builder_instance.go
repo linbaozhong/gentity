@@ -67,12 +67,12 @@ func Order(cols ...dialect.Field) Builder {
 }
 
 // Asc 指定查询结果按指定列升序排序。
-func Asc(cols ...dialect.Field) Builder {
+func OrderAsc(cols ...dialect.Field) Builder {
 	return newOrm().Asc(cols...)
 }
 
 // Desc 指定查询结果按指定列降序排序
-func Desc(cols ...dialect.Field) Builder {
+func OrderDesc(cols ...dialect.Field) Builder {
 	return newOrm().Desc(cols...)
 }
 
