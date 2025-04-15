@@ -16,10 +16,24 @@ package ace
 
 import (
 	"context"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/linbaozhong/gentity/example/model/db"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
 	"testing"
 )
+
+func TestBuilder(t *testing.T) {
+	db, e := Connect("mysql", "ssld_dev:Cu83&sr66@tcp(123.56.5.53:13306)/dispatch?charset=utf8mb4&parseTime=True&loc=Local")
+	if e != nil {
+		t.Error(e)
+	}
+	bld := newOrm().connect(db).Table("company").(*orm)
+	t.Log(bld.db == nil)
+
+	bld.Free()
+	t.Log(bld.db == nil)
+
+}
 
 func TestUpdater(t *testing.T) {
 	Set(tblaccount.State.Set(1)).Where(tblaccount.Id.Eq(1)).Update().Exec(context.Background())

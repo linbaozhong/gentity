@@ -30,8 +30,8 @@ type SelectBuilder interface {
 	LeftJoin(left, right dialect.Field, fns ...dialect.Condition) Builder
 	RightJoin(left, right dialect.Field, fns ...dialect.Condition) Builder
 	Page(pageIndex, pageSize uint) Builder
+	PageByBookmark(size uint, bm dialect.Condition) Builder
 	Limit(size uint, start ...uint) Builder
-	LimitByBookmark(size uint, bm dialect.Condition) Builder
 	Distinct(cols ...dialect.Field) Builder
 	Select(x ...Executer) Selecter
 }

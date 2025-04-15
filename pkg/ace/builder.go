@@ -92,7 +92,7 @@ func New(opts ...Option) Builder {
 
 // Free 释放 orm 对象，将其重置并放回对象池。
 func (o *orm) Free() {
-	if o == nil || o.table == "" {
+	if o == nil {
 		return
 	}
 
@@ -105,6 +105,7 @@ func (o *orm) Free() {
 }
 
 func (o *orm) Reset() {
+	o.db = nil
 	o.table = ""
 	o.cols = o.cols[:0]   // []dialect.Field{} // o.cols[:0]
 	o.funcs = o.funcs[:0] // []string{}       // o.funcs[:0]
@@ -152,6 +153,10 @@ func (o *orm) Table(a any) Builder {
 
 // connect 连接数据库
 func (o *orm) connect(x ...Executer) Builder {
+	if o.db != nil {
+		return o
+	}
+
 	if len(x) > 0 {
 		o.db = x[0]
 	} else {

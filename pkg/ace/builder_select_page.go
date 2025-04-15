@@ -58,8 +58,8 @@ func (o *orm) Page(pageIndex, pageSize uint) Builder {
 //
 // 例如：
 //
-//	正序： 	orm.LimitByBookmark(10, Id.Gt(lastId))
-//	倒序： 	orm.LimitByBookmark(10, Id.Lt(lastId))
-func (o *orm) LimitByBookmark(size uint, bm dialect.Condition) Builder {
+//	正序： 	orm.PageByBookmark(10, Id.Gt(lastId))
+//	倒序： 	orm.PageByBookmark(10, Id.Lt(lastId))
+func (o *orm) PageByBookmark(size uint, bm dialect.Condition) Builder {
 	return o.Where(bm).Limit(size)
 }

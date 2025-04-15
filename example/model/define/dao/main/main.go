@@ -39,5 +39,5 @@ func init() {
 
 func main() {
 	dao.Run()
-	account.New()
+	account.Account()
 }

@@ -5,7 +5,7 @@
 {{- $package := .PackageName}}
 {{- $structNameLower := lower .StructName}}
 
-package dao{{$structNameLower}}
+package {{$structNameLower}}
 
 import (
 {{- if .HasCache}}
@@ -49,8 +49,8 @@ _obj.cache = _obj.db.Cache({{$package}}.{{$structName}}TableName)
 return _obj
 }
 
-// Builder SQL构建器
-func Builder() ace.Builder{
+// Ace 构建器
+func Ace() ace.Builder{
 return ace.Table({{$package}}.{{$structName}}TableName)
 }
 
@@ -59,7 +59,7 @@ func (p *dao{{$structName}}) Insert(ctx context.Context, sets ...dialect.Setter)
 if len(sets) == 0 {
 return 0, dialect.ErrSetterEmpty
 }
-_result, e := Builder().
+_result, e := Ace().
 Set(sets...).
 Create(p.db).
 		Exec(ctx)
@@ -73,7 +73,7 @@ Create(p.db).
 // InsertOne
 // cols: 要插入的列名
 func (p *dao{{$structName}}) InsertOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
-	_result, e := Builder().
+	_result, e := Ace().
 		Cols(cols...).
 		Create(p.db).
 		Struct(ctx, bean)
@@ -99,7 +99,7 @@ func (p *dao{{$structName}}) InsertBatch(ctx context.Context, beans []*{{$packag
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := Builder().
+	_result, e := Ace().
 		Cols(cols...).
 		Create(p.db).
 		BatchStruct(ctx, _args...)
@@ -116,7 +116,7 @@ func (p *dao{{$structName}}) Update(ctx context.Context, sets []dialect.Setter, 
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
-	_result, e := Builder().
+	_result, e := Ace().
 		Where(cond...).
 		Set(sets...).
 		Update(p.db).
@@ -140,7 +140,7 @@ func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}} 
 // UpdateOne
 // cols: 要插入的列名
 func (p *dao{{$structName}}) UpdateOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
-	_result, e := Builder().
+	_result, e := Ace().
 		Cols(cols...).
 		Update(p.db).
 		Struct(ctx, bean)
@@ -164,7 +164,7 @@ func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$packag
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := Builder().
+	_result, e := Ace().
 		Cols(cols...).
 		Update(p.db).
 		BatchStruct(ctx, _args...)
@@ -175,6 +175,28 @@ func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$packag
 	_n, e := _result.RowsAffected()
 	return _n >= 0, e
 }
+
+// Delete
+func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+	_result, e := Ace().
+		Where(cond...).
+		Delete(p.db).
+		Exec(ctx)
+	if e != nil {
+		log.Error(e)
+		return false, e
+	}
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
+}
+
+// DeleteById
+func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (bool, error) {
+	return p.Delete(ctx,
+		tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
+	)
+}
+
 
 // First 查询第一个符合条件的记录
 //  s: 选择器，用于构建sql语句
@@ -228,7 +250,7 @@ func (p *dao{{$structName}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.
 
 	_v, e, _ := p.sg.Do(conv.Any2String({{.PrimaryKey.Col}}), func() (any, error) {
 		//_obj, has, e = p.Get4Cols(ctx, cols, []dialect.Condition{tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})})
-		_obj, has, e = p.First(ctx, Builder().Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
+		_obj, has, e = p.First(ctx, Ace().Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
 		if has {
 			e = p.setCache(ctx, _obj)
 		}
@@ -240,9 +262,19 @@ func (p *dao{{$structName}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.
 
 	return nil,false,e
 {{- else}}
-	return p.First(ctx, Builder().Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
+	return p.First(ctx, Ace().Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
 {{- end}}
 }
+
+// Get 按条件读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+//func (p *dao{{$structName}}) Get(ctx context.Context, cond  []dialect.Condition, sort ...dialect.Order) (*{{$package}}.{{$structName}}, bool, error) {
+//	return p.First(ctx, Ace().Where(cond...).OrderFunc(sort...))
+//}
+
+// Get4Cols 先判断第二返回值是否为true,再判断是否第三返回值为nil
+//func (p *dao{{$structName}}) Get4Cols(ctx context.Context, cols []dialect.Field, cond []dialect.Condition, sort ...dialect.Order) (*{{$package}}.{{$structName}}, bool, error) {
+//	return p.First(ctx, Ace().Where(cond...).Cols(cols...).OrderFunc(sort...))
+//}
 
 // Cell 查询第一个符合条件的记录的第一个列
 //  s: 选择器，用于构建sql语句
@@ -310,20 +342,87 @@ s.Cols(_cols...)
 	return _objs, false, e
 }
 
+// Find 按条件读取一个{{.TableName}} slice对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+//func (p *dao{{$structName}}) Find(ctx context.Context, pageIndex, pageSize uint, cond  []dialect.Condition, sort ...dialect.Order) ([]{{$package}}.{{$structName}}, bool, error) {
+//	return p.List(ctx, Ace().Where(cond...).OrderFunc(sort...).Page(pageIndex, pageSize))
+//}
+
+// Find4Cols 分页获取{{.TableName}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
+//func (p *dao{{$structName}}) Find4Cols(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond  []dialect.Condition, sort ...dialect.Order) ([]{{$package}}.{{$structName}}, bool, error) {
+//	return p.List(ctx, Ace().Cols(cols...).Where(cond...).OrderFunc(sort...).Page(pageIndex, pageSize))
+//}
+
+// GetFirstCell 按条件读取首行首列,先判断第二返回值是否为true,再判断是否第三返回值为nil
+//func (p *dao{{$structName}}) GetFirstCell(ctx context.Context,col dialect.Field, cond  []dialect.Condition, sort ...dialect.Order) (any, bool, error) {
+//	return p.Cell(ctx, Ace().Cols(col).Where(cond...).OrderFunc(sort...))
+//}
+
+// IDs
+func (p *dao{{$structName}}) IDs(ctx context.Context, cond  []dialect.Condition, sort ...dialect.Order) ([]{{.PrimaryKey.Type}}, error) {
+	_c := Ace().Cols(tbl{{$structNameLower}}.PrimaryKey)
+	_rows, e := _c.Where(cond...).
+		OrderFunc(sort...).
+		Limit(dialect.MaxLimit).
+		Select(p.db).
+		Query(ctx)
+	if e != nil {
+		log.Error(e)
+		return nil, e
+	}
+	defer _rows.Close()
+
+	_ids := make([]{{.PrimaryKey.Type}}, 0, dialect.PageSize)
+	for _rows.Next() {
+	    var {{ .PrimaryKey.Col }} {{.PrimaryKey.Type}}
+		if e = _rows.Scan(&{{.PrimaryKey.Col}}); e != nil {
+			log.Error(e)
+			return nil, e
+		}
+		_ids = append(_ids, {{.PrimaryKey.Col}})
+	}
+
+	return _ids, _rows.Err()
+}
+
+// Columns
+func (p *dao{{$structName}}) Columns(ctx context.Context, col dialect.Field, cond  []dialect.Condition, sort ...dialect.Order) ([]any, error) {
+	_c := Ace().Cols(col)
+	_rows, e := _c.Where(cond...).
+		Limit(dialect.MaxLimit).
+		OrderFunc(sort...).
+		Select(p.db).
+		Query(ctx)
+	if e != nil {
+		log.Error(e)
+		return nil, e
+	}
+	defer _rows.Close()
+
+	_cols := make([]any, 0, dialect.PageSize)
+	for _rows.Next() {
+		var _v any
+		if e = _rows.Scan(&_v); e != nil {
+			log.Error(e)
+			return nil, e
+		}
+		_cols = append(_cols, _v)
+	}
+	return _cols, _rows.Err()
+}
 
 // Count
 func (p *dao{{$structName}}) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return Builder().Select(p.db).Count(ctx, cond...)
+	return Ace().Select(p.db).Count(ctx, cond...)
 }
 
 // Sum
 func (p *dao{{$structName}}) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return Builder().Select(p.db).Sum(ctx, cols, cond...)
+	return Ace().Select(p.db).Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	_c := Builder().Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
+	_c := Ace().Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
 	_row, e := _c.Select(p.db).QueryRow(ctx)
 	if e != nil {
 		log.Error(e)
@@ -395,7 +494,7 @@ func (p *dao{{$structName}}) FindX(ctx context.Context, pageIndex, pageSize uint
 }
 // Get4ColsX 先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) Get4ColsX(ctx context.Context, cols []dialect.Field, cond  []dialect.Condition, sort ...dialect.Order) (*{{$package}}.{{$structName}}, bool, error) {
-	_c := Builder()
+	_c := Ace()
 	if len(cols) == 0 {
 		_c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
@@ -451,7 +550,7 @@ func (p *dao{{$structName}}) edges(ctx context.Context,ids []any) map[any][]{{$p
 
 // Find4Cols 分页获取{{.TableName}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *dao{{$structName}}) Find4ColsX(ctx context.Context, pageIndex, pageSize uint, cols []dialect.Field, cond  []dialect.Condition, sort ...dialect.Order) ([]{{$package}}.{{$structName}}, bool, error) {
-	_c := Builder()
+	_c := Ace()
 	if len(cols) == 0 {
 		_c.Cols(tbl{{$structNameLower}}.ReadableFields...)
 	} else {
