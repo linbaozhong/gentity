@@ -30,13 +30,18 @@ type (
 // 返回一个 sets 类型的切片，该切片包含了所有传入的设置器。
 // 该函数可用于构建复杂的更新语句。
 func Sets(fns ...dialect.Setter) sets {
-	return fns
+	if len(fns) > 0 {
+		return fns
+	}
+	return []dialect.Setter{nil}
 }
 
 // Sets 函数用于添加设置器到设置器列表中。它接收可变数量的 Setter 类型的参数，
 // 将这些设置器添加到 sets 类型的切片中，并返回更新后的设置器列表。
 func (s *sets) Sets(fns ...dialect.Setter) *sets {
-	*s = append(*s, fns...)
+	if len(fns) > 0 {
+		*s = append(*s, fns...)
+	}
 	return s
 }
 
@@ -44,27 +49,36 @@ func (s *sets) Sets(fns ...dialect.Setter) *sets {
 // 返回一个 conditions 类型的切片，该切片包含了所有传入的条件。
 // 该函数可用于构建复杂的查询条件。
 func Conds(fns ...dialect.Condition) conditions {
-	return fns
+	if len(fns) > 0 {
+		return fns
+	}
+	return []dialect.Condition{nil}
 }
 
 // Conds 函数用于添加条件到条件列表中。它接收可变数量的 Condition 类型的参数，
 // 将这些条件添加到 conditions 类型的切片中，并返回更新后的条件列表。
 func (c *conditions) Conds(fns ...dialect.Condition) *conditions {
-	*c = append(*c, fns...)
+	if len(fns) > 0 {
+		*c = append(*c, fns...)
+	}
 	return c
 }
 
 // And 函数用于将多个条件组合成一个逻辑与条件。它接收可变数量的 Condition 类型的参数，
 // 返回一个新的 conditions 类型的切片，该切片包含了所有传入的条件。
 func (c *conditions) And(fns ...dialect.Condition) *conditions {
-	*c = append(*c, and(fns...))
+	if len(fns) > 0 {
+		*c = append(*c, and(fns...))
+	}
 	return c
 }
 
 // Or 函数用于将多个条件组合成一个逻辑或条件。它接收可变数量的 Condition 类型的参数，
 // 返回一个新的 conditions 类型的切片，该切片包含了所有传入的条件。
 func (c *conditions) Or(fns ...dialect.Condition) *conditions {
-	*c = append(*c, or(fns...))
+	if len(fns) > 0 {
+		*c = append(*c, or(fns...))
+	}
 	return c
 }
 
@@ -138,14 +152,19 @@ func and(fns ...dialect.Condition) dialect.Condition {
 // 返回一个 orders 类型的切片，该切片包含了所有传入的排序规则。
 // 该函数可用于指定查询结果的排序方式。
 func Orders(fns ...dialect.Field) orders {
-	return append([]dialect.Order{nil}, asc(fns...))
+	if len(fns) > 0 {
+		return append([]dialect.Order{nil}, asc(fns...))
+	}
+	return []dialect.Order{nil}
 }
 
 // Asc 函数用于添加升序排序规则到排序规则列表中。它接收可变数量的 Field 类型的参数，
 // 将这些规则添加到 orders 类型的切片中，并返回更新后的排序规则列表。
 // 该函数可用于指定查询结果按指定字段进行升序排序。
 func (o *orders) Asc(fns ...dialect.Field) *orders {
-	*o = append(*o, asc(fns...))
+	if len(fns) > 0 {
+		*o = append(*o, asc(fns...))
+	}
 	return o
 }
 
@@ -153,7 +172,9 @@ func (o *orders) Asc(fns ...dialect.Field) *orders {
 // 将这些规则添加到 orders 类型的切片中，并返回更新后的排序规则列表。
 // 该函数可用于指定查询结果按指定字段进行降序排序。
 func (o *orders) Desc(fns ...dialect.Field) *orders {
-	*o = append(*o, desc(fns...))
+	if len(fns) > 0 {
+		*o = append(*o, desc(fns...))
+	}
 	return o
 }
 
