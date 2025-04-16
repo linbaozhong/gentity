@@ -21,24 +21,24 @@ func Table(t any) Builder {
 	return newOrm().Table(t)
 }
 
-// Select 设置查询字段
-func Cols(cols ...dialect.Field) Builder {
-	return newOrm().Cols(cols...)
-}
-
 // Distinct 设置去重字段
 func Distinct(cols ...dialect.Field) Builder {
 	return newOrm().Distinct(cols...)
 }
 
-// Omits 设置忽略字段
-func Omits(cols ...dialect.Field) Builder {
-	return newOrm().Omits(cols...)
+// Cols 设置查询字段
+func Cols(cols ...dialect.Field) Builder {
+	return newOrm().Cols(cols...)
 }
 
-// Funcs 聚合函数查询
-func Funcs(fns ...dialect.Function) Builder {
-	return newOrm().Funcs(fns...)
+// Omits 设置忽略字段
+func Omit(cols ...dialect.Field) Builder {
+	return newOrm().Omit(cols...)
+}
+
+// Func 聚合函数查询
+func Func(fns ...dialect.Function) Builder {
+	return newOrm().Func(fns...)
 }
 
 // Join 设置连接

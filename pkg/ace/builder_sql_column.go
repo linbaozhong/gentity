@@ -21,8 +21,8 @@ type Columner interface {
 	GetTableName() string
 	GetCols() []dialect.Field
 	Cols(cols ...dialect.Field) Builder
-	Funcs(fns ...dialect.Function) Builder
-	Omits(cols ...dialect.Field) Builder
+	Func(fns ...dialect.Function) Builder
+	Omit(cols ...dialect.Field) Builder
 }
 
 // GetCols 获取 orm 对象要查询的列。
@@ -49,21 +49,15 @@ func (o *orm) Cols(cols ...dialect.Field) Builder {
 }
 
 // Omits 忽略指定的列
-func (o *orm) Omits(cols ...dialect.Field) Builder {
+func (o *orm) Omit(cols ...dialect.Field) Builder {
 	for _, col := range cols {
 		o.omits = append(o.omits, col)
 	}
 	return o
 }
 
-// Omit Deprecated: 此方法已弃用，请使用Omits
-// 忽略指定的列
-func (o *orm) Omit(cols ...dialect.Field) Builder {
-	return o.Omits(cols...)
-}
-
-// Funcs 添加聚合函数到查询中
-func (o *orm) Funcs(fns ...dialect.Function) Builder {
+// Func 添加聚合函数到查询中
+func (o *orm) Func(fns ...dialect.Function) Builder {
 	for _, fn := range fns {
 		o.funcs = append(o.funcs, fn())
 	}

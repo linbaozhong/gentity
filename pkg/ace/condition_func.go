@@ -33,9 +33,9 @@ func Sets(fns ...dialect.Setter) sets {
 	return fns
 }
 
-// Set 函数用于添加设置器到设置器列表中。它接收可变数量的 Setter 类型的参数，
+// Sets 函数用于添加设置器到设置器列表中。它接收可变数量的 Setter 类型的参数，
 // 将这些设置器添加到 sets 类型的切片中，并返回更新后的设置器列表。
-func (s *sets) Set(fns ...dialect.Setter) *sets {
+func (s *sets) Sets(fns ...dialect.Setter) *sets {
 	*s = append(*s, fns...)
 	return s
 }
@@ -47,9 +47,9 @@ func Conds(fns ...dialect.Condition) conditions {
 	return fns
 }
 
-// Where 函数用于添加条件到条件列表中。它接收可变数量的 Condition 类型的参数，
+// Conds 函数用于添加条件到条件列表中。它接收可变数量的 Condition 类型的参数，
 // 将这些条件添加到 conditions 类型的切片中，并返回更新后的条件列表。
-func (c *conditions) Where(fns ...dialect.Condition) *conditions {
+func (c *conditions) Conds(fns ...dialect.Condition) *conditions {
 	*c = append(*c, fns...)
 	return c
 }

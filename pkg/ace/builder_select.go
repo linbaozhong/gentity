@@ -255,7 +255,7 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	defer s.Free()
 
 	for _, col := range cols {
-		s.Funcs(col.Sum())
+		s.Func(col.Sum())
 	}
 	s.Where(cond...)
 	s.command.WriteString("SELECT ")

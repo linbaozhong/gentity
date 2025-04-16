@@ -26,7 +26,7 @@ func TestFunc(t *testing.T) {
 	conds := Conds(tblaccount.Id.Eq(1),
 		Or(tblaccount.State.Eq(2),
 			tblaccount.State.Eq(3)))
-	conds.Where(tblaccount.Id.Eq(4)).
+	conds.Conds(tblaccount.Id.Eq(4)).
 		And(tblaccount.State.Eq(5),
 			tblaccount.State.Eq(6))
 	bld := Where(conds...).(*orm)
