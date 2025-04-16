@@ -22,6 +22,16 @@ import (
 	"testing"
 )
 
+func TestFunc(t *testing.T) {
+	conds := Conds(tblaccount.Id.Eq(1),
+		And(tblaccount.State.Eq(1),
+			tblaccount.State.Eq(2))).
+		Where(tblaccount.Id.Eq(1)).
+		And(tblaccount.State.Eq(1),
+			tblaccount.State.Eq(2))
+	bld := Where(conds...).(*orm)
+	t.Log(bld.where.String(), bld.whereParams)
+}
 func TestBuilder(t *testing.T) {
 	db, e := Connect("mysql", "ssld_dev:Cu83&sr66@tcp(123.56.5.53:13306)/dispatch?charset=utf8mb4&parseTime=True&loc=Local")
 	if e != nil {

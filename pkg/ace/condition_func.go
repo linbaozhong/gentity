@@ -22,12 +22,20 @@ import (
 type (
 	conditions []dialect.Condition
 	orders     []dialect.Order
+	sets       []dialect.Setter
 )
+
+// Sets 函数用于创建一个设置器列表。它接收可变数量的 Setter 类型的参数，
+// 返回一个 sets 类型的切片，该切片包含了所有传入的设置器。
+// 该函数可用于构建复杂的更新语句。
+func Sets(fns ...dialect.Setter) sets {
+	return fns
+}
 
 // Conds 函数用于创建一个条件列表。它接收可变数量的 Condition 类型的参数，
 // 返回一个 conditions 类型的切片，该切片包含了所有传入的条件。
 // 该函数可用于构建复杂的查询条件。
-func Conditions(fns ...dialect.Condition) conditions {
+func Conds(fns ...dialect.Condition) conditions {
 	return fns
 }
 
