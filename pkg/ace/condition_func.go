@@ -17,6 +17,7 @@ package ace
 import (
 	"bytes"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"strings"
 )
 
 type (
@@ -32,6 +33,13 @@ func Sets(fns ...dialect.Setter) sets {
 	return fns
 }
 
+// Set 函数用于添加设置器到设置器列表中。它接收可变数量的 Setter 类型的参数，
+// 将这些设置器添加到 sets 类型的切片中，并返回更新后的设置器列表。
+func (s *sets) Set(fns ...dialect.Setter) *sets {
+	*s = append(*s, fns...)
+	return s
+}
+
 // Conds 函数用于创建一个条件列表。它接收可变数量的 Condition 类型的参数，
 // 返回一个 conditions 类型的切片，该切片包含了所有传入的条件。
 // 该函数可用于构建复杂的查询条件。
@@ -41,20 +49,23 @@ func Conds(fns ...dialect.Condition) conditions {
 
 // Where 函数用于添加条件到条件列表中。它接收可变数量的 Condition 类型的参数，
 // 将这些条件添加到 conditions 类型的切片中，并返回更新后的条件列表。
-func (c conditions) Where(fns ...dialect.Condition) conditions {
-	return append(c, fns...)
+func (c *conditions) Where(fns ...dialect.Condition) *conditions {
+	*c = append(*c, fns...)
+	return c
 }
 
 // And 函数用于将多个条件组合成一个逻辑与条件。它接收可变数量的 Condition 类型的参数，
 // 返回一个新的 conditions 类型的切片，该切片包含了所有传入的条件。
-func (c conditions) And(fns ...dialect.Condition) conditions {
-	return append(c, and(fns...))
+func (c *conditions) And(fns ...dialect.Condition) *conditions {
+	*c = append(*c, and(fns...))
+	return c
 }
 
 // Or 函数用于将多个条件组合成一个逻辑或条件。它接收可变数量的 Condition 类型的参数，
 // 返回一个新的 conditions 类型的切片，该切片包含了所有传入的条件。
-func (c conditions) Or(fns ...dialect.Condition) conditions {
-	return append(c, or(fns...))
+func (c *conditions) Or(fns ...dialect.Condition) *conditions {
+	*c = append(*c, or(fns...))
+	return c
 }
 
 func or(fns ...dialect.Condition) dialect.Condition {
@@ -71,7 +82,11 @@ func or(fns ...dialect.Condition) dialect.Condition {
 		for i, fn := range fns {
 			cond, val := fn()
 			if i > 0 {
-				buf.WriteString(dialect.Operator_and)
+				if strings.HasPrefix(cond, dialect.Operator_or) || strings.HasPrefix(cond, dialect.Operator_and) {
+					buf.WriteString(" ")
+				} else {
+					buf.WriteString(dialect.Operator_and)
+				}
 			}
 			buf.WriteString(cond)
 			if vals, ok := val.([]any); ok {
@@ -100,7 +115,11 @@ func and(fns ...dialect.Condition) dialect.Condition {
 		for i, fn := range fns {
 			cond, val := fn()
 			if i > 0 {
-				buf.WriteString(dialect.Operator_or)
+				if strings.HasPrefix(cond, dialect.Operator_or) || strings.HasPrefix(cond, dialect.Operator_and) {
+					buf.WriteString(" ")
+				} else {
+					buf.WriteString(dialect.Operator_or)
+				}
 			}
 			buf.WriteString(cond)
 			if vals, ok := val.([]any); ok {
@@ -125,15 +144,17 @@ func Orders(fns ...dialect.Field) orders {
 // Asc 函数用于添加升序排序规则到排序规则列表中。它接收可变数量的 Field 类型的参数，
 // 将这些规则添加到 orders 类型的切片中，并返回更新后的排序规则列表。
 // 该函数可用于指定查询结果按指定字段进行升序排序。
-func (o orders) Asc(fns ...dialect.Field) orders {
-	return append(o, asc(fns...))
+func (o *orders) Asc(fns ...dialect.Field) *orders {
+	*o = append(*o, asc(fns...))
+	return o
 }
 
 // Desc 函数用于添加降序排序规则到排序规则列表中。它接收可变数量的 Field 类型的参数，
 // 将这些规则添加到 orders 类型的切片中，并返回更新后的排序规则列表。
 // 该函数可用于指定查询结果按指定字段进行降序排序。
-func (o orders) Desc(fns ...dialect.Field) orders {
-	return append(o, desc(fns...))
+func (o *orders) Desc(fns ...dialect.Field) *orders {
+	*o = append(*o, desc(fns...))
+	return o
 }
 
 // asc 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Field 类型的参数，

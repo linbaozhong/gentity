@@ -14,7 +14,10 @@
 
 package ace
 
-import "github.com/linbaozhong/gentity/pkg/ace/dialect"
+import (
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"strings"
+)
 
 type Wherer interface {
 	Where(fns ...dialect.Condition) Builder
@@ -36,7 +39,7 @@ func (o *orm) Where(fns ...dialect.Condition) Builder {
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
-			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+			if strings.HasPrefix(cond, dialect.Operator_or) || strings.HasPrefix(cond, dialect.Operator_and) {
 				o.where.WriteString(" ")
 			} else {
 				o.where.WriteString(dialect.Operator_and)
@@ -68,7 +71,7 @@ func (o *orm) And(fns ...dialect.Condition) Builder {
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
-			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+			if strings.HasPrefix(cond, dialect.Operator_or) || strings.HasPrefix(cond, dialect.Operator_and) {
 				o.where.WriteString(" ")
 			} else {
 				o.where.WriteString(dialect.Operator_or)
@@ -100,7 +103,7 @@ func (o *orm) Or(fns ...dialect.Condition) Builder {
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
-			if cond[:len(dialect.Operator_or)] == dialect.Operator_or || cond[:len(dialect.Operator_and)] == dialect.Operator_and {
+			if strings.HasPrefix(cond, dialect.Operator_or) || strings.HasPrefix(cond, dialect.Operator_and) {
 				o.where.WriteString(" ")
 			} else {
 				o.where.WriteString(dialect.Operator_and)

@@ -24,11 +24,11 @@ import (
 
 func TestFunc(t *testing.T) {
 	conds := Conds(tblaccount.Id.Eq(1),
-		And(tblaccount.State.Eq(1),
-			tblaccount.State.Eq(2))).
-		Where(tblaccount.Id.Eq(1)).
-		And(tblaccount.State.Eq(1),
-			tblaccount.State.Eq(2))
+		Or(tblaccount.State.Eq(2),
+			tblaccount.State.Eq(3)))
+	conds.Where(tblaccount.Id.Eq(4)).
+		And(tblaccount.State.Eq(5),
+			tblaccount.State.Eq(6))
 	bld := Where(conds...).(*orm)
 	t.Log(bld.where.String(), bld.whereParams)
 }
