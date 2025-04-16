@@ -175,24 +175,6 @@ func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$packag
 	return _n >= 0, e
 }
 
-// SoftDelete 软删除。即更新state字段为-1
-//
-// 注意:
-//  1. 软删除是逻辑删除，不是物理删除
-//  2. 软删除是更新state字段为-1
-//  cond: 条件，用于构建where语句
-// 返回值:
-//  1. bool: 是否删除成功
-//  2. error: 错误信息
-func (p *dao{{$structName}}) SoftDelete(ctx context.Context, cond...dialect.Condition) (bool, error) {
-	return p.Update(ctx,
-		ace.Sets(
-			tbl{{$structNameLower}}.State.Set(-1),
-		),
-		cond...,
-	)
-}
-
 // Delete
 func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	_result, e := Builder().
