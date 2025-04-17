@@ -39,7 +39,13 @@ type (
 	Modeler interface {
 		TableNamer
 		AssignPtr(args ...Field) []any
+		// AssignValues 向数据库写入数据前，为表列赋值。
+		// 如果 args 为空，则将非零值赋与可写字段
+		// 如果 args 不为空，则只赋值 args 中的字段
 		AssignValues(args ...Field) ([]string, []any)
+		// RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
+		// 如果 args 为空，则赋值所有可写字段
+		// 如果 args 不为空，则只赋值 args 中的字段
 		RawAssignValues(args ...Field) ([]string, []any)
 		AssignKeys() (Field, any)
 		AssignPrimaryKeyValues(result sql.Result) error
