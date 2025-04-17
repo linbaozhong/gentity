@@ -24,7 +24,6 @@ import (
 type (
 	Executer interface {
 		Mapper() *reflectx.Mapper
-		// BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
 		Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
 		PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
 		QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
@@ -33,9 +32,5 @@ type (
 		Debug() bool
 		Cache(string) cachego.Cache
 		IsDB() bool
-		//Create() CreateBuilder
-		//Delete() DeleteBuilder
-		//Update() UpdateBuilder
-		//Select() SelectBuilder
 	}
 )

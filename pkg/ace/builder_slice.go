@@ -24,7 +24,26 @@ type (
 	conditions []dialect.Condition
 	orders     []dialect.Order
 	sets       []dialect.Setter
+	fields     []dialect.Field
 )
+
+// Fields 函数用于创建一个字段列表。它接收可变数量的 dialect.Field 类型的参数，
+// 如果传入的参数不为空，则返回包含这些参数的切片；否则返回一个空的字段切片。
+func Fields(fs ...dialect.Field) fields {
+	if len(fs) > 0 {
+		return fs
+	}
+	return []dialect.Field{}
+}
+
+// Fields 方法用于添加字段到字段列表，它接收可变数量的 dialect.Field 类型的参数，
+// 将这些字段添加到字段列表中，并返回更新后的字段列表
+func (f *fields) Fields(fs ...dialect.Field) *fields {
+	if len(fs) > 0 {
+		*f = append(*f, fs...)
+	}
+	return f
+}
 
 // Sets 函数用于创建一个设置器列表。它接收可变数量的 Setter 类型的参数，
 // 返回一个 sets 类型的切片，该切片包含了所有传入的设置器。
@@ -33,7 +52,7 @@ func Sets(fns ...dialect.Setter) sets {
 	if len(fns) > 0 {
 		return fns
 	}
-	return []dialect.Setter{nil}
+	return []dialect.Setter{}
 }
 
 // Sets 函数用于添加设置器到设置器列表中。它接收可变数量的 Setter 类型的参数，
@@ -52,7 +71,7 @@ func Conds(fns ...dialect.Condition) conditions {
 	if len(fns) > 0 {
 		return fns
 	}
-	return []dialect.Condition{nil}
+	return []dialect.Condition{}
 }
 
 // Conds 函数用于添加条件到条件列表中。它接收可变数量的 Condition 类型的参数，
@@ -153,9 +172,9 @@ func and(fns ...dialect.Condition) dialect.Condition {
 // 该函数可用于指定查询结果的排序方式。
 func Orders(fns ...dialect.Field) orders {
 	if len(fns) > 0 {
-		return append([]dialect.Order{nil}, asc(fns...))
+		return append([]dialect.Order{}, asc(fns...))
 	}
-	return []dialect.Order{nil}
+	return []dialect.Order{}
 }
 
 // Asc 函数用于添加升序排序规则到排序规则列表中。它接收可变数量的 Field 类型的参数，

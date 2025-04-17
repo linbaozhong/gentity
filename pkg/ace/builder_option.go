@@ -20,6 +20,13 @@ import (
 
 type Option func(builder Builder)
 
+// WithCols 配置查询字段
+func WithCols(args ...dialect.Field) Option {
+	return func(o Builder) {
+		o.Cols(args...)
+	}
+}
+
 // WithWhere 配置where条件
 func WithWhere(args ...dialect.Condition) Option {
 	return func(o Builder) {
