@@ -27,51 +27,12 @@ type (
 	fields     []dialect.Field
 )
 
-// Fields 函数用于创建一个字段列表。它接收可变数量的 dialect.Field 类型的参数，
-// 如果传入的参数不为空，则返回包含这些参数的切片；否则返回一个空的字段切片。
-func Fields(fs ...dialect.Field) fields {
-	if len(fs) > 0 {
-		return fs
-	}
-	return []dialect.Field{}
-}
-
-// Fields 方法用于添加字段到字段列表，它接收可变数量的 dialect.Field 类型的参数，
-// 将这些字段添加到字段列表中，并返回更新后的字段列表
-func (f *fields) Fields(fs ...dialect.Field) *fields {
-	if len(fs) > 0 {
-		*f = append(*f, fs...)
-	}
-	return f
-}
-
-// Sets 函数用于创建一个设置器列表。它接收可变数量的 Setter 类型的参数，
-// 返回一个 sets 类型的切片，该切片包含了所有传入的设置器。
-// 该函数可用于构建复杂的更新语句。
-func Sets(fns ...dialect.Setter) sets {
-	if len(fns) > 0 {
-		return fns
-	}
-	return []dialect.Setter{}
-}
-
-// Sets 函数用于添加设置器到设置器列表中。它接收可变数量的 Setter 类型的参数，
-// 将这些设置器添加到 sets 类型的切片中，并返回更新后的设置器列表。
-func (s *sets) Sets(fns ...dialect.Setter) *sets {
-	if len(fns) > 0 {
-		*s = append(*s, fns...)
-	}
-	return s
-}
-
 // Conds 函数用于创建一个条件列表。它接收可变数量的 Condition 类型的参数，
 // 返回一个 conditions 类型的切片，该切片包含了所有传入的条件。
 // 该函数可用于构建复杂的查询条件。
-func Conds(fns ...dialect.Condition) conditions {
-	if len(fns) > 0 {
-		return fns
-	}
-	return []dialect.Condition{}
+func Conds(fns ...dialect.Condition) *conditions {
+	r := conditions(fns)
+	return &r
 }
 
 // Conds 函数用于添加条件到条件列表中。它接收可变数量的 Condition 类型的参数，
@@ -99,6 +60,12 @@ func (c *conditions) Or(fns ...dialect.Condition) *conditions {
 		*c = append(*c, or(fns...))
 	}
 	return c
+}
+
+// ToSlice 函数用于获取 conditions 类型的切片。它返回一个包含所有条件的切片。
+// 该函数可用于将 conditions 类型的切片转换为其他类型的切片。
+func (c *conditions) ToSlice() []dialect.Condition {
+	return *c
 }
 
 func or(fns ...dialect.Condition) dialect.Condition {
@@ -167,14 +134,65 @@ func and(fns ...dialect.Condition) dialect.Condition {
 	}
 }
 
+// -------------------
+
+// Fields 函数用于创建一个字段列表。它接收可变数量的 dialect.Field 类型的参数，
+// 如果传入的参数不为空，则返回包含这些参数的切片；否则返回一个空的字段切片。
+func Fields(fs ...dialect.Field) *fields {
+	r := fields(fs)
+	return &r
+}
+
+// Fields 方法用于添加字段到字段列表，它接收可变数量的 dialect.Field 类型的参数，
+// 将这些字段添加到字段列表中，并返回更新后的字段列表
+func (f *fields) Fields(fs ...dialect.Field) *fields {
+	if len(fs) > 0 {
+		*f = append(*f, fs...)
+	}
+	return f
+}
+
+// ToSlice 方法用于获取 fields 类型的切片，返回包含所有字段的切片
+func (f *fields) ToSlice() []dialect.Field {
+	return *f
+}
+
+// -------------------
+
+// Sets 函数用于创建一个设置器列表。它接收可变数量的 Setter 类型的参数，
+// 返回一个 sets 类型的切片，该切片包含了所有传入的设置器。
+// 该函数可用于构建复杂的更新语句。
+func Sets(fns ...dialect.Setter) *sets {
+	r := sets(fns)
+	return &r
+}
+
+// Sets 函数用于添加设置器到设置器列表中。它接收可变数量的 Setter 类型的参数，
+// 将这些设置器添加到 sets 类型的切片中，并返回更新后的设置器列表。
+func (s *sets) Sets(fns ...dialect.Setter) *sets {
+	if len(fns) > 0 {
+		*s = append(*s, fns...)
+	}
+	return s
+}
+
+// ToSlice 函数用于获取 sets 类型的切片。它返回一个包含所有设置器的切片。
+// 该函数可用于将 sets 类型的切片转换为其他类型的切片。
+func (s *sets) ToSlice() []dialect.Setter {
+	return *s
+}
+
+// -------------------
+
 // Orders 函数用于创建一个排序规则列表。它接收可变数量的 Field 类型的参数，
 // 返回一个 orders 类型的切片，该切片包含了所有传入的排序规则。
 // 该函数可用于指定查询结果的排序方式。
-func Orders(fns ...dialect.Field) orders {
+func Orders(fns ...dialect.Field) *orders {
 	if len(fns) > 0 {
-		return append([]dialect.Order{}, asc(fns...))
+		r := append(orders{}, asc(fns...))
+		return &r
 	}
-	return []dialect.Order{}
+	return &orders{}
 }
 
 // Asc 函数用于添加升序排序规则到排序规则列表中。它接收可变数量的 Field 类型的参数，
@@ -195,6 +213,12 @@ func (o *orders) Desc(fns ...dialect.Field) *orders {
 		*o = append(*o, desc(fns...))
 	}
 	return o
+}
+
+// ToSlice 函数用于获取 orders 类型的切片。它返回一个包含所有排序规则的切片。
+// 该函数可用于将 orders 类型的切片转换为其他类型的切片。
+func (o *orders) ToSlice() []dialect.Order {
+	return *o
 }
 
 // asc 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Field 类型的参数，

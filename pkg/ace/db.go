@@ -115,20 +115,3 @@ func (s *DB) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any,
 func (s *DB) IsDB() bool {
 	return true
 }
-
-//
-//func (s *DB) Create() CreateBuilder {
-//	return newCreate(s)
-//}
-//
-//func (s *DB) Update() UpdateBuilder {
-//	return newUpdate(s)
-//}
-//
-//func (s *DB) Delete() DeleteBuilder {
-//	return newDelete(s)
-//}
-//
-//func (s *DB) Select() SelectBuilder {
-//	return newSelect(s)
-//}

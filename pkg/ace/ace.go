@@ -15,6 +15,7 @@
 package ace
 
 import (
+	"context"
 	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/app"
@@ -31,7 +32,10 @@ type (
 	cacheType string
 )
 
-var _obj *DB
+var (
+	_obj        *DB
+	Transaction func(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
+)
 
 // Connect
 func Connect(driverName, dns string) (*DB, error) {
@@ -52,6 +56,8 @@ func Connect(driverName, dns string) (*DB, error) {
 	_obj.debug = false
 
 	app.RegisterServiceCloser(_obj)
+	// 注册事务方法
+	Transaction = _obj.Transaction
 
 	return _obj, e
 }
@@ -74,7 +80,7 @@ func GetExec(exec ...Executer) Executer {
 }
 
 //
-//func Or(fns ...dialect.Condition) dialect.Condition {
+// func Or(fns ...dialect.Condition) dialect.Condition {
 //	return func() (string, any) {
 //		if len(fns) == 0 {
 //			return "", nil
@@ -101,9 +107,9 @@ func GetExec(exec ...Executer) Executer {
 //
 //		return buf.String(), params
 //	}
-//}
+// }
 //
-//func And(fns ...dialect.Condition) dialect.Condition {
+// func And(fns ...dialect.Condition) dialect.Condition {
 //	return func() (string, any) {
 //		if len(fns) == 0 {
 //			return "", nil
@@ -130,26 +136,26 @@ func GetExec(exec ...Executer) Executer {
 //
 //		return buf.String(), params
 //	}
-//}
+// }
 //
-//// Asc 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Field 类型的参数，
-//// 返回一个实现了 dialect.Order 接口的函数，该函数会返回排序操作符 "ASC" 和指定的字段列表。
-//// 该函数可用于指定查询结果按指定字段进行升序排序。
-//func Asc(fs ...dialect.Field) dialect.Order {
+// // Asc 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Field 类型的参数，
+// // 返回一个实现了 dialect.Order 接口的函数，该函数会返回排序操作符 "ASC" 和指定的字段列表。
+// // 该函数可用于指定查询结果按指定字段进行升序排序。
+// func Asc(fs ...dialect.Field) dialect.Order {
 //	// 返回一个匿名函数，该函数实现了 dialect.Order 接口，返回排序操作符 "ASC" 和字段列表
 //	return func() (string, []dialect.Field) {
 //		// 返回升序操作符
 //		return dialect.Operator_Asc, fs
 //	}
-//}
+// }
 //
-//// Desc 函数用于创建一个降序排序的规则。它接收可变数量的 dialect.Field 类型的参数，
-//// 返回一个实现了 dialect.Order 接口的函数，该函数会返回排序操作符 "DESC" 和指定的字段列表。
-//// 该函数可用于指定查询结果按指定字段进行降序排序。
-//func Desc(fs ...dialect.Field) dialect.Order {
+// // Desc 函数用于创建一个降序排序的规则。它接收可变数量的 dialect.Field 类型的参数，
+// // 返回一个实现了 dialect.Order 接口的函数，该函数会返回排序操作符 "DESC" 和指定的字段列表。
+// // 该函数可用于指定查询结果按指定字段进行降序排序。
+// func Desc(fs ...dialect.Field) dialect.Order {
 //	// 返回一个匿名函数，该函数实现了 dialect.Order 接口，返回排序操作符 "DESC" 和字段列表
 //	return func() (string, []dialect.Field) {
 //		// 返回降序操作符
 //		return dialect.Operator_Desc, fs
 //	}
-//}
+// }
