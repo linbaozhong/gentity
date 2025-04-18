@@ -212,16 +212,17 @@ func (o *orm) Clone() Builder {
 
 // 合并参数
 func (o *orm) mergeParams() []any {
+	var params = make([]any, 0, len(o.joinParams)+len(o.whereParams)+len(o.params))
 	if len(o.joinParams) > 0 {
-		if len(o.whereParams) > 0 {
-			var params = make([]any, len(o.joinParams)+len(o.whereParams))
-			copy(params, o.joinParams)
-			copy(params[len(o.joinParams):], o.whereParams)
-			return params
-		}
-		return o.joinParams
+		params = append(params, o.joinParams...)
 	}
-	return o.whereParams
+	if len(o.whereParams) > 0 {
+		params = append(params, o.whereParams...)
+	}
+	if len(o.params) > 0 {
+		params = append(params, o.params...)
+	}
+	return params
 }
 
 // parse
