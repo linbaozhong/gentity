@@ -68,6 +68,11 @@ func (c *conditions) ToSlice() []dialect.Condition {
 	return *c
 }
 
+// Len 函数用于获取 conditions 类型的切片的长度。它返回 conditions 类型的切片的长度。
+func (c *conditions) Len() int {
+	return len(*c)
+}
+
 func or(fns ...dialect.Condition) dialect.Condition {
 	return func() (string, any) {
 		if len(fns) == 0 {
@@ -77,7 +82,7 @@ func or(fns ...dialect.Condition) dialect.Condition {
 			buf    bytes.Buffer
 			params = make([]any, 0, len(fns))
 		)
-
+		
 		buf.WriteString(dialect.Operator_or + "(")
 		for i, fn := range fns {
 			cond, val := fn()
@@ -96,7 +101,7 @@ func or(fns ...dialect.Condition) dialect.Condition {
 			}
 		}
 		buf.WriteString(")")
-
+		
 		return buf.String(), params
 	}
 }
@@ -110,7 +115,7 @@ func and(fns ...dialect.Condition) dialect.Condition {
 			buf    bytes.Buffer
 			params = make([]any, 0, len(fns))
 		)
-
+		
 		buf.WriteString(dialect.Operator_and + "(")
 		for i, fn := range fns {
 			cond, val := fn()
@@ -129,7 +134,7 @@ func and(fns ...dialect.Condition) dialect.Condition {
 			}
 		}
 		buf.WriteString(")")
-
+		
 		return buf.String(), params
 	}
 }
@@ -157,6 +162,11 @@ func (f *fields) ToSlice() []dialect.Field {
 	return *f
 }
 
+// Len 方法用于获取 fields 类型的切片的长度，返回切片的长度
+func (f *fields) Len() int {
+	return len(*f)
+}
+
 // -------------------
 
 // Sets 函数用于创建一个设置器列表。它接收可变数量的 Setter 类型的参数，
@@ -180,6 +190,11 @@ func (s *sets) Sets(fns ...dialect.Setter) *sets {
 // 该函数可用于将 sets 类型的切片转换为其他类型的切片。
 func (s *sets) ToSlice() []dialect.Setter {
 	return *s
+}
+
+// Len 函数用于获取 sets 类型的切片的长度。它返回 sets 类型的切片的长度。
+func (s *sets) Len() int {
+	return len(*s)
 }
 
 // -------------------
@@ -219,6 +234,11 @@ func (o *orders) Desc(fns ...dialect.Field) *orders {
 // 该函数可用于将 orders 类型的切片转换为其他类型的切片。
 func (o *orders) ToSlice() []dialect.Order {
 	return *o
+}
+
+// Len 函数用于获取 orders 类型的切片的长度。它返回 orders 类型的切片的长度。
+func (o *orders) Len() int {
+	return len(*o)
 }
 
 // asc 函数用于创建一个升序排序的规则。它接收可变数量的 dialect.Field 类型的参数，
