@@ -82,7 +82,7 @@ func or(fns ...dialect.Condition) dialect.Condition {
 			buf    bytes.Buffer
 			params = make([]any, 0, len(fns))
 		)
-		
+
 		buf.WriteString(dialect.Operator_or + "(")
 		for i, fn := range fns {
 			cond, val := fn()
@@ -101,7 +101,7 @@ func or(fns ...dialect.Condition) dialect.Condition {
 			}
 		}
 		buf.WriteString(")")
-		
+
 		return buf.String(), params
 	}
 }
@@ -115,7 +115,7 @@ func and(fns ...dialect.Condition) dialect.Condition {
 			buf    bytes.Buffer
 			params = make([]any, 0, len(fns))
 		)
-		
+
 		buf.WriteString(dialect.Operator_and + "(")
 		for i, fn := range fns {
 			cond, val := fn()
@@ -134,7 +134,7 @@ func and(fns ...dialect.Condition) dialect.Condition {
 			}
 		}
 		buf.WriteString(")")
-		
+
 		return buf.String(), params
 	}
 }
