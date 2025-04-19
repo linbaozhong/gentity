@@ -1,4 +1,4 @@
-package db
+package do
 
 import (
 	"github.com/linbaozhong/gentity/pkg/ace/pool"

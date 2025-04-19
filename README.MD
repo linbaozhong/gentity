@@ -105,7 +105,7 @@ var (
 3. 初始化连接
 ```go
 	var err error
-	dbx, err = ace.Connect(ace.Context, "mysql",
+	dbx, err = ace.Connect("mysql",
 		"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
 	if err != nil {
 		log.Fatal(err)
