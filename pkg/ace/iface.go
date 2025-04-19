@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 )
@@ -34,3 +35,15 @@ type (
 		IsDB() bool
 	}
 )
+
+type noRows struct{}
+
+var _ driver.Result = noRows{}
+
+func (noRows) LastInsertId() (int64, error) {
+	return 0, Err_ToSql
+}
+
+func (noRows) RowsAffected() (int64, error) {
+	return 0, Err_ToSql
+}

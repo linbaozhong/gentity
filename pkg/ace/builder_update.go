@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 )
 
@@ -27,6 +28,8 @@ type UpdateBuilder interface {
 	SetExpr(fns ...dialect.ExprSetter) Builder
 	Wherer
 	Update(x ...Executer) Updater
+	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
+	ToSql(...bool) Builder
 }
 
 type Updater interface {
@@ -78,6 +81,12 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 		u.command.WriteString(" WHERE " + u.where.String())
 	}
 
+	// 只返回SQL语句，不执行
+	if u.toSql {
+		log.Info(u.String())
+		return &noRows{}, nil
+	}
+
 	stmt, err := u.db.PrepareContext(ctx, u.command.String())
 	if err != nil {
 		return nil, err
@@ -111,7 +120,12 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	if u.where.Len() > 0 {
 		u.command.WriteString(" WHERE " + u.where.String())
 	}
-	u.params = append(u.params, u.whereParams...)
+
+	// 只返回SQL语句，不执行
+	if u.toSql {
+		log.Info(u.String())
+		return &noRows{}, nil
+	}
 
 	stmt, err := u.db.PrepareContext(ctx, u.command.String())
 	if err != nil {
@@ -121,6 +135,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		defer stmt.Close()
 	}
 
+	u.params = append(u.params, u.whereParams...)
 	result, err := stmt.ExecContext(ctx, u.params...)
 	if err != nil {
 		return nil, err
@@ -155,8 +170,14 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	if u.where.Len() > 0 {
 		u.command.WriteString(" WHERE " + u.where.String())
 	}
-	u.params = append(u.params, u.whereParams...)
 
+	// 只返回SQL语句，不执行
+	if u.toSql {
+		log.Info(u.String())
+		return &noRows{}, nil
+	}
+
+	u.params = append(u.params, u.whereParams...)
 	// 启动事务批量执行更新
 	ret, err := u.db.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, u.command.String())

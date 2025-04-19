@@ -19,13 +19,13 @@ var (
 func init() {
 	var err error
 	dbx, err = ace.Connect("mysql",
-		"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
+		"ssld_dev:Cu83&sr66@tcp(123.56.5.53:13306)/dispatch?charset=utf8mb4&parseTime=True&loc=Local")
 	if err != nil {
 		log.Fatal(err)
 	}
 	dbx.SetMaxOpenConns(50)
 	dbx.SetMaxIdleConns(25)
-	dbx.SetDebug(true)
+	//dbx.SetDebug(true)
 }
 
 // TestCreateSet 测试函数，用于测试不同方式插入数据的功能。
@@ -40,7 +40,7 @@ func TestCreateSet(t *testing.T) {
 	//  2. 插入数据时，需要传入dialect.Setter类型的参数
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Insert 方法插入数据
 	// id 为插入数据的主键值，err 为可能出现的错误
-	id, err := daocompany.New(dbx).Insert(context.Background(),
+	id, err := daocompany.New(dbx).ToSql().Insert(context.Background(),
 		// 设置公司的长名称为 "aaaaaa"
 		tblcompany.LongName.Set("aaaaaa"),
 		// 设置公司的状态为 1
@@ -189,7 +189,7 @@ func TestUpdateSet(t *testing.T) {
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Update 方法更新数据
 	// n 为更新操作影响的行数，err 为可能出现的错误
 	// 第一个参数为 context 上下文，第二个参数为要更新的字段设置，第三个参数为更新条件
-	n, err := daocompany.New(dbx).
+	n, err := daocompany.New(dbx).ToSql().
 		Update(context.Background(),
 			ace.Sets(
 				tblcompany.LongName.Set("aaaaaa"),
@@ -252,7 +252,7 @@ func TestSelect(t *testing.T) {
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Get 方法进行查询
 	// obj 为查询结果对象，has 表示是否查询到数据，err 为可能出现的错误
 	// 这里指定查询 tblcompany 表的 Id 和 LongName 列，查询条件为 Id 等于 1
-	obj, has, err := daocompany.New(dbx).
+	obj, has, err := daocompany.New(dbx).ToSql().
 		Get(context.Background(),
 			ace.Cols(tblcompany.Id, tblcompany.LongName).
 				Where(tblcompany.Id.Eq(1)),
@@ -278,8 +278,8 @@ func TestSelect(t *testing.T) {
 	// 调用 daocompany 包的 Builder 函数创建一个构建器实例，设置查询条件为 Id 等于 1
 	// 然后调用 Select 方法指定数据库连接，再调用 Get 方法将查询结果填充到 obj 中
 	// err 为可能出现的错误
-	err = daocompany.Builder().
-		Where(tblcompany.Id.Eq(1)).
+	err = daocompany.Builder().ToSql().
+		Where(tblcompany.Id.Eq(2)).
 		Select(dbx).
 		Get(context.Background(), &obj)
 	// 根据查询结果处理不同情况
@@ -299,8 +299,8 @@ func TestSelect(t *testing.T) {
 	// 调用 ace 包的 Table 函数指定要操作的表，设置查询条件为 Id 等于 1
 	// 然后调用 Select 方法指定数据库连接，再调用 Get 方法将查询结果填充到 obj 中
 	// err 为可能出现的错误
-	err = ace.Table(do.CompanyTableName).
-		Where(tblcompany.Id.Eq(1)).
+	err = ace.Table(do.CompanyTableName).ToSql().
+		Where(tblcompany.Id.Eq(3)).
 		Select(dbx).
 		Get(context.Background(), &obj)
 	// 根据查询结果处理不同情况

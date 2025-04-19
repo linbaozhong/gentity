@@ -34,6 +34,8 @@ type SelectBuilder interface {
 	Limit(size uint, start ...uint) Builder
 	Distinct(cols ...dialect.Field) Builder
 	Select(x ...Executer) Selecter
+	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
+	ToSql(...bool) Builder
 }
 
 type Selecter interface {

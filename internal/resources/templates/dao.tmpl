@@ -30,6 +30,7 @@ import (
 
 type dao{{$structName}} struct {
 	db    ace.Executer
+	toSql bool
 {{- if .HasCache}}
 	cache cachego.Cache
 	sg singleflight.Group
@@ -53,6 +54,13 @@ func Builder() ace.Builder{
 	return ace.Table({{$package}}.{{$structName}}TableName)
 }
 
+
+// ToSql 仅打印SQL语句，不执行
+func (p *dao{{$structName}}) ToSql() *dao{{$structName}} {
+	p.toSql = true
+	return p
+}
+
 // Insert 返回 LastInsertId
 func (p *dao{{$structName}}) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
 	if len(sets) == 0 {
@@ -60,6 +68,7 @@ func (p *dao{{$structName}}) Insert(ctx context.Context, sets ...dialect.Setter)
 	}
 	_result, e := Builder().
 		Set(sets...).
+		ToSql(p.toSql).
 		Create(p.db).
 		Exec(ctx)
 	if e != nil {
@@ -74,6 +83,7 @@ func (p *dao{{$structName}}) Insert(ctx context.Context, sets ...dialect.Setter)
 func (p *dao{{$structName}}) InsertOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
 	_result, e := Builder().
 		Cols(cols...).
+		ToSql(p.toSql).
 		Create(p.db).
 		Struct(ctx, bean)
 	if e != nil {
@@ -100,6 +110,7 @@ func (p *dao{{$structName}}) InsertBatch(ctx context.Context, beans []*{{$packag
 	}
 	_result, e := Builder().
 		Cols(cols...).
+		ToSql(p.toSql).
 		Create(p.db).
 		BatchStruct(ctx, _args...)
 	if e != nil {
@@ -118,6 +129,7 @@ func (p *dao{{$structName}}) Update(ctx context.Context, sets []dialect.Setter, 
 	_result, e := Builder().
 		Where(cond...).
 		Set(sets...).
+		ToSql(p.toSql).
 		Update(p.db).
 		Exec(ctx)
 	if e != nil {
@@ -141,6 +153,7 @@ func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}} 
 func (p *dao{{$structName}}) UpdateOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
 	_result, e := Builder().
 		Cols(cols...).
+		ToSql(p.toSql).
 		Update(p.db).
 		Struct(ctx, bean)
 	if e != nil {
@@ -165,6 +178,7 @@ func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$packag
 	}
 	_result, e := Builder().
 		Cols(cols...).
+		ToSql(p.toSql).
 		Update(p.db).
 		BatchStruct(ctx, _args...)
 	if e != nil {
@@ -179,6 +193,7 @@ func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$packag
 func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	_result, e := Builder().
 		Where(cond...).
+		ToSql(p.toSql).
 		Delete(p.db).
 		Exec(ctx)
 	if e != nil {
@@ -220,7 +235,10 @@ func (p *dao{{$structName}}) Get(ctx context.Context, s ace.SelectBuilder) (*{{$
 		_cols = tbl{{$structNameLower}}.ReadableFields
 		s.Cols(_cols...)
 	}
-	_row, e := s.Select(p.db).QueryRow(ctx)
+	_row, e := s.
+		ToSql(p.toSql).
+		Select(p.db).
+		QueryRow(ctx)
 	if e!= nil {
 		log.Error(e)
 		return nil, false, e
@@ -281,7 +299,10 @@ func (p *dao{{$structName}}) Cell(ctx context.Context,s ace.SelectBuilder) (any,
 	if len(s.GetCols()) == 0 {
 		s.Cols(tbl{{$structNameLower}}.PrimaryKey)
 	}
-	_row, e := s.Select(p.db).QueryRow(ctx)
+	_row, e := s.
+		ToSql(p.toSql).
+		Select(p.db).
+		QueryRow(ctx)
 	if e!= nil {
 		log.Error(e)
 		return nil, false, e
@@ -311,7 +332,10 @@ func (p *dao{{$structName}}) List(ctx context.Context, s ace.SelectBuilder) ([]{
 		s.Cols(_cols...)
 	}
 
-	_rows, e := s.Select(p.db).Query(ctx)
+	_rows, e := s.
+		ToSql(p.toSql).
+		Select(p.db).
+		Query(ctx)
 	if e != nil {
 		log.Error(e)
 		return nil, false, e
@@ -333,18 +357,27 @@ func (p *dao{{$structName}}) List(ctx context.Context, s ace.SelectBuilder) ([]{
 
 // Count
 func (p *dao{{$structName}}) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	return Builder().Select(p.db).Count(ctx, cond...)
+	return Builder().
+		ToSql(p.toSql).
+		Select(p.db).
+		Count(ctx, cond...)
 }
 
 // Sum
 func (p *dao{{$structName}}) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	return Builder().Select(p.db).Sum(ctx, cols, cond...)
+	return Builder().
+		ToSql(p.toSql).
+		Select(p.db).
+		Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	_c := Builder().Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
-	_row, e := _c.Select(p.db).QueryRow(ctx)
+	_row, e := _c.
+		ToSql(p.toSql).
+		Select(p.db).
+		QueryRow(ctx)
 	if e != nil {
 		log.Error(e)
 		return false, e
@@ -420,7 +453,10 @@ func (p *dao{{$structName}}) GetX(ctx context.Context, s ace.SelectBuilder) (*{{
 		_cols = tbl{{$structNameLower}}.ReadableFields
 		s.Cols(_cols...)
 	}
-	_row, e := s.Select(p.db).QueryRow(ctx)
+	_row, e := s.
+		ToSql(p.toSql).
+		Select(p.db).
+		QueryRow(ctx)
 	if e != nil {
 		log.Error(e)
 		return nil, false, e
@@ -454,7 +490,7 @@ func (p *dao{{$structName}}) GetX(ctx context.Context, s ace.SelectBuilder) (*{{
 // edges
 func (p *dao{{$structName}}) edges(ctx context.Context,ids []any) map[any][]{{$package}}.{{.RelationX.Type}} {
 	rsMap := make(map[any][]{{$package}}.{{.RelationX.Type}}, len(ids))
-	rs, has, _ := {{.RelationX.Type}}(p.db).Find(ctx, 0, 0, tbl{{lower (.RelationX.Type)}}.{{.RelationX.Foreign}}.In(ids...))
+	rs, has, _ := {{.RelationX.Type}}(p.db).List(ctx, ace.Where(tbl{{lower (.RelationX.Type)}}.{{.RelationX.Foreign}}.In(ids...)))
 	if !has {
 		return rsMap
 	}
@@ -476,7 +512,10 @@ func (p *dao{{$structName}}) ListX(ctx context.Context, s ace.SelectBuilder) ([]
 		s.Cols(_cols...)
 	}
 
-	_rows, e := s.Select(p.db).Query(ctx)
+	_rows, e := s.
+		ToSql(p.toSql).
+		Select(p.db).
+		Query(ctx)
 	if e != nil {
 		log.Error(e)
 		return nil, false, e

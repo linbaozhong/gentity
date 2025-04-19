@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/log"
 )
 
 type DeleteBuilder interface {
@@ -25,6 +26,8 @@ type DeleteBuilder interface {
 	GetTableName() string
 	Wherer
 	Delete(x ...Executer) Deleter
+	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
+	ToSql(...bool) Builder
 }
 
 // Deleter 删除器
@@ -49,14 +52,16 @@ func (o *orm) Delete(x ...Executer) Deleter {
 func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
 
-	// if d.err != nil {
-	// 	return nil, d.err
-	// }
-
 	d.command.WriteString("DELETE FROM " + dialect.Quote_Char + d.table + dialect.Quote_Char)
 	// WHERE
 	if d.where.Len() > 0 {
 		d.command.WriteString(" WHERE " + d.where.String())
+	}
+
+	// 只返回SQL语句，不执行
+	if d.toSql {
+		log.Info(d.String())
+		return &noRows{}, nil
 	}
 
 	stmt, err := d.db.PrepareContext(ctx, d.command.String())

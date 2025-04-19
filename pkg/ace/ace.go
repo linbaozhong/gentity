@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
@@ -33,6 +34,8 @@ type (
 )
 
 var (
+	Err_ToSql = errors.New("the SQL command terminates execution after the ToSql() method")
+
 	_obj        *DB
 	Transaction func(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
 )

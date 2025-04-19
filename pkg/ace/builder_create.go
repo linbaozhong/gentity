@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 )
 
@@ -26,6 +27,8 @@ type CreateBuilder interface {
 	Set(fns ...dialect.Setter) Builder
 	SetExpr(fns ...dialect.ExprSetter) Builder
 	Create(x ...Executer) Creater
+	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
+	ToSql(...bool) Builder
 }
 
 type Creater interface {
@@ -64,7 +67,12 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	}
 	c.command.WriteString(") VALUES ")
 	c.command.WriteString("(" + strings.Repeat("?,", lens)[:lens*2-1] + ")")
-
+	// 只返回SQL语句，不执行
+	if c.toSql {
+		log.Info(c.String())
+		return &noRows{}, nil
+	}
+	// 执行SQL语句
 	stmt, err := c.db.PrepareContext(ctx, c.command.String())
 	if err != nil {
 		return nil, err
@@ -88,7 +96,12 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
 	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
-
+	// 只返回SQL语句，不执行
+	if c.toSql {
+		log.Info(c.String())
+		return &noRows{}, nil
+	}
+	// 执行SQL语句
 	stmt, err := c.db.PrepareContext(ctx, c.command.String())
 	if err != nil {
 		return nil, err
@@ -119,6 +132,11 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
 	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
+	// 只返回SQL语句，不执行
+	if c.toSql {
+		log.Info(c.String())
+		return &noRows{}, nil
+	}
 
 	// 启动事务批量执行Create
 	ret, err := c.db.Transaction(ctx, func(tx *Tx) (any, error) {

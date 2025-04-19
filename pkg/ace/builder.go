@@ -63,7 +63,8 @@ type (
 		params        []any
 		command       strings.Builder
 		commandString strings.Builder
-		// err           error
+		// toSql 为true时，仅打印SQL语句，不执行
+		toSql bool
 	}
 )
 
@@ -123,6 +124,7 @@ func (o *orm) Reset() {
 	o.exprCols = o.exprCols[:0] // []expr{} // o.exprCols[:0]
 	o.params = o.params[:0]     // []any{} // o.params[:0]
 	o.command.Reset()
+	o.toSql = false
 }
 
 // String 返回 orm 对象的 SQL 语句和参数的字符串表示。
@@ -197,6 +199,16 @@ func (o *orm) SetExpr(fns ...dialect.ExprSetter) Builder {
 	return o
 }
 
+// ToSql 不传参数或者参数为true时，仅打印SQL语句，不执行
+func (o *orm) ToSql(b ...bool) Builder {
+	if len(b) > 0 {
+		o.toSql = b[0]
+	} else {
+		o.toSql = true
+	}
+	return o
+}
+
 // Clone 克隆 orm
 func (o *orm) Clone() Builder {
 	_s := *o
@@ -216,11 +228,11 @@ func (o *orm) mergeParams() []any {
 	if len(o.joinParams) > 0 {
 		params = append(params, o.joinParams...)
 	}
-	if len(o.whereParams) > 0 {
-		params = append(params, o.whereParams...)
-	}
 	if len(o.params) > 0 {
 		params = append(params, o.params...)
+	}
+	if len(o.whereParams) > 0 {
+		params = append(params, o.whereParams...)
 	}
 	return params
 }
@@ -288,8 +300,12 @@ func (o *orm) query(ctx context.Context) (*sql.Rows, error) {
 	return o.rows(ctx, o.command.String(), o.mergeParams()...)
 }
 
-func (o *orm) rows(ctx context.Context, sql string, params ...any) (*sql.Rows, error) {
-	stmt, err := o.db.PrepareContext(ctx, sql)
+func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows, error) {
+	if o.toSql {
+		log.Info(o.String())
+		return &sql.Rows{}, Err_ToSql
+	}
+	stmt, err := o.db.PrepareContext(ctx, sqlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -300,8 +316,12 @@ func (o *orm) rows(ctx context.Context, sql string, params ...any) (*sql.Rows, e
 	return stmt.QueryContext(ctx, params...)
 }
 
-func (o *orm) row(ctx context.Context, sql string, params ...any) (*sql.Row, error) {
-	stmt, err := o.db.PrepareContext(ctx, sql)
+func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, error) {
+	if o.toSql {
+		log.Info(o.String())
+		return &sql.Row{}, Err_ToSql
+	}
+	stmt, err := o.db.PrepareContext(ctx, sqlStr)
 	if err != nil {
 		return nil, err
 	}
