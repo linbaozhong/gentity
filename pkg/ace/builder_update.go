@@ -84,7 +84,7 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	// 只返回SQL语句，不执行
 	if u.toSql {
 		log.Info(u.String())
-		return &noRows{}, nil
+		return &noRows{}, Err_ToSql
 	}
 
 	stmt, err := u.db.PrepareContext(ctx, u.command.String())
@@ -124,7 +124,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	// 只返回SQL语句，不执行
 	if u.toSql {
 		log.Info(u.String())
-		return &noRows{}, nil
+		return &noRows{}, Err_ToSql
 	}
 
 	stmt, err := u.db.PrepareContext(ctx, u.command.String())
@@ -174,7 +174,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	// 只返回SQL语句，不执行
 	if u.toSql {
 		log.Info(u.String())
-		return &noRows{}, nil
+		return &noRows{}, Err_ToSql
 	}
 
 	u.params = append(u.params, u.whereParams...)

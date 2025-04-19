@@ -47,10 +47,6 @@ func (o *orm) Having(fns ...dialect.Condition) Builder {
 			o.having.WriteString(dialect.Operator_and)
 		}
 		cond, val := fn()
-		// if v, ok := val.(error); ok {
-		//	o.err = v
-		//	return o
-		// }
 		o.having.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			o.havingParams = append(o.havingParams, vals...)

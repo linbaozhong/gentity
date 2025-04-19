@@ -61,7 +61,7 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	// 只返回SQL语句，不执行
 	if d.toSql {
 		log.Info(d.String())
-		return &noRows{}, nil
+		return &noRows{}, Err_ToSql
 	}
 
 	stmt, err := d.db.PrepareContext(ctx, d.command.String())

@@ -185,6 +185,27 @@ func TestCreateStruct(t *testing.T) {
 func TestUpdateSet(t *testing.T) {
 	// 确保在函数执行结束后关闭数据库连接
 	defer dbx.Close()
+
+	// 使用 daocompany 构建器更新数据
+	// 调用 daocompany 包的 Builder 函数创建一个构建器实例，设置要更新的数据
+	// 并通过 Where 方法指定更新条件，然后调用 Update 方法创建执行器并执行更新操作
+	// result 为执行结果，err 为可能出现的错误
+	sss := daocompany.Builder().
+		Set(
+			tblcompany.LongName.Set("aaaaaa"),
+			// 设置公司的状态为 1
+			tblcompany.State.Set(1),
+		).
+		Where(tblcompany.Id.Eq(1)).Clone()
+
+	result, err := sss.ToSql().Update(dbx).
+		Exec(context.Background())
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	t.Log(result.LastInsertId())
+
 	// 使用生成的 DAO 方法更新数据
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Update 方法更新数据
 	// n 为更新操作影响的行数，err 为可能出现的错误
@@ -192,34 +213,16 @@ func TestUpdateSet(t *testing.T) {
 	n, err := daocompany.New(dbx).ToSql().
 		Update(context.Background(),
 			ace.Sets(
-				tblcompany.LongName.Set("aaaaaa"),
+				tblcompany.LongName.Set("bbbbbbb"),
 				// 设置公司的状态为 1
-				tblcompany.State.Set(1),
+				tblcompany.State.Set(2),
 			).ToSlice(),
-			tblcompany.Id.Eq(1),
+			tblcompany.Id.Eq(2),
 		)
 	t.Log(n, err)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// 使用 daocompany 构建器更新数据
-	// 调用 daocompany 包的 Builder 函数创建一个构建器实例，设置要更新的数据
-	// 并通过 Where 方法指定更新条件，然后调用 Update 方法创建执行器并执行更新操作
-	// result 为执行结果，err 为可能出现的错误
-	result, err := daocompany.Builder().
-		Set(
-			tblcompany.LongName.Set("aaaaaa"),
-			// 设置公司的状态为 1
-			tblcompany.State.Set(1),
-		).
-		Where(tblcompany.Id.Eq(1)).
-		Update(dbx).
-		Exec(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(result.LastInsertId())
 
 	// 使用 ace 包的通用方法更新数据
 	// 调用 ace 包的 Table 函数指定要操作的表，设置要更新的数据
@@ -279,6 +282,7 @@ func TestSelect(t *testing.T) {
 	// 然后调用 Select 方法指定数据库连接，再调用 Get 方法将查询结果填充到 obj 中
 	// err 为可能出现的错误
 	err = daocompany.Builder().ToSql().
+		Cols(tblcompany.Id, tblcompany.State, tblcompany.Address).
 		Where(tblcompany.Id.Eq(2)).
 		Select(dbx).
 		Get(context.Background(), &obj)
@@ -315,4 +319,10 @@ func TestSelect(t *testing.T) {
 		// 若出现其他错误，终止测试并输出错误信息
 		t.Fatal(err)
 	}
+}
+
+func TestCopy(t *testing.T) {
+	var ii []int
+	copy(ii, []int{1, 2, 3})
+	t.Log(len(ii))
 }

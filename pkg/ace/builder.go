@@ -172,15 +172,23 @@ func (s *orm) GetTableName() string {
 // 用于设置更新语句中的字段和值
 // 例如：Set(dialect.F("name", "linbaozhong"))
 func (o *orm) Set(fns ...dialect.Setter) Builder {
-	if len(fns) == 0 {
+	l := len(fns)
+	if l == 0 {
 		return o
 	}
 
+	tmpCols := make([]dialect.Field, 0, len(o.cols)+l)
+	tmpParams := make([]any, 0, len(o.params)+l)
+	tmpCols = append(tmpCols, o.cols...)
+	tmpParams = append(tmpParams, o.params...)
+
 	for _, fn := range fns {
 		c, val := fn()
-		o.cols = append(o.cols, c)
-		o.params = append(o.params, val)
+		tmpCols = append(tmpCols, c)
+		tmpParams = append(tmpParams, val)
 	}
+	o.cols = tmpCols
+	o.params = tmpParams
 	return o
 }
 
@@ -192,10 +200,13 @@ func (o *orm) SetExpr(fns ...dialect.ExprSetter) Builder {
 		return o
 	}
 
+	tmpExprCols := make([]expr, 0, len(o.exprCols)+len(fns))
+	tmpExprCols = append(tmpExprCols, o.exprCols...)
 	for _, fn := range fns {
 		ex, val := fn()
-		o.exprCols = append(o.exprCols, expr{colName: ex, arg: val})
+		tmpExprCols = append(o.exprCols, expr{colName: ex, arg: val})
 	}
+	o.exprCols = tmpExprCols
 	return o
 }
 
@@ -224,16 +235,12 @@ func (o *orm) Clone() Builder {
 
 // 合并参数
 func (o *orm) mergeParams() []any {
-	var params = make([]any, 0, len(o.joinParams)+len(o.whereParams)+len(o.params))
-	if len(o.joinParams) > 0 {
-		params = append(params, o.joinParams...)
-	}
-	if len(o.params) > 0 {
-		params = append(params, o.params...)
-	}
-	if len(o.whereParams) > 0 {
-		params = append(params, o.whereParams...)
-	}
+	params := make([]any, len(o.joinParams)+len(o.params)+len(o.whereParams))
+
+	// 复制各部分参数到新切片
+	idx := copy(params, o.joinParams)
+	idx += copy(params[idx:], o.params)
+	copy(params[idx:], o.whereParams)
 	return params
 }
 

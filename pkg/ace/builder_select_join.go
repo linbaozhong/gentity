@@ -25,10 +25,7 @@ func (o *orm) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...
 	for _, fn := range fns {
 		on.WriteString(dialect.Operator_and)
 		cond, val := fn()
-		// if v, ok := val.(error); ok {
-		//	o.err = v
-		//	return o
-		// }
+
 		on.WriteString(cond)
 		if vals, ok := val.([]any); ok {
 			o.joinParams = append(o.joinParams, vals...)

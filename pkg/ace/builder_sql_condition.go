@@ -36,6 +36,10 @@ func (o *orm) Where(fns ...dialect.Condition) Builder {
 	} else {
 		o.where.WriteString(dialect.Operator_and + "(")
 	}
+
+	tmpWhereParams := make([]any, 0, len(o.whereParams)+len(fns))
+	tmpWhereParams = append(tmpWhereParams, o.whereParams...)
+
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
@@ -47,11 +51,12 @@ func (o *orm) Where(fns ...dialect.Condition) Builder {
 		}
 		o.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			o.whereParams = append(o.whereParams, vals...)
+			tmpWhereParams = append(tmpWhereParams, vals...)
 		} else {
-			o.whereParams = append(o.whereParams, val)
+			tmpWhereParams = append(tmpWhereParams, val)
 		}
 	}
+	o.whereParams = tmpWhereParams
 	o.where.WriteString(")")
 
 	return o
@@ -68,6 +73,10 @@ func (o *orm) And(fns ...dialect.Condition) Builder {
 	} else {
 		o.where.WriteString(dialect.Operator_and + "(")
 	}
+
+	tmpWhereParams := make([]any, 0, len(o.whereParams)+len(fns))
+	tmpWhereParams = append(tmpWhereParams, o.whereParams...)
+
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
@@ -79,11 +88,12 @@ func (o *orm) And(fns ...dialect.Condition) Builder {
 		}
 		o.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			o.whereParams = append(o.whereParams, vals...)
+			tmpWhereParams = append(tmpWhereParams, vals...)
 		} else {
-			o.whereParams = append(o.whereParams, val)
+			tmpWhereParams = append(tmpWhereParams, val)
 		}
 	}
+	o.whereParams = tmpWhereParams
 	o.where.WriteString(")")
 	return o
 }
@@ -100,6 +110,9 @@ func (o *orm) Or(fns ...dialect.Condition) Builder {
 		o.where.WriteString(dialect.Operator_or + "(")
 	}
 
+	tmpWhereParams := make([]any, 0, len(o.whereParams)+len(fns))
+	tmpWhereParams = append(tmpWhereParams, o.whereParams...)
+
 	for i, fn := range fns {
 		cond, val := fn()
 		if i > 0 {
@@ -111,11 +124,12 @@ func (o *orm) Or(fns ...dialect.Condition) Builder {
 		}
 		o.where.WriteString(cond)
 		if vals, ok := val.([]any); ok {
-			o.whereParams = append(o.whereParams, vals...)
+			tmpWhereParams = append(tmpWhereParams, vals...)
 		} else {
-			o.whereParams = append(o.whereParams, val)
+			tmpWhereParams = append(tmpWhereParams, val)
 		}
 	}
+	o.whereParams = tmpWhereParams
 	o.where.WriteString(")")
 	return o
 }

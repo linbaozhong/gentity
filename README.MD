@@ -158,7 +158,7 @@ func TestCreateSet(t *testing.T) {
 		tblcompany.LongName.Set("aaaaaa"),
 		// 设置公司的状态为 1
 		tblcompany.State.Set(1),
-	).
+	).ToSql().
 		Create(dbx).
 		Exec(context.Background())
 	// 若插入操作出现错误，则终止测试并输出错误信息
@@ -181,7 +181,7 @@ func TestCreateSet(t *testing.T) {
 			tblcompany.State.Set(1),
 			// 设置公司的地址为 "beijing"
 			tblcompany.Address.Set("beijing"),
-		).
+		).ToSql().
 		Create(dbx).
 		Exec(context.Background())
 	// 若插入操作出现错误，则终止测试并输出错误信息
