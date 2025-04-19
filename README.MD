@@ -282,9 +282,8 @@ func TestUpdateSet(t *testing.T) {
 		Update(context.Background(),
 			ace.Sets(
 				tblcompany.LongName.Set("aaaaaa"),
-				// 设置公司的状态为 1
 				tblcompany.State.Set(1),
-			),
+			).ToSlice(),
 			tblcompany.Id.Eq(1),
 		)
 	t.Log(n, err)
@@ -299,7 +298,6 @@ func TestUpdateSet(t *testing.T) {
 	result, err := daocompany.Builder().
 		Set(
 			tblcompany.LongName.Set("aaaaaa"),
-			// 设置公司的状态为 1
 			tblcompany.State.Set(1),
 		).
 		Where(tblcompany.Id.Eq(1)).
@@ -318,7 +316,6 @@ func TestUpdateSet(t *testing.T) {
 		Table(db.CompanyTableName).
 		Set(
 			tblcompany.LongName.Set("aaaaaa"),
-			// 设置公司的状态为 1
 			tblcompany.State.Set(1),
 		).
 		Where(tblcompany.Id.Eq(1)).
