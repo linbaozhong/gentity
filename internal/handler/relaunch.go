@@ -184,11 +184,11 @@ var (
 					showError(e)
 				}
 			}
-			// 写入daoBase
-			e = writeDaoBase(daoPath, _allTds)
-			if e != nil {
-				showError(e)
-			}
+			//// 写入daoBase
+			//e = writeDaoBase(daoPath, _allTds)
+			//if e != nil {
+			//	showError(e)
+			//}
 		},
 	}
 )
