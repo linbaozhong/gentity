@@ -476,6 +476,23 @@ func (p *{{$structNameLower}}) setCache(ctx context.Context, obj *{{$package}}.{
 	}
 	return p.cache.Save(ctx, GetIdHashKey(obj.{{.PrimaryKey.Name}}), string(_s), {{.CacheData}})
 }
+
+
+// 生成综合条件cond缓存key
+func GetCondHashKey(key any) string {
+	return cachego.GetHashKey("c:", key)
+}
+
+// 生成id缓存key
+func GetIdHashKey(key any) string {
+	return cachego.GetHashKey("i:", key)
+}
+
+// 生成ids缓存key
+func GetIdsHashKey(key any) string {
+	return cachego.GetHashKey("s:", key)
+}
+
 {{end}}
 
 {{- if ne .RelationX.Name ""}}
@@ -608,21 +625,5 @@ func (p *{{$structNameLower}}) ListX(ctx context.Context, s ace.SelectBuilder) (
 func (p *{{$structNameLower}}) GetByIDX(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
 	return p.GetX(ctx, Builder().Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
 }
-
-// 生成综合条件cond缓存key
-func GetCondHashKey(key any) string {
-	return cachego.GetHashKey("c:", key)
-}
-
-// 生成id缓存key
-func GetIdHashKey(key any) string {
-	return cachego.GetHashKey("i:", key)
-}
-
-// 生成ids缓存key
-func GetIdsHashKey(key any) string {
-	return cachego.GetHashKey("s:", key)
-}
-
 
 {{- end}}
