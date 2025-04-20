@@ -118,9 +118,6 @@ func (p *objPool) cleanup(ctx context.Context) {
 		case <-cleanTimer.C:
 			// 计算过期时间点。
 			expired := time.Now().Add(-p.expire)
-			p.keys.IterCb(func(key uint64, v time.Time) {
-
-			})
 			p.keys.IterCb(func(key uint64, value time.Time) {
 				if value.Before(expired) {
 					// 删除过期对象。

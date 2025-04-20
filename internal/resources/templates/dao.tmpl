@@ -24,11 +24,14 @@ import (
 {{- end}}
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
-type dao{{$structName}} struct {
+type {{$structNameLower}} struct {
+	pool.Model
 	db    ace.Executer
 	toSql bool
 {{- if .HasCache}}
@@ -37,11 +40,19 @@ type dao{{$structName}} struct {
 {{- end}}
 }
 
-// New 实例化dao{{$structName}}
+var(
+	{{$structNameLower}}Pool = pool.New(app.Context, func() any {
+		_obj := &{{$structNameLower}}{}
+		_obj.db = ace.GetExec()
+		return _obj
+	})
+)
+
+// New 实例化{{$structNameLower}}
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
-func New(exec ...ace.Executer) *dao{{$structName}} {
-	_obj := &dao{{$structName}}{}
+func {{$structName}}(exec ...ace.Executer) *{{$structNameLower}} {
+	_obj := &{{$structNameLower}}{}
 	_obj.db = ace.GetExec(exec...)
 {{- if .HasCache}}
 	_obj.cache = _obj.db.Cache({{$package}}.{{$structName}}TableName)
@@ -54,15 +65,30 @@ func Builder() ace.Builder{
 	return ace.Table({{$package}}.{{$structName}}TableName)
 }
 
+// Free 释放对象
+func (p *{{$structNameLower}}) Free() {
+	if p == nil {
+		return
+	}
+
+	{{$structNameLower}}Pool.Put(p)
+}
+
+// Reset 重置对象
+func (p *{{$structNameLower}}) Reset() {
+	p.toSql = false
+	p.db = nil
+}
 
 // ToSql 仅打印SQL语句，不执行
-func (p *dao{{$structName}}) ToSql() *dao{{$structName}} {
+func (p *{{$structNameLower}}) ToSql() *{{$structNameLower}} {
 	p.toSql = true
 	return p
 }
 
 // Insert 返回 LastInsertId
-func (p *dao{{$structName}}) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
+func (p *{{$structNameLower}}) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
+	defer p.Free()
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
@@ -80,7 +106,8 @@ func (p *dao{{$structName}}) Insert(ctx context.Context, sets ...dialect.Setter)
 
 // InsertOne
 // cols: 要插入的列名
-func (p *dao{{$structName}}) InsertOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
+func (p *{{$structNameLower}}) InsertOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
+	defer p.Free()
 	_result, e := Builder().
 		Cols(cols...).
 		ToSql(p.toSql).
@@ -99,7 +126,8 @@ func (p *dao{{$structName}}) InsertOne(ctx context.Context, bean *{{$package}}.{
 
 // InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 // cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
-func (p *dao{{$structName}}) InsertBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (int64, error) {
+func (p *{{$structNameLower}}) InsertBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (int64, error) {
+	defer p.Free()
 	_lens := len(beans)
 	if _lens == 0 {
 		return 0, dialect.ErrBeanEmpty
@@ -122,7 +150,8 @@ func (p *dao{{$structName}}) InsertBatch(ctx context.Context, beans []*{{$packag
 }
 
 // Update
-func (p *dao{{$structName}}) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
+func (p *{{$structNameLower}}) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
+	defer p.Free()
 	if len(sets) == 0 {
 		return false, dialect.ErrSetterEmpty
 	}
@@ -141,7 +170,7 @@ func (p *dao{{$structName}}) Update(ctx context.Context, sets []dialect.Setter, 
 }
 
 // UpdateById
-func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, sets ...dialect.Setter) (bool, error) {
+func (p *{{$structNameLower}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, sets ...dialect.Setter) (bool, error) {
     return p.Update(ctx,
         sets,
        	tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
@@ -150,7 +179,8 @@ func (p *dao{{$structName}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}} 
 
 // UpdateOne
 // cols: 要插入的列名
-func (p *dao{{$structName}}) UpdateOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
+func (p *{{$structNameLower}}) UpdateOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
+	defer p.Free()
 	_result, e := Builder().
 		Cols(cols...).
 		ToSql(p.toSql).
@@ -167,7 +197,8 @@ func (p *dao{{$structName}}) UpdateOne(ctx context.Context, bean *{{$package}}.{
 
 // UpdateBatch 批量更新,禁止在事务中使用
 // cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
-func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
+func (p *{{$structNameLower}}) UpdateBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
+	defer p.Free()
 	_lens := len(beans)
 	if _lens == 0 {
 		return false, dialect.ErrBeanEmpty
@@ -190,7 +221,8 @@ func (p *dao{{$structName}}) UpdateBatch(ctx context.Context, beans []*{{$packag
 }
 
 // Delete
-func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+func (p *{{$structNameLower}}) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+	defer p.Free()
 	_result, e := Builder().
 		Where(cond...).
 		ToSql(p.toSql).
@@ -205,7 +237,7 @@ func (p *dao{{$structName}}) Delete(ctx context.Context, cond ...dialect.Conditi
 }
 
 // DeleteById
-func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (bool, error) {
+func (p *{{$structNameLower}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (bool, error) {
 	return p.Delete(ctx,
 		tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
 		)
@@ -226,7 +258,8 @@ func (p *dao{{$structName}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}}
 //  6. 如果没有查询到记录，则返回nil, false, nil
 //  7. 如果查询到记录，则返回记录, true, nil
 //  8. 如果查询到多条记录，则返回第一条记录, true, nil
-func (p *dao{{$structName}}) Get(ctx context.Context, s ace.SelectBuilder) (*{{$package}}.{{$structName}}, bool, error) {
+func (p *{{$structNameLower}}) Get(ctx context.Context, s ace.SelectBuilder) (*{{$package}}.{{$structName}}, bool, error) {
+	defer p.Free()
 	if len(s.GetTableName()) == 0 {
 		s.Table({{$package}}.{{$structName}}TableName)
 	}
@@ -257,7 +290,8 @@ func (p *dao{{$structName}}) Get(ctx context.Context, s ace.SelectBuilder) (*{{$
 }
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *dao{{$structName}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
+func (p *{{$structNameLower}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
+	defer p.Free()
 {{- if .HasCache}}
 	_obj,has,e:=p.getCache(ctx, {{.PrimaryKey.Col}})
 	if has{
@@ -291,7 +325,8 @@ func (p *dao{{$structName}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.
 // 注意:
 //  1. 如果没有指定表名，则默认使用{{$package}}.{{$structName}}TableName
 //  2. 如果没有指定查询列，则默认使用tbl{{$structNameLower}}.PrimaryKey
-func (p *dao{{$structName}}) Cell(ctx context.Context,s ace.SelectBuilder) (any, bool, error) {
+func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (any, bool, error) {
+	defer p.Free()
 	if len(s.GetTableName()) == 0 {
 		s.Table({{$package}}.{{$structName}}TableName)
 	}
@@ -321,7 +356,8 @@ func (p *dao{{$structName}}) Cell(ctx context.Context,s ace.SelectBuilder) (any,
 }
 
 // List 查询所有符合条件的记录
-func (p *dao{{$structName}}) List(ctx context.Context, s ace.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
+func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
+	defer p.Free()
 	if len(s.GetTableName()) == 0{
 		s.Table({{$package}}.{{$structName}}TableName)
 	}
@@ -356,7 +392,8 @@ func (p *dao{{$structName}}) List(ctx context.Context, s ace.SelectBuilder) ([]{
 
 
 // Count
-func (p *dao{{$structName}}) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
+func (p *{{$structNameLower}}) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
+	defer p.Free()
 	return Builder().
 		ToSql(p.toSql).
 		Select(p.db).
@@ -364,7 +401,8 @@ func (p *dao{{$structName}}) Count(ctx context.Context, cond ...dialect.Conditio
 }
 
 // Sum
-func (p *dao{{$structName}}) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+func (p *{{$structNameLower}}) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+	defer p.Free()
 	return Builder().
 		ToSql(p.toSql).
 		Select(p.db).
@@ -372,7 +410,8 @@ func (p *dao{{$structName}}) Sum(ctx context.Context, cols []dialect.Field, cond
 }
 
 // Exists
-func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+func (p *{{$structNameLower}}) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+	defer p.Free()
 	_c := Builder().Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
 	_row, e := _c.
 		ToSql(p.toSql).
@@ -397,7 +436,8 @@ func (p *dao{{$structName}}) Exists(ctx context.Context, cond ...dialect.Conditi
 
 {{- if .HasCache}}
 // onUpdate
-func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.Type}}) error {
+func (p *{{$structNameLower}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.Type}}) error {
+	defer p.Free()
 	for _, _id := range ids {
 		if e := p.cache.Delete(ctx, GetIdHashKey(_id)); e != nil {
 			log.Error(e)
@@ -409,7 +449,7 @@ func (p *dao{{$structName}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.
 }
 
 // getCache
-func (p *dao{{$structName}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (*{{$package}}.{{$structName}}, bool, error) {
+func (p *{{$structNameLower}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (*{{$package}}.{{$structName}}, bool, error) {
 	_s,e := p.cache.Fetch(ctx, GetIdHashKey({{.PrimaryKey.Col}}))
 	if e != nil {
 		log.Error(e)
@@ -428,7 +468,7 @@ func (p *dao{{$structName}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {
 }
 
 // setCache
-func (p *dao{{$structName}}) setCache(ctx context.Context, obj *{{$package}}.{{$structName}}) error {
+func (p *{{$structNameLower}}) setCache(ctx context.Context, obj *{{$package}}.{{$structName}}) error {
 	_s,e := json.Marshal(obj)
 	if e != nil {
 		log.Error(e)
@@ -444,7 +484,8 @@ func (p *dao{{$structName}}) setCache(ctx context.Context, obj *{{$package}}.{{$
 
 
 // GetX 先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *dao{{$structName}}) GetX(ctx context.Context, s ace.SelectBuilder) (*{{$package}}.{{$structName}}, bool, error) {
+func (p *{{$structNameLower}}) GetX(ctx context.Context, s ace.SelectBuilder) (*{{$package}}.{{$structName}}, bool, error) {
+	defer p.Free()
 	if len(s.GetTableName()) == 0 {
 		s.Table({{$package}}.{{$structName}}TableName)
 	}
@@ -488,7 +529,8 @@ func (p *dao{{$structName}}) GetX(ctx context.Context, s ace.SelectBuilder) (*{{
 }
 
 // edges
-func (p *dao{{$structName}}) edges(ctx context.Context,ids []any) map[any][]{{$package}}.{{.RelationX.Type}} {
+func (p *{{$structNameLower}}) edges(ctx context.Context,ids []any) map[any][]{{$package}}.{{.RelationX.Type}} {
+	defer p.Free()
 	rsMap := make(map[any][]{{$package}}.{{.RelationX.Type}}, len(ids))
 	rs, has, _ := {{.RelationX.Type}}(p.db).List(ctx, ace.Where(tbl{{lower (.RelationX.Type)}}.{{.RelationX.Foreign}}.In(ids...)))
 	if !has {
@@ -501,7 +543,8 @@ func (p *dao{{$structName}}) edges(ctx context.Context,ids []any) map[any][]{{$p
 }
 
 // ListX 分页获取{{.TableName}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *dao{{$structName}}) ListX(ctx context.Context, s ace.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
+func (p *{{$structNameLower}}) ListX(ctx context.Context, s ace.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
+	defer p.Free()
 	if len(s.GetTableName()) == 0{
 		s.Table({{$package}}.{{$structName}}TableName)
 	}
@@ -562,8 +605,24 @@ func (p *dao{{$structName}}) ListX(ctx context.Context, s ace.SelectBuilder) ([]
 }
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *dao{{$structName}}) GetByIDX(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
+func (p *{{$structNameLower}}) GetByIDX(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
 	return p.GetX(ctx, Builder().Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
 }
+
+// 生成综合条件cond缓存key
+func GetCondHashKey(key any) string {
+	return cachego.GetHashKey("c:", key)
+}
+
+// 生成id缓存key
+func GetIdHashKey(key any) string {
+	return cachego.GetHashKey("i:", key)
+}
+
+// 生成ids缓存key
+func GetIdsHashKey(key any) string {
+	return cachego.GetHashKey("s:", key)
+}
+
 
 {{- end}}

@@ -81,7 +81,7 @@ func getBaseFilename(filename string) string {
 	return _f[:pos]
 }
 
-func writeDaoBase(parent string) error {
+func writeDaoBase(parent string, tds []TempData) error {
 	e := os.MkdirAll(parent, os.ModePerm)
 	if e != nil {
 		showError(e)
@@ -101,7 +101,7 @@ func writeDaoBase(parent string) error {
 			return e
 		}
 
-		e = _tmpl.ExecuteTemplate(ioWriter, "dao_base.tmpl", nil)
+		e = _tmpl.ExecuteTemplate(ioWriter, "dao_base.tmpl", tds)
 		if e != nil {
 			showError(e)
 		}

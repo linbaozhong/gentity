@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/linbaozhong/gentity/example/model/define/dao"
 	"github.com/linbaozhong/gentity/example/model/define/dao/daocompany"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
 	"github.com/linbaozhong/gentity/example/model/do"
@@ -40,7 +41,7 @@ func TestCreateSet(t *testing.T) {
 	//  2. 插入数据时，需要传入dialect.Setter类型的参数
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Insert 方法插入数据
 	// id 为插入数据的主键值，err 为可能出现的错误
-	id, err := daocompany.New(dbx).ToSql().Insert(context.Background(),
+	id, err := dao.Company(dbx).ToSql().Insert(context.Background(),
 		// 设置公司的长名称为 "aaaaaa"
 		tblcompany.LongName.Set("aaaaaa"),
 		// 设置公司的状态为 1
@@ -107,7 +108,7 @@ func TestCreateStruct(t *testing.T) {
 
 	// 使用生成的 DAO 批量插入方法，通过结构体切片批量插入数据
 	// n 为插入操作影响的行数，err 为可能出现的错误
-	n, err := daocompany.New(dbx).
+	n, err := dao.Company(dbx).
 		InsertBatch(context.Background(),
 			[]*do.Company{
 				{
@@ -210,7 +211,7 @@ func TestUpdateSet(t *testing.T) {
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Update 方法更新数据
 	// n 为更新操作影响的行数，err 为可能出现的错误
 	// 第一个参数为 context 上下文，第二个参数为要更新的字段设置，第三个参数为更新条件
-	n, err := daocompany.New(dbx).ToSql().
+	n, err := dao.Company(dbx).ToSql().
 		Update(context.Background(),
 			ace.Sets(
 				tblcompany.LongName.Set("bbbbbbb"),
@@ -255,7 +256,7 @@ func TestSelect(t *testing.T) {
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Get 方法进行查询
 	// obj 为查询结果对象，has 表示是否查询到数据，err 为可能出现的错误
 	// 这里指定查询 tblcompany 表的 Id 和 LongName 列，查询条件为 Id 等于 1
-	obj, has, err := daocompany.New(dbx).ToSql().
+	obj, has, err := dao.Company(dbx).ToSql().
 		Get(context.Background(),
 			ace.Cols(tblcompany.Id, tblcompany.LongName).
 				Where(tblcompany.Id.Eq(1)),
@@ -281,7 +282,7 @@ func TestSelect(t *testing.T) {
 	// 调用 daocompany 包的 Builder 函数创建一个构建器实例，设置查询条件为 Id 等于 1
 	// 然后调用 Select 方法指定数据库连接，再调用 Get 方法将查询结果填充到 obj 中
 	// err 为可能出现的错误
-	err = daocompany.Builder().ToSql().
+	err = dao.CompanyBuilder().ToSql().
 		Cols(tblcompany.Id, tblcompany.State, tblcompany.Address).
 		Where(tblcompany.Id.Eq(2)).
 		Select(dbx).

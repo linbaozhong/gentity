@@ -106,11 +106,11 @@ var (
 				if e != nil {
 					showError(e)
 				}
-				// 写入daoBase
-				e = writeDaoBase(daoPath)
-				if e != nil {
-					showError(e)
-				}
+				//// 写入daoBase
+				//e = writeDaoBase(daoPath)
+				//if e != nil {
+				//	showError(e)
+				//}
 			case "check", "dto":
 			case "swag":
 			case "version":
@@ -148,6 +148,7 @@ var (
 			//		BarEnd:        "]",
 			//	}),
 			//	progressbar.OptionShowCount())
+			_allTds := make([]TempData, 0)
 			for _, dir := range _dirs {
 				// _bar.Add(1)
 				if dir.IsDir() {
@@ -176,10 +177,17 @@ var (
 						showError(e)
 					}
 					e = generateDao(_tds, filename)
+					// 将_tds中的元素追加到_allTds中
+					_allTds = append(_allTds, _tds...)
 				}
 				if e != nil {
 					showError(e)
 				}
+			}
+			// 写入daoBase
+			e = writeDaoBase(daoPath, _allTds)
+			if e != nil {
+				showError(e)
 			}
 		},
 	}
