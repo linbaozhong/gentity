@@ -66,6 +66,9 @@ func ReadCache(ctx Context, lefetime ...time.Duration) bool {
 }
 
 func setCache(ctx Context, resp any) {
+	if ctx.Method() != http.MethodGet {
+		return
+	}
 	if _cacheKey := ctx.Values().Get(hasCacheKey); _cacheKey != nil {
 		if _key, ok := _cacheKey.(cacheKey); ok {
 			respCache.Save(ctx, _key.Key, resp, _key.Duration)
