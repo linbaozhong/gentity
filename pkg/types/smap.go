@@ -2,6 +2,9 @@ package types
 
 import (
 	"bytes"
+	"errors"
+	"github.com/linbaozhong/gentity/pkg/gjson"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"strconv"
 	"time"
 )
@@ -26,6 +29,40 @@ func (p Smap) MarshalJSON() ([]byte, error) {
 	}
 	_buf.WriteString("}")
 	return _buf.Bytes(), nil
+}
+
+// UnmarshalJSON 反序列化
+func (p *Smap) UnmarshalJSON(data []byte) error {
+	ok := gjson.ValidBytes(data)
+	if !ok {
+		return errors.New("invalid json")
+	}
+
+	_result := gjson.ParseBytes(data)
+	_result.ForEach(func(key, value gjson.Result) bool {
+		switch value.Type {
+		case gjson.String:
+			p.Set(key.Str, value.Str)
+		case gjson.Number:
+			p.Set(key.Str, value.Num)
+		case gjson.True:
+			p.Set(key.Str, true)
+		case gjson.False:
+			p.Set(key.Str, false)
+		case gjson.Null:
+			p.Set(key.Str, nil)
+		case gjson.JSON:
+			_p := NewSmap()
+			e := Unmarshal(value, _p)
+			if e != nil {
+				log.Error(e)
+				return false
+			}
+			p.Set(key.Str, _p)
+		}
+		return true
+	})
+	return nil
 }
 
 func (p Smap) ConvertFrom(m map[string]any) Smap {
