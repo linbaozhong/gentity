@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"github.com/linbaozhong/gentity/pkg/gjson"
-	"github.com/linbaozhong/gentity/pkg/log"
 	"strconv"
 	"time"
 )
@@ -55,7 +54,6 @@ func (p *Smap) UnmarshalJSON(data []byte) error {
 			_p := NewSmap()
 			e := Unmarshal(value, _p)
 			if e != nil {
-				log.Error(e)
 				return false
 			}
 			p.Set(key.Str, _p)
