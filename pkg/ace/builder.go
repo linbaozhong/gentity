@@ -25,6 +25,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/util"
 	"reflect"
 	"strings"
+	"time"
 )
 
 type (
@@ -32,6 +33,7 @@ type (
 		Free()
 		String() string
 		Clone() Builder
+		Timeout(timeout time.Duration) Builder
 
 		Columner
 		Wherer
@@ -65,12 +67,16 @@ type (
 		commandString strings.Builder
 		// toSql 为true时，仅打印SQL语句，不执行
 		toSql bool
+		// 超时时间
+		timeout time.Duration
 	}
 )
 
 var (
 	ormPool = pool.New(app.Context, func() any {
-		obj := &orm{}
+		obj := &orm{
+			timeout: 3 * time.Second,
+		}
 		obj.UUID()
 		return obj
 	})
@@ -125,6 +131,7 @@ func (o *orm) Reset() {
 	o.params = o.params[:0]     // []any{} // o.params[:0]
 	o.command.Reset()
 	o.toSql = false
+	o.timeout = 0
 }
 
 // String 返回 orm 对象的 SQL 语句和参数的字符串表示。
@@ -153,13 +160,9 @@ func (o *orm) Table(a any) Builder {
 	return o
 }
 
-// connect 连接数据库
-func (o *orm) connect(x ...Executer) Builder {
-	if len(x) > 0 {
-		o.db = x[0]
-	} else if o.db == nil {
-		o.db = GetDB()
-	}
+// Timeout 设置 orm 对象的超时时间。
+func (o *orm) Timeout(timeout time.Duration) Builder {
+	o.timeout = timeout
 	return o
 }
 
@@ -320,7 +323,11 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 		defer stmt.Close()
 	}
 
-	return stmt.QueryContext(ctx, params...)
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, o.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
+	return stmt.QueryContext(c, params...)
 }
 
 func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, error) {
@@ -336,5 +343,19 @@ func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, 
 		defer stmt.Close()
 	}
 
-	return stmt.QueryRowContext(ctx, o.mergeParams()...), nil
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, o.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
+	return stmt.QueryRowContext(c, o.mergeParams()...), nil
+}
+
+// connect 连接数据库
+func (o *orm) connect(x ...Executer) Builder {
+	if len(x) > 0 {
+		o.db = x[0]
+	} else if o.db == nil {
+		o.db = GetDB()
+	}
+	return o
 }

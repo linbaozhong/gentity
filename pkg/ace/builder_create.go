@@ -81,7 +81,11 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 		defer stmt.Close()
 	}
 
-	return stmt.ExecContext(ctx, c.params...)
+	// 设置查询超时时间
+	_ctx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
+	return stmt.ExecContext(_ctx, c.params...)
 }
 
 // InsertStruct 执行插入一个结构体
@@ -107,7 +111,11 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return nil, err
 	}
 
-	result, err := stmt.ExecContext(ctx, c.params...)
+	// 设置查询超时时间
+	_ctx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
+	result, err := stmt.ExecContext(_ctx, c.params...)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +156,11 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 			defer stmt.Close()
 		}
 
-		result, err := stmt.ExecContext(ctx, c.params...)
+		// 设置查询超时时间
+		_ctx, cancel := context.WithTimeout(ctx, c.timeout)
+		defer cancel() // 确保在函数结束时取消上下文
+
+		result, err := stmt.ExecContext(_ctx, c.params...)
 		if err != nil {
 			return nil, err
 		}
@@ -159,7 +171,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 				return nil, dialect.ErrBeanEmpty
 			}
 			_, c.params = bean.RawAssignValues(c.cols...)
-			result, err = stmt.ExecContext(ctx, c.params...)
+			result, err = stmt.ExecContext(_ctx, c.params...)
 			if err != nil {
 				return nil, err
 			}

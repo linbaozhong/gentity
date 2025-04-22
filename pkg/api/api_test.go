@@ -15,6 +15,7 @@
 package api
 
 import (
+	"sync"
 	"testing"
 )
 
@@ -30,4 +31,35 @@ func TestPost(t *testing.T) {
 
 func Init[A any](a *A) {
 	InitiateX(nil, a)
+}
+
+func TestPool(t *testing.T) {
+	type User struct {
+		Id   int
+		Name string
+	}
+	// 初始化一个对象池
+	var pool = sync.Pool{
+		New: func() any {
+			return &User{}
+		},
+	}
+
+	// 从对象池中获取一个对象
+	user := pool.Get().(*User)
+	user.Id = 1
+	user.Name = "Hello World"
+
+	// 将对象放回对象池中
+	pool.Put(user)
+	// 将同一对象重复放回对象池
+	pool.Put(user)
+
+	// 从对象池中获取一个对象
+	userOne := pool.Get().(*User)
+	userOne.Id = 2               // 修改Id的值
+	t.Log("userOne = ", userOne) // 输出：userOne = &{2 Hello World}
+	// 从对象池中再获取一个对象
+	userTwo := pool.Get().(*User)
+	t.Log("userTwo = ", userTwo) // 输出：userTwo = &{2 Hello World}
 }

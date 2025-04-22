@@ -72,5 +72,9 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 		defer stmt.Close()
 	}
 
-	return stmt.ExecContext(ctx, d.whereParams...)
+	// 设置查询超时时间
+	_ctx, cancel := context.WithTimeout(ctx, d.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
+	return stmt.ExecContext(_ctx, d.whereParams...)
 }

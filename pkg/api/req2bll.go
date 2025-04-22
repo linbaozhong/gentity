@@ -16,6 +16,8 @@ package api
 
 import (
 	"context"
+	"github.com/kataras/iris/v12"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
@@ -87,7 +89,7 @@ func PostX[A, B any](
 // logicProcessing 逻辑处理
 func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
-	write func(ctx context.Context, req *A, resp *B) error) error {
+	fn func(ctx context.Context, req *A, resp *B) error) error {
 
 	if e := read(ctx, req); e != nil {
 		Fail(ctx, Param_Invalid)
@@ -100,18 +102,26 @@ func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 		return e
 	}
 
-	if e := write(ctx, req, resp); e != nil {
+	if e := fn(ctx, req, resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
 	}
+	// 缓存
+	if ctx.Method() == iris.MethodGet {
+		key := ctx.Values().Get(hasCacheKey)
+		if _key, ok := key.(cacheKey); ok {
+			setCache(app.Context, _key, resp)
+		}
+	}
+
 	return Ok(ctx, resp)
 }
 
 // logicProcessingX 逻辑处理
 func logicProcessingX[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
-	write func(ctx Context, req *A, resp *B) error) error {
+	fn func(ctx Context, req *A, resp *B) error) error {
 
 	if e := read(ctx, req); e != nil {
 		Fail(ctx, Param_Invalid)
@@ -124,10 +134,17 @@ func logicProcessingX[A, B any](ctx Context, req *A, resp *B,
 		return e
 	}
 
-	if e := write(ctx, req, resp); e != nil {
+	if e := fn(ctx, req, resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
+	}
+	// 缓存
+	if ctx.Method() == iris.MethodGet {
+		key := ctx.Values().Get(hasCacheKey)
+		if _key, ok := key.(cacheKey); ok {
+			setCache(app.Context, _key, resp)
+		}
 	}
 	return Ok(ctx, resp)
 }

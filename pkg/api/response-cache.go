@@ -15,8 +15,10 @@
 package api
 
 import (
+	"context"
+	"encoding/json"
 	"github.com/linbaozhong/gentity/pkg/cachego/mmap"
-	"net/http"
+	"github.com/linbaozhong/gentity/pkg/types"
 	"time"
 )
 
@@ -56,22 +58,26 @@ func ReadCache(ctx Context, lefetime ...time.Duration) bool {
 		return false
 	}
 
-	ctx.Header("Content-Type", "application/json; charset=utf-8")
-	ctx.StatusCode(http.StatusOK)
-	if _, e = ctx.Write(buf); e != nil {
+	// ctx.Header("Content-Type", "application/json; charset=utf-8")
+	// ctx.StatusCode(http.StatusOK)
+	// if _, e = ctx.Write(buf); e != nil {
+	// 	return false
+	// }
+	// ctx.EndRequest()
+	// return true
+
+	var data types.Smap
+	if e = json.Unmarshal(buf, &data); e != nil {
 		return false
 	}
-	ctx.EndRequest()
-	return true
+
+	j := types.NewResult()
+	defer j.Free()
+
+	j.Data = data
+	return ctx.JSON(j) == nil
 }
 
-func setCache(ctx Context, resp any) {
-	if ctx.Method() != http.MethodGet {
-		return
-	}
-	if _cacheKey := ctx.Values().Get(hasCacheKey); _cacheKey != nil {
-		if _key, ok := _cacheKey.(cacheKey); ok {
-			respCache.Save(ctx, _key.Key, resp, _key.Duration)
-		}
-	}
+func setCache(ctx context.Context, key cacheKey, val any) {
+	respCache.Save(ctx, key.Key, val, key.Duration)
 }

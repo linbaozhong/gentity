@@ -44,6 +44,5 @@ func Ok(c Context, args ...any) error {
 	if len(args) > 0 {
 		j.Data = args[0]
 	}
-	setCache(c, j)
 	return c.JSON(j)
 }
