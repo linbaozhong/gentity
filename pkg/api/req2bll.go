@@ -82,6 +82,8 @@ func PostX[A, B any](
 			}
 		}
 	)
+	c := context.WithValue(ctx, "req", req)
+	c.Value("req")
 
 	return logicProcessingX(ctx, &req, &resp, read, fn)
 }
@@ -97,6 +99,12 @@ func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 		return e
 	}
 	if e := Validate(req); e != nil {
+		Fail(ctx, e)
+		log.Error(e)
+		return e
+	}
+
+	if e := Visit(ctx, req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
@@ -129,6 +137,12 @@ func logicProcessingX[A, B any](ctx Context, req *A, resp *B,
 		return e
 	}
 	if e := Validate(req); e != nil {
+		Fail(ctx, e)
+		log.Error(e)
+		return e
+	}
+
+	if e := Visit(ctx, req); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e

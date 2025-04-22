@@ -46,6 +46,7 @@ type TempData struct {
 	HasCache      bool
 	HasCustomType bool
 	HasTime       bool
+	VisitorName   string // 访问者字段名
 }
 
 // Field struct 字段

@@ -14,16 +14,38 @@
 
 package api
 
-type Checker interface {
-	Check() error
-}
-type Initializer interface {
-	Init()
-}
+import "context"
 
+const (
+	VisitorKey = "__Visitor__"
+)
+
+type (
+	Checker interface {
+		Check() error
+	}
+	Initializer interface {
+		Init()
+	}
+	Visiter interface {
+		Visiter(ctx context.Context)
+	}
+)
+
+// Validate 校验参数
+// 注意：如果参数实现了Checker接口，会调用Check方法
 func Validate(arg any) error {
 	if checker, ok := arg.(Checker); ok {
 		return checker.Check()
+	}
+	return nil
+}
+
+// Visit 访问参数
+// 注意：如果参数实现了Visiter接口，会调用Visiter方法
+func Visit(ctx context.Context, arg any) error {
+	if vis, ok := arg.(Visiter); ok {
+		vis.Visiter(ctx)
 	}
 	return nil
 }

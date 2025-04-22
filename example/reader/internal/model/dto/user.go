@@ -17,6 +17,9 @@ type UserRegisterReq struct {
 	Date     time.Time         `valid:"required"`
 	Get      *UserRegisterResp `valid:"required" json:"get"`
 	Amount   types.Money       `valid:"required"`
+	// 约定访问者类型为Visitor
+	// 注意：访问者类型必须实现Visiter接口，否则会报错
+	Vis Visitor `json:"vis"`
 }
 
 // response

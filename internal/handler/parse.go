@@ -86,6 +86,7 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			PrimaryKey:  Field{},
 			RelationX:   Relation{},
 			Columns:     make([]Field, 0, 20),
+			VisitorName: "",
 		}
 		// 解析struct文档
 		parseDocs(&_tempData, stru.Docs, tags...)
@@ -133,6 +134,8 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			}
 			if _namejson.Type == "time.Time" {
 				_tempData.HasTime = true
+			} else if _namejson.Type == "Visitor" {
+				_tempData.VisitorName = _namejson.Name
 			}
 
 			if _namejson.Col == "" {
