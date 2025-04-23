@@ -187,6 +187,10 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return &noRows{}, Err_ToSql
 	}
 
+	// 设置查询超时时间
+	_ctx, cancel := context.WithTimeout(ctx, u.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
 	u.params = append(u.params, u.whereParams...)
 	// 启动事务批量执行更新
 	ret, err := u.db.Transaction(ctx, func(tx *Tx) (any, error) {
@@ -197,10 +201,6 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		if u.db.IsDB() {
 			defer stmt.Close()
 		}
-
-		// 设置查询超时时间
-		_ctx, cancel := context.WithTimeout(ctx, u.timeout)
-		defer cancel() // 确保在函数结束时取消上下文
 
 		result, err := stmt.ExecContext(_ctx, u.params...)
 		if err != nil {

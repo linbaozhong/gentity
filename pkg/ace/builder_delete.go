@@ -64,6 +64,10 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 		return &noRows{}, Err_ToSql
 	}
 
+	// 设置查询超时时间
+	_ctx, cancel := context.WithTimeout(ctx, d.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
 	stmt, err := d.db.PrepareContext(ctx, d.command.String())
 	if err != nil {
 		return nil, err
@@ -71,10 +75,6 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	if d.db.IsDB() {
 		defer stmt.Close()
 	}
-
-	// 设置查询超时时间
-	_ctx, cancel := context.WithTimeout(ctx, d.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
 
 	return stmt.ExecContext(_ctx, d.whereParams...)
 }

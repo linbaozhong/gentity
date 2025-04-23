@@ -85,25 +85,37 @@ func (o *orm) Select(x ...Executer) Selecter {
 func (s *read) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
 
-	return s.query(ctx)
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
+	return s.query(c)
 }
 
 // QueryRow
 func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 	defer s.Free()
 
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
 	_ = s.parse()
 
-	return s.row(ctx, s.command.String(), s.mergeParams()...)
+	return s.row(c, s.command.String(), s.mergeParams()...)
 }
 
 // Get 返回单个数据，dest 必须是指针
 func (s *read) Get(ctx context.Context, dest any) error {
 	defer s.Free()
 
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
 	s.Limit(1)
 
-	rows, err := s.query(ctx)
+	rows, err := s.query(c)
 	if err != nil {
 		return err
 	}
@@ -126,7 +138,11 @@ func (s *read) Get(ctx context.Context, dest any) error {
 func (s *read) Gets(ctx context.Context, dest any) error {
 	defer s.Free()
 
-	rows, err := s.query(ctx)
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
+	rows, err := s.query(c)
 	if err != nil {
 		return err
 	}
@@ -139,9 +155,13 @@ func (s *read) Gets(ctx context.Context, dest any) error {
 func (s *read) Map(ctx context.Context) (map[string]any, error) {
 	defer s.Free()
 
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
 	s.Limit(1)
 
-	rows, err := s.query(ctx)
+	rows, err := s.query(c)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +176,11 @@ func (s *read) Map(ctx context.Context) (map[string]any, error) {
 func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 	defer s.Free()
 
-	rows, err := s.query(ctx)
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
+	rows, err := s.query(c)
 	if err != nil {
 		return nil, err
 	}
@@ -181,9 +205,13 @@ func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 func (s *read) Slice(ctx context.Context) ([]any, error) {
 	defer s.Free()
 
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
 	s.Limit(1)
 
-	rows, err := s.query(ctx)
+	rows, err := s.query(c)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +225,11 @@ func (s *read) Slice(ctx context.Context) ([]any, error) {
 func (s *read) Slices(ctx context.Context) ([][]any, error) {
 	defer s.Free()
 
-	rows, err := s.query(ctx)
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
+	rows, err := s.query(c)
 	if err != nil {
 		return nil, err
 	}
@@ -256,6 +288,10 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer s.Free()
 
+	// 设置查询超时时间
+	c, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel() // 确保在函数结束时取消上下文
+
 	for _, col := range cols {
 		s.Func(col.Sum())
 	}
@@ -279,7 +315,7 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 		s.command.WriteString(s.limit)
 	}
 
-	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
+	row, err := s.row(c, s.command.String(), s.mergeParams()...)
 	if err != nil {
 		return nil, err
 	}

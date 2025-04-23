@@ -74,9 +74,7 @@ type (
 
 var (
 	ormPool = pool.New(app.Context, func() any {
-		obj := &orm{
-			timeout: 3 * time.Second,
-		}
+		obj := &orm{}
 		obj.UUID()
 		return obj
 	})
@@ -84,6 +82,7 @@ var (
 
 func newOrm() *orm {
 	obj := ormPool.Get().(*orm)
+	obj.timeout = 3 * time.Second
 	obj.commandString.Reset()
 	return obj
 }
@@ -323,11 +322,7 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 		defer stmt.Close()
 	}
 
-	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, o.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
-
-	return stmt.QueryContext(c, params...)
+	return stmt.QueryContext(ctx, params...)
 }
 
 func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, error) {
@@ -343,11 +338,7 @@ func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, 
 		defer stmt.Close()
 	}
 
-	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, o.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
-
-	return stmt.QueryRowContext(c, o.mergeParams()...), nil
+	return stmt.QueryRowContext(ctx, o.mergeParams()...), nil
 }
 
 // connect 连接数据库
