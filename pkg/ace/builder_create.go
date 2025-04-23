@@ -74,8 +74,8 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	// 设置查询超时时间
-	_ctx, cancel := context.WithTimeout(ctx, c.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	_ctx, _ := context.WithTimeout(ctx, c.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 	// 执行SQL语句
 	stmt, err := c.db.PrepareContext(ctx, c.command.String())
 	if err != nil {
@@ -107,8 +107,8 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	}
 
 	// 设置查询超时时间
-	_ctx, cancel := context.WithTimeout(ctx, c.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	_ctx, _ := context.WithTimeout(ctx, c.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	// 执行SQL语句
 	stmt, err := c.db.PrepareContext(ctx, c.command.String())
@@ -148,8 +148,8 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	}
 
 	// 设置查询超时时间
-	_ctx, cancel := context.WithTimeout(ctx, c.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	_ctx, _ := context.WithTimeout(ctx, c.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	// 启动事务批量执行Create
 	ret, err := c.db.Transaction(ctx, func(tx *Tx) (any, error) {

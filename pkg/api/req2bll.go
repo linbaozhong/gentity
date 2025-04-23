@@ -16,8 +16,6 @@ package api
 
 import (
 	"context"
-	"github.com/kataras/iris/v12"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
@@ -58,35 +56,6 @@ func Post[A, B any](
 
 	return logicProcessing(ctx, &req, &resp, read, fn)
 }
-func PostX[A, B any](
-	ctx Context,
-	fn func(ctx Context, req *A, resp *B) error,
-) error {
-	var (
-		req  A
-		resp B
-		read = func(ctx Context, req *A) error {
-			Initiate(ctx, req)
-
-			switch ctx.GetContentTypeRequested() {
-			case "application/json":
-				return ReadJSON(ctx, req)
-			case "application/x-www-form-urlencoded", "multipart/form-data":
-				return ReadForm(ctx, req)
-			default:
-				if ctx.Request().URL.RawQuery == "" {
-					return ReadForm(ctx, req)
-				} else {
-					return ReadQuery(ctx, req)
-				}
-			}
-		}
-	)
-	c := context.WithValue(ctx, "req", req)
-	c.Value("req")
-
-	return logicProcessingX(ctx, &req, &resp, read, fn)
-}
 
 // logicProcessing 逻辑处理
 func logicProcessing[A, B any](ctx Context, req *A, resp *B,
@@ -115,51 +84,14 @@ func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 		log.Error(e)
 		return e
 	}
-	// 缓存
-	if ctx.Method() == iris.MethodGet {
-		key := ctx.Values().Get(hasCacheKey)
-		if _key, ok := key.(cacheKey); ok {
-			setCache(app.Context, _key, resp)
-		}
-	}
+	// // 缓存
+	// if ctx.Method() == iris.MethodGet {
+	// 	key := ctx.Values().Get(hasCacheKey)
+	// 	if _key, ok := key.(cacheKey); ok {
+	// 		setCache(app.Context, _key, resp)
+	// 	}
+	// }
 
-	return Ok(ctx, resp)
-}
-
-// logicProcessingX 逻辑处理
-func logicProcessingX[A, B any](ctx Context, req *A, resp *B,
-	read func(ctx Context, req *A) error,
-	fn func(ctx Context, req *A, resp *B) error) error {
-
-	if e := read(ctx, req); e != nil {
-		Fail(ctx, Param_Invalid)
-		log.Error(e)
-		return e
-	}
-	if e := Validate(req); e != nil {
-		Fail(ctx, e)
-		log.Error(e)
-		return e
-	}
-
-	if e := Visit(ctx, req); e != nil {
-		Fail(ctx, e)
-		log.Error(e)
-		return e
-	}
-
-	if e := fn(ctx, req, resp); e != nil {
-		Fail(ctx, e)
-		log.Error(e)
-		return e
-	}
-	// 缓存
-	if ctx.Method() == iris.MethodGet {
-		key := ctx.Values().Get(hasCacheKey)
-		if _key, ok := key.(cacheKey); ok {
-			setCache(app.Context, _key, resp)
-		}
-	}
 	return Ok(ctx, resp)
 }
 
@@ -186,30 +118,9 @@ func Get[A, B any](
 	return logicProcessing(ctx, &req, &resp, read, fn)
 }
 
-func GetX[A, B any](
-	ctx Context,
-	fn func(ctx Context, req *A, resp *B) error,
-) error {
-	var (
-		req  A
-		resp B
-		read = func(ctx Context, req *A) error {
-			Initiate(ctx, req)
-
-			if ctx.Request().URL.RawQuery == "" {
-				return ReadForm(ctx, req)
-			} else {
-				return ReadQuery(ctx, req)
-			}
-		}
-	)
-
-	return logicProcessingX(ctx, &req, &resp, read, fn)
-}
-
 func GetWithCache[A, B any](
 	ctx Context,
-	fn func(ctx Context, req *A, resp *B) error,
+	fn func(ctx context.Context, req *A, resp *B) error,
 ) error {
 	var (
 		req  A
@@ -225,7 +136,7 @@ func GetWithCache[A, B any](
 		}
 	)
 
-	return logicProcessingX(ctx, &req, &resp, read, fn)
+	return logicProcessing(ctx, &req, &resp, read, fn)
 }
 
 func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) error) error {

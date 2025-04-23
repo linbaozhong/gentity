@@ -16,7 +16,9 @@ package api
 
 import (
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"net/http"
 )
 
 func Fail(c Context, e error, args ...any) error {
@@ -44,5 +46,13 @@ func Ok(c Context, args ...any) error {
 	if len(args) > 0 {
 		j.Data = args[0]
 	}
+	// 缓存
+	if c.Method() == http.MethodGet {
+		key := c.Values().Get(hasCacheKey)
+		if _key, ok := key.(cacheKey); ok {
+			setCache(app.Context, _key, j)
+		}
+	}
+
 	return c.JSON(j)
 }

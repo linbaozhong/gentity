@@ -86,8 +86,8 @@ func (s *read) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
 
 	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	c, _ := context.WithTimeout(ctx, s.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	return s.query(c)
 }
@@ -97,8 +97,8 @@ func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 	defer s.Free()
 
 	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	c, _ := context.WithTimeout(ctx, s.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	_ = s.parse()
 
@@ -110,8 +110,8 @@ func (s *read) Get(ctx context.Context, dest any) error {
 	defer s.Free()
 
 	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	c, _ := context.WithTimeout(ctx, s.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	s.Limit(1)
 
@@ -139,8 +139,8 @@ func (s *read) Gets(ctx context.Context, dest any) error {
 	defer s.Free()
 
 	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	c, _ := context.WithTimeout(ctx, s.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	rows, err := s.query(c)
 	if err != nil {
@@ -156,8 +156,8 @@ func (s *read) Map(ctx context.Context) (map[string]any, error) {
 	defer s.Free()
 
 	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	c, _ := context.WithTimeout(ctx, s.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	s.Limit(1)
 
@@ -177,8 +177,8 @@ func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 	defer s.Free()
 
 	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	c, _ := context.WithTimeout(ctx, s.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	rows, err := s.query(c)
 	if err != nil {
@@ -206,8 +206,8 @@ func (s *read) Slice(ctx context.Context) ([]any, error) {
 	defer s.Free()
 
 	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	c, _ := context.WithTimeout(ctx, s.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	s.Limit(1)
 
@@ -226,8 +226,8 @@ func (s *read) Slices(ctx context.Context) ([][]any, error) {
 	defer s.Free()
 
 	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	c, _ := context.WithTimeout(ctx, s.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	rows, err := s.query(c)
 	if err != nil {
@@ -289,8 +289,8 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	defer s.Free()
 
 	// 设置查询超时时间
-	c, cancel := context.WithTimeout(ctx, s.timeout)
-	defer cancel() // 确保在函数结束时取消上下文
+	c, _ := context.WithTimeout(ctx, s.timeout)
+	// defer cancel() // 确保在函数结束时取消上下文
 
 	for _, col := range cols {
 		s.Func(col.Sum())
