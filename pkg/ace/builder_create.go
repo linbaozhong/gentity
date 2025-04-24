@@ -73,9 +73,6 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 		return &noRows{}, Err_ToSql
 	}
 
-	// 设置查询超时时间
-	_ctx, _ := context.WithTimeout(ctx, c.timeout)
-	// defer cancel() // 确保在函数结束时取消上下文
 	// 执行SQL语句
 	stmt, err := c.db.PrepareContext(ctx, c.command.String())
 	if err != nil {
@@ -85,7 +82,7 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 		defer stmt.Close()
 	}
 
-	return stmt.ExecContext(_ctx, c.params...)
+	return stmt.ExecContext(ctx, c.params...)
 }
 
 // InsertStruct 执行插入一个结构体
@@ -106,17 +103,13 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return &noRows{}, Err_ToSql
 	}
 
-	// 设置查询超时时间
-	_ctx, _ := context.WithTimeout(ctx, c.timeout)
-	// defer cancel() // 确保在函数结束时取消上下文
-
 	// 执行SQL语句
 	stmt, err := c.db.PrepareContext(ctx, c.command.String())
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := stmt.ExecContext(_ctx, c.params...)
+	result, err := stmt.ExecContext(ctx, c.params...)
 	if err != nil {
 		return nil, err
 	}
@@ -147,10 +140,6 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return &noRows{}, Err_ToSql
 	}
 
-	// 设置查询超时时间
-	_ctx, _ := context.WithTimeout(ctx, c.timeout)
-	// defer cancel() // 确保在函数结束时取消上下文
-
 	// 启动事务批量执行Create
 	ret, err := c.db.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, c.command.String())
@@ -161,7 +150,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 			defer stmt.Close()
 		}
 
-		result, err := stmt.ExecContext(_ctx, c.params...)
+		result, err := stmt.ExecContext(ctx, c.params...)
 		if err != nil {
 			return nil, err
 		}
@@ -172,7 +161,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 				return nil, dialect.ErrBeanEmpty
 			}
 			_, c.params = bean.RawAssignValues(c.cols...)
-			result, err = stmt.ExecContext(_ctx, c.params...)
+			result, err = stmt.ExecContext(ctx, c.params...)
 			if err != nil {
 				return nil, err
 			}

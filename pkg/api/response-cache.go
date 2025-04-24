@@ -57,16 +57,6 @@ func ReadCache(ctx Context, lefetime ...time.Duration) bool {
 		return false
 	}
 
-	// var data = types.NewSmap()
-	// if e = json.Unmarshal(buf, &data); e != nil {
-	// 	return false
-	// }
-	//
-	// j := types.NewResult()
-	// defer j.Free()
-	//
-	// j.Data = data
-	// return ctx.JSON(j) == nil
 	ctx.StopWithStatus(http.StatusOK)
 	ctx.ContentType("application/json")
 	_, e = ctx.Write(buf)
