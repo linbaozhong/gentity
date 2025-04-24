@@ -106,7 +106,7 @@ func (o *orm) Free() {
 }
 
 func (o *orm) Reset() {
-	// o.db = nil
+	o.db = nil
 	o.table = ""
 	o.cols = o.cols[:0]   // []dialect.Field{} // o.cols[:0]
 	o.funcs = o.funcs[:0] // []string{}       // o.funcs[:0]
