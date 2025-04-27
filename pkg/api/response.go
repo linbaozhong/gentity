@@ -15,8 +15,8 @@
 package api
 
 import (
+	"context"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"net/http"
 )
@@ -50,7 +50,7 @@ func Ok(c Context, args ...any) error {
 	if c.Method() == http.MethodGet {
 		key := c.Values().Get(hasCacheKey)
 		if _key, ok := key.(cacheKey); ok {
-			setCache(app.Context, _key, j)
+			setCache(context.Background(), _key, j)
 		}
 	}
 
