@@ -80,10 +80,7 @@ func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 		return e
 	}
 
-	_ctx, cancel := context.WithTimeout(ctx, time.Second*3)
-	defer cancel()
-
-	if e := fn(_ctx, req, resp); e != nil {
+	if e := fn(ctx, req, resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
