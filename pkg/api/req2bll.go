@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"time"
 )
 
 var (
@@ -79,18 +80,14 @@ func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 		return e
 	}
 
-	if e := fn(ctx, req, resp); e != nil {
+	_ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	if e := fn(_ctx, req, resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
 	}
-	// // 缓存
-	// if ctx.Method() == iris.MethodGet {
-	// 	key := ctx.Values().Get(hasCacheKey)
-	// 	if _key, ok := key.(cacheKey); ok {
-	// 		setCache(app.Context, _key, resp)
-	// 	}
-	// }
 
 	return Ok(ctx, resp)
 }
@@ -139,7 +136,7 @@ func GetWithCache[A, B any](
 	return logicProcessing(ctx, &req, &resp, read, fn)
 }
 
-func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) error) error {
+func Redirect[A any](ctx Context, fn func(ctx context.Context, req *A, resp *string) error) error {
 	var (
 		req  A
 		resp string
@@ -161,7 +158,10 @@ func Redirect[A any](ctx Context, fn func(ctx Context, req *A, resp *string) err
 		return e
 	}
 
-	if e := fn(ctx, &req, &resp); e != nil {
+	_ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	if e := fn(_ctx, &req, &resp); e != nil {
 		log.Error(e)
 		return e
 	}
