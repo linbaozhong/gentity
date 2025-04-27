@@ -212,15 +212,57 @@ func (o *orm) ToSql(b ...bool) Builder {
 
 // Clone 克隆 orm
 func (o *orm) Clone() Builder {
-	_s := *o
-	_s.cols = append([]dialect.Field(nil), o.cols...)
-	_s.funcs = append([]string(nil), o.funcs...)
-	_s.join = append([][3]string(nil), o.join...)
-	_s.joinParams = append([]any(nil), o.joinParams...)
-	_s.omits = append([]dialect.Field(nil), o.omits...)
-	_s.whereParams = append([]any(nil), o.whereParams...)
-	_s.havingParams = append([]any(nil), o.havingParams...)
-	return &_s
+	// 创建一个新的 orm 实例，并复制非引用类型字段
+	newOrm := *o
+
+	// 复制切片类型的字段，创建新的底层数组
+	newOrm.cols = make([]dialect.Field, len(o.cols))
+	copy(newOrm.cols, o.cols)
+
+	newOrm.funcs = make([]string, len(o.funcs))
+	copy(newOrm.funcs, o.funcs)
+
+	newOrm.join = make([][3]string, len(o.join))
+	copy(newOrm.join, o.join)
+
+	newOrm.joinParams = make([]any, len(o.joinParams))
+	copy(newOrm.joinParams, o.joinParams)
+
+	newOrm.omits = make([]dialect.Field, len(o.omits))
+	copy(newOrm.omits, o.omits)
+
+	newOrm.whereParams = make([]any, len(o.whereParams))
+	copy(newOrm.whereParams, o.whereParams)
+
+	newOrm.havingParams = make([]any, len(o.havingParams))
+	copy(newOrm.havingParams, o.havingParams)
+
+	newOrm.exprCols = make([]expr, len(o.exprCols))
+	copy(newOrm.exprCols, o.exprCols)
+
+	newOrm.params = make([]any, len(o.params))
+	copy(newOrm.params, o.params)
+
+	// 复制 strings.Builder 类型的字段
+	newOrm.groupBy.Reset()
+	newOrm.groupBy.WriteString(o.groupBy.String())
+
+	newOrm.having.Reset()
+	newOrm.having.WriteString(o.having.String())
+
+	newOrm.orderBy.Reset()
+	newOrm.orderBy.WriteString(o.orderBy.String())
+
+	newOrm.where.Reset()
+	newOrm.where.WriteString(o.where.String())
+
+	newOrm.command.Reset()
+	newOrm.command.WriteString(o.command.String())
+
+	newOrm.commandString.Reset()
+	newOrm.commandString.WriteString(o.commandString.String())
+
+	return &newOrm
 }
 
 // 合并参数
@@ -304,13 +346,19 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 	}
 	stmt, err := o.db.PrepareContext(ctx, sqlStr)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	if o.db.IsDB() {
 		defer stmt.Close()
 	}
 
-	return stmt.QueryContext(ctx, params...)
+	rows, err := stmt.QueryContext(ctx, params...)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return rows, nil
 }
 
 func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, error) {
@@ -320,6 +368,7 @@ func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, 
 	}
 	stmt, err := o.db.PrepareContext(ctx, sqlStr)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	if o.db.IsDB() {

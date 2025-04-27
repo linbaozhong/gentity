@@ -157,9 +157,9 @@ func (p *DispatchCompany) AssignPtr(args ...dialect.Field) []any {
 	return _vals
 }
 
-func (p *DispatchCompany) Scan(rows *sql.Rows, args ...dialect.Field) ([]DispatchCompany, bool, error) {
+func (p *DispatchCompany) Scan(rows *sql.Rows, args ...dialect.Field) ([]*DispatchCompany, bool, error) {
 	defer rows.Close()
-	dispatch_companys := make([]DispatchCompany, 0)
+	dispatch_companys := make([]*DispatchCompany, 0)
 
 	if len(args) == 0 {
 		args = tbldispatchcompany.ReadableFields
@@ -173,7 +173,7 @@ func (p *DispatchCompany) Scan(rows *sql.Rows, args ...dialect.Field) ([]Dispatc
 			log.Error(e)
 			return nil, false, e
 		}
-		dispatch_companys = append(dispatch_companys, *_p)
+		dispatch_companys = append(dispatch_companys, _p)
 	}
 	if e := rows.Err(); e != nil {
 		log.Error(e)

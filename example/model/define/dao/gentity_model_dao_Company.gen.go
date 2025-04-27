@@ -314,7 +314,7 @@ func (p *company) Cell(ctx context.Context, s ace.SelectBuilder) (any, bool, err
 }
 
 // List 查询所有符合条件的记录
-func (p *company) List(ctx context.Context, s ace.SelectBuilder) ([]do.Company, bool, error) {
+func (p *company) List(ctx context.Context, s ace.SelectBuilder) ([]*do.Company, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0 {
 		s.Table(do.CompanyTableName)

@@ -1,0 +1,110 @@
+// Copyright © 2023 Linbaozhong. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package api
+
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/template/html/v2" // 导入 html 模板引擎
+	"os"
+	"os/signal"
+	"syscall"
+	
+	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/types"
+)
+
+type (
+	Application = *fiber.App
+	Context     = *fiber.Ctx
+	Party       = fiber.Router
+	Handler     = fiber.Handler
+)
+
+func NewApplication(name, version string) Application {
+	app := fiber.New(
+		fiber.Config{
+			DisableStartupMessage: true,
+		},
+	)
+	
+	// 调试服务
+	app.Get("/", debug(name, version))
+	app.Head("/", debug(name, version))
+	// 错误处理
+	// app.OnErrorCode(fiber.StatusNotFound, NoMethod)
+	// app.OnErrorCode(fiber.StatusMethodNotAllowed, NoRoute)
+	app.Use(NoMethod)
+	app.Use(NoRoute)
+	return app
+}
+
+func OnInterrupt(fn func()) {
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch,
+		// kill -SIGINT XXXX or Ctrl+c
+		os.Interrupt,
+		syscall.SIGINT, // register that too, it should be ok
+		// os.Kill  is equivalent with the syscall.SIGKILL
+		// os.Kill,
+		// syscall.SIGKILL, // register that too, it should be ok
+		// kill -SIGTERM XXXX
+		syscall.SIGTERM,
+	)
+	<-ch
+	fn()
+}
+
+func NewParty(app Party, relativePath string) Party {
+	return app.Group(relativePath)
+}
+
+func Logger() Handler {
+	return logger.New()
+}
+
+func GetHtmlView(dir, extension string) *html.Engine {
+	return html.New(dir, extension)
+}
+
+func debug(name, version string) Handler {
+	return func(c Context) error {
+		c.JSON(fiber.Map{
+			"app_name":    name,
+			"app_version": version,
+		})
+		return nil
+	}
+}
+
+func NoRoute(c Context) error {
+	return Fail(c, types.NewError(fiber.StatusMethodNotAllowed, "方法不允许"))
+}
+
+func NoMethod(c Context) error {
+	return Fail(c, types.NewError(fiber.StatusNotFound, "方法未找到"))
+}
+
+func Recovery() Handler {
+	return func(c Context) error {
+		defer func() {
+			if e := recover(); e != nil {
+				log.Panic(e)
+				Fail(c, types.NewError(fiber.StatusInternalServerError, "内部服务器错误"))
+			}
+		}()
+		c.Next()
+	}
+}

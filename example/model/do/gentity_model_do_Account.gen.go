@@ -141,9 +141,9 @@ func (p *Account) AssignPtr(args ...dialect.Field) []any {
 	return _vals
 }
 
-func (p *Account) Scan(rows *sql.Rows, args ...dialect.Field) ([]Account, bool, error) {
+func (p *Account) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Account, bool, error) {
 	defer rows.Close()
-	accounts := make([]Account, 0)
+	accounts := make([]*Account, 0)
 
 	if len(args) == 0 {
 		args = tblaccount.ReadableFields
@@ -157,7 +157,7 @@ func (p *Account) Scan(rows *sql.Rows, args ...dialect.Field) ([]Account, bool, 
 			log.Error(e)
 			return nil, false, e
 		}
-		accounts = append(accounts, *_p)
+		accounts = append(accounts, _p)
 	}
 	if e := rows.Err(); e != nil {
 		log.Error(e)

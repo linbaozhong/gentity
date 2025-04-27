@@ -314,7 +314,7 @@ func (p *companystamp) Cell(ctx context.Context, s ace.SelectBuilder) (any, bool
 }
 
 // List 查询所有符合条件的记录
-func (p *companystamp) List(ctx context.Context, s ace.SelectBuilder) ([]do.CompanyStamp, bool, error) {
+func (p *companystamp) List(ctx context.Context, s ace.SelectBuilder) ([]*do.CompanyStamp, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0 {
 		s.Table(do.CompanyStampTableName)

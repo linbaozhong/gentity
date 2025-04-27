@@ -312,7 +312,7 @@ return _v, false, e
 }
 
 // List 查询所有符合条件的记录
-func (p *dao{{$structName}}) List(ctx context.Context, s ace.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
+func (p *dao{{$structName}}) List(ctx context.Context, s ace.SelectBuilder) ([]*{{$package}}.{{$structName}}, bool, error) {
 if len(s.GetTableName()) == 0{
 s.Table({{$package}}.{{$structName}}TableName)
 }

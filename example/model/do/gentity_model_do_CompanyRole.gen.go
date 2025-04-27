@@ -149,9 +149,9 @@ func (p *CompanyRole) AssignPtr(args ...dialect.Field) []any {
 	return _vals
 }
 
-func (p *CompanyRole) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyRole, bool, error) {
+func (p *CompanyRole) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyRole, bool, error) {
 	defer rows.Close()
-	company_roles := make([]CompanyRole, 0)
+	company_roles := make([]*CompanyRole, 0)
 
 	if len(args) == 0 {
 		args = tblcompanyrole.ReadableFields
@@ -165,7 +165,7 @@ func (p *CompanyRole) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyRole
 			log.Error(e)
 			return nil, false, e
 		}
-		company_roles = append(company_roles, *_p)
+		company_roles = append(company_roles, _p)
 	}
 	if e := rows.Err(); e != nil {
 		log.Error(e)

@@ -128,9 +128,9 @@ func (p *{{.StructName}}) AssignPtr(args ...dialect.Field) ([]any) {
 	return _vals
 }
 
-func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]{{.StructName}}, bool, error) {
+func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]*{{.StructName}}, bool, error) {
 	defer rows.Close()
-	{{.TableName}}s := make([]{{.StructName}}, 0)
+	{{.TableName}}s := make([]*{{.StructName}}, 0)
 
 	if len(args) == 0 {
 		args = tbl{{$structNameLower}}.ReadableFields
@@ -144,7 +144,7 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]{{.Stru
 			log.Error(e)
 			return nil, false, e
 		}
-		{{.TableName}}s = append({{.TableName}}s, *_p)
+		{{.TableName}}s = append({{.TableName}}s, _p)
 	}
 	if e := rows.Err(); e != nil {
 		log.Error(e)

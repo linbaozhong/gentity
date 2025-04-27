@@ -53,7 +53,7 @@ func ReadCache(ctx Context, lefetime ...time.Duration) bool {
 	})
 
 	buf, e := respCache.Fetch(ctx, _key)
-	if e != nil {
+	if e != nil || len(buf) == 0 {
 		return false
 	}
 

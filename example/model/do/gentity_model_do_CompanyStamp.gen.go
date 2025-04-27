@@ -197,9 +197,9 @@ func (p *CompanyStamp) AssignPtr(args ...dialect.Field) []any {
 	return _vals
 }
 
-func (p *CompanyStamp) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyStamp, bool, error) {
+func (p *CompanyStamp) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyStamp, bool, error) {
 	defer rows.Close()
-	company_stamps := make([]CompanyStamp, 0)
+	company_stamps := make([]*CompanyStamp, 0)
 
 	if len(args) == 0 {
 		args = tblcompanystamp.ReadableFields
@@ -213,7 +213,7 @@ func (p *CompanyStamp) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanySta
 			log.Error(e)
 			return nil, false, e
 		}
-		company_stamps = append(company_stamps, *_p)
+		company_stamps = append(company_stamps, _p)
 	}
 	if e := rows.Err(); e != nil {
 		log.Error(e)

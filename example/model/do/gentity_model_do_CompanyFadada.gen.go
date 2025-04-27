@@ -205,9 +205,9 @@ func (p *CompanyFadada) AssignPtr(args ...dialect.Field) []any {
 	return _vals
 }
 
-func (p *CompanyFadada) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyFadada, bool, error) {
+func (p *CompanyFadada) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyFadada, bool, error) {
 	defer rows.Close()
-	company_fadadas := make([]CompanyFadada, 0)
+	company_fadadas := make([]*CompanyFadada, 0)
 
 	if len(args) == 0 {
 		args = tblcompanyfadada.ReadableFields
@@ -221,7 +221,7 @@ func (p *CompanyFadada) Scan(rows *sql.Rows, args ...dialect.Field) ([]CompanyFa
 			log.Error(e)
 			return nil, false, e
 		}
-		company_fadadas = append(company_fadadas, *_p)
+		company_fadadas = append(company_fadadas, _p)
 	}
 	if e := rows.Err(); e != nil {
 		log.Error(e)

@@ -181,9 +181,9 @@ func (p *DocumentTemplate) AssignPtr(args ...dialect.Field) []any {
 	return _vals
 }
 
-func (p *DocumentTemplate) Scan(rows *sql.Rows, args ...dialect.Field) ([]DocumentTemplate, bool, error) {
+func (p *DocumentTemplate) Scan(rows *sql.Rows, args ...dialect.Field) ([]*DocumentTemplate, bool, error) {
 	defer rows.Close()
-	document_templates := make([]DocumentTemplate, 0)
+	document_templates := make([]*DocumentTemplate, 0)
 
 	if len(args) == 0 {
 		args = tbldocumenttemplate.ReadableFields
@@ -197,7 +197,7 @@ func (p *DocumentTemplate) Scan(rows *sql.Rows, args ...dialect.Field) ([]Docume
 			log.Error(e)
 			return nil, false, e
 		}
-		document_templates = append(document_templates, *_p)
+		document_templates = append(document_templates, _p)
 	}
 	if e := rows.Err(); e != nil {
 		log.Error(e)

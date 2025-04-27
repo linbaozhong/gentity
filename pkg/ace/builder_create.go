@@ -76,13 +76,19 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	// 执行SQL语句
 	stmt, err := c.db.PrepareContext(ctx, c.command.String())
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	if c.db.IsDB() {
 		defer stmt.Close()
 	}
 
-	return stmt.ExecContext(ctx, c.params...)
+	r, err := stmt.ExecContext(ctx, c.params...)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return r, nil
 }
 
 // InsertStruct 执行插入一个结构体
@@ -106,11 +112,13 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	// 执行SQL语句
 	stmt, err := c.db.PrepareContext(ctx, c.command.String())
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
 	result, err := stmt.ExecContext(ctx, c.params...)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -144,6 +152,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	ret, err := c.db.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, c.command.String())
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		if c.db.IsDB() {
@@ -152,6 +161,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 
 		result, err := stmt.ExecContext(ctx, c.params...)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 
@@ -170,6 +180,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return result, nil
 	})
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	if result, ok := ret.(sql.Result); ok {

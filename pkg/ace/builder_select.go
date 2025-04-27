@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 )
 
@@ -116,10 +117,18 @@ func (s *read) Get(ctx context.Context, dest any) error {
 			return sql.ErrNoRows
 		}
 		vals := d.AssignPtr()
-		return rows.Scan(vals...)
+		err = rows.Scan(vals...)
+		if err != nil {
+			log.Error(err)
+		}
+		return err
 	}
 	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
-	return r.scanAny(dest, false)
+	err = r.scanAny(dest, false)
+	if err != nil {
+		log.Error(err)
+	}
+	return err
 }
 
 // Gets 返回数据切片，dest 必须是slice指针
@@ -128,11 +137,16 @@ func (s *read) Gets(ctx context.Context, dest any) error {
 
 	rows, err := s.query(ctx)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 	defer rows.Close()
 
-	return scanAll(rows, dest, false)
+	err = scanAll(rows, dest, false)
+	if err != nil {
+		log.Error(err)
+	}
+	return err
 }
 
 // Map 返回 map[string]any，用于列数未知的情况
@@ -143,13 +157,19 @@ func (s *read) Map(ctx context.Context) (map[string]any, error) {
 
 	rows, err := s.query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	defer rows.Close()
 
 	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
 	dest := make(map[string]any)
-	return dest, r.MapScan(dest)
+	err = r.MapScan(dest)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return dest, nil
 }
 
 // Maps 返回 map[string]any 的切片 []map[string]any，用于列数未知的情况
@@ -158,6 +178,7 @@ func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 
 	rows, err := s.query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -185,12 +206,18 @@ func (s *read) Slice(ctx context.Context) ([]any, error) {
 
 	rows, err := s.query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	defer rows.Close()
 
 	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
-	return r.SliceScan()
+	a, err := r.SliceScan()
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return a, nil
 }
 
 // Slices 返回 []any 的切片 [][]any，用于列数未知的情况
@@ -199,6 +226,7 @@ func (s *read) Slices(ctx context.Context) ([][]any, error) {
 
 	rows, err := s.query(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -242,11 +270,13 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 
 	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
 	if err != nil {
+		log.Error(err)
 		return 0, err
 	}
 	var count int64
 	err = row.Scan(&count)
 	if err != nil {
+		log.Error(err)
 		return 0, err
 	}
 	return count, nil
@@ -281,12 +311,14 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 
 	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
 	var sum = make([]any, len(cols))
 	err = row.Scan(sum...)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -309,31 +341,43 @@ func (s *read) RawQuery(ctx context.Context, sqlStr string, args ...any) (*sql.R
 func (se *read) RawQueryMap(ctx context.Context, sqlStr string, args ...any) (map[string]any, error) {
 	rows, err := se.RawQuery(ctx, sqlStr, args...)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	defer rows.Close()
 
 	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
 	dest := make(map[string]any)
-	return dest, r.MapScan(dest)
+	err = r.MapScan(dest)
+	if err != nil {
+		return nil, err
+	}
+	return dest, nil
 }
 
 // SelectSlice 执行原生 SQL 查询并返回 []any
 func (se *read) RawQuerySlice(ctx context.Context, sqlStr string, args ...any) ([]any, error) {
 	rows, err := se.RawQuery(ctx, sqlStr, args...)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	defer rows.Close()
 
 	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
-	return r.SliceScan()
+	a, err := r.SliceScan()
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return a, nil
 }
 
 // SelectStruct 执行原生 SQL 查询并返回实现 dialect.Modeler 接口的结构体
 func (se *read) RawQueryStruct(ctx context.Context, dest any, sqlStr string, args ...any) error {
 	rows, err := se.RawQuery(ctx, sqlStr, args...)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 	defer rows.Close()
@@ -345,8 +389,17 @@ func (se *read) RawQueryStruct(ctx context.Context, dest any, sqlStr string, arg
 			return sql.ErrNoRows
 		}
 		vals := d.AssignPtr()
-		return rows.Scan(vals...)
+		err = rows.Scan(vals...)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
 	}
 	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
-	return r.scanAny(dest, false)
+	err = r.scanAny(dest, false)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	return nil
 }

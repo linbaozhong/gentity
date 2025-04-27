@@ -52,7 +52,8 @@ var(
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
 func {{$structName}}(exec ...ace.Executer) *{{$structNameLower}} {
-	_obj := &{{$structNameLower}}{}
+	_obj := {{$structNameLower}}Pool.Get().(*{{$structNameLower}})
+	_obj.UUID()
 	_obj.db = ace.GetExec(exec...)
 {{- if .HasCache}}
 	_obj.cache = _obj.db.Cache({{$package}}.{{$structName}}TableName)
@@ -351,7 +352,7 @@ func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (an
 }
 
 // List 查询所有符合条件的记录
-func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
+func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([]*{{$package}}.{{$structName}}, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0{
 		s.Table({{$package}}.{{$structName}}TableName)
@@ -555,7 +556,7 @@ func (p *{{$structNameLower}}) edges(ctx context.Context,ids []any) map[any][]{{
 }
 
 // ListX 分页获取{{.TableName}} slice对象，先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *{{$structNameLower}}) ListX(ctx context.Context, s ace.SelectBuilder) ([]{{$package}}.{{$structName}}, bool, error) {
+func (p *{{$structNameLower}}) ListX(ctx context.Context, s ace.SelectBuilder) ([]*{{$package}}.{{$structName}}, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0{
 		s.Table({{$package}}.{{$structName}}TableName)
