@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/linbaozhong/gentity/pkg/app"
 	"strconv"
 	"time"
 )
@@ -15,10 +14,13 @@ type IRegisterRoute interface {
 }
 
 func Initiate(ctx Context, arg any) {
-	if id := ctx.GetHeader(app.OperationID); len(id) == 0 {
-		ctx.SetID(strconv.FormatInt(time.Now().UnixMilli(), 10))
+	if tk := ctx.GetHeader(AuthorizationKey); len(tk) > 0 {
+		ctx.Values().Set(AuthorizationKey, tk)
+	}
+	if id := ctx.GetHeader(OperationID); len(id) == 0 {
+		ctx.Values().Set(OperationID, strconv.FormatInt(time.Now().UnixMilli(), 10))
 	} else {
-		ctx.SetID(id)
+		ctx.Values().Set(OperationID, id)
 	}
 
 	if ier, ok := arg.(Initializer); ok {

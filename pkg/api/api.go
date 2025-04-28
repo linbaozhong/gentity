@@ -16,10 +16,6 @@ package api
 
 import "context"
 
-const (
-	VisitorKey = "__Visitor__"
-)
-
 type (
 	Checker interface {
 		Check() error

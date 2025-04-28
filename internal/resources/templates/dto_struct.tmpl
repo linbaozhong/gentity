@@ -14,7 +14,7 @@ func (p *{{.StructName}}) Init() error {
 	{{- if ne .VisitorName ""}}
 // Visiter
 func (p *{{.StructName}}) Visiter(ctx context.Context) {
-		if vis, ok := ctx.Value(api.VisitorKey).(Visitor); ok {
+	if vis, ok := ctx.Value(api.VisitorKey).(Visitor); ok {
 		p.{{.VisitorName}} = vis
 	}
 	return
@@ -67,70 +67,74 @@ func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 }
 {{end}}
 
-{{- if contains .ParseTag "checker|request"}}
+{{- if and (contains .ParseTag "checker|request") (gt (len .Columns) 0 )}}
+	{{- $firstColumn := index .Columns 0 }}
 // UnmarshalJSON
 func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
-	{{- if .HasRef}}
-	defer func() {
-		if r := recover(); r != nil {
-			log.Error(r)
-			return
-		}
-	}()
-	{{- end}}
-
-	ok := gjson.ValidBytes(data)
-	if !ok {
-		return errors.New("invalid json")
-	}
-	_result := gjson.ParseBytes(data)
-	var e error
-	_result.ForEach(func(key, value gjson.Result) bool {
-		switch key.Str {
-		{{- range $key, $value := .Columns}}
-			{{- if ne $value.Json.Name ""}}
-			case "{{ $value.Json.Name }}":
-				{{getUnmarshalJSON $value}}
-			{{- end}}
+	{{- if ne $firstColumn.Json.Name "-"}}
+		{{- if .HasRef}}
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error(r)
+				return
+			}
+		}()
 		{{- end}}
+
+		ok := gjson.ValidBytes(data)
+		if !ok {
+			return errors.New("invalid json")
 		}
-		if e != nil {
-			log.Error(e)
-			return false
-		}
-		return true
-	})
+		_result := gjson.ParseBytes(data)
+		var e error
+		_result.ForEach(func(key, value gjson.Result) bool {
+			switch key.Str {
+			{{- range $key, $value := .Columns}}
+				{{- if and (ne $value.Json.Name "") (ne $value.Json.Name "-")}}
+				case "{{ $value.Json.Name }}":
+					{{getUnmarshalJSON $value}}
+				{{- end}}
+			{{- end}}
+			}
+			if e != nil {
+				log.Error(e)
+				return false
+			}
+			return true
+		})
+	{{- end}}
 	return nil
 }
 
 // UnmarshalValues
 func (p *{{.StructName}}) UnmarshalValues(m map[string][]string) error {
-	{{- if .HasRef}}
-	defer func() {
-		if r := recover(); r != nil {
-			log.Error(r)
-			return
-		}
-	}()
-	{{- end}}
-
-	var e error
-	for k, v := range m {
-		value := gjson.Result{Type:gjson.String,Raw: v[0],Str: v[0]}
-		switch k {
-		{{- range $key, $value := .Columns}}
-			{{- if ne $value.Json.Name ""}}
-			case "{{ $value.Json.Name }}":
-				{{getUnmarshalJSON $value}}
-			{{- end}}
+    {{- if ne $firstColumn.Json.Name "-"}}
+		{{- if .HasRef}}
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error(r)
+				return
+			}
+		}()
 		{{- end}}
+
+		var e error
+		for k, v := range m {
+			value := gjson.Result{Type:gjson.String,Raw: v[0],Str: v[0]}
+			switch k {
+			{{- range $key, $value := .Columns}}
+				{{- if and (ne $value.Json.Name "") (ne $value.Json.Name "-")}}
+				case "{{ $value.Json.Name }}":
+					{{getUnmarshalJSON $value}}
+				{{- end}}
+			{{- end}}
+			}
+			if e != nil {
+				log.Error(e)
+				return e
+			}
 		}
-		if e != nil {
-			log.Error(e)
-			return e
-		}
-	}
+    {{end}}
 	return nil
 }
-
 {{end}}

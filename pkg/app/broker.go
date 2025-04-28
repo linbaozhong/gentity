@@ -11,10 +11,6 @@ type IServiceCloser interface {
 	Close() error
 }
 
-const (
-	OperationID = "operation_id"
-)
-
 var (
 	// 全局context，用于支持外部调用。最好在程序启动时引用，否则可能造成panic。
 	// 在程序退出时，需要调用Cancel()。

@@ -80,7 +80,10 @@ func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 		return e
 	}
 
-	if e := fn(ctx, req, resp); e != nil {
+	_ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	if e := fn(_ctx, req, resp); e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
@@ -164,4 +167,54 @@ func Redirect[A any](ctx Context, fn func(ctx context.Context, req *A, resp *str
 	}
 	ctx.Redirect(resp)
 	return nil
+}
+
+func Stream[A, B any](
+	ctx Context,
+	fn func(ctx context.Context, req *A, resp *B) error,
+) error {
+	var (
+		req  A
+		resp B
+		read = func(ctx Context, req *A) error {
+			Initiate(ctx, req)
+
+			switch ctx.GetContentTypeRequested() {
+			case "application/json":
+				return ReadJSON(ctx, req)
+			case "application/x-www-form-urlencoded", "multipart/form-data":
+				return ReadForm(ctx, req)
+			default:
+				if ctx.Request().URL.RawQuery == "" {
+					return ReadForm(ctx, req)
+				} else {
+					return ReadQuery(ctx, req)
+				}
+			}
+		}
+	)
+	if e := read(ctx, &req); e != nil {
+		Fail(ctx, Param_Invalid)
+		log.Error(e)
+		return e
+	}
+	if e := Validate(&req); e != nil {
+		Fail(ctx, e)
+		log.Error(e)
+		return e
+	}
+
+	if e := Visit(ctx, &req); e != nil {
+		Fail(ctx, e)
+		log.Error(e)
+		return e
+	}
+
+	if e := fn(ctx, &req, &resp); e != nil {
+		Fail(ctx, e)
+		log.Error(e)
+		return e
+	}
+
+	return Ok(ctx, &resp)
 }
