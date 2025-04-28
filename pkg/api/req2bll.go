@@ -171,7 +171,7 @@ func Redirect[A any](ctx Context, fn func(ctx context.Context, req *A, resp *str
 
 func Stream[A, B any](
 	ctx Context,
-	fn func(ctx context.Context, req *A, resp *B) error,
+	fn func(ctx Context, req *A, resp *B) error,
 ) error {
 	var (
 		req  A
