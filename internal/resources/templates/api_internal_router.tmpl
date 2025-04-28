@@ -8,6 +8,12 @@ import (
 func Init() api.Application {
 	_app := api.NewApplication("{{.ModulePath}}", "0.1")
 
+	_app.Use(func(ctx api.Context) {
+		vals := ctx.Values()
+		vals.Set(api.IpKey, ctx.RemoteAddr())
+		vals.Set(api.UserAgent, ctx.GetHeader(api.UserAgent))
+	})
+
 	_app.Use(api.Recovery())
 	_app.Use(api.Logger())
 

@@ -26,6 +26,29 @@ var (
 	UnKnown       = types.NewError(610, "未知错误")
 )
 
+// Get get请求：
+// 读取query，req结构体的字段 tag 为 url。
+func Get[A, B any](
+	ctx Context,
+	fn func(ctx context.Context, req *A, resp *B) error,
+) error {
+	var (
+		req  A
+		resp B
+		read = func(ctx Context, req *A) error {
+			Initiate(ctx, req)
+
+			if ctx.Request().URL.RawQuery == "" {
+				return ReadForm(ctx, req)
+			} else {
+				return ReadQuery(ctx, req)
+			}
+		}
+	)
+
+	return logicProcessing(ctx, &req, &resp, read, fn)
+}
+
 // Post post请求
 // Content-Type：application/json，req结构体的字段tag为json
 // Content-Type: application/x-www-form-urlencoded，req结构体的字段tag为form
@@ -90,29 +113,6 @@ func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 	}
 
 	return Ok(ctx, resp)
-}
-
-// Get get请求：
-// 读取query，req结构体的字段 tag 为 url。
-func Get[A, B any](
-	ctx Context,
-	fn func(ctx context.Context, req *A, resp *B) error,
-) error {
-	var (
-		req  A
-		resp B
-		read = func(ctx Context, req *A) error {
-			Initiate(ctx, req)
-
-			if ctx.Request().URL.RawQuery == "" {
-				return ReadForm(ctx, req)
-			} else {
-				return ReadQuery(ctx, req)
-			}
-		}
-	)
-
-	return logicProcessing(ctx, &req, &resp, read, fn)
 }
 
 func GetWithCache[A, B any](
