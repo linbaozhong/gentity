@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -33,7 +34,12 @@ func (e Error) SetInfo(i any) Error {
 		return e
 	}
 	if err, ok := i.(error); ok {
-		e.Info = err.Error()
+		switch err {
+		case context.DeadlineExceeded:
+			e = NewError(-500, "超时错误")
+		default:
+			e.Info = err.Error()
+		}
 	} else if s, ok := i.(string); ok {
 		e.Info = s
 	} else {

@@ -11,7 +11,8 @@ func Init() api.Application {
 	_app.Use(func(ctx api.Context) {
 		vals := ctx.Values()
 		vals.Set(api.IpKey, ctx.RemoteAddr())
-		vals.Set(api.UserAgent, ctx.GetHeader(api.UserAgent))
+		vals.Set(api.UserAgent, ctx.Request().UserAgent())
+		ctx.Next()
 	})
 
 	_app.Use(api.Recovery())
