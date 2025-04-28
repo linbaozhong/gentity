@@ -1,36 +1,11 @@
 package api
 
-import (
-	"strconv"
-	"time"
-)
-
 var (
 	routes = make([]any, 0)
 )
 
 type IRegisterRoute interface {
 	RegisterRoute(party Party)
-}
-
-func Initiate(ctx Context, arg any) {
-	if tk := ctx.GetHeader(AuthorizationKey); len(tk) > 0 {
-		ctx.Values().Set(AuthorizationKey, tk)
-	}
-	if id := ctx.GetHeader(OperationID); len(id) == 0 {
-		ctx.Values().Set(OperationID, strconv.FormatInt(time.Now().UnixMilli(), 10))
-	} else {
-		ctx.Values().Set(OperationID, id)
-	}
-
-	if ier, ok := arg.(Initializer); ok {
-		ier.Init()
-	}
-}
-func InitiateX(ctx Context, arg any) {
-	if ier, ok := arg.(Initializer); ok {
-		ier.Init()
-	}
 }
 
 // RegisterRoute 注册路由

@@ -14,7 +14,11 @@
 
 package api
 
-import "context"
+import (
+	"context"
+	"strconv"
+	"time"
+)
 
 type (
 	Checker interface {
@@ -27,6 +31,23 @@ type (
 		Visiter(ctx context.Context)
 	}
 )
+
+func Initiate(ctx Context, arg any) {
+	vals := ctx.Values()
+	vals.Set(IpKey, ctx.RemoteAddr())
+	vals.Set(UserAgent, ctx.Request().UserAgent())
+	vals.Set(AuthorizationKey, ctx.GetHeader(AuthorizationKey))
+
+	id := ctx.GetHeader(OperationID)
+	if len(id) == 0 {
+		id = strconv.FormatInt(time.Now().UnixMilli(), 10)
+	}
+	vals.Set(OperationID, id)
+
+	if ier, ok := arg.(Initializer); ok {
+		ier.Init()
+	}
+}
 
 // Validate 校验参数
 // 注意：如果参数实现了Checker接口，会调用Check方法

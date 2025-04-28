@@ -30,7 +30,7 @@ func TestPost(t *testing.T) {
 }
 
 func Init[A any](a *A) {
-	InitiateX(nil, a)
+	Initiate(nil, a)
 }
 
 func TestPool(t *testing.T) {
