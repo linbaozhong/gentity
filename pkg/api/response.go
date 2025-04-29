@@ -25,7 +25,7 @@ func Fail(c Context, e error, args ...any) error {
 	j := types.NewResult()
 	defer j.Free()
 
-	if er, ok := e.(types.Error); ok {
+	if er, ok := e.(*types.Error); ok {
 		j.Code = er.Code
 		j.Message = er.Error()
 		j.Info = er.Info
