@@ -18,7 +18,6 @@ import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
-	"time"
 )
 
 var (
@@ -37,7 +36,7 @@ func Get[A, B any](
 		resp B
 	)
 
-	_, e := logicProcessing(ctx, &req, &resp, readGetRequest[A], fn)
+	_, e := serviceContext(ctx, &req, &resp, readGetRequest[A], fn)
 	if e != nil {
 		Fail(ctx, e)
 		log.Error(e)
@@ -59,7 +58,7 @@ func Post[A, B any](
 		resp B
 	)
 
-	_, e := logicProcessing(ctx, &req, &resp, readPostRequest[A], fn)
+	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], fn)
 	if e != nil {
 		Fail(ctx, e)
 		log.Error(e)
@@ -69,24 +68,15 @@ func Post[A, B any](
 }
 
 // Redirect 重定向
-func Redirect[A any](ctx Context, fn func(ctx context.Context, req *A, resp *string) error) error {
+func Redirect[A any](ctx Context,
+	fn func(ctx context.Context, req *A, resp *string) error) error {
 	var (
 		req  A
 		resp string
 	)
-	if e := readGetRequest(ctx, &req); e != nil {
-		log.Error(e)
-		return e
-	}
-	if e := Validate(&req); e != nil {
-		log.Error(e)
-		return e
-	}
-
-	_ctx, cancel := context.WithTimeout(ctx, time.Second*3)
-	defer cancel()
-
-	if e := fn(_ctx, &req, &resp); e != nil {
+	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], fn)
+	if e != nil {
+		Fail(ctx, e)
 		log.Error(e)
 		return e
 	}
@@ -96,34 +86,16 @@ func Redirect[A any](ctx Context, fn func(ctx context.Context, req *A, resp *str
 
 func Stream[A, B any](
 	ctx Context,
-	fn func(ctx Context, req *A, resp *B) error,
-) error {
+	fn func(ctx Context, req *A, resp *B) error) error {
 	var (
 		req  A
 		resp B
 	)
-	if e := readPostRequest(ctx, &req); e != nil {
-		Fail(ctx, Param_Invalid)
-		log.Error(e)
-		return e
-	}
-	if e := Validate(&req); e != nil {
+	_, e := service(ctx, &req, &resp, readPostRequest[A], fn)
+	if e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
 	}
-
-	if e := Visit(ctx, &req); e != nil {
-		Fail(ctx, e)
-		log.Error(e)
-		return e
-	}
-
-	if e := fn(ctx, &req, &resp); e != nil {
-		Fail(ctx, e)
-		log.Error(e)
-		return e
-	}
-
-	return Ok(ctx, &resp)
+	return Ok(ctx, resp)
 }

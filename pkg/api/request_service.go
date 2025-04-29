@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-// GetResult 处理get请求，并返回service数据
+// GetResult 调用service处理get请求，并返回结果数据
 func GetResult[A, B any](ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error) (*B, error) {
 	var (
@@ -27,21 +27,31 @@ func GetResult[A, B any](ctx Context,
 		resp B
 	)
 
-	return logicProcessing(ctx, &req, &resp, readGetRequest[A], fn)
+	return serviceContext(ctx, &req, &resp, readGetRequest[A], fn)
 }
 
-// PostResult 处理post请求，并返回service数据
+// PostResult 调用service处理post请求，并返回结果数据
 func PostResult[A, B any](ctx Context,
 	fn func(ctx context.Context, req *A, resp *B) error) (*B, error) {
 	var (
 		req  A
 		resp B
 	)
-	return logicProcessing(ctx, &req, &resp, readPostRequest[A], fn)
+	return serviceContext(ctx, &req, &resp, readPostRequest[A], fn)
 }
 
-// logicProcessing 逻辑处理
-func logicProcessing[A, B any](ctx Context, req *A, resp *B,
+// StreamResult 调用service处理post请求，并返回结果数据
+func StreamResult[A, B any](ctx Context,
+	fn func(ctx Context, req *A, resp *B) error) (*B, error) {
+	var (
+		req  A
+		resp B
+	)
+	return service(ctx, &req, &resp, readPostRequest[A], fn)
+}
+
+// serviceContext 逻辑处理,serviceContext会超时
+func serviceContext[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
 	fn func(ctx context.Context, req *A, resp *B) error) (*B, error) {
 
@@ -66,6 +76,29 @@ func logicProcessing[A, B any](ctx Context, req *A, resp *B,
 	return resp, nil
 }
 
+// service 逻辑处理,service不会超时
+func service[A, B any](ctx Context, req *A, resp *B,
+	read func(ctx Context, req *A) error,
+	fn func(ctx Context, req *A, resp *B) error) (*B, error) {
+
+	if e := read(ctx, req); e != nil {
+		return resp, Param_Invalid.SetInfo(e)
+	}
+	if e := Validate(req); e != nil {
+		return resp, e
+	}
+
+	if e := Visit(ctx, req); e != nil {
+		return resp, e
+	}
+
+	if e := fn(ctx, req, resp); e != nil {
+		return resp, e
+	}
+
+	return resp, nil
+}
+
 // readGetRequest 读取get请求
 func readGetRequest[A any](ctx Context, req *A) error {
 	Initiate(ctx, req)
@@ -76,6 +109,7 @@ func readGetRequest[A any](ctx Context, req *A) error {
 	}
 }
 
+// readPostRequest 读取post请求
 func readPostRequest[A any](ctx Context, req *A) error {
 	Initiate(ctx, req)
 	switch ctx.GetContentTypeRequested() {
