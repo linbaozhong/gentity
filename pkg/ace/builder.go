@@ -346,19 +346,13 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 	}
 	stmt, err := o.db.PrepareContext(ctx, sqlStr)
 	if err != nil {
-		log.Error(err)
 		return nil, err
 	}
 	if o.db.IsDB() {
 		defer stmt.Close()
 	}
 
-	rows, err := stmt.QueryContext(ctx, params...)
-	if err != nil {
-		log.Error(err)
-		return nil, err
-	}
-	return rows, nil
+	return stmt.QueryContext(ctx, params...)
 }
 
 func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, error) {
@@ -368,7 +362,6 @@ func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, 
 	}
 	stmt, err := o.db.PrepareContext(ctx, sqlStr)
 	if err != nil {
-		log.Error(err)
 		return nil, err
 	}
 	if o.db.IsDB() {

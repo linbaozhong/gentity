@@ -89,7 +89,6 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 
 	stmt, err := u.db.PrepareContext(ctx, u.command.String())
 	if err != nil {
-		log.Error(err)
 		return nil, err
 	}
 	if u.db.IsDB() {
@@ -98,12 +97,7 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 
 	u.params = append(u.params, u.whereParams...)
 
-	r, err := stmt.ExecContext(ctx, u.params...)
-	if err != nil {
-		log.Error(err)
-		return nil, err
-	}
-	return r, nil
+	return stmt.ExecContext(ctx, u.params...)
 }
 
 // Struct 更新一个结构体
@@ -136,7 +130,6 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 
 	stmt, err := u.db.PrepareContext(ctx, u.command.String())
 	if err != nil {
-		log.Error(err)
 		return nil, err
 	}
 	if u.db.IsDB() {
@@ -145,13 +138,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 
 	u.params = append(u.params, u.whereParams...)
 
-	result, err := stmt.ExecContext(ctx, u.params...)
-	if err != nil {
-		log.Error(err)
-		return nil, err
-	}
-
-	return result, nil
+	return stmt.ExecContext(ctx, u.params...)
 }
 
 // BatchStruct 执行批量更新,请不要在事务中使用
@@ -192,7 +179,6 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	ret, err := u.db.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, u.command.String())
 		if err != nil {
-			log.Error(err)
 			return nil, err
 		}
 		if u.db.IsDB() {
@@ -201,7 +187,6 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 
 		result, err := stmt.ExecContext(ctx, u.params...)
 		if err != nil {
-			log.Error(err)
 			return nil, err
 		}
 
@@ -219,14 +204,12 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 
 			result, err = stmt.ExecContext(ctx, u.params...)
 			if err != nil {
-				log.Error(err)
 				return nil, err
 			}
 		}
 		return result, nil
 	})
 	if err != nil {
-		log.Error(err)
 		return nil, err
 	}
 	if result, ok := ret.(sql.Result); ok {

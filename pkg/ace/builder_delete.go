@@ -66,17 +66,11 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 
 	stmt, err := d.db.PrepareContext(ctx, d.command.String())
 	if err != nil {
-		log.Error(err)
 		return nil, err
 	}
 	if d.db.IsDB() {
 		defer stmt.Close()
 	}
 
-	r, err := stmt.ExecContext(ctx, d.whereParams...)
-	if err != nil {
-		log.Error(err)
-		return nil, err
-	}
-	return r, nil
+	return stmt.ExecContext(ctx, d.whereParams...)
 }

@@ -11,25 +11,25 @@ type Error struct {
 	Info    string `json:"info"`
 }
 
-func (e Error) Error() string {
+func (e *Error) Error() string {
 	if e.Info == "" {
 		return e.Message
 	}
 	return e.Message + ":" + e.Info
 }
 
-func (e Error) Is(err error) bool {
+func (e *Error) Is(err error) bool {
 	if err == nil {
 		return false
 	}
-	if er, ok := err.(Error); ok {
+	if er, ok := err.(*Error); ok {
 		return er.Code == e.Code
 	}
 
 	return false
 }
 
-func (e Error) SetInfo(i any) Error {
+func (e *Error) SetInfo(i any) *Error {
 	if i == nil {
 		return e
 	}
@@ -48,8 +48,8 @@ func (e Error) SetInfo(i any) Error {
 	return e
 }
 
-func NewError(code int, message string) Error {
-	return Error{
+func NewError(code int, message string) *Error {
+	return &Error{
 		Code:    code,
 		Message: message,
 	}
