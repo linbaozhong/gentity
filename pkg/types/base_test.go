@@ -95,11 +95,12 @@ func TestBase(t *testing.T) {
 
 func TestError(t *testing.T) {
 	e1 := NewError(1, "error1")
-	e3 := NewError(1, "error1")
-	e2 := fmt.Errorf("error2:,%w", e1)
+	e3 := errors.New("error3")
+	e2 := e1.Join(e3)
 	t.Log(e1)
 	t.Log(e2)
-	t.Log(errors.Is(e1, e3))
+	t.Log(errors.Is(e2, e3))
+	t.Log(errors.Is(e2, e1))
 }
 
 func TestConv(t *testing.T) {

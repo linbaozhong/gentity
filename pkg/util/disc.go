@@ -14,6 +14,11 @@
 
 package util
 
+import (
+	"regexp"
+	"strings"
+)
+
 type iif interface {
 	~bool | ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~float32 | ~float64 | ~string | any
 }
@@ -24,4 +29,26 @@ func IIF[T iif](condition bool, trueValue, falseValue T) T {
 		return trueValue
 	}
 	return falseValue
+}
+
+// IsUrl 检查url是否合法
+// 如果url没有前缀，会自动添加https前缀或者scheme指定的前缀
+// scheme: http, https, ftp
+func IsUrl(url string, scheme ...string) (string, bool) {
+	regex := regexp.MustCompile(`^(https?|ftp)://[^\s/$.?#].[^\s]*$`)
+	if regex.MatchString(url) {
+		return url, true
+	}
+	regex = regexp.MustCompile(`^(?:\/\/)?[^\s/$.?#].[^\s]*$`)
+	if regex.MatchString(url) {
+		prefix := "https:"
+		if len(scheme) > 0 {
+			prefix = scheme[0] + ":"
+		}
+		if strings.HasPrefix(url, "//") {
+			return prefix + url, true
+		}
+		return prefix + "//" + url, true
+	}
+	return url, false
 }

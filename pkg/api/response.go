@@ -16,8 +16,11 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"github.com/linbaozhong/gentity/pkg/util"
+	"io"
 	"net/http"
 )
 
@@ -55,4 +58,48 @@ func Ok(c Context, args ...any) error {
 	}
 
 	return c.JSON(j)
+}
+
+// SendLocalFile 发送本地文件
+// path: 文件路径
+// name: 文件名
+func SendLocalFile(c Context, path, name string) error {
+	return c.SendFile(path, name)
+}
+
+// SendUrlFile 发送url文件
+// url: 文件url
+// name: 文件名
+// 注意: 该函数会将文件下载到本地, 然后再发送到客户端, 所以需要确保文件url是可访问的, 否则会出现错误
+func SendUrlFile(c Context, url, name string) error {
+	if url == "" {
+		return errors.New("url is empty")
+	}
+	url, _ = util.IsUrl(url, "https")
+	// 发送 HTTP 请求获取网络文件
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// 检查响应状态码
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to fetch file from URL: %s, status code: %d", url, resp.StatusCode)
+	}
+
+	// 设置响应头
+	c.Header("Content-Type", resp.Header.Get("Content-Type"))
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", name))
+	c.Header("Content-Length", resp.Header.Get("Content-Length"))
+	c.Header("Access-Control-Expose-Headers", "Content-Disposition")
+	c.Header("Content-Transfer-Encoding", "binary")
+
+	// 将文件内容复制到 HTTP 响应体
+	_, err = io.Copy(c.ResponseWriter(), resp.Body)
+	if err != nil {
+		// 复制文件内容失败，设置 500 状态码
+		c.StatusCode(http.StatusInternalServerError)
+	}
+	return err
 }
