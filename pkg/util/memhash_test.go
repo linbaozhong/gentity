@@ -48,3 +48,17 @@ func TestIIF(t *testing.T) {
 	var b myint = 22
 	t.Log(IIF(false, b, 4.03))
 }
+
+func TestIsUrl(t *testing.T) {
+	urls := []string{
+		"www.baidu.com",
+		"6li.me",
+		"http://www.baidu.com/123",
+		"//www.baidu.com/123?a=1&b=2",
+		"www.baidu.com/123.pdf",
+		"http://com/123.pdf?a=1&b=2",
+	}
+	for _, url := range urls {
+		t.Log(IsUrl(url))
+	}
+}

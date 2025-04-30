@@ -19,6 +19,12 @@ import (
 	"strings"
 )
 
+// 预编译正则表达式，避免每次调用都编译
+var (
+	fullURLRegex    = regexp.MustCompile(`^(https?|ftp)://([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:[0-9]{1,5})?(/[^\s]*)?$`)
+	partialURLRegex = regexp.MustCompile(`^(?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:[0-9]{1,5})?(/[^\s]*)?$`)
+)
+
 type iif interface {
 	~bool | ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~float32 | ~float64 | ~string | any
 }
@@ -35,12 +41,10 @@ func IIF[T iif](condition bool, trueValue, falseValue T) T {
 // 如果url没有前缀，会自动添加https前缀或者scheme指定的前缀
 // scheme: http, https, ftp
 func IsUrl(url string, scheme ...string) (string, bool) {
-	regex := regexp.MustCompile(`^(https?|ftp)://[^\s/$.?#].[^\s]*$`)
-	if regex.MatchString(url) {
+	if fullURLRegex.MatchString(url) {
 		return url, true
 	}
-	regex = regexp.MustCompile(`^(?:\/\/)?[^\s/$.?#].[^\s]*$`)
-	if regex.MatchString(url) {
+	if partialURLRegex.MatchString(url) {
 		prefix := "https:"
 		if len(scheme) > 0 {
 			prefix = scheme[0] + ":"
