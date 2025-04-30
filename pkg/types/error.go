@@ -1,7 +1,7 @@
 package types
 
 import (
-	"context"
+	"errors"
 	"fmt"
 )
 
@@ -29,17 +29,17 @@ func (e *Error) Is(err error) bool {
 	return false
 }
 
+// Join 将err加入到e中
+func (e *Error) Join(err error) error {
+	return errors.Join(e, err)
+}
+
 func (e *Error) SetInfo(i any) *Error {
 	if i == nil {
 		return e
 	}
 	if err, ok := i.(error); ok {
-		switch err {
-		case context.DeadlineExceeded:
-			e = NewError(-500, "超时错误")
-		default:
-			e.Info = err.Error()
-		}
+		e.Info = err.Error()
 	} else if s, ok := i.(string); ok {
 		e.Info = s
 	} else {
