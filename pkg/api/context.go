@@ -18,6 +18,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"time"
 
 	"github.com/kataras/iris/v12/middleware/logger"
 	"github.com/kataras/iris/v12/view"
@@ -34,6 +35,9 @@ func NewApplication(name, version string) Application {
 	app := iris.New().Configure(iris.WithRemoteAddrHeader(
 		"X-Forwarded-For",
 	))
+	// 中间件
+	app.Use(Recovery())
+	app.Use(Logger())
 
 	// 调试服务
 	app.Get("/", debug(name, version))
@@ -69,8 +73,9 @@ func GetHtmlView(dir, extension string, reload bool) *view.HTMLEngine {
 func debug(name, version string) Handler {
 	return func(c Context) {
 		c.JSON(iris.Map{
-			"app_name":    name,
-			"app_version": version,
+			"name":    name,
+			"version": version,
+			"time":    time.Now().Format(time.DateTime),
 		})
 		return
 	}
