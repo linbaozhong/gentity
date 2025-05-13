@@ -25,7 +25,7 @@ type (
 		Check() error
 	}
 	Initializer interface {
-		Init()
+		Init() error
 	}
 	Visiter interface {
 		Visiter(ctx context.Context)
