@@ -160,7 +160,7 @@ func (s *orm) GetTableName() string {
 
 // Set
 // 用于设置更新语句中的字段和值
-// 例如：Set(dialect.F("name", "linbaozhong"))
+// 例如：Set(dialect.F("name", "哈利波特"))
 func (o *orm) Set(fns ...dialect.Setter) Builder {
 	l := len(fns)
 	if l == 0 {

@@ -29,8 +29,19 @@ const (
 	CacheTypeSyncMap cacheType = "sync"
 )
 
+// Method
+const (
+	Method_Get    MethodType = iota // 读取符合条件的首行数据
+	Method_List                     // 读取符合条件的所有数据
+	Method_Post                     // 插入数据
+	Method_Patch                    // 更新数据
+	Method_Delete                   // 删除数据
+)
+
 type (
 	cacheType string
+	// MethodType DAL方法类型
+	MethodType uint8
 )
 
 var (
