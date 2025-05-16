@@ -13,3 +13,25 @@
 // limitations under the License.
 
 package ace
+
+import (
+	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
+	"testing"
+)
+
+func TestConditions(t *testing.T) {
+	cs := Conds(tblcompany.Id.Eq(1), tblcompany.State.In())
+	for _, c := range cs.ToSlice() {
+		s, v := c()
+		switch val := v.(type) {
+		case []any:
+			t.Logf("[]any -- s:%s, v:%v", s, val)
+		case error:
+			t.Logf("error -- s:%s, v:%v", s, val)
+		case [][]any:
+			t.Logf("[][]any -- s:%s, v:%v", s, val)
+		default:
+			t.Logf("default -- s:%s, v:%v", s, val)
+		}
+	}
+}
