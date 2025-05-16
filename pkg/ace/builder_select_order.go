@@ -50,7 +50,7 @@ func (o *orm) Order(cols ...dialect.Field) Builder {
 
 // Asc 指定查询结果按指定列升序排序。
 func (o *orm) Asc(cols ...dialect.Field) Builder {
-	if len(cols) == 0 {
+	if len(cols) == 0 || o.err != nil {
 		return o
 	}
 	for _, col := range cols {
@@ -64,7 +64,7 @@ func (o *orm) Asc(cols ...dialect.Field) Builder {
 
 // Desc 指定查询结果按指定列降序排序
 func (o *orm) Desc(cols ...dialect.Field) Builder {
-	if len(cols) == 0 {
+	if len(cols) == 0 || o.err != nil {
 		return o
 	}
 	for _, col := range cols {

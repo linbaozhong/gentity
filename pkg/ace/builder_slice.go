@@ -15,7 +15,6 @@
 package ace
 
 import (
-	"bytes"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -79,7 +78,7 @@ func or(fns ...dialect.Condition) dialect.Condition {
 			return "", nil
 		}
 		var (
-			buf    bytes.Buffer
+			buf    strings.Builder
 			params = make([]any, 0, len(fns))
 		)
 
@@ -112,7 +111,7 @@ func and(fns ...dialect.Condition) dialect.Condition {
 			return "", nil
 		}
 		var (
-			buf    bytes.Buffer
+			buf    strings.Builder
 			params = make([]any, 0, len(fns))
 		)
 

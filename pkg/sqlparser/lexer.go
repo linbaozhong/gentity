@@ -2,7 +2,6 @@ package sqlparser
 
 import (
 	"bufio"
-	"bytes"
 	"io"
 	"strings"
 )
@@ -112,7 +111,7 @@ func (s *Scanner) unread() {
 }
 
 func (s *Scanner) scanWhitespace() (tok Token, lit string) {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	buf.WriteRune(s.read())
 	for {
 		if ch := s.read(); ch == eof {
@@ -128,7 +127,7 @@ func (s *Scanner) scanWhitespace() (tok Token, lit string) {
 }
 
 func (s *Scanner) scanDigit() (tok Token, lit string) {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	buf.WriteRune(s.read())
 	for {
 		if ch := s.read(); ch == eof {
@@ -144,7 +143,7 @@ func (s *Scanner) scanDigit() (tok Token, lit string) {
 }
 
 func (s *Scanner) scanString() (tok Token, lit string) {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	ch := s.read()
 	readString := func(c rune) {
 		for {
@@ -182,7 +181,7 @@ func (s *Scanner) scanInlineComment() (tok Token, lit string) {
 }
 
 func (s *Scanner) scanIdent() (tok Token, lit string) {
-	var buf bytes.Buffer
+	var buf strings.Builder
 	buf.WriteRune(s.read())
 	for {
 		if ch := s.read(); ch == eof {

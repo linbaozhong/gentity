@@ -51,6 +51,9 @@ func (o *orm) Delete(x ...Executer) Deleter {
 // Exec 执行删除
 func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	defer d.Free()
+	if d.err != nil {
+		return nil, d.err
+	}
 
 	d.command.WriteString("DELETE FROM " + dialect.Quote_Char + d.table + dialect.Quote_Char)
 	// WHERE

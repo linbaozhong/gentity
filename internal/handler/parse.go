@@ -15,7 +15,6 @@
 package handler
 
 import (
-	"bytes"
 	"github.com/vetcher/go-astra"
 	"path/filepath"
 	"strings"
@@ -275,7 +274,7 @@ func parseTagsForDB(matchs []string) (columnName, key, rw, ref string) {
 }
 
 func getFieldName(name string) string {
-	bs := bytes.NewBuffer([]byte{})
+	var bs strings.Builder
 
 	pre_lower := true // 前一个字母是小写
 	for i, s := range []rune(name) {

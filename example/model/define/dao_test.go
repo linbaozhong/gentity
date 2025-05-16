@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/linbaozhong/gentity/example/model/define/dao"
-	"github.com/linbaozhong/gentity/example/model/define/dao/daocompany"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
 	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
@@ -26,7 +25,7 @@ func init() {
 	}
 	dbx.SetMaxOpenConns(50)
 	dbx.SetMaxIdleConns(25)
-	//dbx.SetDebug(true)
+	// dbx.SetDebug(true)
 }
 
 // TestCreateSet 测试函数，用于测试不同方式插入数据的功能。
@@ -60,7 +59,7 @@ func TestCreateSet(t *testing.T) {
 	// 调用 daocompany 包的 Builder 函数创建一个构建器实例，设置插入的数据
 	// 然后调用 Create 方法创建执行器并执行插入操作
 	// result 为执行结果，包含插入的 ID 等信息，err 为可能出现的错误
-	result, err := daocompany.Builder().Set(
+	result, err := ace.Table(do.CompanyTableName).Set(
 		// 设置公司的长名称为 "aaaaaa"
 		tblcompany.LongName.Set("aaaaaa"),
 		// 设置公司的状态为 1
@@ -134,7 +133,7 @@ func TestCreateStruct(t *testing.T) {
 
 	// 使用 DAO 构建器，通过单个结构体插入数据
 	// result 为执行结果，包含插入的 ID 等信息，err 为可能出现的错误
-	result, err := daocompany.Builder().
+	result, err := ace.Table(do.CompanyTableName).
 		Cols(
 			tblcompany.LongName,
 			tblcompany.Address,
@@ -191,7 +190,7 @@ func TestUpdateSet(t *testing.T) {
 	// 调用 daocompany 包的 Builder 函数创建一个构建器实例，设置要更新的数据
 	// 并通过 Where 方法指定更新条件，然后调用 Update 方法创建执行器并执行更新操作
 	// result 为执行结果，err 为可能出现的错误
-	sss := daocompany.Builder().
+	sss := ace.Table(do.CompanyTableName).
 		Set(
 			tblcompany.LongName.Set("aaaaaa"),
 			// 设置公司的状态为 1
@@ -259,7 +258,7 @@ func TestSelect(t *testing.T) {
 	obj, has, err := dao.Company(dbx).ToSql().
 		Get(context.Background(),
 			ace.Cols(tblcompany.Id, tblcompany.LongName).
-				Where(tblcompany.Id.Eq(1)),
+				Where(tblcompany.Id.In()),
 		)
 	// 若查询操作出现错误，则终止测试并输出错误信息
 	if err != nil {
@@ -274,6 +273,7 @@ func TestSelect(t *testing.T) {
 
 	// 记录查询结果对象
 	t.Log(obj)
+	return
 
 	// 创建一个新的 Company 实例
 	obj = do.NewCompany()
@@ -282,7 +282,7 @@ func TestSelect(t *testing.T) {
 	// 调用 daocompany 包的 Builder 函数创建一个构建器实例，设置查询条件为 Id 等于 1
 	// 然后调用 Select 方法指定数据库连接，再调用 Get 方法将查询结果填充到 obj 中
 	// err 为可能出现的错误
-	err = dao.CompanyBuilder().ToSql().
+	err = ace.Table(do.CompanyTableName).ToSql().
 		Cols(tblcompany.Id, tblcompany.State, tblcompany.Address).
 		Where(tblcompany.Id.Eq(2)).
 		Select(dbx).

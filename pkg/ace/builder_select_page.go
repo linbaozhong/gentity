@@ -24,7 +24,7 @@ import (
 //	size 大小
 //	start 开始位置
 func (o *orm) Limit(size uint, start ...uint) Builder {
-	if size == 0 {
+	if size == 0 || o.err != nil {
 		o.limit = ""
 		return o
 	}

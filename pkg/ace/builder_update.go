@@ -58,6 +58,9 @@ func (o *orm) Update(x ...Executer) Updater {
 // Exec 执行更新
 func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	defer u.Free()
+	if u.err != nil {
+		return nil, u.err
+	}
 
 	lens := len(u.cols) + len(u.exprCols)
 	if lens == 0 {
@@ -103,6 +106,9 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 // Struct 更新一个结构体
 func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
+	if u.err != nil {
+		return nil, u.err
+	}
 
 	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
 	cols, vals := bean.AssignValues(u.cols...)
@@ -144,6 +150,9 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 // BatchStruct 执行批量更新,请不要在事务中使用
 func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql.Result, error) {
 	defer u.Free()
+	if u.err != nil {
+		return nil, u.err
+	}
 
 	lens := len(beans)
 	if lens == 0 {

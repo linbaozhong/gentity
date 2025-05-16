@@ -23,7 +23,7 @@ type Grouper interface {
 
 // Group 指定查询结果的分组字段
 func (o *orm) Group(cols ...dialect.Field) Builder {
-	if len(cols) == 0 {
+	if len(cols) == 0 || o.err != nil {
 		return o
 	}
 	for _, col := range cols {
@@ -37,9 +37,12 @@ func (o *orm) Group(cols ...dialect.Field) Builder {
 
 // Having 指定查询结果的分组条件
 func (o *orm) Having(fns ...dialect.Condition) Builder {
-	if len(fns) == 0 {
+	if len(fns) == 0 || o.err != nil {
 		return o
 	}
+
+	tmpHavingParams := make([]any, len(o.havingParams), len(o.havingParams)+len(fns))
+	copy(tmpHavingParams, o.havingParams)
 
 	o.having.WriteString("(")
 	for i, fn := range fns {
@@ -48,9 +51,16 @@ func (o *orm) Having(fns ...dialect.Condition) Builder {
 		}
 		cond, val := fn()
 		o.having.WriteString(cond)
-		if vals, ok := val.([]any); ok {
-			o.havingParams = append(o.havingParams, vals...)
+
+		if err := parseWhereParams(val, &tmpHavingParams); err != nil {
+			o.err = err
+			return o
 		}
+		// if vals, ok := val.([]any); ok {
+		// 	o.havingParams = append(o.havingParams, vals...)
+		// }
 	}
+	o.havingParams = tmpHavingParams
+	o.having.WriteString(")")
 	return o
 }
