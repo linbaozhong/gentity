@@ -27,7 +27,7 @@ type Wherer interface {
 
 // Where 添加查询条件。
 func (o *orm) Where(fns ...dialect.Condition) Builder {
-	if len(fns) == 0 {
+	if len(fns) == 0 || o.err != nil {
 		return o
 	}
 
@@ -37,8 +37,8 @@ func (o *orm) Where(fns ...dialect.Condition) Builder {
 		o.where.WriteString(dialect.Operator_and + "(")
 	}
 
-	tmpWhereParams := make([]any, 0, len(o.whereParams)+len(fns))
-	tmpWhereParams = append(tmpWhereParams, o.whereParams...)
+	tmpWhereParams := make([]any, len(o.whereParams), len(o.whereParams)+len(fns))
+	copy(tmpWhereParams, o.whereParams)
 
 	for i, fn := range fns {
 		cond, val := fn()
@@ -50,10 +50,9 @@ func (o *orm) Where(fns ...dialect.Condition) Builder {
 			}
 		}
 		o.where.WriteString(cond)
-		if vals, ok := val.([]any); ok {
-			tmpWhereParams = append(tmpWhereParams, vals...)
-		} else {
-			tmpWhereParams = append(tmpWhereParams, val)
+		if err := parseWhereParams(val, &tmpWhereParams); err != nil {
+			o.err = err
+			return o
 		}
 	}
 	o.whereParams = tmpWhereParams
@@ -64,7 +63,7 @@ func (o *orm) Where(fns ...dialect.Condition) Builder {
 
 // And 添加 AND 查询条件。
 func (o *orm) And(fns ...dialect.Condition) Builder {
-	if len(fns) == 0 {
+	if len(fns) == 0 || o.err != nil {
 		return o
 	}
 
@@ -74,8 +73,8 @@ func (o *orm) And(fns ...dialect.Condition) Builder {
 		o.where.WriteString(dialect.Operator_and + "(")
 	}
 
-	tmpWhereParams := make([]any, 0, len(o.whereParams)+len(fns))
-	tmpWhereParams = append(tmpWhereParams, o.whereParams...)
+	tmpWhereParams := make([]any, len(o.whereParams), len(o.whereParams)+len(fns))
+	copy(tmpWhereParams, o.whereParams)
 
 	for i, fn := range fns {
 		cond, val := fn()
@@ -87,10 +86,9 @@ func (o *orm) And(fns ...dialect.Condition) Builder {
 			}
 		}
 		o.where.WriteString(cond)
-		if vals, ok := val.([]any); ok {
-			tmpWhereParams = append(tmpWhereParams, vals...)
-		} else {
-			tmpWhereParams = append(tmpWhereParams, val)
+		if err := parseWhereParams(val, &tmpWhereParams); err != nil {
+			o.err = err
+			return o
 		}
 	}
 	o.whereParams = tmpWhereParams
@@ -98,9 +96,21 @@ func (o *orm) And(fns ...dialect.Condition) Builder {
 	return o
 }
 
+func parseWhereParams(val any, params *[]any) error {
+	switch v := val.(type) {
+	case error:
+		return v
+	case []any:
+		*params = append(*params, v...)
+	default:
+		*params = append(*params, val)
+	}
+	return nil
+}
+
 // Or 添加 OR 查询条件。
 func (o *orm) Or(fns ...dialect.Condition) Builder {
-	if len(fns) == 0 {
+	if len(fns) == 0 || o.err != nil {
 		return o
 	}
 
@@ -110,8 +120,8 @@ func (o *orm) Or(fns ...dialect.Condition) Builder {
 		o.where.WriteString(dialect.Operator_or + "(")
 	}
 
-	tmpWhereParams := make([]any, 0, len(o.whereParams)+len(fns))
-	tmpWhereParams = append(tmpWhereParams, o.whereParams...)
+	tmpWhereParams := make([]any, len(o.whereParams), len(o.whereParams)+len(fns))
+	copy(tmpWhereParams, o.whereParams)
 
 	for i, fn := range fns {
 		cond, val := fn()
@@ -123,10 +133,9 @@ func (o *orm) Or(fns ...dialect.Condition) Builder {
 			}
 		}
 		o.where.WriteString(cond)
-		if vals, ok := val.([]any); ok {
-			tmpWhereParams = append(tmpWhereParams, vals...)
-		} else {
-			tmpWhereParams = append(tmpWhereParams, val)
+		if err := parseWhereParams(val, &tmpWhereParams); err != nil {
+			o.err = err
+			return o
 		}
 	}
 	o.whereParams = tmpWhereParams

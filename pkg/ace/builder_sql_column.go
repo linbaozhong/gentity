@@ -33,35 +33,26 @@ func (s *orm) GetCols() []dialect.Field {
 // Distinct 设置查询结果去重，并指定去重的列。
 func (o *orm) Distinct(cols ...dialect.Field) Builder {
 	o.distinct = true
-	//for _, col := range cols {
-	//	o.cols = append(o.cols, col)
-	//}
 	o.cols = append(o.cols, cols...)
 	return o
 }
 
 // Cols 指定要查询的列
 func (o *orm) Cols(cols ...dialect.Field) Builder {
-	//for _, col := range cols {
-	//	o.cols = append(o.cols, col)
-	//}
 	o.cols = append(o.cols, cols...)
 	return o
 }
 
 // Omits 忽略指定的列
 func (o *orm) Omit(cols ...dialect.Field) Builder {
-	//for _, col := range cols {
-	//	o.omits = append(o.omits, col)
-	//}
 	o.omits = append(o.omits, cols...)
 	return o
 }
 
 // Func 添加聚合函数到查询中
 func (o *orm) Func(fns ...dialect.Function) Builder {
-	tmpFuncs := make([]string, 0, len(fns)+len(o.funcs))
-	tmpFuncs = append(tmpFuncs, o.funcs...)
+	tmpFuncs := make([]string, len(o.funcs), len(fns)+len(o.funcs))
+	copy(tmpFuncs, o.funcs)
 	for _, fn := range fns {
 		tmpFuncs = append(tmpFuncs, fn())
 	}

@@ -65,6 +65,7 @@ type (
 		commandString strings.Builder
 		// toSql 为true时，仅打印SQL语句，不执行
 		toSql bool
+		err   error
 	}
 )
 
@@ -125,6 +126,7 @@ func (o *orm) Reset() {
 	o.params = o.params[:0]     // []any{} // o.params[:0]
 	o.command.Reset()
 	o.toSql = false
+	o.err = nil
 }
 
 // String 返回 orm 对象的 SQL 语句和参数的字符串表示。
@@ -163,14 +165,16 @@ func (s *orm) GetTableName() string {
 // 例如：Set(dialect.F("name", "哈利波特"))
 func (o *orm) Set(fns ...dialect.Setter) Builder {
 	l := len(fns)
-	if l == 0 {
+	if l == 0 || o.err != nil {
 		return o
 	}
 
-	tmpCols := make([]dialect.Field, 0, len(o.cols)+l)
-	tmpParams := make([]any, 0, len(o.params)+l)
-	tmpCols = append(tmpCols, o.cols...)
-	tmpParams = append(tmpParams, o.params...)
+	tmpCols := make([]dialect.Field, len(o.cols), len(o.cols)+l)
+	copy(tmpCols, o.cols)
+	tmpParams := make([]any, len(o.params), len(o.params)+l)
+	copy(tmpParams, o.params)
+	// tmpCols = append(tmpCols, o.cols...)
+	// tmpParams = append(tmpParams, o.params...)
 
 	for _, fn := range fns {
 		c, val := fn()
@@ -186,12 +190,14 @@ func (o *orm) Set(fns ...dialect.Setter) Builder {
 // 用于设置更新语句中的表达式
 // 例如：SetExpr(dialect.Expr("age", "age + 1"))
 func (o *orm) SetExpr(fns ...dialect.ExprSetter) Builder {
-	if len(fns) == 0 {
+	l := len(fns)
+	if l == 0 || o.err != nil {
 		return o
 	}
 
-	tmpExprCols := make([]expr, 0, len(o.exprCols)+len(fns))
-	tmpExprCols = append(tmpExprCols, o.exprCols...)
+	tmpExprCols := make([]expr, len(o.exprCols), len(o.exprCols)+l)
+	copy(tmpExprCols, o.exprCols)
+	// tmpExprCols = append(tmpExprCols, o.exprCols...)
 	for _, fn := range fns {
 		ex, val := fn()
 		tmpExprCols = append(o.exprCols, expr{colName: ex, arg: val})

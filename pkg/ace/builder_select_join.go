@@ -22,17 +22,29 @@ import (
 // Join 添加连接查询条件
 func (o *orm) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) Builder {
 	var on strings.Builder
-	for _, fn := range fns {
-		on.WriteString(dialect.Operator_and)
-		cond, val := fn()
 
-		on.WriteString(cond)
-		if vals, ok := val.([]any); ok {
-			o.joinParams = append(o.joinParams, vals...)
-		} else {
-			o.joinParams = append(o.joinParams, val)
+	if len(fns) > 0 {
+		tmpJoinParams := make([]any, len(o.joinParams), len(o.joinParams)+len(fns))
+		copy(tmpJoinParams, o.joinParams)
+
+		for _, fn := range fns {
+			on.WriteString(dialect.Operator_and)
+			cond, val := fn()
+
+			on.WriteString(cond)
+			if err := parseWhereParams(val, &tmpJoinParams); err != nil {
+				o.err = err
+				return o
+			}
+			// if vals, ok := val.([]any); ok {
+			// 	o.joinParams = append(o.joinParams, vals...)
+			// } else {
+			// 	o.joinParams = append(o.joinParams, val)
+			// }
 		}
+		o.joinParams = tmpJoinParams
 	}
+
 	o.join = append(o.join, [3]string{
 		string(joinType),
 		right.TableName(),
