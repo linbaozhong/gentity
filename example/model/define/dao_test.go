@@ -258,7 +258,7 @@ func TestSelect(t *testing.T) {
 	obj, has, err := dao.Company(dbx).ToSql().
 		Get(context.Background(),
 			ace.Cols(tblcompany.Id, tblcompany.LongName).
-				Where(tblcompany.Id.In()),
+				Where(tblcompany.Id.In(nil)),
 		)
 	// 若查询操作出现错误，则终止测试并输出错误信息
 	if err != nil {

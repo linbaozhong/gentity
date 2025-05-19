@@ -16,13 +16,14 @@ package dialect
 
 import (
 	"errors"
-	"reflect"
+	"github.com/linbaozhong/gentity/pkg/types"
 	"strings"
+	"time"
 )
 
 var (
-	Err_Expression_Empty_Param = errors.New("Expression param must have one value")
-	Err_Condition_Empty_Param  = errors.New("Condition param must have one value")
+	Err_Expression_Empty_Param = errors.New("Expression parameter must have one value")
+	Err_Condition_Empty_Param  = errors.New("Condition parameter must have one value")
 )
 
 type (
@@ -303,9 +304,18 @@ func (f Field) Lte(val any) Condition {
 
 func checkSlice(vals ...any) error {
 	for _, val := range vals {
-		// 使用反射判断是否为切片类型
-		if reflect.TypeOf(val).Kind() == reflect.Slice {
-			return errors.New("params cannot be slices")
+		// // 使用反射判断是否为切片类型
+		// if reflect.TypeOf(val).Kind() == reflect.Slice {
+		// 	return errors.New("params cannot be slices")
+		// }
+		switch val.(type) {
+		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string, bool, time.Time:
+			continue
+		case types.Int, types.Int8, types.Int16, types.Int32, types.Int64, types.Uint, types.Uint8, types.Uint16,
+			types.Uint32, types.Uint64, types.Float32, types.Float64, types.String, types.Bool, types.Time:
+			continue
+		default:
+			return errors.New("Parameter type error")
 		}
 	}
 	return nil
