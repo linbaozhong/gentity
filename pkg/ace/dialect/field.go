@@ -16,7 +16,13 @@ package dialect
 
 import (
 	"errors"
+	"reflect"
 	"strings"
+)
+
+var (
+	Err_Expression_Empty_Param = errors.New("Expression param must have one value")
+	Err_Condition_Empty_Param  = errors.New("Condition param must have one value")
 )
 
 type (
@@ -132,7 +138,7 @@ func (f Field) Replace(old, new string) ExprSetter {
 	return func() (string, any) {
 		// 参数校验
 		if old == "" {
-			return "1 = 0", errors.New("Replace expression must have one value")
+			return "1 = 0", Err_Expression_Empty_Param
 		}
 		var sb strings.Builder
 		// 预先计算并分配足够的内存空间
@@ -154,7 +160,7 @@ func (f Field) Replace(old, new string) ExprSetter {
 func (f Field) Expr(expr string) ExprSetter {
 	return func() (string, any) {
 		if expr == "" {
-			return "", errors.New("Expr expression must have one value")
+			return "", Err_Expression_Empty_Param
 		}
 		// 使用 strings.Builder 进行字符串拼接
 		var sb strings.Builder
@@ -174,7 +180,7 @@ func (f Field) Eq(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
-			return "1 = 0", errors.New("Eq condition must have one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
 
 		// 使用 strings.Builder 进行字符串拼接
@@ -195,7 +201,7 @@ func (f Field) NotEq(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
-			return "1 = 0", errors.New("Not Eq condition must have one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
 
 		// 使用 strings.Builder 进行字符串拼接
@@ -216,7 +222,7 @@ func (f Field) Gt(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
-			return "1 = 0", errors.New("Gt condition must have one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
 
 		// 使用 strings.Builder 进行字符串拼接
@@ -237,7 +243,7 @@ func (f Field) Gte(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
-			return "1 = 0", errors.New("Gte condition must have one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
 
 		// 使用 strings.Builder 进行字符串拼接
@@ -258,7 +264,7 @@ func (f Field) Lt(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
-			return "1 = 0", errors.New("Lt condition must have one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
 
 		// 使用 strings.Builder 进行字符串拼接
@@ -279,7 +285,7 @@ func (f Field) Lte(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
-			return "1 = 0", errors.New("Lte condition must have one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
 
 		// 使用 strings.Builder 进行字符串拼接
@@ -295,30 +301,34 @@ func (f Field) Lte(val any) Condition {
 	}
 }
 
+func checkSlice(vals ...any) error {
+	for _, val := range vals {
+		// 使用反射判断是否为切片类型
+		if reflect.TypeOf(val).Kind() == reflect.Slice {
+			return errors.New("params cannot be slices")
+		}
+	}
+	return nil
+}
+
 // In 包含
 func (f Field) In(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
 		if l == 0 {
-			return "1 = 0", errors.New("In condition must have at least one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
-		_vals := make([]any, 0, l)
-		for _, val := range vals {
-			if _, ok := val.([]any); ok {
-				// _vals = append(_vals, v...)
-				// continue
-				return "1 = 0", errors.New("params cannot be slices of []any")
-			}
-			_vals = append(_vals, val)
+		if err := checkSlice(vals...); err != nil {
+			return "1 = 0", err
 		}
-		l = len(_vals)
+
 		var sb strings.Builder
 		sb.Grow(len(f.Quote()) + len(" In (") + (len(Placeholder)+1)*l)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" In (")
 		sb.WriteString(strings.Repeat(Placeholder+",", l)[:(len(Placeholder)+1)*l-1])
 		sb.WriteString(")")
-		return sb.String(), _vals
+		return sb.String(), vals
 	}
 }
 
@@ -327,25 +337,19 @@ func (f Field) NotIn(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
 		if l == 0 {
-			return "1 = 0", errors.New("Not In condition must have at least one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
-		_vals := make([]any, 0, l)
-		for _, val := range vals {
-			if _, ok := val.([]any); ok {
-				// _vals = append(_vals, v...)
-				// continue
-				return "1 = 0", errors.New("params cannot be slices of []any")
-			}
-			_vals = append(_vals, val)
+		if err := checkSlice(vals...); err != nil {
+			return "1 = 0", err
 		}
-		l = len(_vals)
+
 		var sb strings.Builder
 		sb.Grow(len(f.Quote()) + len(" Not In (") + (len(Placeholder)+1)*l)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" Not In (")
 		sb.WriteString(strings.Repeat(Placeholder+",", l)[:(len(Placeholder)+1)*l-1])
 		sb.WriteString(")")
-		return sb.String(), _vals
+		return sb.String(), vals
 	}
 }
 
@@ -371,7 +375,7 @@ func (f Field) Like(val any) Condition {
 	return func() (string, any) {
 		// 检查 val 是否为空
 		if val == nil {
-			return "1 = 0", errors.New("Like condition must have one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
 
 		// 使用 strings.Builder 进行字符串拼接
@@ -393,7 +397,7 @@ func (f Field) Llike(val any) Condition {
 	return func() (string, any) {
 		// 检查 val 是否为空
 		if val == nil {
-			return "1 = 0", errors.New("LeftLike condition must have one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
 		var sb strings.Builder
 		// 预先计算并分配足够的内存空间
@@ -414,7 +418,7 @@ func (f Field) Rlike(val any) Condition {
 	return func() (string, any) {
 		// 检查 val 是否为空
 		if val == nil {
-			return "1 = 0", errors.New("RightLike condition must have one value")
+			return "1 = 0", Err_Condition_Empty_Param
 		}
 		var sb strings.Builder
 		// 预先计算并分配足够的内存空间
