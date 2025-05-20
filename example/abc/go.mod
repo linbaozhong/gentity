@@ -5,7 +5,6 @@ go 1.23.6
 require (
 	github.com/linbaozhong/gentity v0.9.32
 	github.com/linbaozhong/sse/v2 v2.10.4
-	gocv.io/x/gocv v0.41.0
 )
 
 require (
