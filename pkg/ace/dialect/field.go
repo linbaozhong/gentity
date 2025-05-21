@@ -58,7 +58,6 @@ func (f Field) Quote() string {
 	sb.WriteString(".")
 	sb.WriteString(f.FieldName())
 	return sb.String()
-	// return f.TableName() + "." + f.FieldName()
 }
 
 // TableName 为表名添加引号
@@ -70,7 +69,6 @@ func (f Field) TableName() string {
 	sb.WriteString(f.Table)
 	sb.WriteString(Quote_Char)
 	return sb.String()
-	// return Quote_Char + f.Table + Quote_Char
 }
 
 // FieldName 为字段名添加引号
@@ -82,7 +80,6 @@ func (f Field) FieldName() string {
 	sb.WriteString(f.Name)
 	sb.WriteString(Quote_Char)
 	return sb.String()
-	// return Quote_Char + f.Name + Quote_Char
 }
 
 // Set 为字段设置值
@@ -112,7 +109,6 @@ func (f Field) Incr(val ...any) ExprSetter {
 		sb.WriteString(" + ")
 		sb.WriteString(Placeholder)
 		return sb.String(), v
-		// return f.Quote() + " = " + f.Quote() + " + " + Placeholder, v
 	}
 }
 
@@ -137,7 +133,6 @@ func (f Field) Decr(val ...any) ExprSetter {
 		sb.WriteString(Placeholder)
 
 		return sb.String(), v
-		// return f.Quote() + " = " + f.Quote() + " - " + Placeholder, v
 	}
 }
 
@@ -160,7 +155,6 @@ func (f Field) Replace(old, new string) ExprSetter {
 		sb.WriteString(Placeholder)
 		sb.WriteString(")")
 		return sb.String(), []any{old, new}
-		// return f.Quote() + " = REPLACE(" + f.Quote() + ",'" + old + "','" + new + "')", nil
 	}
 }
 
@@ -179,7 +173,6 @@ func (f Field) Expr(expr string) ExprSetter {
 		sb.WriteString(Placeholder)
 
 		return sb.String(), expr
-		// return f.Quote() + " = " + expr, nil
 	}
 }
 
@@ -200,7 +193,6 @@ func (f Field) Eq(val any) Condition {
 		sb.WriteString(Placeholder)
 
 		return sb.String(), val
-		// return f.Quote() + " = " + Placeholder, val
 	}
 }
 
@@ -221,7 +213,6 @@ func (f Field) NotEq(val any) Condition {
 		sb.WriteString(Placeholder)
 
 		return sb.String(), val
-		// return f.Quote() + " != " + Placeholder, val
 	}
 }
 
@@ -242,7 +233,6 @@ func (f Field) Gt(val any) Condition {
 		sb.WriteString(Placeholder)
 
 		return sb.String(), val
-		// return f.Quote() + " > " + Placeholder, val
 	}
 }
 
@@ -263,7 +253,6 @@ func (f Field) Gte(val any) Condition {
 		sb.WriteString(Placeholder)
 
 		return sb.String(), val
-		// return f.Quote() + " >= " + Placeholder, val
 	}
 }
 
@@ -284,7 +273,6 @@ func (f Field) Lt(val any) Condition {
 		sb.WriteString(Placeholder)
 
 		return sb.String(), val
-		// return f.Quote() + " < " + Placeholder, val
 	}
 }
 
@@ -305,7 +293,6 @@ func (f Field) Lte(val any) Condition {
 		sb.WriteString(Placeholder)
 
 		return sb.String(), val
-		// return f.Quote() + " <= " + Placeholder, val
 	}
 }
 
@@ -429,7 +416,6 @@ func (f Field) Llike(val any) Condition {
 		sb.WriteString("))")
 
 		return sb.String(), val
-		// return "(" + f.Quote() + " LIKE CONCAT('%'," + Placeholder + "))", val
 	}
 }
 
@@ -449,7 +435,6 @@ func (f Field) Rlike(val any) Condition {
 		sb.WriteString(Placeholder)
 		sb.WriteString(",'%'))")
 		return sb.String(), val
-		// return "(" + f.Quote() + " LIKE CONCAT(" + Placeholder + ",'%'))", val
 	}
 }
 
@@ -463,7 +448,6 @@ func (f Field) Null() Condition {
 		sb.WriteString(f.Quote())
 		sb.WriteString(")")
 		return sb.String(), nil
-		// return " ISNULL(" + f.Quote() + ")", nil
 	}
 }
 
@@ -477,7 +461,6 @@ func (f Field) NotNull() Condition {
 		sb.WriteString(f.Quote())
 		sb.WriteString(")")
 		return sb.String(), nil
-		// return " NOT ISNULL(" + f.Quote() + ")", nil
 	}
 }
 
@@ -493,7 +476,6 @@ func (f Field) AsName(name string) string {
 	sb.WriteString(" AS ")
 	sb.WriteString(name)
 	return sb.String()
-	// return f.Quote() + " AS " + name
 }
 
 // Sum 合计
@@ -511,7 +493,6 @@ func (f Field) Sum(as ...string) Function {
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)
 		return sb.String()
-		// return "IFNULL(Sum(" + f.Quote() + "),0) AS " + a
 	}
 }
 
@@ -530,7 +511,6 @@ func (f Field) Avg(as ...string) Function {
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)
 		return sb.String()
-		// return "IFNULL(Avg(" + f.Quote() + "),0) AS " + a
 	}
 }
 
@@ -549,7 +529,6 @@ func (f Field) Count(as ...string) Function {
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)
 		return sb.String()
-		// return "IFNULL(Count(" + f.Quote() + "),0) AS " + a
 	}
 }
 
@@ -568,7 +547,6 @@ func (f Field) Max(as ...string) Function {
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)
 		return sb.String()
-		// return "IFNULL(Max(" + f.Quote() + "),0) AS " + a
 	}
 }
 
@@ -587,6 +565,5 @@ func (f Field) Min(as ...string) Function {
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)
 		return sb.String()
-		// return "IFNULL(Min(" + f.Quote() + "),0) AS " + a
 	}
 }
