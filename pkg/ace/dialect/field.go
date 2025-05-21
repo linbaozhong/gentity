@@ -27,6 +27,13 @@ var (
 )
 
 type (
+	FieldType interface {
+		~int | ~int8 | ~int16 | ~int32 | ~int64 |
+			~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
+			~float32 | ~float64 |
+			~string |
+			time.Time | types.Time
+	}
 	Field struct {
 		Name      string
 		Json      string
@@ -89,7 +96,7 @@ func (f Field) Set(val any) Setter {
 // val 默认为1
 func (f Field) Incr(val ...any) ExprSetter {
 	var v any
-	if len(val) > 0 {
+	if len(val) > 0 && val[0] != nil {
 		v = val[0]
 	} else {
 		v = 1
@@ -113,7 +120,7 @@ func (f Field) Incr(val ...any) ExprSetter {
 // val 默认为1
 func (f Field) Decr(val ...any) ExprSetter {
 	var v any
-	if len(val) > 0 {
+	if len(val) > 0 && val[0] != nil {
 		v = val[0]
 	} else {
 		v = 1
@@ -368,6 +375,9 @@ func (f Field) Between(vals ...any) Condition {
 	return func() (string, any) {
 		if len(vals) != 2 {
 			return "1 = 0", errors.New("Between condition must have two value")
+		}
+		if err := checkSlice(vals...); err != nil {
+			return "1 = 0", err
 		}
 		var sb strings.Builder
 		sb.Grow(len(f.Quote()) + len(" Between ") + len(Placeholder) + len(" And ") + len(Placeholder))
