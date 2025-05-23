@@ -6,7 +6,7 @@
 // Init
 func (p *{{.StructName}}) Init() error {
 	{{- range $key, $value := .Columns}}
-		{{- if eq $value.Json.OmitEmpty false}}
+		{{- if $value.Json.OmitEmpty}}{{else}}
 		p.{{$value.Name}} = {{getTypeNil $value}}
 		{{- end}}
 	{{- end}}
