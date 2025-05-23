@@ -103,10 +103,15 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 				ref string // 关系键
 			)
 			var _namejson = Field{}
+			var _parsedJson bool
 			for k, v := range field.Tags {
 				switch k {
 				case jsonTag, urlTag, formTag, paramTag:
+					if _parsedJson {
+						continue
+					}
 					_namejson.Json = parseJson(v) // json_name
+					_parsedJson = true
 				case dbTag:
 					_namejson.Col, pk, rw, ref = parseTagsForDB(v) // column_name
 					if len(ref) == 0 {

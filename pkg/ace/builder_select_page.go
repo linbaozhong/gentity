@@ -42,7 +42,7 @@ func (o *orm) Limit(size uint, start ...uint) Builder {
 //	pageIndex 页码, 从1开始
 //	pageSize 页大小
 func (o *orm) Page(pageIndex, pageSize uint) Builder {
-	if pageSize == 0 {
+	if pageSize < 1 {
 		return o.Limit(0)
 	}
 	if pageIndex < 1 {

@@ -114,6 +114,7 @@ func writeToDTO(d TempData) error {
 		"sub": func(a, b int) int {
 			return a - b
 		},
+		// "omitempty":         omitempty,
 		"getType":           getType,
 		"getTypeValue":      getTypeValue,
 		"getZeroValue":      getZeroValue,
@@ -155,6 +156,15 @@ func writeToDTO(d TempData) error {
 	}
 	return e
 }
+
+// // omitempty
+// // 判断是否需要忽略空值
+// func omitempty(t Field) bool {
+// 	return t.Json.OmitEmpty
+// }
+
+// getType
+// 转换类型
 func getTypeNil(t Field) any {
 	switch t.Type {
 	case "string", "types.String":
