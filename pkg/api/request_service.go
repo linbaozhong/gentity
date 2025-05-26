@@ -62,9 +62,9 @@ func serviceContext[A, B any](ctx Context, req *A, resp *B,
 		return resp, e
 	}
 
-	if e := Visit(ctx, req); e != nil {
-		return resp, e
-	}
+	// if e := Visit(ctx, req); e != nil {
+	// 	return resp, e
+	// }
 
 	_ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
@@ -88,9 +88,9 @@ func service[A, B any](ctx Context, req *A, resp *B,
 		return resp, e
 	}
 
-	if e := Visit(ctx, req); e != nil {
-		return resp, e
-	}
+	// if e := Visit(ctx, req); e != nil {
+	// 	return resp, e
+	// }
 
 	if e := fn(ctx, req, resp); e != nil {
 		return resp, e
