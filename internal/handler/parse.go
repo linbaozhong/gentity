@@ -280,9 +280,11 @@ func parseTagsForDB(matchs []string) (columnName, key, rw, ref string) {
 
 func getFieldName(name string) string {
 	var bs strings.Builder
+	runeName := []rune(name)
+	bs.Grow(len(runeName))
 
 	pre_lower := true // 前一个字母是小写
-	for i, s := range []rune(name) {
+	for i, s := range runeName {
 		// 如果是大写字母
 		if unicode.IsUpper(s) {
 			r := unicode.ToLower(s)

@@ -15,7 +15,6 @@
 package api
 
 import (
-	"context"
 	"strconv"
 	"time"
 )
@@ -27,9 +26,9 @@ type (
 	Initializer interface {
 		Init() error
 	}
-	Visiter interface {
-		Visiter(ctx context.Context)
-	}
+	// Visiter interface {
+	// 	Visiter(ctx context.Context)
+	// }
 )
 
 func Initiate(ctx Context, arg any) {
@@ -58,11 +57,11 @@ func Validate(arg any) error {
 	return nil
 }
 
-// Visit 访问参数
-// 注意：如果参数实现了Visiter接口，会调用Visiter方法
-func Visit(ctx context.Context, arg any) error {
-	if vis, ok := arg.(Visiter); ok {
-		vis.Visiter(ctx)
-	}
-	return nil
-}
+// // Visit 访问参数
+// // 注意：如果参数实现了Visiter接口，会调用Visiter方法
+// func Visit(ctx context.Context, arg any) error {
+// 	if vis, ok := arg.(Visiter); ok {
+// 		vis.Visiter(ctx)
+// 	}
+// 	return nil
+// }
