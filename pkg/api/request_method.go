@@ -30,7 +30,7 @@ var (
 func Get[A, B any](
 	ctx Context,
 	callService func(ctx context.Context, req *A, resp *B) error,
-	before ...func(ctx Context, resp *B) error,
+	after ...func(ctx Context, resp *B) error,
 ) error {
 	var (
 		req  A
@@ -43,8 +43,8 @@ func Get[A, B any](
 		log.Error(e)
 		return e
 	}
-	if len(before) > 0 {
-		before[0](ctx, &resp)
+	if len(after) > 0 {
+		after[0](ctx, &resp)
 	}
 	return Ok(ctx, resp)
 }
@@ -56,7 +56,7 @@ func Get[A, B any](
 func Post[A, B any](
 	ctx Context,
 	callService func(ctx context.Context, req *A, resp *B) error,
-	before ...func(ctx Context, resp *B) error,
+	after ...func(ctx Context, resp *B) error,
 ) error {
 	var (
 		req  A
@@ -69,8 +69,8 @@ func Post[A, B any](
 		log.Error(e)
 		return e
 	}
-	if len(before) > 0 {
-		before[0](ctx, &resp)
+	if len(after) > 0 {
+		after[0](ctx, &resp)
 	}
 	return Ok(ctx, resp)
 }
@@ -96,7 +96,7 @@ func Redirect[A any](ctx Context,
 func Stream[A, B any](
 	ctx Context,
 	callService func(ctx Context, req *A, resp *B) error,
-	before ...func(ctx Context, resp *B) error,
+	after ...func(ctx Context, resp *B) error,
 ) error {
 	var (
 		req  A
@@ -108,8 +108,8 @@ func Stream[A, B any](
 		log.Error(e)
 		return e
 	}
-	if len(before) > 0 {
-		before[0](ctx, &resp)
+	if len(after) > 0 {
+		after[0](ctx, &resp)
 	}
 	return Ok(ctx, resp)
 }
