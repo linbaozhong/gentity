@@ -56,7 +56,6 @@ func Ok(c Context, args ...any) error {
 			setCache(context.Background(), _key, j)
 		}
 	}
-
 	return c.JSON(j)
 }
 

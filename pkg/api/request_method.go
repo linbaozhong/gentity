@@ -29,18 +29,22 @@ var (
 // 读取query，req结构体的字段 tag 为 url。
 func Get[A, B any](
 	ctx Context,
-	fn func(ctx context.Context, req *A, resp *B) error,
+	callService func(ctx context.Context, req *A, resp *B) error,
+	before ...func(ctx Context, resp *B) error,
 ) error {
 	var (
 		req  A
 		resp B
 	)
 
-	_, e := serviceContext(ctx, &req, &resp, readGetRequest[A], fn)
+	_, e := serviceContext(ctx, &req, &resp, readGetRequest[A], callService)
 	if e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
+	}
+	if len(before) > 0 {
+		before[0](ctx, &resp)
 	}
 	return Ok(ctx, resp)
 }
@@ -51,30 +55,35 @@ func Get[A, B any](
 // Content-Type: multipart/form-data，req结构体的字段tag为form
 func Post[A, B any](
 	ctx Context,
-	fn func(ctx context.Context, req *A, resp *B) error,
+	callService func(ctx context.Context, req *A, resp *B) error,
+	before ...func(ctx Context, resp *B) error,
 ) error {
 	var (
 		req  A
 		resp B
 	)
 
-	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], fn)
+	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
 	if e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
+	}
+	if len(before) > 0 {
+		before[0](ctx, &resp)
 	}
 	return Ok(ctx, resp)
 }
 
 // Redirect 重定向
 func Redirect[A any](ctx Context,
-	fn func(ctx context.Context, req *A, resp *string) error) error {
+	callService func(ctx context.Context, req *A, resp *string) error,
+) error {
 	var (
 		req  A
 		resp string
 	)
-	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], fn)
+	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
 	if e != nil {
 		Fail(ctx, e)
 		log.Error(e)
@@ -86,16 +95,21 @@ func Redirect[A any](ctx Context,
 
 func Stream[A, B any](
 	ctx Context,
-	fn func(ctx Context, req *A, resp *B) error) error {
+	callService func(ctx Context, req *A, resp *B) error,
+	before ...func(ctx Context, resp *B) error,
+) error {
 	var (
 		req  A
 		resp B
 	)
-	_, e := service(ctx, &req, &resp, readPostRequest[A], fn)
+	_, e := service(ctx, &req, &resp, readPostRequest[A], callService)
 	if e != nil {
 		Fail(ctx, e)
 		log.Error(e)
 		return e
+	}
+	if len(before) > 0 {
+		before[0](ctx, &resp)
 	}
 	return Ok(ctx, resp)
 }

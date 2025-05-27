@@ -21,39 +21,39 @@ import (
 
 // GetResult 调用service处理get请求，并返回结果数据
 func GetResult[A, B any](ctx Context,
-	fn func(ctx context.Context, req *A, resp *B) error) (*B, error) {
+	callService func(ctx context.Context, req *A, resp *B) error) (*B, error) {
 	var (
 		req  A
 		resp B
 	)
 
-	return serviceContext(ctx, &req, &resp, readGetRequest[A], fn)
+	return serviceContext(ctx, &req, &resp, readGetRequest[A], callService)
 }
 
 // PostResult 调用service处理post请求，并返回结果数据
 func PostResult[A, B any](ctx Context,
-	fn func(ctx context.Context, req *A, resp *B) error) (*B, error) {
+	callService func(ctx context.Context, req *A, resp *B) error) (*B, error) {
 	var (
 		req  A
 		resp B
 	)
-	return serviceContext(ctx, &req, &resp, readPostRequest[A], fn)
+	return serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
 }
 
 // StreamResult 调用service处理post请求，并返回结果数据
 func StreamResult[A, B any](ctx Context,
-	fn func(ctx Context, req *A, resp *B) error) (*B, error) {
+	callService func(ctx Context, req *A, resp *B) error) (*B, error) {
 	var (
 		req  A
 		resp B
 	)
-	return service(ctx, &req, &resp, readPostRequest[A], fn)
+	return service(ctx, &req, &resp, readPostRequest[A], callService)
 }
 
 // serviceContext 逻辑处理,serviceContext会超时
 func serviceContext[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
-	fn func(ctx context.Context, req *A, resp *B) error) (*B, error) {
+	callService func(ctx context.Context, req *A, resp *B) error) (*B, error) {
 
 	if e := read(ctx, req); e != nil {
 		return resp, Param_Invalid.SetInfo(e)
@@ -62,14 +62,10 @@ func serviceContext[A, B any](ctx Context, req *A, resp *B,
 		return resp, e
 	}
 
-	// if e := Visit(ctx, req); e != nil {
-	// 	return resp, e
-	// }
-
 	_ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 
-	if e := fn(_ctx, req, resp); e != nil {
+	if e := callService(_ctx, req, resp); e != nil {
 		return resp, e
 	}
 
@@ -79,7 +75,7 @@ func serviceContext[A, B any](ctx Context, req *A, resp *B,
 // service 逻辑处理,service不会超时
 func service[A, B any](ctx Context, req *A, resp *B,
 	read func(ctx Context, req *A) error,
-	fn func(ctx Context, req *A, resp *B) error) (*B, error) {
+	callService func(ctx Context, req *A, resp *B) error) (*B, error) {
 
 	if e := read(ctx, req); e != nil {
 		return resp, Param_Invalid.SetInfo(e)
@@ -88,11 +84,7 @@ func service[A, B any](ctx Context, req *A, resp *B,
 		return resp, e
 	}
 
-	// if e := Visit(ctx, req); e != nil {
-	// 	return resp, e
-	// }
-
-	if e := fn(ctx, req, resp); e != nil {
+	if e := callService(ctx, req, resp); e != nil {
 		return resp, e
 	}
 
