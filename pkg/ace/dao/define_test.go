@@ -15,6 +15,7 @@
 package dao
 
 import (
+	"fmt"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
 	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
@@ -23,12 +24,45 @@ import (
 
 func TestDefine(t *testing.T) {
 	_dai := DataAccessInterface{
-		Name:   "GetCompany",
-		Table:  do.CompanyTableName,
-		Method: ace.Method_Get,
-		Input:  ace.Where(tblcompany.Id.Eq(1), tblcompany.State.Eq(nil)).Order(tblcompany.Ctime),
-		Output: do.Company{},
+		NameSpace: "company",
+		Children: []DataAccessInterface{
+			{
+				NameSpace: "document",
+				Name:      "Get",
+				Table:     do.CompanyTableName,
+				Method:    ace.Method_Get,
+				Input:     ace.Where(tblcompany.Id.Eq(1), tblcompany.State.Eq(nil)).Order(tblcompany.Ctime),
+				Output:    do.Company{},
+			},
+		},
 	}
-	RegisterDpi(_dai)
-	Run()
+	Run(_dai)
+}
+
+func Run(dai DataAccessInterface) {
+	if dai.NameSpace == "" && dai.Table == "" {
+		return
+	}
+	if dai.NameSpace == "" {
+		dai.NameSpace = dai.Table
+	} else if dai.Table == "" {
+		dai.Table = dai.NameSpace
+	}
+
+	if len(dai.Children) > 0 {
+		for _, _dai := range dai.Children {
+			_dai.NameSpace = dai.NameSpace + "_" + _dai.NameSpace
+			Run(_dai)
+		}
+		return
+	}
+
+	fmt.Println(`// `, dai.NameSpace+"."+dai.Name)
+	if dai.Title != "" {
+		fmt.Println(`// @Title `, dai.Title)
+	}
+	if dai.Description != "" {
+		fmt.Println(`// @Description `, dai.Description)
+	}
+	fmt.Println(`func `, dai.Name, `(ctx context.Context,`)
 }

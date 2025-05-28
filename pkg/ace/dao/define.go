@@ -15,39 +15,17 @@
 package dao
 
 import (
-	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace"
 )
 
 type DataAccessInterface struct {
-	Name        string         // 方法名
-	Title       string         // 方法标题
-	Description string         // 方法描述
-	Table       string         // 表名
-	Method      ace.MethodType // 方法类型
-	Input       ace.Builder    // 方法输入
-	Output      any            // 方法输出
-}
-
-var dais = make(map[string]DataAccessInterface)
-
-func RegisterDpi(dai DataAccessInterface) {
-	dais[dai.Name] = dai
-}
-
-func Run() {
-	for _, dai := range dais {
-		if dai.Name == "" {
-			continue
-		}
-		fmt.Println(`// `, dai.Name)
-		if dai.Title != "" {
-			fmt.Println(`// @Title `, dai.Title)
-		}
-		if dai.Description != "" {
-			fmt.Println(`// @Description `, dai.Description)
-		}
-		fmt.Println(`func `, dai.Name, `(ctx context.Context,`)
-
-	}
+	NameSpace   string                // 命名空间
+	Name        string                // 方法名
+	Title       string                // 方法标题
+	Description string                // 方法描述
+	Table       string                // 表名
+	Method      ace.MethodType        // 方法类型
+	Input       ace.Builder           // 方法输入
+	Output      any                   // 方法输出
+	Children    []DataAccessInterface // 子方法
 }
