@@ -50,7 +50,7 @@ type (
 )
 
 // Quote 为字段添加引号
-func (f Field) Quote() string {
+func (f *Field) Quote() string {
 	var sb strings.Builder
 	// 预先计算并分配足够的内存空间
 	sb.Grow(len(f.TableName()) + len(".") + len(f.FieldName()))
@@ -61,7 +61,7 @@ func (f Field) Quote() string {
 }
 
 // TableName 为表名添加引号
-func (f Field) TableName() string {
+func (f *Field) TableName() string {
 	var sb strings.Builder
 	// 预先计算并分配足够的内存空间
 	sb.Grow(len(Quote_Char) + len(f.Table) + len(Quote_Char))
@@ -72,7 +72,7 @@ func (f Field) TableName() string {
 }
 
 // FieldName 为字段名添加引号
-func (f Field) FieldName() string {
+func (f *Field) FieldName() string {
 	var sb strings.Builder
 	// 预先计算并分配足够的内存空间
 	sb.Grow(len(Quote_Char) + len(f.Name) + len(Quote_Char))
@@ -83,15 +83,15 @@ func (f Field) FieldName() string {
 }
 
 // Set 为字段设置值
-func (f Field) Set(val any) Setter {
+func (f *Field) Set(val any) Setter {
 	return func() (Field, any) {
-		return f, val
+		return *f, val
 	}
 }
 
 // Incr 自增
 // val 默认为1
-func (f Field) Incr(val ...any) ExprSetter {
+func (f *Field) Incr(val ...any) ExprSetter {
 	var v any
 	if len(val) > 0 && val[0] != nil {
 		v = val[0]
@@ -114,7 +114,7 @@ func (f Field) Incr(val ...any) ExprSetter {
 
 // Decr 自减
 // val 默认为1
-func (f Field) Decr(val ...any) ExprSetter {
+func (f *Field) Decr(val ...any) ExprSetter {
 	var v any
 	if len(val) > 0 && val[0] != nil {
 		v = val[0]
@@ -137,7 +137,7 @@ func (f Field) Decr(val ...any) ExprSetter {
 }
 
 // Replace 替换
-func (f Field) Replace(old, new string) ExprSetter {
+func (f *Field) Replace(old, new string) ExprSetter {
 	return func() (string, any) {
 		// 参数校验
 		if old == "" {
@@ -159,7 +159,7 @@ func (f Field) Replace(old, new string) ExprSetter {
 }
 
 // Expr 其它表达式
-func (f Field) Expr(expr string) ExprSetter {
+func (f *Field) Expr(expr string) ExprSetter {
 	return func() (string, any) {
 		if expr == "" {
 			return "", Err_Expression_Empty_Param
@@ -177,7 +177,7 @@ func (f Field) Expr(expr string) ExprSetter {
 }
 
 // Eq 等于
-func (f Field) Eq(val any) Condition {
+func (f *Field) Eq(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
@@ -197,7 +197,7 @@ func (f Field) Eq(val any) Condition {
 }
 
 // NotEq 不等于
-func (f Field) NotEq(val any) Condition {
+func (f *Field) NotEq(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
@@ -217,7 +217,7 @@ func (f Field) NotEq(val any) Condition {
 }
 
 // Gt 大于
-func (f Field) Gt(val any) Condition {
+func (f *Field) Gt(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
@@ -237,7 +237,7 @@ func (f Field) Gt(val any) Condition {
 }
 
 // Gte 大于或等于
-func (f Field) Gte(val any) Condition {
+func (f *Field) Gte(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
@@ -257,7 +257,7 @@ func (f Field) Gte(val any) Condition {
 }
 
 // Lt 小于
-func (f Field) Lt(val any) Condition {
+func (f *Field) Lt(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
@@ -277,7 +277,7 @@ func (f Field) Lt(val any) Condition {
 }
 
 // Lte 小于或等于
-func (f Field) Lte(val any) Condition {
+func (f *Field) Lte(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
@@ -316,7 +316,7 @@ func checkSlice(vals ...any) error {
 }
 
 // In 包含
-func (f Field) In(vals ...any) Condition {
+func (f *Field) In(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
 		if l == 0 {
@@ -337,7 +337,7 @@ func (f Field) In(vals ...any) Condition {
 }
 
 // NotIn 不包含
-func (f Field) NotIn(vals ...any) Condition {
+func (f *Field) NotIn(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
 		if l == 0 {
@@ -358,7 +358,7 @@ func (f Field) NotIn(vals ...any) Condition {
 }
 
 // Between 在区间
-func (f Field) Between(vals ...any) Condition {
+func (f *Field) Between(vals ...any) Condition {
 	return func() (string, any) {
 		if len(vals) != 2 {
 			return "1 = 0", errors.New("Between condition must have two value")
@@ -378,7 +378,7 @@ func (f Field) Between(vals ...any) Condition {
 }
 
 // Like 匹配
-func (f Field) Like(val any) Condition {
+func (f *Field) Like(val any) Condition {
 	return func() (string, any) {
 		// 检查 val 是否为空
 		if val == nil {
@@ -400,7 +400,7 @@ func (f Field) Like(val any) Condition {
 }
 
 // Llike 左匹配
-func (f Field) Llike(val any) Condition {
+func (f *Field) Llike(val any) Condition {
 	return func() (string, any) {
 		// 检查 val 是否为空
 		if val == nil {
@@ -420,7 +420,7 @@ func (f Field) Llike(val any) Condition {
 }
 
 // Rlike 右匹配
-func (f Field) Rlike(val any) Condition {
+func (f *Field) Rlike(val any) Condition {
 	return func() (string, any) {
 		// 检查 val 是否为空
 		if val == nil {
@@ -439,7 +439,7 @@ func (f Field) Rlike(val any) Condition {
 }
 
 // Null 为空
-func (f Field) Null() Condition {
+func (f *Field) Null() Condition {
 	return func() (string, any) {
 		var sb strings.Builder
 		// 预先计算并分配足够的内存空间
@@ -452,7 +452,7 @@ func (f Field) Null() Condition {
 }
 
 // NotNull 不为空
-func (f Field) NotNull() Condition {
+func (f *Field) NotNull() Condition {
 	return func() (string, any) {
 		var sb strings.Builder
 		// 预先计算并分配足够的内存空间
@@ -465,7 +465,7 @@ func (f Field) NotNull() Condition {
 }
 
 // AsName 别名
-func (f Field) AsName(name string) string {
+func (f *Field) AsName(name string) string {
 	if name == "" {
 		return f.Quote()
 	}
@@ -479,7 +479,7 @@ func (f Field) AsName(name string) string {
 }
 
 // Sum 合计
-func (f Field) Sum(as ...string) Function {
+func (f *Field) Sum(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]
@@ -497,7 +497,7 @@ func (f Field) Sum(as ...string) Function {
 }
 
 // Avg 平均
-func (f Field) Avg(as ...string) Function {
+func (f *Field) Avg(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]
@@ -515,7 +515,7 @@ func (f Field) Avg(as ...string) Function {
 }
 
 // Count 计数
-func (f Field) Count(as ...string) Function {
+func (f *Field) Count(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]
@@ -533,7 +533,7 @@ func (f Field) Count(as ...string) Function {
 }
 
 // Max 最大值
-func (f Field) Max(as ...string) Function {
+func (f *Field) Max(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]
@@ -551,7 +551,7 @@ func (f Field) Max(as ...string) Function {
 }
 
 // Min 最小值
-func (f Field) Min(as ...string) Function {
+func (f *Field) Min(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
 		a = as[0]
