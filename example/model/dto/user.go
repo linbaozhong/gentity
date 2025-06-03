@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// checker
+// @checker
 type UserRegisterReq struct {
 	ID       types.BigInt      `json:"id" valid:"required"`
 	UserName int               `json:"user_name" url:"user_name" form:"user_name" valid:"required,range(10|25)"`
@@ -19,7 +19,7 @@ type UserRegisterReq struct {
 	Amount   types.Money       `valid:"required"`
 }
 
-// response
+// @response
 type UserRegisterResp struct {
 	UserID   uint64 `json:"user_id"`
 	UserName string `json:"user_name"`

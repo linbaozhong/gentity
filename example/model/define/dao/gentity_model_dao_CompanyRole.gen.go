@@ -24,7 +24,7 @@ type companyrole struct {
 var (
 	companyrolePool = pool.New(app.Context, func() any {
 		_obj := &companyrole{}
-		_obj.db = ace.GetExec()
+		_obj.UUID()
 		return _obj
 	})
 )
@@ -33,7 +33,7 @@ var (
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
 func CompanyRole(exec ...ace.Executer) *companyrole {
-	_obj := &companyrole{}
+	_obj := companyrolePool.Get().(*companyrole)
 	_obj.db = ace.GetExec(exec...)
 	return _obj
 }

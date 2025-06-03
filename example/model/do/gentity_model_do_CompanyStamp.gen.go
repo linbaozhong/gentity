@@ -37,8 +37,8 @@ func (p *CompanyStamp) MarshalJSON() ([]byte, error) {
 	if p.Id != 0 {
 		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
 	}
-	if p.CompanyId != 0 {
-		_buf.WriteString(`"company_id":` + types.Marshal(p.CompanyId) + `,`)
+	if p.Company != 0 {
+		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
 	}
 	if p.Url != "" {
 		_buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
@@ -54,12 +54,6 @@ func (p *CompanyStamp) MarshalJSON() ([]byte, error) {
 	}
 	if p.CreatorName != "" {
 		_buf.WriteString(`"creator_name":` + types.Marshal(p.CreatorName) + `,`)
-	}
-	if p.Department != "" {
-		_buf.WriteString(`"department":` + types.Marshal(p.Department) + `,`)
-	}
-	if p.Position != "" {
-		_buf.WriteString(`"position":` + types.Marshal(p.Position) + `,`)
 	}
 	if p.State != 0 {
 		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
@@ -91,9 +85,9 @@ func (p *CompanyStamp) UnmarshalJSON(data []byte) error {
 		var e error
 		switch key.Str {
 		case "id":
-			p.Id = types.Money(value.Uint())
-		case "company_id":
-			p.CompanyId = types.Money(value.Uint())
+			p.Id = types.BigInt(value.Uint())
+		case "company":
+			p.Company = types.BigInt(value.Uint())
 		case "url":
 			p.Url = types.String(value.Str)
 		case "genre":
@@ -104,10 +98,6 @@ func (p *CompanyStamp) UnmarshalJSON(data []byte) error {
 			p.Creator = types.BigInt(value.Uint())
 		case "creator_name":
 			p.CreatorName = types.String(value.Str)
-		case "department":
-			p.Department = types.String(value.Str)
-		case "position":
-			p.Position = types.String(value.Str)
 		case "state":
 			p.State = types.Int8(value.Int())
 		case "status":
@@ -138,14 +128,12 @@ func (p *CompanyStamp) Free() {
 // Reset
 func (p *CompanyStamp) Reset() {
 	p.Id = 0
-	p.CompanyId = 0
+	p.Company = 0
 	p.Url = ""
 	p.Genre = 0
 	p.IsDefault = 0
 	p.Creator = 0
 	p.CreatorName = ""
-	p.Department = ""
-	p.Position = ""
 	p.State = 0
 	p.Status = 0
 	p.Ctime = types.Time{}
@@ -167,8 +155,8 @@ func (p *CompanyStamp) AssignPtr(args ...dialect.Field) []any {
 		switch col {
 		case tblcompanystamp.Id:
 			_vals = append(_vals, &p.Id)
-		case tblcompanystamp.CompanyId:
-			_vals = append(_vals, &p.CompanyId)
+		case tblcompanystamp.Company:
+			_vals = append(_vals, &p.Company)
 		case tblcompanystamp.Url:
 			_vals = append(_vals, &p.Url)
 		case tblcompanystamp.Genre:
@@ -179,10 +167,6 @@ func (p *CompanyStamp) AssignPtr(args ...dialect.Field) []any {
 			_vals = append(_vals, &p.Creator)
 		case tblcompanystamp.CreatorName:
 			_vals = append(_vals, &p.CreatorName)
-		case tblcompanystamp.Department:
-			_vals = append(_vals, &p.Department)
-		case tblcompanystamp.Position:
-			_vals = append(_vals, &p.Position)
 		case tblcompanystamp.State:
 			_vals = append(_vals, &p.State)
 		case tblcompanystamp.Status:
@@ -255,12 +239,12 @@ func (p *CompanyStamp) AssignValues(args ...dialect.Field) ([]string, []any) {
 				}
 				_cols = append(_cols, tblcompanystamp.Id.Quote())
 				_vals = append(_vals, p.Id)
-			case tblcompanystamp.CompanyId:
-				if p.CompanyId == 0 {
+			case tblcompanystamp.Company:
+				if p.Company == 0 {
 					continue
 				}
-				_cols = append(_cols, tblcompanystamp.CompanyId.Quote())
-				_vals = append(_vals, p.CompanyId)
+				_cols = append(_cols, tblcompanystamp.Company.Quote())
+				_vals = append(_vals, p.Company)
 			case tblcompanystamp.Url:
 				if p.Url == "" {
 					continue
@@ -291,18 +275,6 @@ func (p *CompanyStamp) AssignValues(args ...dialect.Field) ([]string, []any) {
 				}
 				_cols = append(_cols, tblcompanystamp.CreatorName.Quote())
 				_vals = append(_vals, p.CreatorName)
-			case tblcompanystamp.Department:
-				if p.Department == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Department.Quote())
-				_vals = append(_vals, p.Department)
-			case tblcompanystamp.Position:
-				if p.Position == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Position.Quote())
-				_vals = append(_vals, p.Position)
 			case tblcompanystamp.State:
 				if p.State == 0 {
 					continue
@@ -339,9 +311,9 @@ func (p *CompanyStamp) AssignValues(args ...dialect.Field) ([]string, []any) {
 		case tblcompanystamp.Id:
 			_cols = append(_cols, tblcompanystamp.Id.Quote())
 			_vals = append(_vals, p.Id)
-		case tblcompanystamp.CompanyId:
-			_cols = append(_cols, tblcompanystamp.CompanyId.Quote())
-			_vals = append(_vals, p.CompanyId)
+		case tblcompanystamp.Company:
+			_cols = append(_cols, tblcompanystamp.Company.Quote())
+			_vals = append(_vals, p.Company)
 		case tblcompanystamp.Url:
 			_cols = append(_cols, tblcompanystamp.Url.Quote())
 			_vals = append(_vals, p.Url)
@@ -357,12 +329,6 @@ func (p *CompanyStamp) AssignValues(args ...dialect.Field) ([]string, []any) {
 		case tblcompanystamp.CreatorName:
 			_cols = append(_cols, tblcompanystamp.CreatorName.Quote())
 			_vals = append(_vals, p.CreatorName)
-		case tblcompanystamp.Department:
-			_cols = append(_cols, tblcompanystamp.Department.Quote())
-			_vals = append(_vals, p.Department)
-		case tblcompanystamp.Position:
-			_cols = append(_cols, tblcompanystamp.Position.Quote())
-			_vals = append(_vals, p.Position)
 		case tblcompanystamp.State:
 			_cols = append(_cols, tblcompanystamp.State.Quote())
 			_vals = append(_vals, p.State)

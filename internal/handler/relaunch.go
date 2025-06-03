@@ -106,11 +106,11 @@ var (
 				if e != nil {
 					showError(e)
 				}
-				//// 写入daoBase
-				//e = writeDaoBase(daoPath)
-				//if e != nil {
+				// // 写入daoBase
+				// e = writeDaoBase(daoPath)
+				// if e != nil {
 				//	showError(e)
-				//}
+				// }
 			case "check", "dto":
 			case "swag":
 			case "version":
@@ -166,13 +166,13 @@ var (
 					if filename == dentityDTO {
 						continue
 					}
-					_tds, e := parseFile(filename, pkgPath, "checker", "request", "response")
+					_tds, e := parseFile(filename, pkgPath, "@checker", "@request", "@response")
 					if e != nil {
 						showError(e)
 					}
 					e = generateDTO(_tds, filename)
 				} else {
-					_tds, e := parseFile(filename, pkgPath, "tablename")
+					_tds, e := parseFile(filename, pkgPath, "@tablename")
 					if e != nil {
 						showError(e)
 					}
@@ -184,11 +184,11 @@ var (
 					showError(e)
 				}
 			}
-			//// 写入daoBase
-			//e = writeDaoBase(daoPath, _allTds)
-			//if e != nil {
+			// // 写入daoBase
+			// e = writeDaoBase(daoPath, _allTds)
+			// if e != nil {
 			//	showError(e)
-			//}
+			// }
 		},
 	}
 )

@@ -89,7 +89,7 @@ func (p *DocumentTemplate) UnmarshalJSON(data []byte) error {
 		case "genre":
 			p.Genre = types.Int8(value.Int())
 		case "company":
-			p.Company = types.Money(value.Uint())
+			p.Company = types.BigInt(value.Uint())
 		case "way":
 			p.Way = types.Int8(value.Int())
 		case "auth_sign":

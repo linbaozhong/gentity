@@ -41,6 +41,7 @@ type Table struct {
 	Keys        map[string][]string // index -> column_name
 	Constraints map[string]*Constraint
 	Extras      map[string]string
+	Comment     string
 }
 
 // Schema stores table name and its schema

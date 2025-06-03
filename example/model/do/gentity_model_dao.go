@@ -16,6 +16,8 @@ package do
 
 import "context"
 
+// AccountDao 账号信息DAO
+// @tablename account
 type AccountDao interface {
 	// FindByID 根据ID查询账号信息
 	// @Condition

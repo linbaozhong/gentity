@@ -37,8 +37,8 @@ func (p *CompanyRole) MarshalJSON() ([]byte, error) {
 	if p.Id != 0 {
 		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
 	}
-	if p.CompanyId != 0 {
-		_buf.WriteString(`"company_id":` + types.Marshal(p.CompanyId) + `,`)
+	if p.Company != 0 {
+		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
 	}
 	if p.Name != "" {
 		_buf.WriteString(`"name":` + types.Marshal(p.Name) + `,`)
@@ -74,8 +74,8 @@ func (p *CompanyRole) UnmarshalJSON(data []byte) error {
 		switch key.Str {
 		case "id":
 			p.Id = types.BigInt(value.Uint())
-		case "company_id":
-			p.CompanyId = types.BigInt(value.Uint())
+		case "company":
+			p.Company = types.BigInt(value.Uint())
 		case "name":
 			p.Name = types.String(value.Str)
 		case "descr":
@@ -108,7 +108,7 @@ func (p *CompanyRole) Free() {
 // Reset
 func (p *CompanyRole) Reset() {
 	p.Id = 0
-	p.CompanyId = 0
+	p.Company = 0
 	p.Name = ""
 	p.Descr = ""
 	p.Rules = ""
@@ -131,8 +131,8 @@ func (p *CompanyRole) AssignPtr(args ...dialect.Field) []any {
 		switch col {
 		case tblcompanyrole.Id:
 			_vals = append(_vals, &p.Id)
-		case tblcompanyrole.CompanyId:
-			_vals = append(_vals, &p.CompanyId)
+		case tblcompanyrole.Company:
+			_vals = append(_vals, &p.Company)
 		case tblcompanyrole.Name:
 			_vals = append(_vals, &p.Name)
 		case tblcompanyrole.Descr:
@@ -207,12 +207,12 @@ func (p *CompanyRole) AssignValues(args ...dialect.Field) ([]string, []any) {
 				}
 				_cols = append(_cols, tblcompanyrole.Id.Quote())
 				_vals = append(_vals, p.Id)
-			case tblcompanyrole.CompanyId:
-				if p.CompanyId == 0 {
+			case tblcompanyrole.Company:
+				if p.Company == 0 {
 					continue
 				}
-				_cols = append(_cols, tblcompanyrole.CompanyId.Quote())
-				_vals = append(_vals, p.CompanyId)
+				_cols = append(_cols, tblcompanyrole.Company.Quote())
+				_vals = append(_vals, p.Company)
 			case tblcompanyrole.Name:
 				if p.Name == "" {
 					continue
@@ -255,9 +255,9 @@ func (p *CompanyRole) AssignValues(args ...dialect.Field) ([]string, []any) {
 		case tblcompanyrole.Id:
 			_cols = append(_cols, tblcompanyrole.Id.Quote())
 			_vals = append(_vals, p.Id)
-		case tblcompanyrole.CompanyId:
-			_cols = append(_cols, tblcompanyrole.CompanyId.Quote())
-			_vals = append(_vals, p.CompanyId)
+		case tblcompanyrole.Company:
+			_cols = append(_cols, tblcompanyrole.Company.Quote())
+			_vals = append(_vals, p.Company)
 		case tblcompanyrole.Name:
 			_cols = append(_cols, tblcompanyrole.Name.Quote())
 			_vals = append(_vals, p.Name)

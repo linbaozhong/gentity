@@ -39,7 +39,6 @@ var (
 		AuthContractId,
 		AuthResult,
 		State,
-		Ctime,
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{

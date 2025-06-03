@@ -211,16 +211,16 @@ func parseDocs(tmp *TempData, docs []string, tags ...string) {
 		for _, tag := range tags {
 			if strings.Contains(doc, tag) {
 				tmp.ParseTag = append(tmp.ParseTag, tag)
-				if tag == "tablename" {
+				if tag == "@tablename" {
 					tmp.TableName = strings.TrimSpace(strings.TrimLeft(doc, tag))
 					break
 				}
 			}
 		}
 
-		if strings.HasPrefix(doc, "cache ") {
+		if strings.HasPrefix(doc, "@cache ") {
 			tmp.HasCache = true
-			cache := strings.Replace(strings.TrimSpace(strings.TrimLeft(doc, "cache")), "  ", " ", -1)
+			cache := strings.Replace(strings.TrimSpace(strings.TrimLeft(doc, "@cache")), "  ", " ", -1)
 			caches := strings.Split(cache, " ")
 			if len(caches) >= 3 {
 				tmp.CacheData = caches[0]

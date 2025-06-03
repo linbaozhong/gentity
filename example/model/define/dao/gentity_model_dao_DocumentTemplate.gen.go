@@ -24,7 +24,7 @@ type documenttemplate struct {
 var (
 	documenttemplatePool = pool.New(app.Context, func() any {
 		_obj := &documenttemplate{}
-		_obj.db = ace.GetExec()
+		_obj.UUID()
 		return _obj
 	})
 )
@@ -33,7 +33,7 @@ var (
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
 func DocumentTemplate(exec ...ace.Executer) *documenttemplate {
-	_obj := &documenttemplate{}
+	_obj := documenttemplatePool.Get().(*documenttemplate)
 	_obj.db = ace.GetExec(exec...)
 	return _obj
 }

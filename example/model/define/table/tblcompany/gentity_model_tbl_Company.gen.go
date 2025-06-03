@@ -39,8 +39,6 @@ var (
 		Creator,
 		State,
 		Status,
-		Ctime,
-		Utime,
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{

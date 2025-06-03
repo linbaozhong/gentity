@@ -21,8 +21,6 @@ var (
 		LoginName,
 		Password,
 		State,
-		Ctime,
-		Utime,
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{

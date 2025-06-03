@@ -40,8 +40,8 @@ func (p *CompanyMan) MarshalJSON() ([]byte, error) {
 	if p.AccountId != 0 {
 		_buf.WriteString(`"account_id":` + types.Marshal(p.AccountId) + `,`)
 	}
-	if p.CompanyId != 0 {
-		_buf.WriteString(`"company_id":` + types.Marshal(p.CompanyId) + `,`)
+	if p.Company != 0 {
+		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
 	}
 	if p.RealName != "" {
 		_buf.WriteString(`"real_name":` + types.Marshal(p.RealName) + `,`)
@@ -51,6 +51,18 @@ func (p *CompanyMan) MarshalJSON() ([]byte, error) {
 	}
 	if p.Roles != "" {
 		_buf.WriteString(`"roles":` + types.Marshal(p.Roles) + `,`)
+	}
+	if p.Gender != "" {
+		_buf.WriteString(`"gender":` + types.Marshal(p.Gender) + `,`)
+	}
+	if p.Genre != 0 {
+		_buf.WriteString(`"genre":` + types.Marshal(p.Genre) + `,`)
+	}
+	if p.IsActivate != 0 {
+		_buf.WriteString(`"is_activate":` + types.Marshal(p.IsActivate) + `,`)
+	}
+	if !p.LoginTime.IsZero() {
+		_buf.WriteString(`"login_time":` + types.Marshal(p.LoginTime) + `,`)
 	}
 	if p.State != 0 {
 		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
@@ -82,14 +94,22 @@ func (p *CompanyMan) UnmarshalJSON(data []byte) error {
 			p.Id = types.BigInt(value.Uint())
 		case "account_id":
 			p.AccountId = types.BigInt(value.Uint())
-		case "company_id":
-			p.CompanyId = types.BigInt(value.Uint())
+		case "company":
+			p.Company = types.BigInt(value.Uint())
 		case "real_name":
 			p.RealName = types.String(value.Str)
 		case "email":
 			p.Email = types.String(value.Str)
 		case "roles":
 			p.Roles = types.String(value.Str)
+		case "gender":
+			p.Gender = types.String(value.Str)
+		case "genre":
+			p.Genre = types.Int8(value.Int())
+		case "is_activate":
+			p.IsActivate = types.Int8(value.Int())
+		case "login_time":
+			p.LoginTime = types.Time{Time: value.Time()}
 		case "state":
 			p.State = types.Int8(value.Int())
 		case "ctime":
@@ -119,10 +139,14 @@ func (p *CompanyMan) Free() {
 func (p *CompanyMan) Reset() {
 	p.Id = 0
 	p.AccountId = 0
-	p.CompanyId = 0
+	p.Company = 0
 	p.RealName = ""
 	p.Email = ""
 	p.Roles = ""
+	p.Gender = ""
+	p.Genre = 0
+	p.IsActivate = 0
+	p.LoginTime = types.Time{}
 	p.State = 0
 	p.Ctime = types.Time{}
 	p.Utime = types.Time{}
@@ -145,14 +169,22 @@ func (p *CompanyMan) AssignPtr(args ...dialect.Field) []any {
 			_vals = append(_vals, &p.Id)
 		case tblcompanyman.AccountId:
 			_vals = append(_vals, &p.AccountId)
-		case tblcompanyman.CompanyId:
-			_vals = append(_vals, &p.CompanyId)
+		case tblcompanyman.Company:
+			_vals = append(_vals, &p.Company)
 		case tblcompanyman.RealName:
 			_vals = append(_vals, &p.RealName)
 		case tblcompanyman.Email:
 			_vals = append(_vals, &p.Email)
 		case tblcompanyman.Roles:
 			_vals = append(_vals, &p.Roles)
+		case tblcompanyman.Gender:
+			_vals = append(_vals, &p.Gender)
+		case tblcompanyman.Genre:
+			_vals = append(_vals, &p.Genre)
+		case tblcompanyman.IsActivate:
+			_vals = append(_vals, &p.IsActivate)
+		case tblcompanyman.LoginTime:
+			_vals = append(_vals, &p.LoginTime)
 		case tblcompanyman.State:
 			_vals = append(_vals, &p.State)
 		case tblcompanyman.Ctime:
@@ -229,12 +261,12 @@ func (p *CompanyMan) AssignValues(args ...dialect.Field) ([]string, []any) {
 				}
 				_cols = append(_cols, tblcompanyman.AccountId.Quote())
 				_vals = append(_vals, p.AccountId)
-			case tblcompanyman.CompanyId:
-				if p.CompanyId == 0 {
+			case tblcompanyman.Company:
+				if p.Company == 0 {
 					continue
 				}
-				_cols = append(_cols, tblcompanyman.CompanyId.Quote())
-				_vals = append(_vals, p.CompanyId)
+				_cols = append(_cols, tblcompanyman.Company.Quote())
+				_vals = append(_vals, p.Company)
 			case tblcompanyman.RealName:
 				if p.RealName == "" {
 					continue
@@ -253,6 +285,30 @@ func (p *CompanyMan) AssignValues(args ...dialect.Field) ([]string, []any) {
 				}
 				_cols = append(_cols, tblcompanyman.Roles.Quote())
 				_vals = append(_vals, p.Roles)
+			case tblcompanyman.Gender:
+				if p.Gender == "" {
+					continue
+				}
+				_cols = append(_cols, tblcompanyman.Gender.Quote())
+				_vals = append(_vals, p.Gender)
+			case tblcompanyman.Genre:
+				if p.Genre == 0 {
+					continue
+				}
+				_cols = append(_cols, tblcompanyman.Genre.Quote())
+				_vals = append(_vals, p.Genre)
+			case tblcompanyman.IsActivate:
+				if p.IsActivate == 0 {
+					continue
+				}
+				_cols = append(_cols, tblcompanyman.IsActivate.Quote())
+				_vals = append(_vals, p.IsActivate)
+			case tblcompanyman.LoginTime:
+				if p.LoginTime.IsZero() {
+					continue
+				}
+				_cols = append(_cols, tblcompanyman.LoginTime.Quote())
+				_vals = append(_vals, p.LoginTime)
 			case tblcompanyman.State:
 				if p.State == 0 {
 					continue
@@ -286,9 +342,9 @@ func (p *CompanyMan) AssignValues(args ...dialect.Field) ([]string, []any) {
 		case tblcompanyman.AccountId:
 			_cols = append(_cols, tblcompanyman.AccountId.Quote())
 			_vals = append(_vals, p.AccountId)
-		case tblcompanyman.CompanyId:
-			_cols = append(_cols, tblcompanyman.CompanyId.Quote())
-			_vals = append(_vals, p.CompanyId)
+		case tblcompanyman.Company:
+			_cols = append(_cols, tblcompanyman.Company.Quote())
+			_vals = append(_vals, p.Company)
 		case tblcompanyman.RealName:
 			_cols = append(_cols, tblcompanyman.RealName.Quote())
 			_vals = append(_vals, p.RealName)
@@ -298,6 +354,18 @@ func (p *CompanyMan) AssignValues(args ...dialect.Field) ([]string, []any) {
 		case tblcompanyman.Roles:
 			_cols = append(_cols, tblcompanyman.Roles.Quote())
 			_vals = append(_vals, p.Roles)
+		case tblcompanyman.Gender:
+			_cols = append(_cols, tblcompanyman.Gender.Quote())
+			_vals = append(_vals, p.Gender)
+		case tblcompanyman.Genre:
+			_cols = append(_cols, tblcompanyman.Genre.Quote())
+			_vals = append(_vals, p.Genre)
+		case tblcompanyman.IsActivate:
+			_cols = append(_cols, tblcompanyman.IsActivate.Quote())
+			_vals = append(_vals, p.IsActivate)
+		case tblcompanyman.LoginTime:
+			_cols = append(_cols, tblcompanyman.LoginTime.Quote())
+			_vals = append(_vals, p.LoginTime)
 		case tblcompanyman.State:
 			_cols = append(_cols, tblcompanyman.State.Quote())
 			_vals = append(_vals, p.State)

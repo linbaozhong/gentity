@@ -2,7 +2,7 @@
 /*
 	--- {{.StructName}} ---
 */
-{{- if contains .ParseTag "checker|request"}}
+{{- if contains .ParseTag "@checker|@request"}}
 // Init
 func (p *{{.StructName}}) Init() error {
 	{{- range $key, $value := .Columns}}
@@ -47,7 +47,7 @@ func (p *{{.StructName}}) Check() error {
 }
 {{end}}
 
-{{- if contains .ParseTag "response"}}
+{{- if contains .ParseTag "@response"}}
 // MarshalJSON
 func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
@@ -69,7 +69,7 @@ func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 }
 {{end}}
 
-{{- if and (contains .ParseTag "checker|request") (gt (len .Columns) 0 )}}
+{{- if and (contains .ParseTag "@checker|@request") (gt (len .Columns) 0 )}}
 	{{- $firstColumn := index .Columns 0 }}
 // UnmarshalJSON
 func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {

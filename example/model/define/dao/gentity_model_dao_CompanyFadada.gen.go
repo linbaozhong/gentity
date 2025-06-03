@@ -24,7 +24,7 @@ type companyfadada struct {
 var (
 	companyfadadaPool = pool.New(app.Context, func() any {
 		_obj := &companyfadada{}
-		_obj.db = ace.GetExec()
+		_obj.UUID()
 		return _obj
 	})
 )
@@ -33,7 +33,7 @@ var (
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
 func CompanyFadada(exec ...ace.Executer) *companyfadada {
-	_obj := &companyfadada{}
+	_obj := companyfadadaPool.Get().(*companyfadada)
 	_obj.db = ace.GetExec(exec...)
 	return _obj
 }

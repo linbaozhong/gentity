@@ -7,15 +7,13 @@ import (
 )
 
 var (
-	Id          = dialect.Field{Name: "id", Json: "id", Table: "company_stamp", Type: "types.Money"}
-	CompanyId   = dialect.Field{Name: "company_id", Json: "company_id", Table: "company_stamp", Type: "types.Money"}
+	Id          = dialect.Field{Name: "id", Json: "id", Table: "company_stamp", Type: "types.BigInt"}
+	Company     = dialect.Field{Name: "company", Json: "company", Table: "company_stamp", Type: "types.BigInt"}
 	Url         = dialect.Field{Name: "url", Json: "url", Table: "company_stamp", Type: "types.String"}
 	Genre       = dialect.Field{Name: "genre", Json: "genre", Table: "company_stamp", Type: "types.Int8"}
 	IsDefault   = dialect.Field{Name: "is_default", Json: "is_default", Table: "company_stamp", Type: "types.Int8"}
 	Creator     = dialect.Field{Name: "creator", Json: "creator", Table: "company_stamp", Type: "types.BigInt"}
 	CreatorName = dialect.Field{Name: "creator_name", Json: "creator_name", Table: "company_stamp", Type: "types.String"}
-	Department  = dialect.Field{Name: "department", Json: "department", Table: "company_stamp", Type: "types.String"}
-	Position    = dialect.Field{Name: "position", Json: "position", Table: "company_stamp", Type: "types.String"}
 	State       = dialect.Field{Name: "state", Json: "state", Table: "company_stamp", Type: "types.Int8"}
 	Status      = dialect.Field{Name: "status", Json: "status", Table: "company_stamp", Type: "types.Int8"}
 	Ctime       = dialect.Field{Name: "ctime", Json: "ctime", Table: "company_stamp", Type: "types.Time"}
@@ -26,30 +24,24 @@ var (
 	// 可写列
 	WritableFields = []dialect.Field{
 		Id,
-		CompanyId,
+		Company,
 		Url,
 		Genre,
 		IsDefault,
 		Creator,
 		CreatorName,
-		Department,
-		Position,
 		State,
 		Status,
-		Ctime,
-		Utime,
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{
 		Id,
-		CompanyId,
+		Company,
 		Url,
 		Genre,
 		IsDefault,
 		Creator,
 		CreatorName,
-		Department,
-		Position,
 		State,
 		Status,
 		Ctime,

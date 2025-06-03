@@ -16,7 +16,7 @@ package main
 
 import (
 	account "github.com/linbaozhong/gentity/example/model/define/dao"
-	"github.com/linbaozhong/gentity/example/model/define/dto"
+	"github.com/linbaozhong/gentity/example/model/dto"
 	"github.com/linbaozhong/gentity/pkg/ace/dao"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )

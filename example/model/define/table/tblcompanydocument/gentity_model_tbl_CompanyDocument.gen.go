@@ -8,8 +8,8 @@ import (
 
 var (
 	Id           = dialect.Field{Name: "id", Json: "id", Table: "company_document", Type: "types.BigInt"}
-	CompanyId    = dialect.Field{Name: "company_id", Json: "company_id", Table: "company_document", Type: "types.BigInt"}
-	TemplateId   = dialect.Field{Name: "template_id", Json: "template_id", Table: "company_document", Type: "types.Money"}
+	Company      = dialect.Field{Name: "company", Json: "company", Table: "company_document", Type: "types.BigInt"}
+	TemplateId   = dialect.Field{Name: "template_id", Json: "template_id", Table: "company_document", Type: "types.BigInt"}
 	Title        = dialect.Field{Name: "title", Json: "title", Table: "company_document", Type: "types.String"}
 	Classify     = dialect.Field{Name: "classify", Json: "classify", Table: "company_document", Type: "types.Int8"}
 	Genre        = dialect.Field{Name: "genre", Json: "genre", Table: "company_document", Type: "types.Int8"}
@@ -18,7 +18,7 @@ var (
 	VariableMode = dialect.Field{Name: "variable_mode", Json: "variable_mode", Table: "company_document", Type: "types.Int32"}
 	IsDefault    = dialect.Field{Name: "is_default", Json: "is_default", Table: "company_document", Type: "types.Int8"}
 	CanDefault   = dialect.Field{Name: "can_default", Json: "can_default", Table: "company_document", Type: "types.Int8"}
-	Modifier     = dialect.Field{Name: "modifier", Json: "modifier", Table: "company_document", Type: "types.Money"}
+	Modifier     = dialect.Field{Name: "modifier", Json: "modifier", Table: "company_document", Type: "types.BigInt"}
 	State        = dialect.Field{Name: "state", Json: "state", Table: "company_document", Type: "types.Int8"}
 	Ctime        = dialect.Field{Name: "ctime", Json: "ctime", Table: "company_document", Type: "types.Time"}
 	// 主键
@@ -26,7 +26,7 @@ var (
 
 	// 可写列
 	WritableFields = []dialect.Field{
-		CompanyId,
+		Company,
 		TemplateId,
 		Title,
 		Classify,
@@ -38,12 +38,11 @@ var (
 		CanDefault,
 		Modifier,
 		State,
-		Ctime,
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{
 		Id,
-		CompanyId,
+		Company,
 		TemplateId,
 		Title,
 		Classify,

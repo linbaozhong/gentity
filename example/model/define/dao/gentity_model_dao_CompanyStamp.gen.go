@@ -24,7 +24,7 @@ type companystamp struct {
 var (
 	companystampPool = pool.New(app.Context, func() any {
 		_obj := &companystamp{}
-		_obj.db = ace.GetExec()
+		_obj.UUID()
 		return _obj
 	})
 )
@@ -33,7 +33,7 @@ var (
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
 func CompanyStamp(exec ...ace.Executer) *companystamp {
-	_obj := &companystamp{}
+	_obj := companystampPool.Get().(*companystamp)
 	_obj.db = ace.GetExec(exec...)
 	return _obj
 }
@@ -143,7 +143,7 @@ func (p *companystamp) Update(ctx context.Context, sets []dialect.Setter, cond .
 }
 
 // UpdateById
-func (p *companystamp) UpdateById(ctx context.Context, id types.Money, sets ...dialect.Setter) (bool, error) {
+func (p *companystamp) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error) {
 	return p.Update(ctx,
 		sets,
 		tblcompanystamp.PrimaryKey.Eq(id),
@@ -210,7 +210,7 @@ func (p *companystamp) Delete(ctx context.Context, cond ...dialect.Condition) (b
 }
 
 // DeleteById
-func (p *companystamp) DeleteById(ctx context.Context, id types.Money) (bool, error) {
+func (p *companystamp) DeleteById(ctx context.Context, id types.BigInt) (bool, error) {
 	return p.Delete(ctx,
 		tblcompanystamp.PrimaryKey.Eq(id),
 	)
@@ -266,7 +266,7 @@ func (p *companystamp) Get(ctx context.Context, s ace.SelectBuilder) (*do.Compan
 }
 
 // GetByID 按主键读取一个company_stamp对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *companystamp) GetByID(ctx context.Context, id types.Money, cols ...dialect.Field) (*do.CompanyStamp, bool, error) {
+func (p *companystamp) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*do.CompanyStamp, bool, error) {
 	defer p.Free()
 	return p.Get(ctx, ace.Table(do.CompanyStampTableName).Where(tblcompanystamp.PrimaryKey.Eq(id)).Cols(cols...))
 }
@@ -379,7 +379,7 @@ func (p *companystamp) Exists(ctx context.Context, cond ...dialect.Condition) (b
 		return false, e
 	}
 
-	var id types.Money
+	var id types.BigInt
 	e = _row.Scan(&id)
 	switch e {
 	case nil:

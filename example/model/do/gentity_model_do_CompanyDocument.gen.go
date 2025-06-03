@@ -37,8 +37,8 @@ func (p *CompanyDocument) MarshalJSON() ([]byte, error) {
 	if p.Id != 0 {
 		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
 	}
-	if p.CompanyId != 0 {
-		_buf.WriteString(`"company_id":` + types.Marshal(p.CompanyId) + `,`)
+	if p.Company != 0 {
+		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
 	}
 	if p.TemplateId != 0 {
 		_buf.WriteString(`"template_id":` + types.Marshal(p.TemplateId) + `,`)
@@ -95,10 +95,10 @@ func (p *CompanyDocument) UnmarshalJSON(data []byte) error {
 		switch key.Str {
 		case "id":
 			p.Id = types.BigInt(value.Uint())
-		case "company_id":
-			p.CompanyId = types.BigInt(value.Uint())
+		case "company":
+			p.Company = types.BigInt(value.Uint())
 		case "template_id":
-			p.TemplateId = types.Money(value.Uint())
+			p.TemplateId = types.BigInt(value.Uint())
 		case "title":
 			p.Title = types.String(value.Str)
 		case "classify":
@@ -116,7 +116,7 @@ func (p *CompanyDocument) UnmarshalJSON(data []byte) error {
 		case "can_default":
 			p.CanDefault = types.Int8(value.Int())
 		case "modifier":
-			p.Modifier = types.Money(value.Uint())
+			p.Modifier = types.BigInt(value.Uint())
 		case "state":
 			p.State = types.Int8(value.Int())
 		case "ctime":
@@ -143,7 +143,7 @@ func (p *CompanyDocument) Free() {
 // Reset
 func (p *CompanyDocument) Reset() {
 	p.Id = 0
-	p.CompanyId = 0
+	p.Company = 0
 	p.TemplateId = 0
 	p.Title = ""
 	p.Classify = 0
@@ -173,8 +173,8 @@ func (p *CompanyDocument) AssignPtr(args ...dialect.Field) []any {
 		switch col {
 		case tblcompanydocument.Id:
 			_vals = append(_vals, &p.Id)
-		case tblcompanydocument.CompanyId:
-			_vals = append(_vals, &p.CompanyId)
+		case tblcompanydocument.Company:
+			_vals = append(_vals, &p.Company)
 		case tblcompanydocument.TemplateId:
 			_vals = append(_vals, &p.TemplateId)
 		case tblcompanydocument.Title:
@@ -263,12 +263,12 @@ func (p *CompanyDocument) AssignValues(args ...dialect.Field) ([]string, []any) 
 				}
 				_cols = append(_cols, tblcompanydocument.Id.Quote())
 				_vals = append(_vals, p.Id)
-			case tblcompanydocument.CompanyId:
-				if p.CompanyId == 0 {
+			case tblcompanydocument.Company:
+				if p.Company == 0 {
 					continue
 				}
-				_cols = append(_cols, tblcompanydocument.CompanyId.Quote())
-				_vals = append(_vals, p.CompanyId)
+				_cols = append(_cols, tblcompanydocument.Company.Quote())
+				_vals = append(_vals, p.Company)
 			case tblcompanydocument.TemplateId:
 				if p.TemplateId == 0 {
 					continue
@@ -353,9 +353,9 @@ func (p *CompanyDocument) AssignValues(args ...dialect.Field) ([]string, []any) 
 		case tblcompanydocument.Id:
 			_cols = append(_cols, tblcompanydocument.Id.Quote())
 			_vals = append(_vals, p.Id)
-		case tblcompanydocument.CompanyId:
-			_cols = append(_cols, tblcompanydocument.CompanyId.Quote())
-			_vals = append(_vals, p.CompanyId)
+		case tblcompanydocument.Company:
+			_cols = append(_cols, tblcompanydocument.Company.Quote())
+			_vals = append(_vals, p.Company)
 		case tblcompanydocument.TemplateId:
 			_cols = append(_cols, tblcompanydocument.TemplateId.Quote())
 			_vals = append(_vals, p.TemplateId)

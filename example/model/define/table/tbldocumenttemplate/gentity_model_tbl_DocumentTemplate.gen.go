@@ -9,7 +9,7 @@ import (
 var (
 	Id       = dialect.Field{Name: "id", Json: "id", Table: "document_template", Type: "types.BigInt"}
 	Genre    = dialect.Field{Name: "genre", Json: "genre", Table: "document_template", Type: "types.Int8"}
-	Company  = dialect.Field{Name: "company", Json: "company", Table: "document_template", Type: "types.Money"}
+	Company  = dialect.Field{Name: "company", Json: "company", Table: "document_template", Type: "types.BigInt"}
 	Way      = dialect.Field{Name: "way", Json: "way", Table: "document_template", Type: "types.Int8"}
 	AuthSign = dialect.Field{Name: "auth_sign", Json: "auth_sign", Table: "document_template", Type: "types.Int8"}
 	Title    = dialect.Field{Name: "title", Json: "title", Table: "document_template", Type: "types.String"}
@@ -32,7 +32,6 @@ var (
 		Url,
 		HasForm,
 		State,
-		Utime,
 	}
 	// 可读列
 	ReadableFields = []dialect.Field{
