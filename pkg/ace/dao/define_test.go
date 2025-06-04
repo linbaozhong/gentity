@@ -16,23 +16,55 @@ package dao
 
 import (
 	"fmt"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
+	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanydocument"
 	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"strings"
 	"testing"
 )
 
+type (
+	builder struct {
+		table         string
+		join          [][3]string
+		joinParams    []any
+		distinct      bool
+		cols          []dialect.Field
+		funcs         []string
+		omits         []dialect.Field
+		groupBy       strings.Builder
+		having        strings.Builder
+		havingParams  []any
+		orderBy       strings.Builder
+		limit         string
+		where         strings.Builder
+		whereParams   []any
+		params        []any
+		command       strings.Builder
+		commandString strings.Builder
+	}
+)
+
+func (b *builder) Where(conds ...dialect.Condition) *builder {
+	return b
+}
+
 func TestDefine(t *testing.T) {
 	_dai := DataAccessInterface{
-		NameSpace: "company",
+		NameSpace: do.CompanyDocumentTableName,
 		Children: []DataAccessInterface{
 			{
-				NameSpace: "document",
-				Name:      "Get",
-				Table:     do.CompanyTableName,
-				Method:    ace.Method_Get,
-				Input:     ace.Where(tblcompany.Id.Eq(1), tblcompany.State.Eq(nil)).Order(tblcompany.Ctime),
-				Output:    do.Company{},
+				Name:   "GetById",
+				Method: ace.Method_Get,
+				Input:  ace.Where(tblcompanydocument.Id.Eq(1), tblcompanydocument.State.Eq(nil)).Order(tblcompanydocument.Ctime),
+				Output: &do.Company{},
+			},
+			{
+				Name:   "ListByCompanyId",
+				Method: ace.Method_List,
+				Input:  ace.Where(tblcompanydocument.Company.Eq(1), tblcompanydocument.State.Eq(nil)).Order(tblcompanydocument.Ctime),
+				Output: []do.Company{},
 			},
 		},
 	}
@@ -51,7 +83,11 @@ func Run(dai DataAccessInterface) {
 
 	if len(dai.Children) > 0 {
 		for _, _dai := range dai.Children {
-			_dai.NameSpace = dai.NameSpace + "_" + _dai.NameSpace
+			if _dai.NameSpace == "" {
+				_dai.NameSpace = dai.NameSpace
+			} else {
+				_dai.NameSpace = dai.NameSpace + "." + _dai.NameSpace
+			}
 			Run(_dai)
 		}
 		return
