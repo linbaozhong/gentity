@@ -78,6 +78,8 @@ require (
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/tdewolff/minify/v2 v2.20.19 // indirect
 	github.com/tdewolff/parse/v2 v2.7.12 // indirect
+	github.com/ulikunitz/lz v0.4.1 // indirect
+	github.com/ulikunitz/xz v0.6.0-alpha.3.0.20250227202934-03d8b7c53fdb // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
