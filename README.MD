@@ -23,7 +23,7 @@ gentity api [项目名称]
 ### 生成ORM代码
 #### 定义一个struct，添加注释 tablename 数据库表名
 ```go
-// tablename user
+// @tablename user
 type User struct {
 	ID         types.ID `json:"id" db:"'id' pk auto"`
 	Avatar     string   `json:"avatar" db:"avatar"`
@@ -337,7 +337,7 @@ func TestSelect(t *testing.T) {
 
 例如：
 ```go
-// tablename user_log
+// @tablename user_log
 type UserLog struct {
 	ace.Model
 	Id         types.BigInt `json:"id,omitempty" db:"'id' pk auto size(20)"`           //
@@ -353,7 +353,7 @@ type UserLog struct {
 	User User `json:"user,omitempty" db:"ref:UserId|Id"`
 }
 
-// tablename user
+// @tablename user
 type User struct {
 	ace.Model
 	Id    types.BigInt `json:"id,omitempty" db:"'id' pk auto size(20)"` //
@@ -372,15 +372,15 @@ gentity check [dir]
 
 ### 示例
 注意：
-* 如果是请求结构体，一定要要在struct上添加注释：// request
-* 如果是响应结构体，一定要要在struct上添加注释：// response
+* 如果是请求结构体，一定要要在struct上添加注释：// @request
+* 如果是响应结构体，一定要要在struct上添加注释：// @response
 
 #### Post请求
 * 如果 Content-Type：application/json，req结构体的字段tag为json
 * 如果 Content-Type: application/x-www-form-urlencoded，req结构体的字段tag为form
 * 如果 Content-Type: multipart/form-data，req结构体的字段tag为form
 ```
-// request
+// @request
 type ArticleReq struct {
 	Title    string `json:"title" valid:"alphanum,required"`
 	Emain    string `json:"email" valid:"email~email格式错误,required"`
@@ -389,7 +389,7 @@ type ArticleReq struct {
 	Date     string `json:"date" valid:"-"`
 }
 
-// response
+// @response
 type ArticleReq struct {
 	Title    string `json:"title" valid:"alphanum,required"`
 	Emain    string `json:"email" valid:"email~email格式错误,required"`
@@ -398,7 +398,7 @@ type ArticleReq struct {
 	Date     string `json:"date" valid:"-"`
 }
 
-// request
+// @request
 type ChannelReq struct {
 	ID int `form:"id" valid:"int,required"`
 }
@@ -407,13 +407,13 @@ type ChannelReq struct {
 * 首先尝试读取query，req结构体的字段 tag 为 url 或者 param。
 * 如果query为空，则尝试读取form，req结构体的字段tag为form。
 ```
-// request
+// @request
 type ArticleReq struct {
 	ID       int    `param:"id" valid:"int,required"`
 	Title    string `url:"title" valid:"alphanum,required"`
 	Emain    string `url:"email" valid:"email~email格式错误,required"`
 }
-// request
+// @request
 type ChannelReq struct {
 	ID int `form:"id" valid:"int,required"`
 }
@@ -496,9 +496,9 @@ type ChannelReq struct {
 参照下面示例代码 struct 中的 email 字段
 
 ### 示例
-注意：一定要要在struct上添加注释：// checker
+注意：一定要要在struct上添加注释：// @request
 ```
-// request
+// @request
 type PostRequest struct {
 	Title    string `json:"title" valid:"alphanum,required"`
 	Emain    string `json:"email" valid:"email~email格式错误,required"`
@@ -506,7 +506,7 @@ type PostRequest struct {
 	AuthorIP string `json:"author_ip" valid:"ipv4"`
 	Date     string `json:"date" valid:"-"`
 }
-// request
+// @request
 type GetRequest struct {
 	ID int `url:"id" valid:"int,required"`
 }
