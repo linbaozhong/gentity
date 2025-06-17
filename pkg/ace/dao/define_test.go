@@ -19,36 +19,8 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanydocument"
 	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
-	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"strings"
 	"testing"
 )
-
-type (
-	builder struct {
-		table         string
-		join          [][3]string
-		joinParams    []any
-		distinct      bool
-		cols          []dialect.Field
-		funcs         []string
-		omits         []dialect.Field
-		groupBy       strings.Builder
-		having        strings.Builder
-		havingParams  []any
-		orderBy       strings.Builder
-		limit         string
-		where         strings.Builder
-		whereParams   []any
-		params        []any
-		command       strings.Builder
-		commandString strings.Builder
-	}
-)
-
-func (b *builder) Where(conds ...dialect.Condition) *builder {
-	return b
-}
 
 func TestDefine(t *testing.T) {
 	_dai := DataAccessInterface{

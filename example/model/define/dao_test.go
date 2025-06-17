@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/linbaozhong/gentity/example/model/define/dao"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
-	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"model/define/dao"
+	"model/define/table/tblcompany"
+	"model/do"
 	"testing"
 )
 
@@ -320,6 +320,21 @@ func TestSelect(t *testing.T) {
 		// 若出现其他错误，终止测试并输出错误信息
 		t.Fatal(err)
 	}
+}
+
+func TestPool(t *testing.T) {
+	a1 := do.NewAccount()
+	a1.Id = 1
+	a1.LoginName = "a1"
+	a1.Free()
+	a1.Free()
+
+	a2 := do.NewAccount()
+	a3 := do.NewAccount()
+	a2.Id = 2
+	a2.LoginName = "a2"
+	t.Logf("a3: %+v", a3)
+	t.Logf("a2: %+v", a2)
 }
 
 func TestCopy(t *testing.T) {

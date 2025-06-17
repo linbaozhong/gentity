@@ -5,14 +5,14 @@ package dao //documenttemplate
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/example/model/define/table/tbldocumenttemplate"
-	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"model/define/table/tbldocumenttemplate"
+	"model/do"
 )
 
 type documenttemplate struct {
@@ -24,7 +24,6 @@ type documenttemplate struct {
 var (
 	documenttemplatePool = pool.New(app.Context, func() any {
 		_obj := &documenttemplate{}
-		_obj.UUID()
 		return _obj
 	})
 )

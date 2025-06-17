@@ -72,7 +72,6 @@ type (
 var (
 	ormPool = pool.New(app.Context, func() any {
 		obj := &orm{}
-		obj.UUID()
 		return obj
 	})
 )

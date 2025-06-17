@@ -5,14 +5,14 @@ package dao //companystamp
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanystamp"
-	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"model/define/table/tblcompanystamp"
+	"model/do"
 )
 
 type companystamp struct {
@@ -24,7 +24,6 @@ type companystamp struct {
 var (
 	companystampPool = pool.New(app.Context, func() any {
 		_obj := &companystamp{}
-		_obj.UUID()
 		return _obj
 	})
 )

@@ -6,13 +6,13 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanystamp"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"model/define/table/tblcompanystamp"
 )
 
 const CompanyStampTableName = "company_stamp"
@@ -20,7 +20,6 @@ const CompanyStampTableName = "company_stamp"
 var (
 	companystampPool = pool.New(app.Context, func() any {
 		_obj := &CompanyStamp{}
-		_obj.UUID()
 		return _obj
 	})
 )

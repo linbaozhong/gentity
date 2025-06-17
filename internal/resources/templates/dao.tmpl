@@ -43,7 +43,6 @@ type {{$structNameLower}} struct {
 var(
 	{{$structNameLower}}Pool = pool.New(app.Context, func() any {
 		_obj := &{{$structNameLower}}{}
-		_obj.UUID()
 		return _obj
 	})
 )

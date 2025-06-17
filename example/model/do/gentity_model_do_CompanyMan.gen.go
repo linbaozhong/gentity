@@ -6,13 +6,13 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyman"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"model/define/table/tblcompanyman"
 )
 
 const CompanyManTableName = "company_man"
@@ -20,7 +20,6 @@ const CompanyManTableName = "company_man"
 var (
 	companymanPool = pool.New(app.Context, func() any {
 		_obj := &CompanyMan{}
-		_obj.UUID()
 		return _obj
 	})
 )

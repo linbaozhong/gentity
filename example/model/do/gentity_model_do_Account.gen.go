@@ -6,13 +6,13 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"model/define/table/tblaccount"
 )
 
 const AccountTableName = "account"
@@ -20,7 +20,6 @@ const AccountTableName = "account"
 var (
 	accountPool = pool.New(app.Context, func() any {
 		_obj := &Account{}
-		_obj.UUID()
 		return _obj
 	})
 )

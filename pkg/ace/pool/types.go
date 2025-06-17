@@ -15,31 +15,50 @@
 package pool
 
 import (
-	"sync/atomic"
+	"sync"
 )
-
-var atomic_uint64 uint64
 
 type (
 	// 定义一个私有类型，用于禁止拷贝
 	noCopy struct{}
 
 	Model struct {
-		_        noCopy
-		ace_uuid uint64 `json:"-"` // 内部留用，禁止外部赋值
+		_       noCopy
+		mu      sync.Mutex
+		ace_put bool // 内部留用，禁止外部赋值
 	}
 
 	PoolModeler interface {
-		UUID() uint64
 		Reset()
+		// Put2Pool 方法，用于判断是否已经放入池中
+		// 如果已经放入池中，返回 true，否则返回 false
+		// 并将 ace_put 设置为 true，防止重复放入池中
+		Put2Pool() bool
+		// Get4Pool 方法，用于从池中取出对象时
+		// 将 ace_put 设置为 false，防止重复放入池中
+		Get4Pool()
 	}
 )
 
-func (a *Model) UUID() uint64 {
-	if a.ace_uuid == 0 {
-		a.ace_uuid = atomic.AddUint64(&atomic_uint64, 1)
+// Put2Pool 方法，用于判断是否已经放入池中
+// 如果已经放入池中，返回 true，否则返回 false
+// 并将 ace_put 设置为 true，防止重复放入池中
+func (a *Model) Put2Pool() bool {
+	if a.ace_put {
+		return true
 	}
-	return a.ace_uuid
+	a.mu.Lock()
+	a.ace_put = true
+	a.mu.Unlock()
+	return false
+}
+
+// Get4Pool 方法，用于从池中取出对象时
+// 将 ace_put 设置为 false，防止重复放入池中
+func (a *Model) Get4Pool() {
+	a.mu.Lock()
+	a.ace_put = false
+	a.mu.Unlock()
 }
 
 // 实现一个 Lock 方法，让 noCopy 实现 sync.Locker 接口

@@ -5,14 +5,14 @@ package dao //companyfadada
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyfadada"
-	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"model/define/table/tblcompanyfadada"
+	"model/do"
 )
 
 type companyfadada struct {
@@ -24,7 +24,6 @@ type companyfadada struct {
 var (
 	companyfadadaPool = pool.New(app.Context, func() any {
 		_obj := &companyfadada{}
-		_obj.UUID()
 		return _obj
 	})
 )

@@ -5,14 +5,14 @@ package dao //companydocument
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanydocument"
-	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"model/define/table/tblcompanydocument"
+	"model/do"
 )
 
 type companydocument struct {
@@ -24,7 +24,6 @@ type companydocument struct {
 var (
 	companydocumentPool = pool.New(app.Context, func() any {
 		_obj := &companydocument{}
-		_obj.UUID()
 		return _obj
 	})
 )

@@ -1,7 +1,8 @@
-go 1.23.6
+go 1.24.4
 
 use (
 	.
-	example/reader
 	example/abc
+	example/reader
+	example/model
 )
