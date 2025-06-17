@@ -1,8 +1,0 @@
-go 1.24.4
-
-use (
-	.
-	example/abc
-	example/reader
-	example/model
-)

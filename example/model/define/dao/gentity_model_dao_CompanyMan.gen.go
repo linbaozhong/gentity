@@ -5,14 +5,14 @@ package dao //companyman
 import (
 	"context"
 	"database/sql"
+	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyman"
+	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
-	"model/define/table/tblcompanyman"
-	"model/do"
 )
 
 type companyman struct {

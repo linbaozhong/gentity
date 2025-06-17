@@ -16,9 +16,9 @@ package dao
 
 import (
 	"fmt"
-	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanydocument"
-	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
+	"model/define/table/tblcompanydocument"
+	"model/do"
 	"testing"
 )
 

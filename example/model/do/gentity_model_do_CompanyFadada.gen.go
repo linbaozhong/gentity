@@ -6,13 +6,13 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
+	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyfadada"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
-	"model/define/table/tblcompanyfadada"
 )
 
 const CompanyFadadaTableName = "company_fadada"

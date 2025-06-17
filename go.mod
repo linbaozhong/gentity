@@ -2,8 +2,6 @@ module github.com/linbaozhong/gentity
 
 go 1.24.2
 
-toolchain go1.24.4
-
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/bwmarrin/snowflake v0.3.0
