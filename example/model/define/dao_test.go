@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/linbaozhong/gentity/example/model/define/dao"
+	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
+	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"model/define/dao"
-	"model/define/table/tblcompany"
-	"model/do"
 	"testing"
 )
 

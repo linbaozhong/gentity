@@ -1,0 +1,10 @@
+- Account: # 账户
+  - GetById: # 依据账户id获取账户信息
+    statement: SELECT * FROM account WHERE id = ?
+  - GetByEmail: # 依据账户email获取账户信息
+    statement: SELECT * FROM account WHERE email = ?
+- Company: # 公司
+  - GetById: # 依据公司id获取公司信息
+    statement: SELECT * FROM company WHERE id =?
+  - GetByEmail: # 依据公司email获取公司信息
+    statement: SELECT * FROM company WHERE email =?
