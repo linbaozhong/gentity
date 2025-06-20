@@ -180,62 +180,82 @@ func parseDelete(s *sqlparser.Delete) {
 }
 
 func parseUpdate(s *sqlparser.Update) {
+	stmt := &Statement{
+		Type: UpdateType,
+	}
 	fmt.Println("语句类型: UPDATE")
 	fmt.Print("表名: ")
-	getTables(s.TableExprs)
-
-	fmt.Println()
+	stmt.Table = getTables(s.TableExprs)
+	fmt.Println(stmt.Table)
 
 	// 解析 SET 子句
 	fmt.Print("更新内容: ")
 	for _, updateExpr := range s.Exprs {
 		fmt.Printf("%s = %v ", updateExpr.Name.Name, getExprInfo(updateExpr.Expr))
+		stmt.PlaceHolders = append(stmt.PlaceHolders, PlaceHolder{
+			Name: getExprInfo(updateExpr.Expr),
+		})
 	}
 	fmt.Println()
 	// 解析 WHERE 子句中的条件
 	if s.Where != nil {
-		fmt.Print("条件: ")
+		fmt.Println("条件: ")
 		sqlparser.Walk(func(node sqlparser.SQLNode) (kontinue bool, err error) {
+			placeholder := PlaceHolder{}
 			if cond, ok := node.(*sqlparser.ComparisonExpr); ok {
-				fmt.Printf("%s %v %v ", getExprInfo(cond.Left), cond.Operator.ToString(), getExprInfo(cond.Right))
-				cond.Right = sqlparser.NewIntLiteral("?")
+				val := getExprInfo(cond.Right)
+				// fmt.Printf("%s %v %v ", getExprInfo(cond.Left), cond.Operator.ToString(), val)
+				// cond.Right = sqlparser.NewIntLiteral("?")
+				placeholder.Name = val
+				placeholder.Operator = OperatorType(cond.Operator)
+				stmt.PlaceHolders = append(stmt.PlaceHolders, placeholder)
 			}
 			return true, nil
 		}, s.Where.Expr)
 	}
-	fmt.Println()
+	fmt.Println(stmt.PlaceHolders)
 }
 
 func parseInsert(s *sqlparser.Insert) {
+	stmt := &Statement{
+		Type: InsertType,
+	}
 	fmt.Println("语句类型: INSERT")
 	fmt.Print("表名: ")
 	sqlparser.Walk(func(node sqlparser.SQLNode) (kontinue bool, err error) {
 		if tableName, ok := node.(*sqlparser.AliasedTableExpr); ok {
-			fmt.Print(tableName.TableNameString())
+			stmt.Table = append(stmt.Table, Table{
+				Name: tableName.TableNameString(),
+			})
 		}
 		return true, nil
 	}, s.Table)
-	fmt.Println()
+	fmt.Println("表名: ", stmt.Table)
 
 	// 解析插入的列名
 	fmt.Print("插入列名: ")
 	for _, col := range s.Columns {
-		fmt.Print(col.String(), " ")
+		stmt.Columns = append(stmt.Columns, Column{
+			Name: col.String(),
+		})
 	}
-	fmt.Println()
+	fmt.Println(stmt.Columns)
 	// 解析插入的值
 	fmt.Print("插入值: ")
 	switch rows := s.Rows.(type) {
 	case sqlparser.Values:
 		for _, tuple := range rows {
 			for _, val := range tuple {
-				fmt.Print(getExprInfo(val), " ")
+				// fmt.Print(getExprInfo(val), " ")
+				stmt.PlaceHolders = append(stmt.PlaceHolders, PlaceHolder{
+					Name: getExprInfo(val),
+				})
 			}
 		}
-	case *sqlparser.Select:
-		fmt.Print("子查询插入: ", sqlparser.String(rows))
+		// case *sqlparser.Select:
+		// 	fmt.Print("子查询插入: ", sqlparser.String(rows))
 	}
-	fmt.Println()
+	fmt.Println(stmt.PlaceHolders)
 }
 func getTableName(tables []Table, alias string) string {
 	if len(tables) == 0 {
@@ -289,14 +309,18 @@ func parseSelect(s *sqlparser.Select) *Statement {
 	if s.Where != nil {
 		fmt.Print("条件: ")
 		sqlparser.Walk(func(node sqlparser.SQLNode) (kontinue bool, err error) {
+			placeholder := PlaceHolder{}
 			if cond, ok := node.(*sqlparser.ComparisonExpr); ok {
 				val := getExprInfo(cond.Right)
 				fmt.Printf("%v %v %v ", getExprInfo(cond.Left), cond.Operator.ToString(), val)
-				cond.Right = getplaceholder(cond.Operator, val)
+				// cond.Right = getplaceholder(cond.Operator, val)
+				placeholder.Name = val
+				placeholder.Operator = OperatorType(cond.Operator)
+				stmt.PlaceHolders = append(stmt.PlaceHolders, placeholder)
 			}
 			return true, nil
 		}, s.Where.Expr)
-		fmt.Println()
+		fmt.Println(stmt.PlaceHolders)
 	}
 
 	// 解析 ORDER BY 子句

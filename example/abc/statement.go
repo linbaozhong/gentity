@@ -23,6 +23,24 @@ const (
 	SelectType               = "SELECT"
 )
 
+type OperatorType int8
+
+const (
+	EqualOp OperatorType = iota
+	LessThanOp
+	GreaterThanOp
+	LessEqualOp
+	GreaterEqualOp
+	NotEqualOp
+	NullSafeEqualOp
+	InOp
+	NotInOp
+	LikeOp
+	NotLikeOp
+	RegexpOp
+	NotRegexpOp
+)
+
 // Table 表信息
 type Table struct {
 	Name  string // 表名
@@ -36,8 +54,15 @@ type Column struct {
 	Type  string // 列类型
 }
 
+// PlaceHolder 占位符信息
+type PlaceHolder struct {
+	Name     string       // 占位符名称
+	Operator OperatorType // 操作符
+}
+
 type Statement struct {
-	Type    StatementType // 语句类型
-	Table   []Table       // 表名
-	Columns []Column      // 列信息
+	Type         StatementType // 语句类型
+	Table        []Table       // 表名
+	Columns      []Column      // 列信息
+	PlaceHolders []PlaceHolder // 占位符
 }
