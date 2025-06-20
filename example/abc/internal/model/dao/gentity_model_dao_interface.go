@@ -37,6 +37,6 @@ type AccountDao interface {
 // @Namespace company
 type CompanyDao interface {
 	// FindByID 根据ID查询公司信息
-	// @Statement SELECT * FROM company WHERE id = :id
+	// @Statement SELECT company.id,account.id FROM company as c,account as a WHERE a.id = :id
 	FindByID(ctx context.Context, id int) (*do.Company, error)
 }

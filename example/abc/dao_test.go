@@ -237,28 +237,53 @@ func parseInsert(s *sqlparser.Insert) {
 	}
 	fmt.Println()
 }
+func getTableName(tables []Table, alias string) string {
+	if len(tables) == 0 {
+		return ""
+	}
+	if len(tables) == 1 {
+		return tables[0].Name
+	}
+	for _, table := range tables {
+		if table.Name == alias || table.Alias == alias {
+			return table.Name
+		}
+	}
+	return tables[0].Name
+}
 
-func parseSelect(s *sqlparser.Select) {
+func parseSelect(s *sqlparser.Select) *Statement {
+	stmt := &Statement{
+		Type: SelectType,
+	}
 	fmt.Println("语句类型: SELECT")
 	// 解析 FROM 子句中的表名
-	fmt.Print("表名: ")
-	getTables(s.From)
-
-	fmt.Println()
+	stmt.Table = getTables(s.From)
+	fmt.Println("表名: ", stmt.Table)
 
 	// 解析 SELECT 子句中的列名
 	fmt.Print("列名: ")
 	for _, selectExpr := range s.SelectExprs.Exprs {
-		if colName, ok := selectExpr.(*sqlparser.AliasedExpr); ok {
+		column := Column{}
+		switch colName := selectExpr.(type) {
+		case *sqlparser.StarExpr:
+			fmt.Print("*")
+		case *sqlparser.AliasedExpr:
 			switch col := colName.Expr.(type) {
 			case *sqlparser.ColName:
-				fmt.Print(col.Name.String(), " ")
+				if col.Qualifier.Name.String() == "" {
+					column.Table = stmt.Table[0].Name
+				} else {
+					column.Table = getTableName(stmt.Table, col.Qualifier.Name.String())
+				}
+				column.Name = col.Name.String()
 			case *sqlparser.Count:
 				fmt.Print(getExprInfo(col.Args[0]), " ")
 			}
 		}
+		stmt.Columns = append(stmt.Columns, column)
 	}
-	fmt.Println()
+	fmt.Println(stmt.Columns)
 
 	// 解析 WHERE 子句中的条件
 	if s.Where != nil {
@@ -311,43 +336,40 @@ func parseSelect(s *sqlparser.Select) {
 		fmt.Println()
 	}
 	fmt.Println(sqlparser.String(s))
+	return stmt
 }
 
 func getplaceholder(op sqlparser.ComparisonExprOperator, val string) *sqlparser.Literal {
 	switch op {
 	case sqlparser.InOp:
-		return sqlparser.NewBitLiteral(`("+ strings.TrimSuffix(strings.Repeat("?,",len(` + val + `)-1),",") +")"`)
+		return sqlparser.NewBitLiteral("(%s)")
 	default:
 		return sqlparser.NewBitLiteral("?")
 	}
 }
 
 // getTables 从 TableExpr 中提取表名
-func getTables(ts []sqlparser.TableExpr) {
+func getTables(ts []sqlparser.TableExpr) []Table {
+	tables := make([]Table, 0, len(ts))
 	for _, tableExpr := range ts {
-		// sqlparser.Walk(func(node sqlparser.SQLNode) (kontinue bool, err error) {
-		// 	if tableName, ok := node.(*sqlparser.AliasedTableExpr); ok {
-		// 		fmt.Print(tableName.TableNameString(), " ")
-		// 	}
-		// 	return true, nil
-		// }, tableExpr)
+		table := Table{}
 		switch expr := tableExpr.(type) {
 		case *sqlparser.JoinTableExpr:
 			sqlparser.Walk(func(node sqlparser.SQLNode) (kontinue bool, err error) {
-				if table, ok := node.(*sqlparser.AliasedTableExpr); ok {
-					if tableName, ok := table.Expr.(sqlparser.TableName); ok {
-						fmt.Print(tableName.Name.String(), ".")
+				if aliasTableName, ok := node.(*sqlparser.AliasedTableExpr); ok {
+					if tableName, ok := aliasTableName.Expr.(sqlparser.TableName); ok {
+						table.Name = tableName.Name.String()
 					}
-					fmt.Print(table.TableNameString(), " ")
+					table.Alias = aliasTableName.TableNameString()
 				}
 				return true, nil
 			}, expr.LeftExpr)
 			sqlparser.Walk(func(node sqlparser.SQLNode) (kontinue bool, err error) {
-				if table, ok := node.(*sqlparser.AliasedTableExpr); ok {
-					if tableName, ok := table.Expr.(sqlparser.TableName); ok {
-						fmt.Print(tableName.Name.String(), ".")
+				if aliasTableName, ok := node.(*sqlparser.AliasedTableExpr); ok {
+					if tableName, ok := aliasTableName.Expr.(sqlparser.TableName); ok {
+						table.Name = tableName.Name.String()
 					}
-					fmt.Print(table.TableNameString(), " ")
+					table.Alias = aliasTableName.TableNameString()
 				}
 				return true, nil
 			}, expr.RightExpr)
@@ -355,14 +377,18 @@ func getTables(ts []sqlparser.TableExpr) {
 			fmt.Println(expr.Join.ToString(), getExprInfo(expr.Condition.On))
 		default:
 			sqlparser.Walk(func(node sqlparser.SQLNode) (kontinue bool, err error) {
-				if tableName, ok := node.(*sqlparser.AliasedTableExpr); ok {
-					fmt.Print(tableName.TableNameString(), " ")
+				if aliasTableName, ok := node.(*sqlparser.AliasedTableExpr); ok {
+					if tableName, ok := aliasTableName.Expr.(sqlparser.TableName); ok {
+						table.Name = tableName.Name.String()
+					}
+					table.Alias = aliasTableName.TableNameString()
 				}
 				return true, nil
 			}, tableExpr)
 		}
+		tables = append(tables, table)
 	}
-
+	return tables
 }
 
 // getFieldName 从 sqlparser.Expr 中解析字段名
