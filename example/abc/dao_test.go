@@ -45,13 +45,14 @@ type Result struct {
 	Type string
 }
 
+var daos = make([]*Dao, 0)
+
 func TestParseDao(t *testing.T) {
-	file, e := astra.ParseFile("./internal/model/dao/gentity_model_dao_interface.go")
+	file, e := astra.ParseFile("./internal/model/do/gentity_model_dao_interface.go")
 	if e != nil {
 		t.Error(e)
 		return
 	}
-	daos := make([]*Dao, 0)
 
 	for _, iface := range file.Interfaces {
 		dao := &Dao{
@@ -104,25 +105,31 @@ func TestParseDao(t *testing.T) {
 		daos = append(daos, dao)
 	}
 	for _, dao := range daos {
-		t.Log("接口：", dao.InterfaceName)
-		fmt.Println("---- 接口描述：", dao.Description)
-		fmt.Println("---- 接口命名空间：", dao.Namespace)
+		fmt.Println("// ", dao.InterfaceName, dao.Description)
 		for _, method := range dao.Methods {
-			t.Log("方法：", method.Name)
-			fmt.Println("---- 方法描述：", method.Description)
-			fmt.Println("---- 查询语句：", method.Statement)
-			fmt.Println("---- 方法参数：")
-			for _, arg := range method.Args {
-				fmt.Println("---- ---- ", arg.Name, arg.Type)
+			fmt.Println("// ", method.Name, method.Description)
+			fmt.Print("func (*", dao.Namespace, ")")
+			fmt.Print(method.Name, "(")
+			// fmt.Println("---- 查询语句：", method.Statement)
+
+			for i, arg := range method.Args {
+				if i > 0 {
+					fmt.Print(",")
+				}
+				fmt.Printf("%s %s", arg.Name, arg.Type)
 			}
-			fmt.Println("---- 方法返回值：")
-			for _, result := range method.Results {
-				fmt.Println("---- ---- ", result.Name, result.Type)
+			fmt.Print(") (")
+			for i, result := range method.Results {
+				if i > 0 {
+					fmt.Print(",")
+				}
+				fmt.Printf("%s %s", result.Name, result.Type)
 			}
+			fmt.Print(") {\n")
 			fmt.Println("---- SQL语句解析开始：")
 			parseSQLInfo(method.Statement)
 			fmt.Println("---- SQL语句解析结束：")
-			fmt.Println()
+			fmt.Println("}")
 			fmt.Println()
 		}
 	}
