@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package do
+package dao
 
 import (
 	"context"
+	"github.com/linbaozhong/gentity/example/abc/internal/model/do"
 )
 
 // // AccountDao 账号信息DAO
@@ -37,11 +38,11 @@ import (
 type CompanyDao interface {
 	// FindByID 根据ID查询公司信息
 	// @Statement SELECT company.id,account.id FROM company as c,account as a WHERE a.id = :do.Account.ID
-	FindByID(ctx context.Context, id int) (comp *Company, err error)
+	FindByID(ctx context.Context, id int) (comp *do.Company, err error)
 	// Create 创建公司信息
-	// @Statement INSERT INTO company (long_name, short_name, address, email, contact_name, contact_telephone, contact_mobile, contact_email, legal_name, creator, state, status, ctime, utime) values (:long_name, :short_name, :address, :email, :contact_name, :contact_telephone, :contact_mobile, :contact_email, :legal_name, :creator, :state, :status, :ctime, :utime)
-	Create(ctx context.Context, company *Company) (int64, error)
+	// @Statement INSERT INTO company (long_name, short_name, address, email, contact_name, contact_telephone, contact_mobile, contact_email, legal_name, creator, state, status, ctime, utime) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	Create(ctx context.Context, company *do.Company) (int64, error)
 	// Update 更新公司信息
 	// @Statement Update company Set long_name = :company.LongName,short_name = :company.ShortName WHERE id = :company.ID
-	Update(ctx context.Context, company *Company) (int64, error)
+	Update(ctx context.Context, company *do.Company) (int64, error)
 }
