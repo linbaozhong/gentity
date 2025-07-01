@@ -26,33 +26,47 @@ import (
 const {{$structName}}TableName = "{{.TableName}}"
 
 var (
-	{{lower .StructName}}Pool = pool.New(app.Context,func() any {
+	{{$structNameLower}}Pool = pool.New(app.Context,func() any {
 		_obj := &{{.StructName}}{}
 		return _obj
 	})
 )
 
 func New{{.StructName}}() *{{.StructName}} {
-	_obj := {{lower .StructName}}Pool.Get().(*{{.StructName}})
+	_obj := {{$structNameLower}}Pool.Get().(*{{.StructName}})
 	return _obj
 }
 
 // MarshalJSON
 func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf bytes.Buffer
+		_comma bool
+	)
 	_buf.WriteByte('{')
+	_buf.Grow({{len .Columns}}*50)
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
+
+
 	{{- range $key, $value := .Columns}}
 		{{- if $value.Json.OmitEmpty}}
 		if {{getNotZeroValue $value}} {
-			_buf.WriteString(`"{{ $value.Json.Name }}":`+types.Marshal(p.{{$value.Name}})+`,`)
+			writeField("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
 		}
 		{{- else}}
-		_buf.WriteString(`"{{ $value.Json.Name }}":`+types.Marshal(p.{{$value.Name}})+`,`)
+			writeField("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
 		{{- end}}
 	{{- end}}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
-	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
 }
@@ -95,7 +109,7 @@ func (p *{{.StructName}}) Free() {
 		return
 	}
 
-	{{lower .StructName}}Pool.Put(p)
+	{{$structNameLower}}Pool.Put(p)
 }
 
 // Reset
@@ -191,31 +205,30 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tbl{{$structNameLower}}.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
 			if valueFunc, exists := {{$structNameLower}}FieldToValueFunc[arg]; exists {
-				colName, value, valid := valueFunc(p)
-				if !valid {
-					_cols = append(_cols, colName)
-					_vals = append(_vals, value)
-				}
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tbl{{$structNameLower}}.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
 		if valueFunc, exists := {{$structNameLower}}FieldToValueFunc[arg]; exists {
-			colName, value, _ := valueFunc(p)
-			_cols = append(_cols, colName)
-			_vals = append(_vals, value)
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals

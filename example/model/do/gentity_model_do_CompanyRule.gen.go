@@ -31,37 +31,49 @@ func NewCompanyRule() *CompanyRule {
 
 // MarshalJSON
 func (p *CompanyRule) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf   bytes.Buffer
+		_comma bool
+	)
 	_buf.WriteByte('{')
+	_buf.Grow(9 * 50)
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
 	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		writeField("id", types.Marshal(p.Id))
 	}
 	if p.Pid != 0 {
-		_buf.WriteString(`"pid":` + types.Marshal(p.Pid) + `,`)
+		writeField("pid", types.Marshal(p.Pid))
 	}
 	if p.Path != "" {
-		_buf.WriteString(`"path":` + types.Marshal(p.Path) + `,`)
+		writeField("path", types.Marshal(p.Path))
 	}
 	if p.Title != "" {
-		_buf.WriteString(`"title":` + types.Marshal(p.Title) + `,`)
+		writeField("title", types.Marshal(p.Title))
 	}
 	if p.Type != 0 {
-		_buf.WriteString(`"type":` + types.Marshal(p.Type) + `,`)
+		writeField("type", types.Marshal(p.Type))
 	}
 	if p.IsPrivate != 0 {
-		_buf.WriteString(`"is_private":` + types.Marshal(p.IsPrivate) + `,`)
+		writeField("is_private", types.Marshal(p.IsPrivate))
 	}
 	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+		writeField("state", types.Marshal(p.State))
 	}
 	if p.Descr != "" {
-		_buf.WriteString(`"descr":` + types.Marshal(p.Descr) + `,`)
+		writeField("descr", types.Marshal(p.Descr))
 	}
 	if p.Belong != 0 {
-		_buf.WriteString(`"belong":` + types.Marshal(p.Belong) + `,`)
-	}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
+		writeField("belong", types.Marshal(p.Belong))
 	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
@@ -132,6 +144,23 @@ func (p *CompanyRule) TableName() string {
 	return CompanyRuleTableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var companyruleFieldToPtrFunc = map[dialect.Field]func(*CompanyRule) any{
+	tblcompanyrule.Id:        func(p *CompanyRule) any { return &p.Id },
+	tblcompanyrule.Pid:       func(p *CompanyRule) any { return &p.Pid },
+	tblcompanyrule.Path:      func(p *CompanyRule) any { return &p.Path },
+	tblcompanyrule.Title:     func(p *CompanyRule) any { return &p.Title },
+	tblcompanyrule.Type:      func(p *CompanyRule) any { return &p.Type },
+	tblcompanyrule.IsPrivate: func(p *CompanyRule) any { return &p.IsPrivate },
+	tblcompanyrule.State:     func(p *CompanyRule) any { return &p.State },
+	tblcompanyrule.Descr:     func(p *CompanyRule) any { return &p.Descr },
+	tblcompanyrule.Belong:    func(p *CompanyRule) any { return &p.Belong },
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *CompanyRule) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompanyrule.ReadableFields
@@ -139,25 +168,8 @@ func (p *CompanyRule) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		switch col {
-		case tblcompanyrule.Id:
-			_vals = append(_vals, &p.Id)
-		case tblcompanyrule.Pid:
-			_vals = append(_vals, &p.Pid)
-		case tblcompanyrule.Path:
-			_vals = append(_vals, &p.Path)
-		case tblcompanyrule.Title:
-			_vals = append(_vals, &p.Title)
-		case tblcompanyrule.Type:
-			_vals = append(_vals, &p.Type)
-		case tblcompanyrule.IsPrivate:
-			_vals = append(_vals, &p.IsPrivate)
-		case tblcompanyrule.State:
-			_vals = append(_vals, &p.State)
-		case tblcompanyrule.Descr:
-			_vals = append(_vals, &p.Descr)
-		case tblcompanyrule.Belong:
-			_vals = append(_vals, &p.Belong)
+		if ptrFunc, ok := companyruleFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
@@ -199,6 +211,37 @@ func (p *CompanyRule) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 	return p.AssignValues(args...)
 }
 
+// 定义字段到值检查和获取函数的映射
+var companyruleFieldToValueFunc = map[dialect.Field]func(*CompanyRule) (string, any, bool){
+	tblcompanyrule.Id: func(p *CompanyRule) (string, any, bool) {
+		return tblcompanyrule.Id.Quote(), p.Id, p.Id == 0
+	},
+	tblcompanyrule.Pid: func(p *CompanyRule) (string, any, bool) {
+		return tblcompanyrule.Pid.Quote(), p.Pid, p.Pid == 0
+	},
+	tblcompanyrule.Path: func(p *CompanyRule) (string, any, bool) {
+		return tblcompanyrule.Path.Quote(), p.Path, p.Path == ""
+	},
+	tblcompanyrule.Title: func(p *CompanyRule) (string, any, bool) {
+		return tblcompanyrule.Title.Quote(), p.Title, p.Title == ""
+	},
+	tblcompanyrule.Type: func(p *CompanyRule) (string, any, bool) {
+		return tblcompanyrule.Type.Quote(), p.Type, p.Type == 0
+	},
+	tblcompanyrule.IsPrivate: func(p *CompanyRule) (string, any, bool) {
+		return tblcompanyrule.IsPrivate.Quote(), p.IsPrivate, p.IsPrivate == 0
+	},
+	tblcompanyrule.State: func(p *CompanyRule) (string, any, bool) {
+		return tblcompanyrule.State.Quote(), p.State, p.State == 0
+	},
+	tblcompanyrule.Descr: func(p *CompanyRule) (string, any, bool) {
+		return tblcompanyrule.Descr.Quote(), p.Descr, p.Descr == ""
+	},
+	tblcompanyrule.Belong: func(p *CompanyRule) (string, any, bool) {
+		return tblcompanyrule.Belong.Quote(), p.Belong, p.Belong == 0
+	},
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -208,113 +251,41 @@ func (p *CompanyRule) AssignValues(args ...dialect.Field) ([]string, []any) {
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tblcompanyrule.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			case tblcompanyrule.Id:
-				if p.Id == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrule.Id.Quote())
-				_vals = append(_vals, p.Id)
-			case tblcompanyrule.Pid:
-				if p.Pid == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrule.Pid.Quote())
-				_vals = append(_vals, p.Pid)
-			case tblcompanyrule.Path:
-				if p.Path == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrule.Path.Quote())
-				_vals = append(_vals, p.Path)
-			case tblcompanyrule.Title:
-				if p.Title == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrule.Title.Quote())
-				_vals = append(_vals, p.Title)
-			case tblcompanyrule.Type:
-				if p.Type == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrule.Type.Quote())
-				_vals = append(_vals, p.Type)
-			case tblcompanyrule.IsPrivate:
-				if p.IsPrivate == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrule.IsPrivate.Quote())
-				_vals = append(_vals, p.IsPrivate)
-			case tblcompanyrule.State:
-				if p.State == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrule.State.Quote())
-				_vals = append(_vals, p.State)
-			case tblcompanyrule.Descr:
-				if p.Descr == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrule.Descr.Quote())
-				_vals = append(_vals, p.Descr)
-			case tblcompanyrule.Belong:
-				if p.Belong == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrule.Belong.Quote())
-				_vals = append(_vals, p.Belong)
+			if valueFunc, exists := companyruleFieldToValueFunc[arg]; exists {
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tblcompanyrule.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		case tblcompanyrule.Id:
-			_cols = append(_cols, tblcompanyrule.Id.Quote())
-			_vals = append(_vals, p.Id)
-		case tblcompanyrule.Pid:
-			_cols = append(_cols, tblcompanyrule.Pid.Quote())
-			_vals = append(_vals, p.Pid)
-		case tblcompanyrule.Path:
-			_cols = append(_cols, tblcompanyrule.Path.Quote())
-			_vals = append(_vals, p.Path)
-		case tblcompanyrule.Title:
-			_cols = append(_cols, tblcompanyrule.Title.Quote())
-			_vals = append(_vals, p.Title)
-		case tblcompanyrule.Type:
-			_cols = append(_cols, tblcompanyrule.Type.Quote())
-			_vals = append(_vals, p.Type)
-		case tblcompanyrule.IsPrivate:
-			_cols = append(_cols, tblcompanyrule.IsPrivate.Quote())
-			_vals = append(_vals, p.IsPrivate)
-		case tblcompanyrule.State:
-			_cols = append(_cols, tblcompanyrule.State.Quote())
-			_vals = append(_vals, p.State)
-		case tblcompanyrule.Descr:
-			_cols = append(_cols, tblcompanyrule.Descr.Quote())
-			_vals = append(_vals, p.Descr)
-		case tblcompanyrule.Belong:
-			_cols = append(_cols, tblcompanyrule.Belong.Quote())
-			_vals = append(_vals, p.Belong)
+		if valueFunc, exists := companyruleFieldToValueFunc[arg]; exists {
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals
 }
 
+//
 func (p *CompanyRule) AssignKeys() (dialect.Field, any) {
 	return tblcompanyrule.PrimaryKey, p.Id
 }
 
+//
 func (p *CompanyRule) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {

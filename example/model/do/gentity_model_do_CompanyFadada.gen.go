@@ -31,52 +31,64 @@ func NewCompanyFadada() *CompanyFadada {
 
 // MarshalJSON
 func (p *CompanyFadada) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf   bytes.Buffer
+		_comma bool
+	)
 	_buf.WriteByte('{')
+	_buf.Grow(14 * 50)
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
 	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		writeField("id", types.Marshal(p.Id))
 	}
 	if p.CompanyName != "" {
-		_buf.WriteString(`"company_name":` + types.Marshal(p.CompanyName) + `,`)
+		writeField("company_name", types.Marshal(p.CompanyName))
 	}
 	if p.CustomerId != "" {
-		_buf.WriteString(`"customer_id":` + types.Marshal(p.CustomerId) + `,`)
+		writeField("customer_id", types.Marshal(p.CustomerId))
 	}
 	if p.TransactionNo != "" {
-		_buf.WriteString(`"transaction_no":` + types.Marshal(p.TransactionNo) + `,`)
+		writeField("transaction_no", types.Marshal(p.TransactionNo))
 	}
 	if p.Url != "" {
-		_buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
+		writeField("url", types.Marshal(p.Url))
 	}
 	if p.CertInfo != "" {
-		_buf.WriteString(`"cert_info":` + types.Marshal(p.CertInfo) + `,`)
+		writeField("cert_info", types.Marshal(p.CertInfo))
 	}
 	if p.Status != 0 {
-		_buf.WriteString(`"status":` + types.Marshal(p.Status) + `,`)
+		writeField("status", types.Marshal(p.Status))
 	}
 	if p.HasCertificate != 0 {
-		_buf.WriteString(`"has_certificate":` + types.Marshal(p.HasCertificate) + `,`)
+		writeField("has_certificate", types.Marshal(p.HasCertificate))
 	}
 	if p.AuthSign != 0 {
-		_buf.WriteString(`"auth_sign":` + types.Marshal(p.AuthSign) + `,`)
+		writeField("auth_sign", types.Marshal(p.AuthSign))
 	}
 	if p.AuthTransactionId != "" {
-		_buf.WriteString(`"auth_transaction_id":` + types.Marshal(p.AuthTransactionId) + `,`)
+		writeField("auth_transaction_id", types.Marshal(p.AuthTransactionId))
 	}
 	if p.AuthContractId != "" {
-		_buf.WriteString(`"auth_contract_id":` + types.Marshal(p.AuthContractId) + `,`)
+		writeField("auth_contract_id", types.Marshal(p.AuthContractId))
 	}
 	if p.AuthResult != "" {
-		_buf.WriteString(`"auth_result":` + types.Marshal(p.AuthResult) + `,`)
+		writeField("auth_result", types.Marshal(p.AuthResult))
 	}
 	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+		writeField("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
-	}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
+		writeField("ctime", types.Marshal(p.Ctime))
 	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
@@ -162,6 +174,28 @@ func (p *CompanyFadada) TableName() string {
 	return CompanyFadadaTableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var companyfadadaFieldToPtrFunc = map[dialect.Field]func(*CompanyFadada) any{
+	tblcompanyfadada.Id:                func(p *CompanyFadada) any { return &p.Id },
+	tblcompanyfadada.CompanyName:       func(p *CompanyFadada) any { return &p.CompanyName },
+	tblcompanyfadada.CustomerId:        func(p *CompanyFadada) any { return &p.CustomerId },
+	tblcompanyfadada.TransactionNo:     func(p *CompanyFadada) any { return &p.TransactionNo },
+	tblcompanyfadada.Url:               func(p *CompanyFadada) any { return &p.Url },
+	tblcompanyfadada.CertInfo:          func(p *CompanyFadada) any { return &p.CertInfo },
+	tblcompanyfadada.Status:            func(p *CompanyFadada) any { return &p.Status },
+	tblcompanyfadada.HasCertificate:    func(p *CompanyFadada) any { return &p.HasCertificate },
+	tblcompanyfadada.AuthSign:          func(p *CompanyFadada) any { return &p.AuthSign },
+	tblcompanyfadada.AuthTransactionId: func(p *CompanyFadada) any { return &p.AuthTransactionId },
+	tblcompanyfadada.AuthContractId:    func(p *CompanyFadada) any { return &p.AuthContractId },
+	tblcompanyfadada.AuthResult:        func(p *CompanyFadada) any { return &p.AuthResult },
+	tblcompanyfadada.State:             func(p *CompanyFadada) any { return &p.State },
+	tblcompanyfadada.Ctime:             func(p *CompanyFadada) any { return &p.Ctime },
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *CompanyFadada) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompanyfadada.ReadableFields
@@ -169,35 +203,8 @@ func (p *CompanyFadada) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		switch col {
-		case tblcompanyfadada.Id:
-			_vals = append(_vals, &p.Id)
-		case tblcompanyfadada.CompanyName:
-			_vals = append(_vals, &p.CompanyName)
-		case tblcompanyfadada.CustomerId:
-			_vals = append(_vals, &p.CustomerId)
-		case tblcompanyfadada.TransactionNo:
-			_vals = append(_vals, &p.TransactionNo)
-		case tblcompanyfadada.Url:
-			_vals = append(_vals, &p.Url)
-		case tblcompanyfadada.CertInfo:
-			_vals = append(_vals, &p.CertInfo)
-		case tblcompanyfadada.Status:
-			_vals = append(_vals, &p.Status)
-		case tblcompanyfadada.HasCertificate:
-			_vals = append(_vals, &p.HasCertificate)
-		case tblcompanyfadada.AuthSign:
-			_vals = append(_vals, &p.AuthSign)
-		case tblcompanyfadada.AuthTransactionId:
-			_vals = append(_vals, &p.AuthTransactionId)
-		case tblcompanyfadada.AuthContractId:
-			_vals = append(_vals, &p.AuthContractId)
-		case tblcompanyfadada.AuthResult:
-			_vals = append(_vals, &p.AuthResult)
-		case tblcompanyfadada.State:
-			_vals = append(_vals, &p.State)
-		case tblcompanyfadada.Ctime:
-			_vals = append(_vals, &p.Ctime)
+		if ptrFunc, ok := companyfadadaFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
@@ -239,6 +246,52 @@ func (p *CompanyFadada) RawAssignValues(args ...dialect.Field) ([]string, []any)
 	return p.AssignValues(args...)
 }
 
+// 定义字段到值检查和获取函数的映射
+var companyfadadaFieldToValueFunc = map[dialect.Field]func(*CompanyFadada) (string, any, bool){
+	tblcompanyfadada.Id: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.Id.Quote(), p.Id, p.Id == 0
+	},
+	tblcompanyfadada.CompanyName: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.CompanyName.Quote(), p.CompanyName, p.CompanyName == ""
+	},
+	tblcompanyfadada.CustomerId: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.CustomerId.Quote(), p.CustomerId, p.CustomerId == ""
+	},
+	tblcompanyfadada.TransactionNo: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.TransactionNo.Quote(), p.TransactionNo, p.TransactionNo == ""
+	},
+	tblcompanyfadada.Url: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.Url.Quote(), p.Url, p.Url == ""
+	},
+	tblcompanyfadada.CertInfo: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.CertInfo.Quote(), p.CertInfo, p.CertInfo == ""
+	},
+	tblcompanyfadada.Status: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.Status.Quote(), p.Status, p.Status == 0
+	},
+	tblcompanyfadada.HasCertificate: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.HasCertificate.Quote(), p.HasCertificate, p.HasCertificate == 0
+	},
+	tblcompanyfadada.AuthSign: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.AuthSign.Quote(), p.AuthSign, p.AuthSign == 0
+	},
+	tblcompanyfadada.AuthTransactionId: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.AuthTransactionId.Quote(), p.AuthTransactionId, p.AuthTransactionId == ""
+	},
+	tblcompanyfadada.AuthContractId: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.AuthContractId.Quote(), p.AuthContractId, p.AuthContractId == ""
+	},
+	tblcompanyfadada.AuthResult: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.AuthResult.Quote(), p.AuthResult, p.AuthResult == ""
+	},
+	tblcompanyfadada.State: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.State.Quote(), p.State, p.State == 0
+	},
+	tblcompanyfadada.Ctime: func(p *CompanyFadada) (string, any, bool) {
+		return tblcompanyfadada.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+	},
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -248,158 +301,41 @@ func (p *CompanyFadada) AssignValues(args ...dialect.Field) ([]string, []any) {
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tblcompanyfadada.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			case tblcompanyfadada.Id:
-				if p.Id == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.Id.Quote())
-				_vals = append(_vals, p.Id)
-			case tblcompanyfadada.CompanyName:
-				if p.CompanyName == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.CompanyName.Quote())
-				_vals = append(_vals, p.CompanyName)
-			case tblcompanyfadada.CustomerId:
-				if p.CustomerId == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.CustomerId.Quote())
-				_vals = append(_vals, p.CustomerId)
-			case tblcompanyfadada.TransactionNo:
-				if p.TransactionNo == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.TransactionNo.Quote())
-				_vals = append(_vals, p.TransactionNo)
-			case tblcompanyfadada.Url:
-				if p.Url == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.Url.Quote())
-				_vals = append(_vals, p.Url)
-			case tblcompanyfadada.CertInfo:
-				if p.CertInfo == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.CertInfo.Quote())
-				_vals = append(_vals, p.CertInfo)
-			case tblcompanyfadada.Status:
-				if p.Status == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.Status.Quote())
-				_vals = append(_vals, p.Status)
-			case tblcompanyfadada.HasCertificate:
-				if p.HasCertificate == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.HasCertificate.Quote())
-				_vals = append(_vals, p.HasCertificate)
-			case tblcompanyfadada.AuthSign:
-				if p.AuthSign == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.AuthSign.Quote())
-				_vals = append(_vals, p.AuthSign)
-			case tblcompanyfadada.AuthTransactionId:
-				if p.AuthTransactionId == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.AuthTransactionId.Quote())
-				_vals = append(_vals, p.AuthTransactionId)
-			case tblcompanyfadada.AuthContractId:
-				if p.AuthContractId == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.AuthContractId.Quote())
-				_vals = append(_vals, p.AuthContractId)
-			case tblcompanyfadada.AuthResult:
-				if p.AuthResult == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.AuthResult.Quote())
-				_vals = append(_vals, p.AuthResult)
-			case tblcompanyfadada.State:
-				if p.State == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.State.Quote())
-				_vals = append(_vals, p.State)
-			case tblcompanyfadada.Ctime:
-				if p.Ctime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblcompanyfadada.Ctime.Quote())
-				_vals = append(_vals, p.Ctime)
+			if valueFunc, exists := companyfadadaFieldToValueFunc[arg]; exists {
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tblcompanyfadada.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		case tblcompanyfadada.Id:
-			_cols = append(_cols, tblcompanyfadada.Id.Quote())
-			_vals = append(_vals, p.Id)
-		case tblcompanyfadada.CompanyName:
-			_cols = append(_cols, tblcompanyfadada.CompanyName.Quote())
-			_vals = append(_vals, p.CompanyName)
-		case tblcompanyfadada.CustomerId:
-			_cols = append(_cols, tblcompanyfadada.CustomerId.Quote())
-			_vals = append(_vals, p.CustomerId)
-		case tblcompanyfadada.TransactionNo:
-			_cols = append(_cols, tblcompanyfadada.TransactionNo.Quote())
-			_vals = append(_vals, p.TransactionNo)
-		case tblcompanyfadada.Url:
-			_cols = append(_cols, tblcompanyfadada.Url.Quote())
-			_vals = append(_vals, p.Url)
-		case tblcompanyfadada.CertInfo:
-			_cols = append(_cols, tblcompanyfadada.CertInfo.Quote())
-			_vals = append(_vals, p.CertInfo)
-		case tblcompanyfadada.Status:
-			_cols = append(_cols, tblcompanyfadada.Status.Quote())
-			_vals = append(_vals, p.Status)
-		case tblcompanyfadada.HasCertificate:
-			_cols = append(_cols, tblcompanyfadada.HasCertificate.Quote())
-			_vals = append(_vals, p.HasCertificate)
-		case tblcompanyfadada.AuthSign:
-			_cols = append(_cols, tblcompanyfadada.AuthSign.Quote())
-			_vals = append(_vals, p.AuthSign)
-		case tblcompanyfadada.AuthTransactionId:
-			_cols = append(_cols, tblcompanyfadada.AuthTransactionId.Quote())
-			_vals = append(_vals, p.AuthTransactionId)
-		case tblcompanyfadada.AuthContractId:
-			_cols = append(_cols, tblcompanyfadada.AuthContractId.Quote())
-			_vals = append(_vals, p.AuthContractId)
-		case tblcompanyfadada.AuthResult:
-			_cols = append(_cols, tblcompanyfadada.AuthResult.Quote())
-			_vals = append(_vals, p.AuthResult)
-		case tblcompanyfadada.State:
-			_cols = append(_cols, tblcompanyfadada.State.Quote())
-			_vals = append(_vals, p.State)
-		case tblcompanyfadada.Ctime:
-			_cols = append(_cols, tblcompanyfadada.Ctime.Quote())
-			_vals = append(_vals, p.Ctime)
+		if valueFunc, exists := companyfadadaFieldToValueFunc[arg]; exists {
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals
 }
 
+//
 func (p *CompanyFadada) AssignKeys() (dialect.Field, any) {
 	return tblcompanyfadada.PrimaryKey, p.Id
 }
 
+//
 func (p *CompanyFadada) AssignPrimaryKeyValues(result sql.Result) error {
 	return nil
 }

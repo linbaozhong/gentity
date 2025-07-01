@@ -31,43 +31,55 @@ func NewDocumentTemplate() *DocumentTemplate {
 
 // MarshalJSON
 func (p *DocumentTemplate) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf   bytes.Buffer
+		_comma bool
+	)
 	_buf.WriteByte('{')
+	_buf.Grow(11 * 50)
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
 	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		writeField("id", types.Marshal(p.Id))
 	}
 	if p.Genre != 0 {
-		_buf.WriteString(`"genre":` + types.Marshal(p.Genre) + `,`)
+		writeField("genre", types.Marshal(p.Genre))
 	}
 	if p.Company != 0 {
-		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
+		writeField("company", types.Marshal(p.Company))
 	}
 	if p.Way != 0 {
-		_buf.WriteString(`"way":` + types.Marshal(p.Way) + `,`)
+		writeField("way", types.Marshal(p.Way))
 	}
 	if p.AuthSign != 0 {
-		_buf.WriteString(`"auth_sign":` + types.Marshal(p.AuthSign) + `,`)
+		writeField("auth_sign", types.Marshal(p.AuthSign))
 	}
 	if p.Title != "" {
-		_buf.WriteString(`"title":` + types.Marshal(p.Title) + `,`)
+		writeField("title", types.Marshal(p.Title))
 	}
 	if p.Content != "" {
-		_buf.WriteString(`"content":` + types.Marshal(p.Content) + `,`)
+		writeField("content", types.Marshal(p.Content))
 	}
 	if p.Url != "" {
-		_buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
+		writeField("url", types.Marshal(p.Url))
 	}
 	if p.HasForm != 0 {
-		_buf.WriteString(`"has_form":` + types.Marshal(p.HasForm) + `,`)
+		writeField("has_form", types.Marshal(p.HasForm))
 	}
 	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+		writeField("state", types.Marshal(p.State))
 	}
 	if !p.Utime.IsZero() {
-		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
-	}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
+		writeField("utime", types.Marshal(p.Utime))
 	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
@@ -144,6 +156,25 @@ func (p *DocumentTemplate) TableName() string {
 	return DocumentTemplateTableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var documenttemplateFieldToPtrFunc = map[dialect.Field]func(*DocumentTemplate) any{
+	tbldocumenttemplate.Id:       func(p *DocumentTemplate) any { return &p.Id },
+	tbldocumenttemplate.Genre:    func(p *DocumentTemplate) any { return &p.Genre },
+	tbldocumenttemplate.Company:  func(p *DocumentTemplate) any { return &p.Company },
+	tbldocumenttemplate.Way:      func(p *DocumentTemplate) any { return &p.Way },
+	tbldocumenttemplate.AuthSign: func(p *DocumentTemplate) any { return &p.AuthSign },
+	tbldocumenttemplate.Title:    func(p *DocumentTemplate) any { return &p.Title },
+	tbldocumenttemplate.Content:  func(p *DocumentTemplate) any { return &p.Content },
+	tbldocumenttemplate.Url:      func(p *DocumentTemplate) any { return &p.Url },
+	tbldocumenttemplate.HasForm:  func(p *DocumentTemplate) any { return &p.HasForm },
+	tbldocumenttemplate.State:    func(p *DocumentTemplate) any { return &p.State },
+	tbldocumenttemplate.Utime:    func(p *DocumentTemplate) any { return &p.Utime },
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *DocumentTemplate) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tbldocumenttemplate.ReadableFields
@@ -151,29 +182,8 @@ func (p *DocumentTemplate) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		switch col {
-		case tbldocumenttemplate.Id:
-			_vals = append(_vals, &p.Id)
-		case tbldocumenttemplate.Genre:
-			_vals = append(_vals, &p.Genre)
-		case tbldocumenttemplate.Company:
-			_vals = append(_vals, &p.Company)
-		case tbldocumenttemplate.Way:
-			_vals = append(_vals, &p.Way)
-		case tbldocumenttemplate.AuthSign:
-			_vals = append(_vals, &p.AuthSign)
-		case tbldocumenttemplate.Title:
-			_vals = append(_vals, &p.Title)
-		case tbldocumenttemplate.Content:
-			_vals = append(_vals, &p.Content)
-		case tbldocumenttemplate.Url:
-			_vals = append(_vals, &p.Url)
-		case tbldocumenttemplate.HasForm:
-			_vals = append(_vals, &p.HasForm)
-		case tbldocumenttemplate.State:
-			_vals = append(_vals, &p.State)
-		case tbldocumenttemplate.Utime:
-			_vals = append(_vals, &p.Utime)
+		if ptrFunc, ok := documenttemplateFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
@@ -215,6 +225,43 @@ func (p *DocumentTemplate) RawAssignValues(args ...dialect.Field) ([]string, []a
 	return p.AssignValues(args...)
 }
 
+// 定义字段到值检查和获取函数的映射
+var documenttemplateFieldToValueFunc = map[dialect.Field]func(*DocumentTemplate) (string, any, bool){
+	tbldocumenttemplate.Id: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.Id.Quote(), p.Id, p.Id == 0
+	},
+	tbldocumenttemplate.Genre: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.Genre.Quote(), p.Genre, p.Genre == 0
+	},
+	tbldocumenttemplate.Company: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.Company.Quote(), p.Company, p.Company == 0
+	},
+	tbldocumenttemplate.Way: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.Way.Quote(), p.Way, p.Way == 0
+	},
+	tbldocumenttemplate.AuthSign: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.AuthSign.Quote(), p.AuthSign, p.AuthSign == 0
+	},
+	tbldocumenttemplate.Title: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.Title.Quote(), p.Title, p.Title == ""
+	},
+	tbldocumenttemplate.Content: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.Content.Quote(), p.Content, p.Content == ""
+	},
+	tbldocumenttemplate.Url: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.Url.Quote(), p.Url, p.Url == ""
+	},
+	tbldocumenttemplate.HasForm: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.HasForm.Quote(), p.HasForm, p.HasForm == 0
+	},
+	tbldocumenttemplate.State: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.State.Quote(), p.State, p.State == 0
+	},
+	tbldocumenttemplate.Utime: func(p *DocumentTemplate) (string, any, bool) {
+		return tbldocumenttemplate.Utime.Quote(), p.Utime, p.Utime.IsZero()
+	},
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -224,131 +271,41 @@ func (p *DocumentTemplate) AssignValues(args ...dialect.Field) ([]string, []any)
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tbldocumenttemplate.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			case tbldocumenttemplate.Id:
-				if p.Id == 0 {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.Id.Quote())
-				_vals = append(_vals, p.Id)
-			case tbldocumenttemplate.Genre:
-				if p.Genre == 0 {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.Genre.Quote())
-				_vals = append(_vals, p.Genre)
-			case tbldocumenttemplate.Company:
-				if p.Company == 0 {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.Company.Quote())
-				_vals = append(_vals, p.Company)
-			case tbldocumenttemplate.Way:
-				if p.Way == 0 {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.Way.Quote())
-				_vals = append(_vals, p.Way)
-			case tbldocumenttemplate.AuthSign:
-				if p.AuthSign == 0 {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.AuthSign.Quote())
-				_vals = append(_vals, p.AuthSign)
-			case tbldocumenttemplate.Title:
-				if p.Title == "" {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.Title.Quote())
-				_vals = append(_vals, p.Title)
-			case tbldocumenttemplate.Content:
-				if p.Content == "" {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.Content.Quote())
-				_vals = append(_vals, p.Content)
-			case tbldocumenttemplate.Url:
-				if p.Url == "" {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.Url.Quote())
-				_vals = append(_vals, p.Url)
-			case tbldocumenttemplate.HasForm:
-				if p.HasForm == 0 {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.HasForm.Quote())
-				_vals = append(_vals, p.HasForm)
-			case tbldocumenttemplate.State:
-				if p.State == 0 {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.State.Quote())
-				_vals = append(_vals, p.State)
-			case tbldocumenttemplate.Utime:
-				if p.Utime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tbldocumenttemplate.Utime.Quote())
-				_vals = append(_vals, p.Utime)
+			if valueFunc, exists := documenttemplateFieldToValueFunc[arg]; exists {
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tbldocumenttemplate.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		case tbldocumenttemplate.Id:
-			_cols = append(_cols, tbldocumenttemplate.Id.Quote())
-			_vals = append(_vals, p.Id)
-		case tbldocumenttemplate.Genre:
-			_cols = append(_cols, tbldocumenttemplate.Genre.Quote())
-			_vals = append(_vals, p.Genre)
-		case tbldocumenttemplate.Company:
-			_cols = append(_cols, tbldocumenttemplate.Company.Quote())
-			_vals = append(_vals, p.Company)
-		case tbldocumenttemplate.Way:
-			_cols = append(_cols, tbldocumenttemplate.Way.Quote())
-			_vals = append(_vals, p.Way)
-		case tbldocumenttemplate.AuthSign:
-			_cols = append(_cols, tbldocumenttemplate.AuthSign.Quote())
-			_vals = append(_vals, p.AuthSign)
-		case tbldocumenttemplate.Title:
-			_cols = append(_cols, tbldocumenttemplate.Title.Quote())
-			_vals = append(_vals, p.Title)
-		case tbldocumenttemplate.Content:
-			_cols = append(_cols, tbldocumenttemplate.Content.Quote())
-			_vals = append(_vals, p.Content)
-		case tbldocumenttemplate.Url:
-			_cols = append(_cols, tbldocumenttemplate.Url.Quote())
-			_vals = append(_vals, p.Url)
-		case tbldocumenttemplate.HasForm:
-			_cols = append(_cols, tbldocumenttemplate.HasForm.Quote())
-			_vals = append(_vals, p.HasForm)
-		case tbldocumenttemplate.State:
-			_cols = append(_cols, tbldocumenttemplate.State.Quote())
-			_vals = append(_vals, p.State)
-		case tbldocumenttemplate.Utime:
-			_cols = append(_cols, tbldocumenttemplate.Utime.Quote())
-			_vals = append(_vals, p.Utime)
+		if valueFunc, exists := documenttemplateFieldToValueFunc[arg]; exists {
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals
 }
 
+//
 func (p *DocumentTemplate) AssignKeys() (dialect.Field, any) {
 	return tbldocumenttemplate.PrimaryKey, p.Id
 }
 
+//
 func (p *DocumentTemplate) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
