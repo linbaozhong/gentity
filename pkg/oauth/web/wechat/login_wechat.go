@@ -24,9 +24,10 @@ import (
 )
 
 type wx struct {
-	appid     string
-	appSecret string
-	lang      string
+	appid       string
+	appSecret   string
+	lang        string
+	redirectURI string // 回调地址
 }
 type option func(w *wx)
 
@@ -35,7 +36,6 @@ const (
 	wechatAuthURL     = "https://open.weixin.qq.com/connect/qrconnect"
 	wechatTokenURL    = "https://api.weixin.qq.com/sns/oauth2/access_token"
 	wechatUserInfoURL = "https://api.weixin.qq.com/sns/userinfo"
-	redirectURI       = "http://your-domain.com/wx/callback" // 替换为你的回调地址
 )
 
 func WithAppId(appid string) option {
@@ -56,7 +56,13 @@ func WithAppSecret(appSecret string) option {
 	}
 }
 
-func New(opts ...option) web.Loginer {
+func WithRedirectURI(redirectURI string) option {
+	return func(w *wx) {
+		w.redirectURI = redirectURI
+	}
+}
+
+func New(opts ...option) web.Platformer {
 	w := &wx{}
 	for _, opt := range opts {
 		opt(w)
@@ -66,7 +72,7 @@ func New(opts ...option) web.Loginer {
 
 func (w *wx) Authorize(ctx context.Context, state string) (string, error) {
 	return fmt.Sprintf("%s?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_login&state=%s#wechat_redirect",
-		wechatAuthURL, w.appid, redirectURI, state), nil
+		wechatAuthURL, w.appid, w.redirectURI, state), nil
 }
 
 func (w *wx) Callback(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {

@@ -49,7 +49,7 @@ type UserInfoRsp struct {
 	Mobile             string `json:"mobile"`
 }
 
-type Loginer interface {
+type Platformer interface {
 	Authorize(ctx context.Context, state string) (string, error)
 	Callback(ctx context.Context, code, state string) (*OauthTokenRsp, error)
 	GetUserInfo(ctx context.Context, token string) (*UserInfoRsp, error)

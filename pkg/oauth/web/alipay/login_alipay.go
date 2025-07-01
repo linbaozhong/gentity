@@ -62,7 +62,7 @@ func WithNotifyUrl(notifyUrl string) option {
 	}
 }
 
-func New(opts ...option) web.Loginer {
+func New(opts ...option) web.Platformer {
 	a := &ali{}
 	for _, opt := range opts {
 		opt(a)

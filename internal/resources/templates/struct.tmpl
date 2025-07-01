@@ -109,6 +109,17 @@ func (p *{{.StructName}}) TableName() string {
 	return {{$structName}}TableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var {{$structNameLower}}FieldToPtrFunc = map[dialect.Field]func(*{{.StructName}}) any {
+{{- range $key, $value := .Columns}}
+	tbl{{$structNameLower}}.{{ $value.Name }}: func(p *{{$structName}}) any { return &p.{{ $value.Name }} },
+{{- end}}
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *{{.StructName}}) AssignPtr(args ...dialect.Field) ([]any) {
 	if len(args) == 0 {
 		args = tbl{{ $structNameLower }}.ReadableFields
@@ -116,12 +127,9 @@ func (p *{{.StructName}}) AssignPtr(args ...dialect.Field) ([]any) {
 
     _vals := make([]any, 0, len(args))
     for _, col := range args {
-        switch col {
-        {{- range $key, $value := .Columns}}
-        case tbl{{$structNameLower}}.{{ $value.Name }}:
-            _vals = append(_vals, &p.{{ $value.Name }})
-        {{- end}}
-        }
+		if ptrFunc, ok := {{$structNameLower}}FieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
+		}
     }
 
 	return _vals
@@ -162,6 +170,18 @@ func (p *{{.StructName}}) RawAssignValues(args ...dialect.Field) ([]string, []an
 	return p.AssignValues(args...)
 }
 
+
+// 定义字段到值检查和获取函数的映射
+var {{$structNameLower}}FieldToValueFunc = map[dialect.Field]func(*{{$structName}}) (string, any, bool) {
+{{- range $key, $value := .Columns}}
+	{{- if ne (getType $value) "any"}}
+	tbl{{$structNameLower}}.{{ $value.Name }}: func(p *{{$structName}}) (string, any, bool) {
+		return tbl{{$structNameLower}}.{{ $value.Name }}.Quote(), p.{{ $value.Name }}, p.{{ $value.Name }}{{getZeroValue $value}}
+	},
+	{{- end}}
+{{- end}}
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -178,17 +198,12 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			{{- range $key, $value := .Columns}}
-				{{- if ne (getType $value) "any"}}
-			case tbl{{$structNameLower}}.{{ $value.Name }}:
-				if p.{{ $value.Name }}{{getZeroValue $value}} {
-					continue
+			if valueFunc, exists := {{$structNameLower}}FieldToValueFunc[arg]; exists {
+				colName, value, valid := valueFunc(p)
+				if !valid {
+					_cols = append(_cols, colName)
+					_vals = append(_vals, value)
 				}
-				_cols = append(_cols, tbl{{$structNameLower}}.{{ $value.Name }}.Quote())
-				_vals = append(_vals, p.{{ $value.Name }})
-				{{- end}}
-			{{- end}}
 			}
 		}
 		return _cols, _vals
@@ -197,14 +212,10 @@ func (p *{{.StructName}})AssignValues(args ...dialect.Field) ([]string, []any) {
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		{{- range $key, $value := .Columns}}
-			{{- if ne (getType $value) "any"}}
-		case tbl{{$structNameLower}}.{{ $value.Name }}:
-			_cols = append(_cols, tbl{{$structNameLower}}.{{ $value.Name }}.Quote())
-			_vals = append(_vals, p.{{ $value.Name }})
-			{{- end}}
-		{{- end}}
+		if valueFunc, exists := {{$structNameLower}}FieldToValueFunc[arg]; exists {
+			colName, value, _ := valueFunc(p)
+			_cols = append(_cols, colName)
+			_vals = append(_vals, value)
 		}
 	}
 	return _cols, _vals

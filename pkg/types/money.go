@@ -27,40 +27,44 @@ func (m *Money) UnmarshalJSON(b []byte) error {
 	return e
 }
 
-func (i *Money) Scan(src any) error {
+func (m *Money) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
-		*i = 0
+		*m = 0
 		return nil
 	case int64:
-		*i = Money(v)
+		*m = Money(v)
 		return nil
 	case int:
-		*i = Money(v)
+		*m = Money(v)
 		return nil
 	case int32:
-		*i = Money(v)
+		*m = Money(v)
 		return nil
 	case int16:
-		*i = Money(v)
+		*m = Money(v)
 		return nil
 	case int8:
-		*i = Money(v)
+		*m = Money(v)
 		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for Money: %T", src)
 	}
 }
-func (i Money) Value() (driver.Value, error) {
-	return int64(i), nil
+func (m Money) Value() (driver.Value, error) {
+	return int64(m), nil
 }
 
-func (i Money) Int() int {
-	return int(i)
+func (m Money) Int() int {
+	return int(m)
 }
 
-func (i Money) Int64() int64 {
-	return int64(i)
+func (m Money) Int64() int64 {
+	return int64(m)
+}
+
+func (m Money) String() string {
+	return strconv.FormatInt(int64(m), 10)
 }
 
 // Yuan 金额分精确到元

@@ -21,13 +21,13 @@ import (
 type (
 	// 定义一个私有类型，用于禁止拷贝
 	noCopy struct{}
-	
+
 	Model struct {
 		_       noCopy
 		mu      sync.Mutex
 		ace_put bool // 内部留用，禁止外部赋值
 	}
-	
+
 	PoolModeler interface {
 		Reset()
 		// Put2Pool 方法，用于判断是否已经放入池中
