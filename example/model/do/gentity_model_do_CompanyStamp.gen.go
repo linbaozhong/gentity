@@ -32,11 +32,10 @@ func NewCompanyStamp() *CompanyStamp {
 // MarshalJSON
 func (p *CompanyStamp) MarshalJSON() ([]byte, error) {
 	var (
-		_buf   bytes.Buffer
+		_buf   = bytes.NewBuffer((make([]byte, 0, 11*50)))
 		_comma bool
 	)
 	_buf.WriteByte('{')
-	_buf.Grow(11 * 50)
 
 	writeField := func(key string, value string) {
 		if _comma {

@@ -32,11 +32,10 @@ func NewCompanyRule() *CompanyRule {
 // MarshalJSON
 func (p *CompanyRule) MarshalJSON() ([]byte, error) {
 	var (
-		_buf   bytes.Buffer
+		_buf   = bytes.NewBuffer((make([]byte, 0, 9*50)))
 		_comma bool
 	)
 	_buf.WriteByte('{')
-	_buf.Grow(9 * 50)
 
 	writeField := func(key string, value string) {
 		if _comma {
