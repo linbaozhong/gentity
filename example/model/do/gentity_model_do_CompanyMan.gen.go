@@ -319,12 +319,10 @@ func (p *CompanyMan) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
-//
 func (p *CompanyMan) AssignKeys() (dialect.Field, any) {
 	return tblcompanyman.PrimaryKey, p.Id
 }
 
-//
 func (p *CompanyMan) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {

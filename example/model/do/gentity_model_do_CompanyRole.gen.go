@@ -259,12 +259,10 @@ func (p *CompanyRole) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
-//
 func (p *CompanyRole) AssignKeys() (dialect.Field, any) {
 	return tblcompanyrole.PrimaryKey, p.Id
 }
 
-//
 func (p *CompanyRole) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {

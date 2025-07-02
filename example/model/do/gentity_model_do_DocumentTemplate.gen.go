@@ -299,12 +299,10 @@ func (p *DocumentTemplate) AssignValues(args ...dialect.Field) ([]string, []any)
 	return _cols, _vals
 }
 
-//
 func (p *DocumentTemplate) AssignKeys() (dialect.Field, any) {
 	return tbldocumenttemplate.PrimaryKey, p.Id
 }
 
-//
 func (p *DocumentTemplate) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {

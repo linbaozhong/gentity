@@ -279,12 +279,10 @@ func (p *CompanyRule) AssignValues(args ...dialect.Field) ([]string, []any) {
 	return _cols, _vals
 }
 
-//
 func (p *CompanyRule) AssignKeys() (dialect.Field, any) {
 	return tblcompanyrule.PrimaryKey, p.Id
 }
 
-//
 func (p *CompanyRule) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
