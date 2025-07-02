@@ -41,66 +41,10 @@ func Func(fns ...dialect.Function) Builder {
 	return newOrm().Func(fns...)
 }
 
-//
-// // Join 设置连接
-// func Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) Builder {
-// 	return newOrm().Join(joinType, left, right, fns...)
-// }
-//
-// // LeftJoin 设置左连接
-// func LeftJoin(left, right dialect.Field, fns ...dialect.Condition) Builder {
-// 	return newOrm().LeftJoin(left, right, fns...)
-// }
-//
-// // RightJoin 设置右连接
-// func RightJoin(left, right dialect.Field, fns ...dialect.Condition) Builder {
-// 	return newOrm().RightJoin(left, right, fns...)
-// }
-
 // Where 设置条件
 func Where(fns ...dialect.Condition) Builder {
 	return newOrm().Where(fns...)
 }
-
-//
-// // Order 设置排序，默认升序
-// func Order(cols ...dialect.Field) Builder {
-// 	return newOrm().Order(cols...)
-// }
-//
-// // Asc 指定查询结果按指定列升序排序。
-// func OrderAsc(cols ...dialect.Field) Builder {
-// 	return newOrm().Asc(cols...)
-// }
-//
-// // Desc 指定查询结果按指定列降序排序
-// func OrderDesc(cols ...dialect.Field) Builder {
-// 	return newOrm().Desc(cols...)
-// }
-//
-// // Group 指定查询结果的分组字段
-// func Group(cols ...dialect.Field) Builder {
-// 	return newOrm().Group(cols...)
-// }
-//
-// // Having 指定查询结果的分组条件
-// func Having(fns ...dialect.Condition) Builder {
-// 	return newOrm().Having(fns...)
-// }
-//
-// // Limit
-// // size 大小
-// // start 开始位置
-// func Limit(size uint, start ...uint) Builder {
-// 	return newOrm().Limit(size, start...)
-// }
-//
-// // Page
-// // pageIndex 页码
-// // pageSize 页大小
-// func Page(pageIndex, pageSize uint) Builder {
-// 	return newOrm().Page(pageIndex, pageSize)
-// }
 
 // Set
 // 用于设置更新语句中的字段和值
