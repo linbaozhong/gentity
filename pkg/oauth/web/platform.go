@@ -21,29 +21,32 @@ import (
 
 type OauthTokenRsp struct {
 	UserId       string `json:"user_id"`
-	AccessToken  string `json:"access_token"`
-	ExpiresIn    int64  `json:"expires_in"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"access_token"`  // 微信
+	ExpiresIn    int64  `json:"expires_in"`    // 微信
+	RefreshToken string `json:"refresh_token"` // 微信
 	ReExpiresIn  int64  `json:"re_expires_in"`
 	AuthStart    string `json:"auth_start"`
-	OpenId       string `json:"open_id"`
+	OpenId       string `json:"openid"` // 微信openid
 	UnionId      string `json:"union_id"`
+	Scope        string `json:"scope"` // 微信
 }
 
 type UserInfoRsp struct {
 	AuthNo             string `json:"auth_no"`
 	UserId             string `json:"user_id"`
-	OpenId             string `json:"open_id"`
-	UnionId            string `json:"union_id"`
-	Avatar             string `json:"avatar"`
-	Province           string `json:"province"`
-	City               string `json:"city"`
-	NickName           string `json:"nick_name"`
+	OpenId             string `json:"openid"`     // 微信
+	UnionId            string `json:"unionid"`    // 微信
+	Avatar             string `json:"headimgurl"` // 微信
+	Province           string `json:"province"`   // 微信
+	City               string `json:"city"`       // 微信
+	Country            string `json:"country"`    // 微信
+	NickName           string `json:"nickname"`   // 微信
 	IsStudentCertified string `json:"is_student_certified"`
 	UserType           string `json:"user_type"`
 	UserStatus         string `json:"user_status"`
 	IsCertified        string `json:"is_certified"`
-	Gender             string `json:"gender"`
+	Sex                int8   `json:"sex"`    // 微信
+	Gender             string `json:"gender"` // 支付宝
 	Username           string `json:"user_name"`
 	CertNo             string `json:"cert_no"`
 	CertType           string `json:"cert_type"`
