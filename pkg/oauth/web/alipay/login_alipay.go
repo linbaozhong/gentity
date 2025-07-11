@@ -85,7 +85,7 @@ func (a *ali) client() *alipay.Client {
 
 // Authorize 生成支付宝授权链接
 func (a *ali) Authorize(ctx context.Context, state string) (string, error) {
-	u, e := a.client().PublicAppAuthorize([]string{"auth_user"}, a.returnUrl, state)
+	u, e := a.client().PublicAppAuthorize([]string{"auth_user"}, a.returnUrl, web.Alipay.String()+":"+state)
 	if e != nil {
 		return "", e
 	}

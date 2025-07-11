@@ -55,3 +55,17 @@ type Platformer interface {
 	GetUserInfo(ctx context.Context, token string) (*UserInfoRsp, error)
 	GetPlatform() string
 }
+
+// 第三方平台
+type Platform string
+
+const (
+	// 微信
+	Wechat Platform = "wechat"
+	// 支付宝
+	Alipay Platform = "alipay"
+)
+
+func (p Platform) String() string {
+	return string(p)
+}

@@ -21,6 +21,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/oauth/web"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 type wx struct {
@@ -71,8 +72,14 @@ func New(opts ...option) web.Platformer {
 }
 
 func (w *wx) Authorize(ctx context.Context, state string) (string, error) {
-	return fmt.Sprintf("%s?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_login&state=%s#wechat_redirect",
-		wechatAuthURL, w.appid, w.redirectURI, state), nil
+	params := url.Values{}
+	params.Set("appid", w.appid)
+	params.Set("redirect_uri", w.redirectURI)
+	params.Set("response_type", "code")
+	params.Set("scope", "snsapi_login")                // 授权范围
+	params.Set("state", web.Wechat.String()+":"+state) // 防CSRF令牌
+
+	return fmt.Sprintf("%s?%s#wechat_redirect", wechatAuthURL, params.Encode()), nil
 }
 
 func (w *wx) Callback(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {
