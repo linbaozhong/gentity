@@ -16,6 +16,7 @@ package web
 
 import (
 	"context"
+	"strings"
 )
 
 type OauthTokenRsp struct {
@@ -68,4 +69,16 @@ const (
 
 func (p Platform) String() string {
 	return string(p)
+}
+
+func (p Platform) CombinState(state string) string {
+	return p.String() + ":" + state
+}
+
+func SplitState(state string) (Platform, string) {
+	pos := strings.Index(state, ":")
+	if pos == -1 {
+		return "", state
+	}
+	return Platform(state[:pos]), state[pos+1:]
 }
