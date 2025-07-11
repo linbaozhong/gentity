@@ -122,7 +122,7 @@ func (a *ali) Callback(ctx context.Context, code, state string) (*web.OauthToken
 }
 
 // GetUserInfo 获取用户信息
-func (a *ali) GetUserInfo(ctx context.Context, token string) (*web.UserInfoRsp, error) {
+func (a *ali) GetUserInfo(ctx context.Context, token, openid string) (*web.UserInfoRsp, error) {
 	_res, e := a.client().UserInfoShare(ctx,
 		alipay.UserInfoShare{
 			AuthToken: token,

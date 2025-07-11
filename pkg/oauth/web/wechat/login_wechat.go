@@ -100,11 +100,34 @@ func (w *wx) Callback(ctx context.Context, code, state string) (*web.OauthTokenR
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err
 	}
-	return &web.OauthTokenRsp{}, nil
+	return &result, nil
 }
 
-func (w *wx) GetUserInfo(ctx context.Context, token string) (*web.UserInfoRsp, error) {
-	return &web.UserInfoRsp{}, nil
+func (w *wx) GetUserInfo(ctx context.Context, token, openid string) (*web.UserInfoRsp, error) {
+	// 构造正确的 URL
+	url := fmt.Sprintf("%s?access_token=%s&openid=%s&lang=%s",
+		wechatUserInfoURL, token, openid, w.lang)
+
+	// 发起 HTTP 请求
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// 读取响应体
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// 解析 JSON 响应
+	var userInfo web.UserInfoRsp
+	if err := json.Unmarshal(body, &userInfo); err != nil {
+		return nil, err
+	}
+
+	return &userInfo, nil
 }
 
 func (w *wx) GetPlatform() string {

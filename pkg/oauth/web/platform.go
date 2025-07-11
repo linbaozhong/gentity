@@ -52,7 +52,7 @@ type UserInfoRsp struct {
 type Platformer interface {
 	Authorize(ctx context.Context, state string) (string, error)
 	Callback(ctx context.Context, code, state string) (*OauthTokenRsp, error)
-	GetUserInfo(ctx context.Context, token string) (*UserInfoRsp, error)
+	GetUserInfo(ctx context.Context, token, openid string) (*UserInfoRsp, error)
 	GetPlatform() string
 }
 
