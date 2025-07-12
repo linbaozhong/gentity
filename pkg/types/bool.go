@@ -66,6 +66,11 @@ func (b Bool) String() string {
 		return "null"
 	}
 }
+
+func (b Bool) Bytes() []byte {
+	return []byte{byte(b)}
+}
+
 func (b Bool) MarshalJSON() ([]byte, error) {
 	return []byte(b.String()), nil
 }

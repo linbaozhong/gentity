@@ -3,6 +3,7 @@ package types
 import (
 	"database/sql/driver"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"strconv"
 	"strings"
 )
@@ -65,6 +66,10 @@ func (m Money) Int64() int64 {
 
 func (m Money) String() string {
 	return strconv.FormatInt(int64(m), 10)
+}
+
+func (m Money) Bytes() []byte {
+	return conv.Base2Bytes(m)
 }
 
 // Yuan 金额分精确到元

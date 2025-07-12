@@ -2,6 +2,7 @@ package types
 
 import (
 	"database/sql/driver"
+	"encoding/binary"
 	"fmt"
 	"strconv"
 )
@@ -41,6 +42,10 @@ func (i BigInt) Uint64() uint64 {
 
 func (i BigInt) Uint() uint {
 	return uint(i)
+}
+
+func (i BigInt) Bytes() []byte {
+	return binary.BigEndian.AppendUint64(nil, uint64(i))
 }
 
 func (i *BigInt) Scan(src any) error {

@@ -1,14 +1,20 @@
 package conv
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"runtime"
 	"time"
 	"unsafe"
 )
+
+type Byteser interface {
+	Bytes() []byte
+}
 
 var ErrTooShort = errors.New("bytes.Buffer: too short")
 
@@ -51,19 +57,19 @@ func Bytes2Any[T b2a](b []byte, r T) error {
 		}
 	case *int64:
 		if len(b) >= 8 {
-			*v = int64(binary.BigEndian.Uint64(b))
+			*v, err = Bytes2Base[int64](b)
 		} else {
 			return ErrTooShort
 		}
 	case *int32:
 		if len(b) >= 4 {
-			*v = int32(binary.BigEndian.Uint32(b))
+			*v, err = Bytes2Base[int32](b)
 		} else {
 			return ErrTooShort
 		}
 	case *int16:
 		if len(b) >= 2 {
-			*v = int16(binary.BigEndian.Uint16(b))
+			*v, err = Bytes2Base[int16](b)
 		} else {
 			return ErrTooShort
 		}
@@ -110,16 +116,13 @@ func Bytes2Any[T b2a](b []byte, r T) error {
 	case *time.Time:
 		if len(b) > 0 {
 			*v, err = time.Parse(time.RFC3339Nano, string(b))
-			if err != nil {
-				return err
-			}
 		} else {
 			return ErrTooShort
 		}
 	default:
 		return json.Unmarshal(b, r)
 	}
-	return nil
+	return err
 }
 
 // Any2Bytes 泛型数据类型
@@ -137,12 +140,7 @@ func Any2Bytes[T a2b](s T) ([]byte, error) {
 		// 直接返回字节切片
 		buf = v
 	case bool:
-		if v {
-			buf = []byte{1}
-		} else {
-			buf = []byte{0}
-		}
-	// 处理 time.Time 类型
+		buf = Base2Bytes(v)
 	case time.Time:
 		buf = []byte(v.Format(time.RFC3339Nano))
 	case uint64:
@@ -155,24 +153,7 @@ func Any2Bytes[T a2b](s T) ([]byte, error) {
 		buf = make([]byte, 2)
 		binary.BigEndian.PutUint16(buf, v)
 	case uint8:
-		buf = []byte{byte(v)}
-	case int64:
-		buf = make([]byte, 8)
-		binary.BigEndian.PutUint64(buf, uint64(v))
-	case int32:
-		buf = make([]byte, 4)
-		binary.BigEndian.PutUint32(buf, uint32(v))
-	case int16:
-		buf = make([]byte, 2)
-		binary.BigEndian.PutUint16(buf, uint16(v))
-	case int8:
-		buf = []byte{byte(v)}
-	case float32:
-		buf = make([]byte, 4)
-		binary.BigEndian.PutUint32(buf, math.Float32bits(v))
-	case float64:
-		buf = make([]byte, 8)
-		binary.BigEndian.PutUint64(buf, math.Float64bits(v))
+		buf = []byte{v}
 	case uint:
 		if runtime.GOARCH == "arm64" || runtime.GOARCH == "amd64" {
 			buf = make([]byte, 8)
@@ -181,16 +162,33 @@ func Any2Bytes[T a2b](s T) ([]byte, error) {
 			buf = make([]byte, 4)
 			binary.BigEndian.PutUint32(buf, uint32(v))
 		}
+	case int64:
+		buf = Base2Bytes(v)
+	case int32:
+		buf = Base2Bytes(v)
+	case int16:
+		buf = Base2Bytes(v)
+	case int8:
+		buf = []byte{byte(v)}
+	case float32:
+		buf = make([]byte, 4)
+		binary.BigEndian.PutUint32(buf, math.Float32bits(v))
+	case float64:
+		buf = make([]byte, 8)
+		binary.BigEndian.PutUint64(buf, math.Float64bits(v))
 	case int:
 		if runtime.GOARCH == "arm64" || runtime.GOARCH == "amd64" {
-			buf = make([]byte, 8)
-			binary.BigEndian.PutUint64(buf, uint64(v))
+			buf = Base2Bytes(int64(v))
 		} else {
-			buf = make([]byte, 4)
-			binary.BigEndian.PutUint32(buf, uint32(v))
+			buf = Base2Bytes(int32(v))
 		}
 	default:
-		return json.Marshal(v)
+		fmt.Println("default")
+		if c, ok := v.(Byteser); ok {
+			buf = c.Bytes()
+		} else {
+			return json.Marshal(v)
+		}
 	}
 	return buf, nil
 }
@@ -212,4 +210,34 @@ func String2Bytes(s string) []byte {
 		}{s, len(s)},
 	))
 	return b
+}
+
+type base interface {
+	~bool | ~int8 | ~int16 | ~int32 | ~int64 | ~float32 | ~float64
+}
+
+// Base2Bytes 将 base 类型的值转换为字节切片
+func Base2Bytes[T base](v T) []byte {
+	var buf bytes.Buffer
+	err := binary.Write(&buf, binary.BigEndian, v)
+	if err != nil {
+		panic(err)
+	}
+	return buf.Bytes()
+}
+
+// Bytes2Base 将字节切片转换为 base 类型的值
+func Bytes2Base[T base](b []byte) (T, error) {
+	var result T
+	buf := bytes.NewBuffer(b)
+	err := binary.Read(buf, binary.BigEndian, &result)
+	if err != nil {
+		var zero T
+		return zero, err
+	}
+	if buf.Len() > 0 {
+		var zero T
+		return zero, ErrTooShort
+	}
+	return result, nil
 }

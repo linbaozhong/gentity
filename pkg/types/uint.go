@@ -15,7 +15,9 @@
 package types
 
 import (
+	"encoding/binary"
 	"fmt"
+	"runtime"
 	"strconv"
 )
 
@@ -48,6 +50,10 @@ func (i8 Uint8) Uint8() uint8 {
 
 func (i8 Uint8) String() string {
 	return strconv.FormatUint(uint64(i8), 10)
+}
+
+func (i8 Uint8) Bytes() []byte {
+	return []byte{byte(i8)}
 }
 
 func (i8 Uint8) MarshalJSON() ([]byte, error) {
@@ -89,6 +95,10 @@ func (i16 Uint16) String() string {
 	return strconv.FormatUint(uint64(i16), 10)
 }
 
+func (i16 Uint16) Bytes() []byte {
+	return binary.BigEndian.AppendUint16(nil, uint16(i16))
+}
+
 func (i16 Uint16) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i16), 10)), nil
 }
@@ -126,6 +136,10 @@ func (i32 Uint32) Uint32() uint32 {
 
 func (i32 Uint32) String() string {
 	return strconv.FormatUint(uint64(i32), 10)
+}
+
+func (i32 Uint32) Bytes() []byte {
+	return binary.BigEndian.AppendUint32(nil, uint32(i32))
 }
 
 func (i32 Uint32) MarshalJSON() ([]byte, error) {
@@ -167,6 +181,10 @@ func (i64 Uint64) String() string {
 	return strconv.FormatUint(uint64(i64), 10)
 }
 
+func (i64 Uint64) Bytes() []byte {
+	return binary.BigEndian.AppendUint64(nil, uint64(i64))
+}
+
 func (i64 Uint64) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i64), 10)), nil
 }
@@ -204,6 +222,13 @@ func (i Uint) Uint() uint {
 
 func (i Uint) String() string {
 	return strconv.FormatUint(uint64(i), 10)
+}
+func (i Uint) Bytes() []byte {
+	if runtime.GOARCH == "arm64" || runtime.GOARCH == "amd64" {
+		return binary.BigEndian.AppendUint64(nil, uint64(i))
+	} else {
+		return binary.BigEndian.AppendUint32(nil, uint32(i))
+	}
 }
 
 func (i Uint) MarshalJSON() ([]byte, error) {

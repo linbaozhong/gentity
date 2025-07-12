@@ -16,6 +16,8 @@ package types
 
 import (
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/conv"
+	"runtime"
 	"strconv"
 )
 
@@ -49,6 +51,11 @@ func (i8 Int8) Int8() int8 {
 func (i8 Int8) String() string {
 	return strconv.FormatInt(int64(i8), 10)
 }
+
+func (i8 Int8) Bytes() []byte {
+	return []byte{byte(i8)}
+}
+
 func (i8 Int8) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i8), 10)), nil
 }
@@ -87,6 +94,11 @@ func (i16 Int16) Int16() int16 {
 func (i16 Int16) String() string {
 	return strconv.FormatInt(int64(i16), 10)
 }
+
+func (i16 Int16) Bytes() []byte {
+	return conv.Base2Bytes(i16)
+}
+
 func (i16 Int16) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i16), 10)), nil
 }
@@ -125,6 +137,11 @@ func (i32 Int32) Int32() int32 {
 func (i32 Int32) String() string {
 	return strconv.FormatInt(int64(i32), 10)
 }
+
+func (i32 Int32) Bytes() []byte {
+	return conv.Base2Bytes(i32)
+}
+
 func (i32 Int32) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i32), 10)), nil
 }
@@ -163,6 +180,11 @@ func (i64 Int64) Int64() int64 {
 func (i64 Int64) String() string {
 	return strconv.FormatInt(int64(i64), 10)
 }
+
+func (i64 Int64) Bytes() []byte {
+	return conv.Base2Bytes(i64)
+}
+
 func (i64 Int64) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i64), 10)), nil
 }
@@ -201,6 +223,15 @@ func (i Int) Int() int {
 func (i Int) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
+
+func (i Int) Bytes() []byte {
+	if runtime.GOARCH == "arm64" || runtime.GOARCH == "amd64" {
+		return conv.Base2Bytes(int64(i))
+	} else {
+		return conv.Base2Bytes(int32(i))
+	}
+}
+
 func (i Int) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i), 10)), nil
 }

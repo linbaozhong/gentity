@@ -15,7 +15,9 @@
 package types
 
 import (
+	"encoding/binary"
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -45,6 +47,10 @@ func (f32 Float32) Float32() float32 {
 
 func (f32 Float32) String() string {
 	return strconv.FormatFloat(float64(f32), 'f', -1, 32)
+}
+
+func (f32 Float32) Bytes() []byte {
+	return binary.BigEndian.AppendUint32(nil, math.Float32bits(f32.Float32()))
 }
 
 func (f32 Float32) MarshalJSON() ([]byte, error) {
@@ -84,6 +90,10 @@ func (f64 Float64) Float64() float64 {
 
 func (f64 Float64) String() string {
 	return strconv.FormatFloat(float64(f64), 'f', -1, 64)
+}
+
+func (f64 Float64) Bytes() []byte {
+	return binary.BigEndian.AppendUint64(nil, math.Float64bits(f64.Float64()))
 }
 
 func (f64 Float64) MarshalJSON() ([]byte, error) {

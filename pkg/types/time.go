@@ -60,8 +60,13 @@ func (t Time) Now() Time {
 func Now() Time {
 	return Time{time.Now()}
 }
+
 func (t Time) String() string {
 	return t.Format(time.DateTime)
+}
+
+func (t Time) Bytes() []byte {
+	return []byte(t.String())
 }
 
 func (t Time) MarshalJSON() ([]byte, error) {

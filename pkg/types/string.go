@@ -41,6 +41,10 @@ func (s String) String() string {
 	return string(s)
 }
 
+func (s String) Bytes() []byte {
+	return []byte(s)
+}
+
 func (s String) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(string(s))), nil
 }

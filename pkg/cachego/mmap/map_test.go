@@ -14,7 +14,7 @@ func TestCache(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(1, string(v))
-	time.Sleep(time.Second * 11)
+	time.Sleep(time.Second * 10)
 	v, err = m.Fetch(context.Background(), "key")
 	if err != nil {
 		//t.Fatal(err)
