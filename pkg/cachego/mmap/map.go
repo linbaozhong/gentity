@@ -51,7 +51,7 @@ func WithPrefix(prefix string) option {
 // WithExpired 设置过期时间
 func WithExpired(duration time.Duration) option {
 	return func(o *syncMap) {
-		o.duration = time.Now().Unix() + int64(duration.Seconds())
+		o.duration = int64(duration.Seconds())
 	}
 }
 
@@ -149,7 +149,7 @@ func (sm *syncMap) Flush(ctx context.Context) error {
 
 // Save a value in SyncMap storage by key
 func (sm *syncMap) Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error {
-	duration := sm.duration
+	duration := time.Now().Unix() + sm.duration
 
 	if len(lifeTime) > 0 {
 		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())

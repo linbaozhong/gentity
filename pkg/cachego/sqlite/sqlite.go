@@ -74,7 +74,7 @@ func WithInterval(d time.Duration) option {
 // WithExpired 设置过期时间
 func WithExpired(duration time.Duration) option {
 	return func(o *sqlite) {
-		o.duration = time.Now().Unix() + int64(duration.Seconds())
+		o.duration = int64(duration.Seconds())
 	}
 }
 
@@ -139,7 +139,7 @@ func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value any, lifeTi
 		return false
 	}
 
-	duration := s.duration
+	duration := time.Now().Unix() + s.duration
 	if len(lifeTime) > 0 {
 		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
@@ -221,7 +221,7 @@ func (s *sqlite) Save(ctx context.Context, key string, value any, lifeTime ...ti
 		stmt *sql.Stmt
 		err  error
 	)
-	duration := s.duration
+	duration := time.Now().Unix() + s.duration
 	if len(lifeTime) > 0 {
 		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
