@@ -13,13 +13,13 @@ func TestCache(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(1, string(v))
+	t.Log(1, v)
 	time.Sleep(time.Second * 10)
 	v, err = m.Fetch(context.Background(), "key")
 	if err != nil {
 		//t.Fatal(err)
 	}
-	t.Log(2, string(v))
+	t.Log(2, v)
 
 	m.Save(context.Background(), "name", "linbaozhong")
 	time.Sleep(time.Second * 5)
@@ -27,5 +27,5 @@ func TestCache(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(3, string(v))
+	t.Log(3, v)
 }
