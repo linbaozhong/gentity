@@ -3,11 +3,17 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
+	"github.com/linbaozhong/gentity/pkg/cachego/memcached"
+	"github.com/linbaozhong/gentity/pkg/cachego/mmap"
+	"github.com/linbaozhong/gentity/pkg/cachego/redis"
 	"golang.org/x/sync/singleflight"
 	"sync"
 
+	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/log"
+	rd "github.com/redis/go-redis/v9"
 )
 
 type (
@@ -55,35 +61,34 @@ func (s *DB) SetCache(t cacheType, opts any) *DB {
 	return s
 }
 
-//
-//// Cache
-//func (s *DB) Cache(name string) cachego.Cache {
-//	if v, ok := s.cacheMap.Load(name); ok {
-//		return v.(cachego.Cache)
-//	}
-//
-//	v, _, _ := s.sg.Do(name, func() (any, error) {
-//		var v cachego.Cache
-//		switch s.cacheType {
-//		case CacheTypeMemory:
-//			if opts, ok := s.cacheOpts.(string); ok {
-//				v = memcached.New(memcache.New(opts), memcached.WithPrefix(name))
-//			}
-//		case CacheTypeRedis:
-//			if opts, ok := s.cacheOpts.(*rd.Options); ok {
-//				v = redis.New(rd.NewClient(opts), redis.WithPrefix(name))
-//			}
-//		default: // CacheTypeSyncMap
-//			v = mmap.New() // sync.Map 不需要前缀
-//		}
-//		if v == nil {
-//			v = mmap.New() // sync.Map 不需要前缀
-//		}
-//		s.cacheMap.Store(name, v)
-//		return v, nil
-//	})
-//	return v.(cachego.Cache)
-//}
+// Cache
+func (s *DB) Cache(name string) cachego.Cache {
+	if v, ok := s.cacheMap.Load(name); ok {
+		return v.(cachego.Cache)
+	}
+
+	v, _, _ := s.sg.Do(name, func() (any, error) {
+		var v cachego.Cache
+		switch s.cacheType {
+		case CacheTypeMemory:
+			if opts, ok := s.cacheOpts.(string); ok {
+				v = memcached.New(memcache.New(opts), memcached.WithPrefix(name))
+			}
+		case CacheTypeRedis:
+			if opts, ok := s.cacheOpts.(*rd.Options); ok {
+				v = redis.New(rd.NewClient(opts), redis.WithPrefix(name))
+			}
+		default: // CacheTypeSyncMap
+			v = mmap.New() // sync.Map 不需要前缀
+		}
+		if v == nil {
+			v = mmap.New() // sync.Map 不需要前缀
+		}
+		s.cacheMap.Store(name, v)
+		return v, nil
+	})
+	return v.(cachego.Cache)
+}
 
 // Transaction 事务处理
 func (s *DB) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any, error) {
@@ -93,7 +98,7 @@ func (s *DB) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any,
 	}
 
 	var result any
-	result, e = f(&Tx{tx, s.mapper, s.Transaction, s.debug})
+	result, e = f(&Tx{tx, s.mapper, s.Cache, s.Transaction, s.debug})
 	if e != nil {
 		if err := tx.Rollback(); err != nil {
 			log.Error(err)

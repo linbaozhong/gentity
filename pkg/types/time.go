@@ -69,6 +69,11 @@ func (t Time) Bytes() []byte {
 	return []byte(t.String())
 }
 
+func (t *Time) FromBytes(b []byte) {
+	t2, _ := time.Parse(time.DateTime, string(b))
+	*t = Time{t2}
+}
+
 func (t Time) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(t.String())), nil
 }

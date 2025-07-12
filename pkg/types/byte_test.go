@@ -7,11 +7,14 @@ import (
 
 func TestTypes(t *testing.T) {
 	var err error
-	var f32 Money = -127
+	var f32 Float32 = -127.33
 	f, err := conv.Any2Bytes(f32)
+	//f := f32.Bytes()
 	t.Log(f, err)
 
-	f32, err = conv.Bytes2Base[Money](f)
-	t.Log(f32, err)
+	var f322 Float32
+	err = conv.Bytes2Any(f, &f322)
+	//f322.FromBytes(f)
+	t.Log(f322, err)
 
 }

@@ -17,6 +17,7 @@ package mmap
 import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/cachego"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"strings"
 	"sync"
@@ -27,7 +28,7 @@ type (
 	option func(o *syncMap)
 
 	syncMapItem struct {
-		data     any
+		data     []byte
 		duration int64
 	}
 
@@ -55,7 +56,7 @@ func WithExpired(duration time.Duration) option {
 }
 
 // New creates an instance of SyncMap cache driver
-func New(opts ...option) *syncMap {
+func New(opts ...option) cachego.Cache {
 	obj := &syncMap{storage: cmap.New[any]()}
 	for _, opt := range opts {
 		opt(obj)
@@ -117,7 +118,7 @@ func (sm *syncMap) PrefixDelete(ctx context.Context, prefix string) error {
 }
 
 // Fetch retrieves the cached value from key of the SyncMap storage
-func (sm *syncMap) Fetch(ctx context.Context, key string) (any, error) {
+func (sm *syncMap) Fetch(ctx context.Context, key string) ([]byte, error) {
 	item, err := sm.read(ctx, key)
 	if err != nil {
 		return nil, err
@@ -127,8 +128,8 @@ func (sm *syncMap) Fetch(ctx context.Context, key string) (any, error) {
 }
 
 // FetchMulti retrieves multiple cached value from keys of the SyncMap storage
-func (sm *syncMap) FetchMulti(ctx context.Context, keys ...string) ([]any, error) {
-	vals := make([]any, 0, len(keys))
+func (sm *syncMap) FetchMulti(ctx context.Context, keys ...string) ([][]byte, error) {
+	vals := make([][]byte, 0, len(keys))
 	for _, key := range keys {
 		if b, err := sm.Fetch(ctx, key); err == nil {
 			vals = append(vals, b)
@@ -153,11 +154,11 @@ func (sm *syncMap) Save(ctx context.Context, key string, value any, lifeTime ...
 	if len(lifeTime) > 0 {
 		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
-	//b, err := conv.Any2Bytes(value)
-	//if err != nil {
-	//	return err
-	//}
-	sm.storage.Set(sm.getKey(key), &syncMapItem{value, duration})
+	buf, err := conv.Any2Bytes(value)
+	if err != nil {
+		return err
+	}
+	sm.storage.Set(sm.getKey(key), &syncMapItem{buf, duration})
 	return nil
 }
 

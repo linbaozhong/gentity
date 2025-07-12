@@ -72,6 +72,11 @@ func (m Money) Bytes() []byte {
 	return conv.Base2Bytes(m)
 }
 
+func (m *Money) FromBytes(b []byte) {
+	_m, _ := conv.Bytes2Base[int64](b)
+	*m = Money(_m)
+}
+
 // Yuan 金额分精确到元
 func (m Money) Yuan() float64 {
 	return float64(m) / 100

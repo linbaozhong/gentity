@@ -71,6 +71,14 @@ func (b Bool) Bytes() []byte {
 	return []byte{byte(b)}
 }
 
+func (b *Bool) FromBytes(buf []byte) {
+	if len(buf) == 0 {
+		*b = -1
+		return
+	}
+	*b = Bool(buf[0])
+}
+
 func (b Bool) MarshalJSON() ([]byte, error) {
 	return []byte(b.String()), nil
 }

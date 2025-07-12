@@ -18,13 +18,14 @@ import (
 	"context"
 	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
+	"github.com/linbaozhong/gentity/pkg/cachego"
 )
 
 type (
 	Tx struct {
 		*sql.Tx
-		mapper *reflectx.Mapper
-		//cache       func(name string) cachego.Cache
+		mapper      *reflectx.Mapper
+		cache       func(name string) cachego.Cache
 		transaction func(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
 		debug       bool // 如果是调试模式，则打印sql命令及错误
 	}
@@ -34,9 +35,9 @@ func (t *Tx) Mapper() *reflectx.Mapper {
 	return t.mapper
 }
 
-//func (t *Tx) Cache(name string) cachego.Cache {
-//	return t.cache(name)
-//}
+func (t *Tx) Cache(name string) cachego.Cache {
+	return t.cache(name)
+}
 
 func (t *Tx) Debug() bool {
 	return t.debug

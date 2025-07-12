@@ -48,6 +48,10 @@ func (i BigInt) Bytes() []byte {
 	return binary.BigEndian.AppendUint64(nil, uint64(i))
 }
 
+func (i *BigInt) FromBytes(b []byte) {
+	*i = BigInt(binary.BigEndian.Uint64(b))
+}
+
 func (i *BigInt) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:

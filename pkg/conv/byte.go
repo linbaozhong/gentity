@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math"
 	"runtime"
 	"time"
@@ -14,6 +13,9 @@ import (
 
 type Byteser interface {
 	Bytes() []byte
+}
+type FromByteser interface {
+	FromBytes(b []byte)
 }
 
 var ErrTooShort = errors.New("bytes.Buffer: too short")
@@ -120,7 +122,11 @@ func Bytes2Any[T b2a](b []byte, r T) error {
 			return ErrTooShort
 		}
 	default:
-		return json.Unmarshal(b, r)
+		if c, ok := v.(FromByteser); ok {
+			c.FromBytes(b)
+		} else {
+			return json.Unmarshal(b, r)
+		}
 	}
 	return err
 }
@@ -183,8 +189,7 @@ func Any2Bytes[T a2b](s T) ([]byte, error) {
 			buf = Base2Bytes(int32(v))
 		}
 	default:
-		fmt.Println("default")
-		if c, ok := v.(Byteser); ok {
+		if c, ok := any(&s).(Byteser); ok {
 			buf = c.Bytes()
 		} else {
 			return json.Marshal(v)

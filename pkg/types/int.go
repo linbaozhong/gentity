@@ -56,6 +56,10 @@ func (i8 Int8) Bytes() []byte {
 	return []byte{byte(i8)}
 }
 
+func (i8 *Int8) FromBytes(b []byte) {
+	*i8 = Int8(b[0])
+}
+
 func (i8 Int8) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i8), 10)), nil
 }
@@ -97,6 +101,11 @@ func (i16 Int16) String() string {
 
 func (i16 Int16) Bytes() []byte {
 	return conv.Base2Bytes(i16)
+}
+
+func (i16 *Int16) FromBytes(b []byte) {
+	_i16, _ := conv.Bytes2Base[int16](b)
+	*i16 = Int16(_i16)
 }
 
 func (i16 Int16) MarshalJSON() ([]byte, error) {
@@ -142,6 +151,11 @@ func (i32 Int32) Bytes() []byte {
 	return conv.Base2Bytes(i32)
 }
 
+func (i32 *Int32) FromBytes(b []byte) {
+	_i32, _ := conv.Bytes2Base[int32](b)
+	*i32 = Int32(_i32)
+}
+
 func (i32 Int32) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i32), 10)), nil
 }
@@ -183,6 +197,11 @@ func (i64 Int64) String() string {
 
 func (i64 Int64) Bytes() []byte {
 	return conv.Base2Bytes(i64)
+}
+
+func (i64 *Int64) FromBytes(b []byte) {
+	_i64, _ := conv.Bytes2Base[int64](b)
+	*i64 = Int64(_i64)
 }
 
 func (i64 Int64) MarshalJSON() ([]byte, error) {
@@ -229,6 +248,16 @@ func (i Int) Bytes() []byte {
 		return conv.Base2Bytes(int64(i))
 	} else {
 		return conv.Base2Bytes(int32(i))
+	}
+}
+
+func (i *Int) FromBytes(b []byte) {
+	if runtime.GOARCH == "arm64" || runtime.GOARCH == "amd64" {
+		_i, _ := conv.Bytes2Base[int64](b)
+		*i = Int(_i)
+	} else {
+		_i, _ := conv.Bytes2Base[int32](b)
+		*i = Int(_i)
 	}
 }
 
