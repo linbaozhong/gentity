@@ -52,6 +52,12 @@ func (i *BigInt) FromBytes(b []byte) {
 	*i = BigInt(binary.BigEndian.Uint64(b))
 }
 
+func (i *BigInt) FromString(s string) error {
+	tem, e := strconv.ParseUint(s, 10, 64)
+	*i = BigInt(tem)
+	return e
+}
+
 func (i *BigInt) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:

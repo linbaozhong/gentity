@@ -131,7 +131,7 @@ func (s *sqlite) Contains(ctx context.Context, key string) bool {
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value any, lifeTime ...time.Duration) bool {
+func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -216,7 +216,7 @@ func (s *sqlite) Flush(ctx context.Context) error {
 	return err
 }
 
-func (s *sqlite) Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error {
+func (s *sqlite) Save(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) error {
 	var (
 		stmt *sql.Stmt
 		err  error
@@ -253,7 +253,7 @@ func (s *sqlite) getKey(key string) string {
 func (s *sqlite) storage(ctx context.Context, name string) error {
 	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS "`+name+`" (
 			"key" TEXT NOT NULL DEFAULT '',
-			"value" TEXT NOT NULL DEFAULT '',
+			"value" BLOB NOT NULL DEFAULT '',
 			"expire" integer NOT NULL DEFAULT 0,
 			PRIMARY KEY ("key")
 		)`)

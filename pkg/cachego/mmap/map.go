@@ -17,7 +17,6 @@ package mmap
 import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/cachego"
-	"github.com/linbaozhong/gentity/pkg/conv"
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"strings"
 	"sync"
@@ -64,13 +63,14 @@ func New(opts ...option) cachego.Cache {
 	return obj
 }
 
-func (sm *syncMap) read(ctx context.Context, key string) (*syncMapItem, error) {
+func (sm *syncMap) read(ctx context.Context, key string) (syncMapItem, error) {
+	var item syncMapItem
 	v, ok := sm.storage.Get(sm.getKey(key))
 	if !ok {
-		return nil, cachego.ErrCacheMiss
+		return item, cachego.ErrCacheMiss
 	}
 
-	item := v.(*syncMapItem)
+	item = v.(syncMapItem)
 
 	if item.duration == 0 {
 		return item, nil
@@ -78,7 +78,7 @@ func (sm *syncMap) read(ctx context.Context, key string) (*syncMapItem, error) {
 
 	if item.duration <= time.Now().Unix() {
 		_ = sm.Delete(ctx, key)
-		return nil, cachego.ErrCacheMiss
+		return item, cachego.ErrCacheMiss
 	}
 
 	return item, nil
@@ -90,7 +90,7 @@ func (sm *syncMap) Contains(ctx context.Context, key string) bool {
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (sm *syncMap) ExistsOrSave(ctx context.Context, key string, value any, lifeTime ...time.Duration) bool {
+func (sm *syncMap) ExistsOrSave(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) bool {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
@@ -148,17 +148,17 @@ func (sm *syncMap) Flush(ctx context.Context) error {
 }
 
 // Save a value in SyncMap storage by key
-func (sm *syncMap) Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error {
+func (sm *syncMap) Save(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) error {
 	duration := time.Now().Unix() + sm.duration
 
 	if len(lifeTime) > 0 {
 		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
-	buf, err := conv.Any2Bytes(value)
-	if err != nil {
-		return err
-	}
-	sm.storage.Set(sm.getKey(key), &syncMapItem{buf, duration})
+	//buf, err := conv.Any2Bytes(value)
+	//if err != nil {
+	//	return err
+	//}
+	sm.storage.Set(sm.getKey(key), syncMapItem{value, duration})
 	return nil
 }
 
