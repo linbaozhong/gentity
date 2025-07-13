@@ -16,6 +16,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -53,7 +54,10 @@ func Ok(c Context, args ...any) error {
 	if c.Method() == http.MethodGet {
 		key := c.Values().Get(hasCacheKey)
 		if _key, ok := key.(cacheKey); ok {
-			setCache(context.Background(), _key, j)
+			buf, e := json.Marshal(j)
+			if e == nil {
+				setCache(context.Background(), _key, buf)
+			}
 		}
 	}
 	return c.JSON(j)
