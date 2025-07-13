@@ -65,7 +65,7 @@ func Marshal(s any) string {
 		}
 		return strconv.Quote(v.Format(time.DateTime))
 	case time.Duration: //转为毫秒
-		return strconv.Quote(strconv.FormatInt(v.Milliseconds(), 64))
+		return strconv.Quote(strconv.FormatInt(v.Milliseconds(), 10))
 	default:
 		if s == nil {
 			return "null"
