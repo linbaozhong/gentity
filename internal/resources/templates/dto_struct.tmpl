@@ -67,7 +67,7 @@ func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 		_comma = true
 	}
 	{{- range $key, $value := .Columns}}
-		{{- if and (ne $value.Json.Name "") (ne $value.Json.Name "-")}}
+		{{- if ne $value.Json.Name "-" }}
 			{{- if $value.Json.OmitEmpty}}
 			if {{getNotZeroValue $value}} {
 				writeField("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
@@ -105,7 +105,7 @@ func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 		_result.ForEach(func(key, value gjson.Result) bool {
 			switch key.Str {
 			{{- range $key, $value := .Columns}}
-				{{- if and (ne $value.Json.Name "") (ne $value.Json.Name "-")}}
+				{{- if ne $value.Json.Name "-" }}
 				case "{{ $value.Json.Name }}":
 					{{getUnmarshalJSON $value}}
 				{{- end}}
@@ -138,7 +138,7 @@ func (p *{{.StructName}}) UnmarshalValues(m map[string][]string) error {
 			value := gjson.Result{Type:gjson.String,Raw: v[0],Str: v[0]}
 			switch k {
 			{{- range $key, $value := .Columns}}
-				{{- if and (ne $value.Json.Name "") (ne $value.Json.Name "-")}}
+				{{- if ne $value.Json.Name "-" }}
 				case "{{ $value.Json.Name }}":
 					{{getUnmarshalJSON $value}}
 				{{- end}}
