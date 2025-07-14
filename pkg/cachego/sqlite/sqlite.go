@@ -19,6 +19,7 @@ import (
 	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/util"
 	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"strings"
@@ -79,7 +80,7 @@ func WithExpired(duration time.Duration) option {
 }
 
 // New 创建一个sqlite缓存实例
-func New(ctx context.Context, opts ...option) cachego.Cache {
+func New(ctx context.Context, name string, opts ...option) cachego.Cache {
 	cacheOnce.Do(func() {
 		var err error
 		err = os.MkdirAll("./cache", 0755)
@@ -95,13 +96,17 @@ func New(ctx context.Context, opts ...option) cachego.Cache {
 
 	obj := &sqlite{
 		db:       cacheDB,
-		name:     cacheTableName,
+		name:     name,
 		interval: cacheCleanupInterval,
 		lastTime: time.Now(),
 	}
 
 	for _, opt := range opts {
 		opt(obj)
+	}
+
+	if obj.name == "" {
+		obj.name = cacheTableName + "_" + util.GetRandLowerString(4)
 	}
 
 	obj.storage(ctx, obj.name)

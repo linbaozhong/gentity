@@ -12,29 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sqlite
+package util
 
-import (
-	"context"
-	"testing"
-	"time"
-)
+import "testing"
 
-func TestCache(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	cc := New(ctx, "a",
-		WithPrefix("abc"),
-	)
-
-	e := cc.Save(ctx, "bbb", []byte("456"), time.Second*10)
-	if e != nil {
-		t.Fatal(e)
-	}
-	v, e := cc.Fetch(ctx, "bbb")
-	if e != nil {
-		t.Fatal(e)
-	}
-	t.Log(string(v))
+func TestRandom(t *testing.T) {
+	t.Log(GetRandLowerString(6))
+	t.Log(GetRandLowerString(6))
+	t.Log(GetRandLowerString(6))
+	t.Log(GetRandLowerString(6))
+	t.Log(GetRandLowerString(6))
 }
