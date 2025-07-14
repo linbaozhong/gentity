@@ -51,12 +51,12 @@ var (
 	cacheOnce sync.Once
 )
 
-// WithName 设置缓存名称
-func WithName(name string) option {
-	return func(o *sqlite) {
-		o.name = name
-	}
-}
+// // WithName 设置缓存名称
+// func WithName(name string) option {
+// 	return func(o *sqlite) {
+// 		o.name = name
+// 	}
+// }
 
 // WithPrefix 设置key前缀
 func WithPrefix(prefix string) option {
