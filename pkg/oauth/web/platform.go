@@ -55,6 +55,7 @@ type UserInfoRsp struct {
 
 type Platformer interface {
 	Authorize(ctx context.Context, state string) (string, error)
+	// Callback code: 授权码，注意：微信返回的是code，支付宝返回的是auth_code
 	Callback(ctx context.Context, code, state string) (*OauthTokenRsp, error)
 	GetUserInfo(ctx context.Context, token, openid string) (*UserInfoRsp, error)
 	GetPlatform() string
