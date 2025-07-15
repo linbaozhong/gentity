@@ -16,6 +16,7 @@ package alipay
 
 import (
 	"context"
+	"fmt"
 	"github.com/linbaozhong/alipay/v3"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"github.com/linbaozhong/gentity/pkg/oauth/web"
@@ -94,6 +95,8 @@ func (a *ali) Authorize(ctx context.Context, state string) (string, error) {
 
 // Callback alipay 用户授权回调，使用授权码换取 access_token
 func (a *ali) Callback(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {
+	fmt.Println(code, state)
+
 	_res, e := a.client().SystemOauthToken(ctx,
 		alipay.SystemOauthToken{
 			Code:      code,
