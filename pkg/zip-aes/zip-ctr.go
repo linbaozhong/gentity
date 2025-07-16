@@ -15,6 +15,7 @@
 package zip_aes
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -143,4 +144,101 @@ func CtrDecryptAndDecompress(inputPath, outputPath string, password []byte) erro
 
 	// log.Printf("CTR 模式解密解压完成: %s → %s\n", inputPath, outputPath)
 	return nil
+}
+
+// ////////////////////
+
+//export CtrCompressAndEncryptWasm
+func CtrCompressAndEncryptWasm(input []byte, password []byte) ([]byte, error) {
+	// 创建 AES 块
+	block, err := aes.NewCipher(password)
+	if err != nil {
+		return nil, err
+	}
+
+	// 生成 nonce
+	nonce := make([]byte, aes.BlockSize)
+	if _, err := rand.Read(nonce); err != nil {
+		return nil, err
+	}
+
+	// 使用 Pipe 连接压缩和加密
+	pr, pw := xzPipe()
+
+	// 压缩协程
+	go func() {
+		defer pw.Close()
+		xzWriter, err := xz.NewWriter(pw)
+		if err != nil {
+			pw.CloseWithError(err)
+			return
+		}
+		defer xzWriter.Close()
+		if _, err := xzWriter.Write(input); err != nil {
+			pw.CloseWithError(err)
+		}
+	}()
+
+	// 创建 CTR 加密器
+	stream := cipher.NewCTR(block, nonce)
+	// 创建加密流
+	var encryptedData []byte
+	encryptedStream := &cipher.StreamWriter{S: stream, W: &bytesBuffer{&encryptedData}}
+
+	// 将 nonce 写入输出
+	encryptedData = append(encryptedData, nonce...)
+
+	// 将压缩数据加密并写入输出
+	if _, err := io.Copy(encryptedStream, pr); err != nil {
+		return nil, err
+	}
+
+	return encryptedData, nil
+}
+
+//export CtrDecryptAndDecompressWasm
+func CtrDecryptAndDecompressWasm(input []byte, password []byte) ([]byte, error) {
+	// 创建 AES 块
+	block, err := aes.NewCipher(password)
+	if err != nil {
+		return nil, err
+	}
+
+	// 读取 nonce
+	nonce := input[:aes.BlockSize]
+	input = input[aes.BlockSize:]
+
+	// 创建 CTR 解密器
+	stream := cipher.NewCTR(block, nonce)
+	// 创建解密流
+	decryptedStream := &cipher.StreamReader{S: stream, R: bytes.NewReader(input)}
+
+	// 解压数据
+	xzReader, err := xz.NewReader(decryptedStream)
+	if err != nil {
+		return nil, err
+	}
+
+	var decryptedData []byte
+	decryptedBuffer := &bytesBuffer{&decryptedData}
+	if _, err := io.Copy(decryptedBuffer, xzReader); err != nil {
+		return nil, err
+	}
+
+	return decryptedData, nil
+}
+
+// xzPipe 创建一个用于 XZ 压缩的管道
+func xzPipe() (*io.PipeReader, *io.PipeWriter) {
+	return io.Pipe()
+}
+
+// bytesBuffer 实现 io.Writer 接口，用于将数据写入字节切片
+type bytesBuffer struct {
+	buf *[]byte
+}
+
+func (b *bytesBuffer) Write(p []byte) (n int, err error) {
+	*b.buf = append(*b.buf, p...)
+	return len(p), nil
 }
