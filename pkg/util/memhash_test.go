@@ -20,12 +20,12 @@ import (
 )
 
 func TestHashKey(t *testing.T) {
-	prefix := "test"
+	prefix := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
 	t.Log(MemHashString(prefix))
-	t.Log(MemHashString(prefix + "abc"))
-	t.Log(MemHashString(prefix + "123"))
-	t.Log(MemHashString(prefix + "eter"))
-	t.Log(MemHashString(prefix + "4579"))
+	t.Log(MemHashString(prefix + "13325343645"))
+	t.Log(MemHashString(prefix + "13325343645"))
+	t.Log(MemHashString(prefix + "13325343645"))
+	t.Log(MemHashString(prefix + "13325343645"))
 }
 
 func BenchmarkHash(b *testing.B) {
