@@ -37,6 +37,11 @@ func (s *String) Scan(src any) error {
 	return nil
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (s String) IsNil() bool {
+	return s == NilString
+}
+
 func (s String) String() string {
 	return string(s)
 }

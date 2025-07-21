@@ -53,6 +53,11 @@ func (t Time) Value() (driver.Value, error) {
 	return t.Time, nil
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (t Time) IsNil() bool {
+	return t.Time == NilTime
+}
+
 func (t Time) Now() Time {
 	return Time{time.Now()}
 }

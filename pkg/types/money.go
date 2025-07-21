@@ -56,6 +56,11 @@ func (m Money) Value() (driver.Value, error) {
 	return int64(m), nil
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (m Money) IsNil() bool {
+	return m == NilInt64
+}
+
 func (m Money) Int() int {
 	return int(m)
 }

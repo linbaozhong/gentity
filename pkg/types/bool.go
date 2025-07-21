@@ -53,6 +53,11 @@ func (b Bool) Value() (driver.Value, error) {
 	return b > 0, nil
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (b Bool) IsNil() bool {
+	return b == NilBool
+}
+
 func (b Bool) Bool() bool {
 	return b > 0
 }

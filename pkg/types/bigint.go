@@ -74,3 +74,8 @@ func (i *BigInt) Scan(src any) error {
 func (i BigInt) Value() (driver.Value, error) {
 	return int64(i), nil
 }
+
+// IsNil 是否空值，注意空值!=零值
+func (i BigInt) IsNil() bool {
+	return i == NilUint64
+}
