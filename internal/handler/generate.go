@@ -198,7 +198,7 @@ func getTypeNil(t Field) any {
 	case "types.Time":
 		return "types.Time{}"
 	case "bool", "types.Bool":
-		return "types.Bool(-1)"
+		return "types.NilBool"
 	case "Visitor": // 特定访问者类型
 		return "Visitor{}"
 	default:
