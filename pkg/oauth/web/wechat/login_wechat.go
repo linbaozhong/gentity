@@ -71,7 +71,7 @@ func New(opts ...option) web.Platformer {
 	return w
 }
 
-func (w *wx) Authorize(ctx context.Context, state string) (string, error) {
+func (w *wx) Authorize(ctx context.Context, state string, isMobile bool) (string, error) {
 	params := url.Values{}
 	params.Set("appid", w.appid)
 	params.Set("redirect_uri", w.redirectURI)
@@ -79,6 +79,9 @@ func (w *wx) Authorize(ctx context.Context, state string) (string, error) {
 	params.Set("scope", "snsapi_login")                // 授权范围
 	params.Set("state", web.Wechat.String()+":"+state) // 防CSRF令牌
 
+	if isMobile {
+		return fmt.Sprintf("https://open.weixin.qq.com/connect/oauth2/authorize?%s#wechat_redirect", params.Encode()), nil
+	}
 	return fmt.Sprintf("%s?%s#wechat_redirect", wechatAuthURL, params.Encode()), nil
 }
 
