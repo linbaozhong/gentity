@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/oauth/web"
-	"github.com/linbaozhong/gentity/pkg/util"
 	"io"
 	"net/http"
 	"net/url"
@@ -77,12 +76,9 @@ func (w *wx) Authorize(ctx context.Context, state string, isMobile bool) (string
 	params.Set("appid", w.appid)
 	params.Set("redirect_uri", w.redirectURI)
 	params.Set("response_type", "code")
-	params.Set("scope", util.IIF(isMobile, "snsapi_userinfo", "snsapi_login")) // 授权范围
-	params.Set("state", web.Wechat.String()+":"+state)                         // 防CSRF令牌
+	params.Set("scope", "snsapi_login")                // 授权范围
+	params.Set("state", web.Wechat.String()+":"+state) // 防CSRF令牌
 
-	if isMobile {
-		return fmt.Sprintf("https://open.weixin.qq.com/connect/oauth2/authorize?%s#wechat_redirect", params.Encode()), nil
-	}
 	return fmt.Sprintf("%s?%s#wechat_redirect", wechatAuthURL, params.Encode()), nil
 }
 
