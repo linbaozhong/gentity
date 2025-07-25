@@ -46,6 +46,11 @@ func (f32 Float32) IsNil() bool {
 	return f32 == NilFloat32
 }
 
+// IsNilZero 是否空值或零值
+func (f32 Float32) IsNilZero() bool {
+	return f32.IsNil() || f32 == 0
+}
+
 func (f32 Float32) Float32() float32 {
 	return float32(f32)
 }
@@ -96,6 +101,11 @@ func (f64 *Float64) Scan(src any) error {
 // IsNil 是否空值，注意空值!=零值
 func (f64 Float64) IsNil() bool {
 	return f64 == NilFloat64
+}
+
+// IsNilZero 是否空值或零值
+func (f64 Float64) IsNilZero() bool {
+	return f64.IsNil() || f64 == 0
 }
 
 func (f64 Float64) Float64() float64 {

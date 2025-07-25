@@ -79,3 +79,8 @@ func (i BigInt) Value() (driver.Value, error) {
 func (i BigInt) IsNil() bool {
 	return i == NilUint64
 }
+
+// IsNilZero 是否空值或零值
+func (i BigInt) IsNilZero() bool {
+	return i.IsNil() || i == 0
+}

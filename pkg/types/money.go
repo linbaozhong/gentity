@@ -61,6 +61,11 @@ func (m Money) IsNil() bool {
 	return m == NilInt64
 }
 
+// IsNilZero 是否空值或零值
+func (m Money) IsNilZero() bool {
+	return m.IsNil() || m == 0
+}
+
 func (m Money) Int() int {
 	return int(m)
 }

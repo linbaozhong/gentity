@@ -53,6 +53,11 @@ func (i8 Uint8) IsNil() bool {
 	return i8 == NilUint8
 }
 
+// IsNilZero 是否空值或零值
+func (i8 Uint8) IsNilZero() bool {
+	return i8.IsNil() || i8 == 0
+}
+
 func (i8 Uint8) String() string {
 	return strconv.FormatUint(uint64(i8), 10)
 }
@@ -95,6 +100,11 @@ func (i16 *Uint16) Scan(src any) error {
 // IsNil 是否空值，注意空值!=零值
 func (i16 Uint16) IsNil() bool {
 	return i16 == NilUint16
+}
+
+// IsNilZero 是否空值或零值
+func (i16 Uint16) IsNilZero() bool {
+	return i16.IsNil() || i16 == 0
 }
 
 func (i16 Uint16) Uint16() uint16 {
@@ -145,6 +155,11 @@ func (i32 Uint32) IsNil() bool {
 	return i32 == NilUint32
 }
 
+// IsNilZero 是否空值或零值
+func (i32 Uint32) IsNilZero() bool {
+	return i32.IsNil() || i32 == 0
+}
+
 func (i32 Uint32) Uint32() uint32 {
 	return uint32(i32)
 }
@@ -193,6 +208,11 @@ func (i64 Uint64) IsNil() bool {
 	return i64 == NilUint64
 }
 
+// IsNilZero 是否空值或零值
+func (i64 Uint64) IsNilZero() bool {
+	return i64.IsNil() || i64 == 0
+}
+
 func (i64 Uint64) Uint64() uint64 {
 	return uint64(i64)
 }
@@ -239,6 +259,11 @@ func (i *Uint) Scan(src any) error {
 // IsNil 是否空值，注意空值!=零值
 func (i Uint) IsNil() bool {
 	return i == NilUint
+}
+
+// IsNilZero 是否空值或零值
+func (i Uint) IsNilZero() bool {
+	return i.IsNil() || i == 0
 }
 
 func (i Uint) Uint() uint {

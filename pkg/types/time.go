@@ -58,6 +58,11 @@ func (t Time) IsNil() bool {
 	return t.Time == NilTime
 }
 
+// IsNilZero 是否空值或零值
+func (t Time) IsNilZero() bool {
+	return t.IsNil() || t.Time.IsZero()
+}
+
 func (t Time) Now() Time {
 	return Time{time.Now()}
 }

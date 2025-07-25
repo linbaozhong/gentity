@@ -53,6 +53,11 @@ func (i8 Int8) IsNil() bool {
 	return i8 == NilInt8
 }
 
+// IsNilZero 是否空值或零值
+func (i8 Int8) IsNilZero() bool {
+	return i8.IsNil() || i8 == 0
+}
+
 func (i8 Int8) String() string {
 	return strconv.FormatInt(int64(i8), 10)
 }
@@ -103,6 +108,11 @@ func (i16 Int16) Int16() int16 {
 // IsNil 是否空值，注意空值!=零值
 func (i16 Int16) IsNil() bool {
 	return i16 == NilInt16
+}
+
+// IsNilZero 是否空值或零值
+func (i16 Int16) IsNilZero() bool {
+	return i16.IsNil() || i16 == 0
 }
 
 func (i16 Int16) String() string {
@@ -158,6 +168,11 @@ func (i32 Int32) IsNil() bool {
 	return i32 == NilInt32
 }
 
+// IsNilZero 是否空值或零值
+func (i32 Int32) IsNilZero() bool {
+	return i32.IsNil() || i32 == 0
+}
+
 func (i32 Int32) String() string {
 	return strconv.FormatInt(int64(i32), 10)
 }
@@ -211,6 +226,11 @@ func (i64 Int64) IsNil() bool {
 	return i64 == NilInt64
 }
 
+// IsNilZero 是否空值或零值
+func (i64 Int64) IsNilZero() bool {
+	return i64.IsNil() || i64 == 0
+}
+
 func (i64 Int64) String() string {
 	return strconv.FormatInt(int64(i64), 10)
 }
@@ -262,6 +282,11 @@ func (i Int) Int() int {
 // IsNil 是否空值，注意空值!=零值
 func (i Int) IsNil() bool {
 	return i == NilInt
+}
+
+// IsNilZero 是否空值或零值
+func (i Int) IsNilZero() bool {
+	return i.IsNil() || i == 0
 }
 
 func (i Int) String() string {
