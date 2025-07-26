@@ -16,6 +16,7 @@ package web
 
 import (
 	"context"
+	"github.com/linbaozhong/gentity/pkg/types"
 	"strings"
 )
 
@@ -85,4 +86,21 @@ func SplitState(state string) (Platform, string) {
 		return "", state
 	}
 	return Platform(state[:pos]), state[pos+1:]
+}
+
+const Passbackchar = "__"
+
+type PagePayReq struct {
+	Bill      types.BigInt //交易ID
+	Sku       types.BigInt //商品ID
+	Sharer    types.BigInt //分享人ID
+	Buyer     types.BigInt //买家ID
+	Seller    types.BigInt //卖家ID
+	OpenID    string       //支付宝或微信用户openid
+	Name      string       //商品名称
+	Desc      string       //商品描述
+	Amount    types.Money  //交易金额
+	Currency  string       //货币名称
+	NotifyUrl string       //通知地址
+	ReturnUrl string       //返回地址
 }

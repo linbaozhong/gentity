@@ -88,8 +88,8 @@ func (m *Money) FromBytes(b []byte) {
 }
 
 // Yuan 金额分精确到元
-func (m Money) Yuan() float64 {
-	return float64(m) / 100
+func (m Money) Yuan() Float64 {
+	return Float64(m) / 100
 }
 
 // 金额分小写转中文大写金额
