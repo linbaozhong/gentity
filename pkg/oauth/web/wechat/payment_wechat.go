@@ -27,10 +27,10 @@ func (w *wx) h5(ctx context.Context, req *web.PagePayReq) (string, error) {
 	_trade.OutTradeNo = core.String(req.Bill.String())
 	_trade.Amount = &h5.Amount{
 		Total:    core.Int64(req.Amount.Int64()),
-		Currency: core.String(req.Currency),
+		Currency: core.String(req.Currency.String()),
 	}
-	_trade.Description = core.String(req.Desc)
-	_trade.NotifyUrl = core.String(req.NotifyUrl)
+	_trade.Description = core.String(req.Desc.String())
+	_trade.NotifyUrl = core.String(w.notifyURL)
 	_trade.TimeExpire = core.Time(time.Now().Add(time.Minute * 30))
 	_trade.Attach = core.String(
 		req.Sku.String() + web.Passbackchar +
@@ -55,10 +55,10 @@ func (w *wx) native(ctx context.Context, req *web.PagePayReq) (string, error) {
 	_trade.OutTradeNo = core.String(req.Bill.String())
 	_trade.Amount = &native.Amount{
 		Total:    core.Int64(req.Amount.Int64()),
-		Currency: core.String(req.Currency),
+		Currency: core.String(req.Currency.String()),
 	}
-	_trade.Description = core.String(req.Desc)
-	_trade.NotifyUrl = core.String(req.NotifyUrl)
+	_trade.Description = core.String(req.Desc.String())
+	_trade.NotifyUrl = core.String(w.notifyURL)
 	_trade.TimeExpire = core.Time(time.Now().Add(time.Minute * 30))
 	_trade.Attach = core.String(
 		req.Sku.String() + web.Passbackchar +

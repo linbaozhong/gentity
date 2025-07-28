@@ -92,16 +92,16 @@ func SplitState(state string) (Platform, string) {
 const Passbackchar = "__"
 
 type PagePayReq struct {
-	Bill      types.BigInt // 交易ID
-	Sku       types.BigInt // 商品ID
-	Sharer    types.BigInt // 分享人ID
-	Buyer     types.BigInt // 买家ID
-	Seller    types.BigInt // 卖家ID
-	OpenID    types.String // 支付宝或微信用户openid
-	Name      types.String // 商品名称
-	Desc      types.String // 商品描述
-	Amount    types.Money  // 交易金额
-	Currency  types.String // 货币名称
-	NotifyUrl types.String // 通知地址
-	ReturnUrl types.String // 返回地址
+	Bill     types.BigInt // 交易ID
+	Sku      types.BigInt // 商品ID
+	Sharer   types.BigInt // 分享人ID
+	Buyer    types.BigInt // 买家ID
+	Seller   types.BigInt // 卖家ID
+	OpenID   types.String // 支付宝或微信用户openid
+	Name     types.String // 商品名称
+	Desc     types.String // 商品描述
+	Amount   types.Money  // 交易金额
+	Currency types.String // 货币名称
+	// NotifyUrl types.String // 通知地址
+	// ReturnUrl types.String // 返回地址
 }

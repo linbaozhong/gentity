@@ -12,14 +12,14 @@ func (a *ali) PagePay(ctx context.Context, req *web.PagePayReq) (string, error) 
 	_trade.OutTradeNo = req.Bill.String()
 	_trade.TotalAmount = req.Amount.Yuan().String()
 	_trade.ProductCode = "FAST_INSTANT_TRADE_PAY"
-	_trade.Subject = req.Name
-	_trade.Body = req.Desc
-	_trade.NotifyURL = req.NotifyUrl
-	_trade.ReturnURL = req.ReturnUrl
+	_trade.Subject = req.Name.String()
+	_trade.Body = req.Desc.String()
+	_trade.NotifyURL = a.notifyUrl
+	_trade.ReturnURL = a.returnUrl
 	_trade.TimeoutExpress = "30m"
-	//_trade.QRPayMode = "4" //前置模式
-	//_trade.QRCodeWidth = "120"
-	_trade.QRPayMode = "2" //跳转模式
+	// _trade.QRPayMode = "4" //前置模式
+	// _trade.QRCodeWidth = "120"
+	_trade.QRPayMode = "2" // 跳转模式
 	_trade.PassbackParams = url.QueryEscape(
 		req.Sku.String() + web.Passbackchar +
 			req.Sharer.String() + web.Passbackchar +

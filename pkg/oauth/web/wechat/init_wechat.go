@@ -120,7 +120,7 @@ func New(opts ...option) web.Platformer {
 
 func (w *wx) client() *core.Client {
 	// 使用 utils 提供的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
-	mchPrivateKey, err := utils.LoadPrivateKey(w.mchPrivateKey)
+	mchPrivateKey, err := utils.LoadPrivateKeyWithPath(w.mchPrivateKey)
 	if err != nil {
 		log.Fatal("load merchant private key error")
 	}
