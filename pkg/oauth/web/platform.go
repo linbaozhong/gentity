@@ -97,11 +97,11 @@ type PagePayReq struct {
 	Sharer    types.BigInt // 分享人ID
 	Buyer     types.BigInt // 买家ID
 	Seller    types.BigInt // 卖家ID
-	OpenID    string       // 支付宝或微信用户openid
-	Name      string       // 商品名称
-	Desc      string       // 商品描述
+	OpenID    types.String // 支付宝或微信用户openid
+	Name      types.String // 商品名称
+	Desc      types.String // 商品描述
 	Amount    types.Money  // 交易金额
-	Currency  string       // 货币名称
-	NotifyUrl string       // 通知地址
-	ReturnUrl string       // 返回地址
+	Currency  types.String // 货币名称
+	NotifyUrl types.String // 通知地址
+	ReturnUrl types.String // 返回地址
 }
