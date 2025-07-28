@@ -68,8 +68,8 @@ func WithRedirectURI(redirectURI string) option {
 	}
 }
 
-// WithMchID 设置商户号
-func WithMchID(mchID string) option {
+// WithMchId 设置商户号
+func WithMchId(mchID string) option {
 	return func(w *wx) {
 		w.mchID = mchID
 	}
@@ -90,7 +90,7 @@ func WithMchPrivateKey(mchPrivateKey string) option {
 }
 
 // WithMchAPIv3Key 设置商户APIv3密钥
-func WithMchAPIv3Key(mchAPIv3Key string) option {
+func WithMchApiv3Key(mchAPIv3Key string) option {
 	return func(w *wx) {
 		w.mchAPIv3Key = mchAPIv3Key
 	}
@@ -103,8 +103,8 @@ func WithMchPaymentType(mchPaymentType PaymentType) option {
 	}
 }
 
-// WithNotifyURL 设置通知地址
-func WithNotifyURL(notifyURL string) option {
+// WithMchNotifyUrl 设置通知地址
+func WithMchNotifyUrl(notifyURL string) option {
 	return func(w *wx) {
 		w.notifyURL = notifyURL
 	}
