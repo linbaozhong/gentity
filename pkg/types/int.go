@@ -53,9 +53,14 @@ func (i8 Int8) IsNil() bool {
 	return i8 == NilInt8
 }
 
-// IsNilZero 是否空值或零值
-func (i8 Int8) IsNilZero() bool {
-	return i8.IsNil() || i8 == 0
+// IsZero 是否零值
+func (i8 Int8) IsZero() bool {
+	return i8 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i8 Int8) IsEmpty() bool {
+	return i8 == NilInt8 || i8 == 0
 }
 
 func (i8 Int8) String() string {
@@ -110,9 +115,14 @@ func (i16 Int16) IsNil() bool {
 	return i16 == NilInt16
 }
 
-// IsNilZero 是否空值或零值
-func (i16 Int16) IsNilZero() bool {
-	return i16.IsNil() || i16 == 0
+// IsZero 是否零值
+func (i16 Int16) IsZero() bool {
+	return i16 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i16 Int16) IsEmpty() bool {
+	return i16 == NilInt16 || i16 == 0
 }
 
 func (i16 Int16) String() string {
@@ -168,9 +178,14 @@ func (i32 Int32) IsNil() bool {
 	return i32 == NilInt32
 }
 
-// IsNilZero 是否空值或零值
-func (i32 Int32) IsNilZero() bool {
-	return i32.IsNil() || i32 == 0
+// IsZero 是否零值
+func (i32 Int32) IsZero() bool {
+	return i32 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i32 Int32) IsEmpty() bool {
+	return i32 == NilInt32 || i32 == 0
 }
 
 func (i32 Int32) String() string {
@@ -226,9 +241,14 @@ func (i64 Int64) IsNil() bool {
 	return i64 == NilInt64
 }
 
-// IsNilZero 是否空值或零值
-func (i64 Int64) IsNilZero() bool {
-	return i64.IsNil() || i64 == 0
+// IsZero 是否零值
+func (i64 Int64) IsZero() bool {
+	return i64 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i64 Int64) IsEmpty() bool {
+	return i64 == NilInt64 || i64 == 0
 }
 
 func (i64 Int64) String() string {
@@ -284,9 +304,14 @@ func (i Int) IsNil() bool {
 	return i == NilInt
 }
 
-// IsNilZero 是否空值或零值
-func (i Int) IsNilZero() bool {
-	return i.IsNil() || i == 0
+// IsZero 是否零值
+func (i Int) IsZero() bool {
+	return i == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i Int) IsEmpty() bool {
+	return i == NilInt || i == 0
 }
 
 func (i Int) String() string {

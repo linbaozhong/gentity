@@ -58,9 +58,14 @@ func (t Time) IsNil() bool {
 	return t.Time == NilTime
 }
 
-// IsNilZero 是否空值或零值
-func (t Time) IsNilZero() bool {
-	return t.IsNil() || t.Time.IsZero()
+// IsZero 是否零值
+func (t Time) IsZero() bool {
+	return t.Time.IsZero()
+}
+
+// IsEmpty 是否空值或零值
+func (t Time) IsEmpty() bool {
+	return t.Time == NilTime || t.Time.IsZero()
 }
 
 func (t Time) Now() Time {

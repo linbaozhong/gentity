@@ -42,9 +42,14 @@ func (s String) IsNil() bool {
 	return s == NilString
 }
 
-// IsNilZero 是否空值或零值
-func (s String) IsNilZero() bool {
-	return s.IsNil() || s == ""
+// IsZero 是否零值
+func (s String) IsZero() bool {
+	return s == ""
+}
+
+// IsEmpty 是否空值或零值
+func (s String) IsEmpty() bool {
+	return s == NilString || s == ""
 }
 
 func (s String) String() string {

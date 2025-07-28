@@ -58,9 +58,14 @@ func (b Bool) IsNil() bool {
 	return b == NilBool
 }
 
-// IsNilZero 是否空值或零值
-func (b Bool) IsNilZero() bool {
-	return b.IsNil() || b == 0
+// IsZero 是否零值
+func (b Bool) IsZero() bool {
+	return b == 0
+}
+
+// IsEmpty 是否空值或零值
+func (b Bool) IsEmpty() bool {
+	return b == NilBool || b == 0
 }
 
 func (b Bool) Bool() bool {

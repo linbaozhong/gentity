@@ -80,7 +80,12 @@ func (i BigInt) IsNil() bool {
 	return i == NilUint64
 }
 
-// IsNilZero 是否空值或零值
-func (i BigInt) IsNilZero() bool {
-	return i.IsNil() || i == 0
+// IsZero 是否零值
+func (i BigInt) IsZero() bool {
+	return i == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i BigInt) IsEmpty() bool {
+	return i == NilUint64 || i == 0
 }
