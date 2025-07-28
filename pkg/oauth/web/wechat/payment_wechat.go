@@ -24,6 +24,8 @@ func (w *wx) PagePay(ctx context.Context, req *web.PagePayReq) (string, error) {
 // h5 浏览器打开支付
 func (w *wx) h5(ctx context.Context, req *web.PagePayReq) (string, error) {
 	_trade := h5.PrepayRequest{}
+	_trade.Appid = core.String(w.appid)
+	_trade.Mchid = core.String(w.mchID)
 	_trade.OutTradeNo = core.String(req.Bill.String())
 	_trade.Amount = &h5.Amount{
 		Total:    core.Int64(req.Amount.Int64()),
@@ -52,6 +54,8 @@ func (w *wx) h5(ctx context.Context, req *web.PagePayReq) (string, error) {
 // native 扫码支付
 func (w *wx) native(ctx context.Context, req *web.PagePayReq) (string, error) {
 	_trade := native.PrepayRequest{}
+	_trade.Appid = core.String(w.appid)
+	_trade.Mchid = core.String(w.mchID)
 	_trade.OutTradeNo = core.String(req.Bill.String())
 	_trade.Amount = &native.Amount{
 		Total:    core.Int64(req.Amount.Int64()),
