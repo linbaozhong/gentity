@@ -122,14 +122,16 @@ func (w *wx) client() *core.Client {
 	// 使用 utils 提供的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
 	mchPrivateKey, err := utils.LoadPrivateKeyWithPath(w.mchPrivateKey)
 	if err != nil {
-		log.Fatal("load merchant private key error")
+		log.Fatal("load merchant private key error", err)
+		return nil
 	}
 	_opts := []core.ClientOption{
 		wxoption.WithWechatPayAutoAuthCipher(w.mchID, w.mchCertificateSerialNumber, mchPrivateKey, w.mchAPIv3Key),
 	}
 	_cli, err := core.NewClient(context.Background(), _opts...)
 	if err != nil {
-		log.Fatal("new wechat client error")
+		log.Fatal("new wechat client error", err)
+		return nil
 	}
 
 	return _cli
