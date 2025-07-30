@@ -27,9 +27,9 @@ type OauthTokenRsp struct {
 	RefreshToken string `json:"refresh_token"` // 微信
 	ReExpiresIn  int64  `json:"re_expires_in"`
 	AuthStart    string `json:"auth_start"`
-	OpenId       string `json:"openid"` // 微信openid
-	UnionId      string `json:"union_id"`
-	Scope        string `json:"scope"` // 微信
+	OpenId       string `json:"openid"`  // 微信openid
+	UnionId      string `json:"unionid"` // 微信unionid
+	Scope        string `json:"scope"`   // 微信
 }
 
 type UserInfoRsp struct {
