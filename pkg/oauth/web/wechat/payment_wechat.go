@@ -40,7 +40,7 @@ func (w *wx) h5(ctx context.Context, req *web.PagePayReq) (string, error) {
 			req.Sharer.String() + web.Passbackchar +
 			req.Buyer.String() + web.Passbackchar +
 			req.Seller.String())
-	
+
 	_cli := &h5.H5ApiService{Client: w.client()}
 	resp, result, err := _cli.Prepay(ctx, _trade)
 	if err != nil {
@@ -71,7 +71,7 @@ func (w *wx) native(ctx context.Context, req *web.PagePayReq) (string, error) {
 			req.Sharer.String() + web.Passbackchar +
 			req.Buyer.String() + web.Passbackchar +
 			req.Seller.String())
-	
+
 	_cli := &native.NativeApiService{Client: w.client()}
 	resp, result, err := _cli.Prepay(ctx, _trade)
 	if err != nil {
