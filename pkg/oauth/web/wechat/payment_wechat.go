@@ -26,6 +26,7 @@ func (w *wx) h5(ctx context.Context, req *web.PagePayReq) (string, error) {
 	_trade := h5.PrepayRequest{}
 	_trade.Appid = core.String(w.appid)
 	_trade.Mchid = core.String(w.mchID)
+	_trade.NotifyUrl = core.String(w.notifyURL)
 	_trade.OutTradeNo = core.String(req.Bill.String())
 	_trade.Amount = &h5.Amount{
 		Total:    core.Int64(req.Amount.Int64()),
@@ -39,7 +40,7 @@ func (w *wx) h5(ctx context.Context, req *web.PagePayReq) (string, error) {
 			req.Sharer.String() + web.Passbackchar +
 			req.Buyer.String() + web.Passbackchar +
 			req.Seller.String())
-
+	
 	_cli := &h5.H5ApiService{Client: w.client()}
 	resp, result, err := _cli.Prepay(ctx, _trade)
 	if err != nil {
@@ -56,6 +57,7 @@ func (w *wx) native(ctx context.Context, req *web.PagePayReq) (string, error) {
 	_trade := native.PrepayRequest{}
 	_trade.Appid = core.String(w.appid)
 	_trade.Mchid = core.String(w.mchID)
+	_trade.NotifyUrl = core.String(w.notifyURL)
 	_trade.OutTradeNo = core.String(req.Bill.String())
 	_trade.Amount = &native.Amount{
 		Total:    core.Int64(req.Amount.Int64()),
@@ -69,7 +71,7 @@ func (w *wx) native(ctx context.Context, req *web.PagePayReq) (string, error) {
 			req.Sharer.String() + web.Passbackchar +
 			req.Buyer.String() + web.Passbackchar +
 			req.Seller.String())
-
+	
 	_cli := &native.NativeApiService{Client: w.client()}
 	resp, result, err := _cli.Prepay(ctx, _trade)
 	if err != nil {
