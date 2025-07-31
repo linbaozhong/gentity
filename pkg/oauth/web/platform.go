@@ -60,7 +60,7 @@ type Platformer interface {
 	Callback(ctx context.Context, code, state string) (*OauthTokenRsp, error)
 	GetUserInfo(ctx context.Context, token, openid string) (*UserInfoRsp, error)
 	GetPlatform() string
-	PagePay(ctx context.Context, req *PagePayReq) (string, error)
+	PagePay(ctx context.Context, req *PagePayReq) (types.Smap, error)
 }
 
 // 第三方平台

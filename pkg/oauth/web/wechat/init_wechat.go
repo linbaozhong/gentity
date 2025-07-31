@@ -12,6 +12,7 @@ import (
 type PaymentType string
 
 const (
+	PaymentTypeJsapi  PaymentType = "jsapi"
 	PaymentTypeH5     PaymentType = "h5"
 	PaymentTypeNative PaymentType = "native"
 )
