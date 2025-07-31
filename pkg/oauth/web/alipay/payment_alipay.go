@@ -17,9 +17,9 @@ func (a *ali) PagePay(ctx context.Context, req *web.PagePayReq) (string, error) 
 	_trade.NotifyURL = a.notifyUrl
 	_trade.ReturnURL = a.returnUrl
 	_trade.TimeoutExpress = "30m"
-	_trade.QRPayMode = "4" // 前置模式
-	_trade.QRCodeWidth = "120"
-	// _trade.QRPayMode = "2" // 跳转模式
+	// _trade.QRPayMode = "4" // 前置模式
+	// _trade.QRCodeWidth = "120"
+	_trade.QRPayMode = "2" // 跳转模式
 	_trade.PassbackParams = url.QueryEscape(
 		req.Sku.String() + web.Passbackchar +
 			req.Sharer.String() + web.Passbackchar +

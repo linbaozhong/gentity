@@ -77,6 +77,17 @@ func (p Platform) String() string {
 	return string(p)
 }
 
+func (p Platform) Int() uint8 {
+	switch p {
+	case Wechat:
+		return 1
+	case Alipay:
+		return 2
+	default:
+		return 0
+	}
+}
+
 func (p Platform) CombinState(state string) string {
 	return p.String() + ":" + state
 }
