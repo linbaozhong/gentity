@@ -2,15 +2,21 @@ package wechat
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/oauth/web"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"github.com/wechatpay-apiv3/wechatpay-go/core"
+	"github.com/wechatpay-apiv3/wechatpay-go/core/auth/verifiers"
+	"github.com/wechatpay-apiv3/wechatpay-go/core/downloader"
+	"github.com/wechatpay-apiv3/wechatpay-go/core/notify"
+	"github.com/wechatpay-apiv3/wechatpay-go/services/payments"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/h5"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/jsapi"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/native"
+	"net/http"
 	"time"
 )
 
@@ -136,4 +142,31 @@ func (w *wx) jsapi(ctx context.Context, req *web.PagePayReq) (types.Smap, error)
 		Set("package", packageStr).
 		Set("signType", signType).
 		Set("paySign", sign.Signature), nil
+}
+
+// Notify 支付成功的异步通知
+func (w *wx) Notify(ctx context.Context, req *http.Request) (int, []byte) {
+	certificateVisitor := downloader.MgrInstance().GetCertificateVisitor(w.mchID)
+	_cli, e := notify.NewRSANotifyHandler(w.mchAPIv3Key, verifiers.NewSHA256WithRSAVerifier(certificateVisitor))
+	if e != nil {
+		return http.StatusInternalServerError, []byte("create notify handler failed")
+	}
+	// 解密通知数据
+	transaction := new(payments.Transaction)
+	notifyReq, err := _cli.ParseNotifyRequest(ctx, req, transaction)
+	// 如果验签未通过，或者解密失败
+	if err != nil {
+		return http.StatusBadRequest, []byte("parse notify request failed")
+	}
+	// todo：处理通知数据
+	// 打印通知数据
+	fmt.Printf("Notify Data: %+v\n", notifyReq)
+	fmt.Printf("Transaction Data: %+v\n", transaction)
+	// 返回成功响应
+	response := map[string]string{
+		"code":    "SUCCESS",
+		"message": "成功",
+	}
+	responseBytes, _ := json.Marshal(response)
+	return http.StatusOK, responseBytes
 }

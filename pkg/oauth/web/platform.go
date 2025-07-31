@@ -17,6 +17,7 @@ package web
 import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"net/http"
 	"strings"
 )
 
@@ -61,6 +62,7 @@ type Platformer interface {
 	GetUserInfo(ctx context.Context, token, openid string) (*UserInfoRsp, error)
 	GetPlatform() string
 	PagePay(ctx context.Context, req *PagePayReq) (types.Smap, error)
+	Notify(ctx context.Context, req *http.Request) (int, []byte)
 }
 
 // 第三方平台
