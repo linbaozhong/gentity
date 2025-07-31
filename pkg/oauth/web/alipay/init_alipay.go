@@ -16,6 +16,7 @@ type ali struct {
 
 var (
 	aliClient *alipay.Client
+	_         web.Platformer = &ali{}
 )
 
 type option func(a *ali)

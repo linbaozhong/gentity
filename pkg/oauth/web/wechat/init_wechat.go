@@ -2,7 +2,7 @@ package wechat
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/log"
+	"fmt"
 	"github.com/linbaozhong/gentity/pkg/oauth/web"
 	"github.com/wechatpay-apiv3/wechatpay-go/core"
 	wxoption "github.com/wechatpay-apiv3/wechatpay-go/core/option"
@@ -32,6 +32,12 @@ type wx struct {
 	notifyURL string // 通知地址
 
 }
+
+var (
+	wxClient *core.Client
+	_        web.Platformer = &wx{}
+)
+
 type option func(w *wx)
 
 // 微信 API 地址
@@ -120,20 +126,22 @@ func New(opts ...option) web.Platformer {
 }
 
 func (w *wx) client() *core.Client {
-	// 使用 utils 提供的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
-	mchPrivateKey, err := utils.LoadPrivateKeyWithPath(w.mchPrivateKey)
-	if err != nil {
-		log.Fatal("load merchant private key error", err)
-		return nil
+	if wxClient == nil {
+		var err error
+		// 使用 utils 提供的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
+		mchPrivateKey, err := utils.LoadPrivateKeyWithPath(w.mchPrivateKey)
+		if err != nil {
+			panic(fmt.Sprintf("load merchant private key error: %v", err))
+			return nil
+		}
+		_opts := []core.ClientOption{
+			wxoption.WithWechatPayAutoAuthCipher(w.mchID, w.mchCertificateSerialNumber, mchPrivateKey, w.mchAPIv3Key),
+		}
+		wxClient, err = core.NewClient(context.Background(), _opts...)
+		if err != nil {
+			panic(fmt.Sprintf("new wechat client error: %v", err))
+			return nil
+		}
 	}
-	_opts := []core.ClientOption{
-		wxoption.WithWechatPayAutoAuthCipher(w.mchID, w.mchCertificateSerialNumber, mchPrivateKey, w.mchAPIv3Key),
-	}
-	_cli, err := core.NewClient(context.Background(), _opts...)
-	if err != nil {
-		log.Fatal("new wechat client error", err)
-		return nil
-	}
-
-	return _cli
+	return wxClient
 }

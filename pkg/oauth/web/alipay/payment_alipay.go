@@ -5,10 +5,11 @@ import (
 	"github.com/linbaozhong/alipay/v3"
 	"github.com/linbaozhong/gentity/pkg/oauth/web"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"net/http"
 	"net/url"
 )
 
-func (a *ali) PagePay(ctx context.Context, req *web.PagePayReq) (map[string]interface{}, error) {
+func (a *ali) PagePay(ctx context.Context, req *web.PagePayReq) (types.Smap, error) {
 	_trade := alipay.TradePagePay{}
 	_trade.OutTradeNo = req.Bill.String()
 	_trade.TotalAmount = req.Amount.Yuan().String()
@@ -31,4 +32,8 @@ func (a *ali) PagePay(ctx context.Context, req *web.PagePayReq) (map[string]inte
 		return nil, err
 	}
 	return types.NewSmap().Set("url", _url.String()), nil
+}
+
+func (a *ali) Notify(ctx context.Context, req *http.Request) (int, []byte) {
+	return 0, nil
 }
