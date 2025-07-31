@@ -129,12 +129,11 @@ func (w *wx) jsapi(ctx context.Context, req *web.PagePayReq) (types.Smap, error)
 		return nil, err
 	}
 
-	return map[string]interface{}{
-		"appId":     w.appid,
-		"timeStamp": timeStamp,
-		"nonceStr":  nonceStr,
-		"package":   packageStr,
-		"signType":  signType,
-		"paySign":   sign.Signature,
-	}, nil
+	return types.NewSmap(6).
+		Set("appId", w.appid).
+		Set("timeStamp", timeStamp).
+		Set("nonceStr", nonceStr).
+		Set("package", packageStr).
+		Set("signType", signType).
+		Set("paySign", sign.Signature), nil
 }
