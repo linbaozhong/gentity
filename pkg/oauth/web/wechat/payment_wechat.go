@@ -2,7 +2,6 @@ package wechat
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/oauth/web"
@@ -145,28 +144,50 @@ func (w *wx) jsapi(ctx context.Context, req *web.PagePayReq) (types.Smap, error)
 }
 
 // Notify 支付成功的异步通知
-func (w *wx) Notify(ctx context.Context, req *http.Request) (int, []byte) {
+func (w *wx) Notify(ctx context.Context, req *http.Request) (*web.NotifyResp, error) {
+	_resp := new(web.NotifyResp)
 	certificateVisitor := downloader.MgrInstance().GetCertificateVisitor(w.mchID)
 	_cli, e := notify.NewRSANotifyHandler(w.mchAPIv3Key, verifiers.NewSHA256WithRSAVerifier(certificateVisitor))
 	if e != nil {
-		return http.StatusInternalServerError, []byte("create notify handler failed")
+		_resp.Code = http.StatusInternalServerError
+		return _resp, fmt.Errorf("create notify handler failed: %w", e)
 	}
 	// 解密通知数据
 	transaction := new(payments.Transaction)
 	notifyReq, err := _cli.ParseNotifyRequest(ctx, req, transaction)
 	// 如果验签未通过，或者解密失败
 	if err != nil {
-		return http.StatusBadRequest, []byte("parse notify request failed")
+		_resp.Code = http.StatusBadRequest
+		return _resp, fmt.Errorf("parse notify request failed: %w", err)
 	}
-	// todo：处理通知数据
-	// 打印通知数据
-	fmt.Printf("Notify Data: %+v\n", notifyReq)
-	fmt.Printf("Transaction Data: %+v\n", transaction)
-	// 返回成功响应
-	response := map[string]string{
-		"code":    "SUCCESS",
-		"message": "成功",
+	if notifyReq.EventType != "TRANSACTION.SUCCESS" {
+		_resp.Code = http.StatusBadRequest
+		return _resp, fmt.Errorf("The event type is not TRANSACTION.SUCCESS: %s", notifyReq.EventType)
 	}
-	responseBytes, _ := json.Marshal(response)
-	return http.StatusOK, responseBytes
+	// 处理通知数据
+	_resp.Code = http.StatusOK
+	_resp.Id = notifyReq.ID
+	_resp.CreateTime = notifyReq.CreateTime.Format(time.RFC3339)
+	_resp.EventType = notifyReq.EventType
+	_resp.Summary = notifyReq.Summary
+	_resp.Transaction = web.Transaction{
+		Amount: web.Amount{
+			Currency:      *transaction.Amount.Currency,
+			PayerCurrency: *transaction.Amount.PayerCurrency,
+			PayerTotal:    *transaction.Amount.PayerTotal,
+			Total:         *transaction.Amount.Total,
+		},
+		Appid:          *transaction.Appid,
+		Attach:         *transaction.Attach,
+		BankType:       *transaction.BankType,
+		Mchid:          *transaction.Mchid,
+		OutTradeNo:     *transaction.OutTradeNo,
+		Payer:          web.Payer{Openid: *transaction.Payer.Openid},
+		SuccessTime:    *transaction.SuccessTime,
+		TradeState:     *transaction.TradeState,
+		TradeStateDesc: *transaction.TradeStateDesc,
+		TradeType:      *transaction.TradeType,
+		TransactionId:  *transaction.TransactionId,
+	}
+	return _resp, nil
 }

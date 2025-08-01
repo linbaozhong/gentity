@@ -21,40 +21,6 @@ import (
 	"strings"
 )
 
-type OauthTokenRsp struct {
-	UserId       string `json:"user_id"`
-	AccessToken  string `json:"access_token"`  // 微信
-	ExpiresIn    int64  `json:"expires_in"`    // 微信
-	RefreshToken string `json:"refresh_token"` // 微信
-	ReExpiresIn  int64  `json:"re_expires_in"`
-	AuthStart    string `json:"auth_start"`
-	OpenId       string `json:"openid"`  // 微信openid
-	UnionId      string `json:"unionid"` // 微信unionid
-	Scope        string `json:"scope"`   // 微信
-}
-
-type UserInfoRsp struct {
-	AuthNo             string `json:"auth_no"`
-	UserId             string `json:"user_id"`
-	OpenId             string `json:"openid"`     // 微信
-	UnionId            string `json:"unionid"`    // 微信
-	Avatar             string `json:"headimgurl"` // 微信
-	Province           string `json:"province"`   // 微信
-	City               string `json:"city"`       // 微信
-	Country            string `json:"country"`    // 微信
-	NickName           string `json:"nickname"`   // 微信
-	IsStudentCertified string `json:"is_student_certified"`
-	UserType           string `json:"user_type"`
-	UserStatus         string `json:"user_status"`
-	IsCertified        string `json:"is_certified"`
-	Sex                int8   `json:"sex"`    // 微信
-	Gender             string `json:"gender"` // 支付宝
-	Username           string `json:"user_name"`
-	CertNo             string `json:"cert_no"`
-	CertType           string `json:"cert_type"`
-	Mobile             string `json:"mobile"`
-}
-
 type Platformer interface {
 	Authorize(ctx context.Context, state string, isMobile bool) (string, error)
 	// Callback code: 授权码，注意：微信返回的是code，支付宝返回的是auth_code
@@ -62,7 +28,7 @@ type Platformer interface {
 	GetUserInfo(ctx context.Context, token, openid string) (*UserInfoRsp, error)
 	GetPlatform() string
 	PagePay(ctx context.Context, req *PagePayReq) (types.Smap, error)
-	Notify(ctx context.Context, req *http.Request) (int, []byte)
+	Notify(ctx context.Context, req *http.Request) (*NotifyResp, error)
 }
 
 // 第三方平台
@@ -103,18 +69,3 @@ func SplitState(state string) (Platform, string) {
 }
 
 const Passbackchar = "__"
-
-type PagePayReq struct {
-	Bill     types.BigInt // 交易ID
-	Sku      types.BigInt // 商品ID
-	Sharer   types.BigInt // 分享人ID
-	Buyer    types.BigInt // 买家ID
-	Seller   types.BigInt // 卖家ID
-	OpenID   types.String // 支付宝或微信用户openid
-	Name     types.String // 商品名称
-	Desc     types.String // 商品描述
-	Amount   types.Money  // 交易金额
-	Currency types.String // 货币名称
-	// NotifyUrl types.String // 通知地址
-	// ReturnUrl types.String // 返回地址
-}
