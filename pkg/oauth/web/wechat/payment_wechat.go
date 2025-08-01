@@ -144,33 +144,32 @@ func (w *wx) jsapi(ctx context.Context, req *web.PagePayReq) (types.Smap, error)
 }
 
 // Notify 支付成功的异步通知
-func (w *wx) Notify(ctx context.Context, req *http.Request) (*web.NotifyResp, error) {
-	_resp := new(web.NotifyResp)
+func (w *wx) Notify(ctx context.Context, req *http.Request, resp *web.NotifyResp) error {
 	certificateVisitor := downloader.MgrInstance().GetCertificateVisitor(w.mchID)
 	_cli, e := notify.NewRSANotifyHandler(w.mchAPIv3Key, verifiers.NewSHA256WithRSAVerifier(certificateVisitor))
 	if e != nil {
-		_resp.Code = http.StatusInternalServerError
-		return _resp, fmt.Errorf("create notify handler failed: %w", e)
+		resp.Code = http.StatusInternalServerError
+		return fmt.Errorf("create notify handler failed: %w", e)
 	}
 	// 解密通知数据
 	transaction := new(payments.Transaction)
 	notifyReq, err := _cli.ParseNotifyRequest(ctx, req, transaction)
 	// 如果验签未通过，或者解密失败
 	if err != nil {
-		_resp.Code = http.StatusBadRequest
-		return _resp, fmt.Errorf("parse notify request failed: %w", err)
+		resp.Code = http.StatusBadRequest
+		return fmt.Errorf("parse notify request failed: %w", err)
 	}
 	if notifyReq.EventType != "TRANSACTION.SUCCESS" {
-		_resp.Code = http.StatusBadRequest
-		return _resp, fmt.Errorf("The event type is not TRANSACTION.SUCCESS: %s", notifyReq.EventType)
+		resp.Code = http.StatusBadRequest
+		return fmt.Errorf("The event type is not TRANSACTION.SUCCESS: %s", notifyReq.EventType)
 	}
 	// 处理通知数据
-	_resp.Code = http.StatusOK
-	_resp.Id = notifyReq.ID
-	_resp.CreateTime = notifyReq.CreateTime.Format(time.RFC3339)
-	_resp.EventType = notifyReq.EventType
-	_resp.Summary = notifyReq.Summary
-	_resp.Transaction = web.Transaction{
+	resp.Code = http.StatusOK
+	resp.Id = notifyReq.ID
+	resp.CreateTime = notifyReq.CreateTime.Format(time.RFC3339)
+	resp.EventType = notifyReq.EventType
+	resp.Summary = notifyReq.Summary
+	resp.Transaction = web.Transaction{
 		Amount: web.Amount{
 			Currency:      *transaction.Amount.Currency,
 			PayerCurrency: *transaction.Amount.PayerCurrency,
@@ -189,5 +188,5 @@ func (w *wx) Notify(ctx context.Context, req *http.Request) (*web.NotifyResp, er
 		TradeType:      *transaction.TradeType,
 		TransactionId:  *transaction.TransactionId,
 	}
-	return _resp, nil
+	return nil
 }

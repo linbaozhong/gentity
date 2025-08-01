@@ -34,6 +34,6 @@ func (a *ali) PagePay(ctx context.Context, req *web.PagePayReq) (types.Smap, err
 	return types.NewSmap().Set("url", _url.String()), nil
 }
 
-func (a *ali) Notify(ctx context.Context, req *http.Request) (*web.NotifyResp, error) {
-	return nil, nil
+func (a *ali) Notify(ctx context.Context, req *http.Request, resp *web.NotifyResp) error {
+	return nil
 }
