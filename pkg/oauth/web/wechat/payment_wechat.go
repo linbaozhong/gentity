@@ -15,6 +15,7 @@ import (
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/h5"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/jsapi"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/native"
+	"io"
 	"net/http"
 	"time"
 )
@@ -188,5 +189,7 @@ func (w *wx) Notify(ctx context.Context, req *http.Request, resp *web.NotifyResp
 		TradeType:      *transaction.TradeType,
 		TransactionId:  *transaction.TransactionId,
 	}
+	_body, _ := io.ReadAll(req.Body)
+	resp.Message = string(_body)
 	return nil
 }

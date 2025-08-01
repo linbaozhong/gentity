@@ -72,6 +72,7 @@ type NotifyResp struct {
 	EventType   string      `json:"event_type"`            // 支付成功通知的类型为TRANSACTION.SUCCESS
 	Summary     string      `json:"summary,omitempty"`     // 内容摘要备注
 	Transaction Transaction `json:"transaction,omitempty"` // 业务数据
+	Message     string      `json:"message"`               // 报文
 }
 
 // Transaction 业务数据
@@ -82,7 +83,7 @@ type Transaction struct {
 	BankType       string `json:"bank_type,omitempty"`
 	Mchid          string `json:"mchid,omitempty"`
 	OutTradeNo     string `json:"out_trade_no,omitempty"`
-	Payer          Payer  `json:"payer,omitempty"`
+	Payer          Payer  `json:"payer,omitempty"` // 支付方
 	SuccessTime    string `json:"success_time,omitempty"`
 	TradeState     string `json:"trade_state,omitempty"`
 	TradeStateDesc string `json:"trade_state_desc,omitempty"`

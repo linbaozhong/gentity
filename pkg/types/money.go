@@ -92,6 +92,11 @@ func (m *Money) FromBytes(b []byte) {
 	*m = Money(_m)
 }
 
+func (m *Money) FromString(str string) {
+	_m, _ := strconv.ParseInt(str, 10, 64)
+	*m = Money(_m)
+}
+
 // Yuan 金额分精确到元
 func (m Money) Yuan() Float64 {
 	return Float64(m) / 100

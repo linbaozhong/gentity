@@ -60,6 +60,10 @@ func (s String) Bytes() []byte {
 	return []byte(s)
 }
 
+func (s *String) FromString(str string) {
+	*s = String(str)
+}
+
 func (s String) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(string(s))), nil
 }
