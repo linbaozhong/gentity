@@ -60,6 +60,17 @@ func (p Platform) CombinState(state string) string {
 	return p.String() + ":" + state
 }
 
+func ToPlatform(i int) Platform {
+	switch i {
+	case 1:
+		return Wechat
+	case 2:
+		return Alipay
+	default:
+		return Wechat
+	}
+}
+
 func SplitState(state string) (Platform, string) {
 	pos := strings.Index(state, ":")
 	if pos == -1 {
