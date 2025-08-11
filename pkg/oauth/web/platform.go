@@ -60,7 +60,7 @@ func (p Platform) CombinState(state string) string {
 	return p.String() + ":" + state
 }
 
-func ToPlatform(i int) Platform {
+func ToPlatform(i uint8) Platform {
 	switch i {
 	case 1:
 		return Wechat
