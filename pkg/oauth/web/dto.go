@@ -14,7 +14,10 @@
 
 package web
 
-import "github.com/linbaozhong/gentity/pkg/types"
+import (
+	"github.com/linbaozhong/gentity/pkg/types"
+	"time"
+)
 
 type OauthTokenRsp struct {
 	UserId       string `json:"user_id"`
@@ -102,4 +105,28 @@ type Amount struct {
 // Payer 支付方
 type Payer struct {
 	Openid string `json:"openid,omitempty"`
+}
+
+type RefundReq struct {
+	TransactionId string      `json:"transaction_id,omitempty"` // 微信支付订单号
+	OutTradeNo    string      `json:"out_trade_no,omitempty"`   // 商户下单时传入的商户系统内部订单号。transaction_id和out_trade_no必须二选一进行传参
+	OutRefundNo   string      `json:"out_refund_no,omitempty"`  // 商户系统内部的退款单号，商户系统内部唯一，只能是数字、大小写字母_-|*@ ，同一退款单号多次请求只退一笔。
+	Reason        string      `json:"reason,omitempty"`         // 退款原因
+	Amount        types.Money `json:"amount,omitempty"`         // 金额
+	NotifyUrl     string      `json:"notify_url,omitempty"`     // 退款结果通知地址
+}
+
+type RefundResp struct {
+	RefundId            string      `json:"refund_id,omitempty"`             // 退款单号
+	OutRefundNo         string      `json:"out_refund_no,omitempty"`         // 商户系统内部的退款单号，商户系统内部唯一，只能是数字、大小写字母_-|*@ ，同一退款单号多次请求只退一笔。
+	TransactionId       string      `json:"transaction_id,omitempty"`        // 微信支付订单号
+	OutTradeNo          string      `json:"out_trade_no,omitempty"`          // 商户下单时传入的商户系统内部订单号。transaction_id和out_trade_no必须二选一进行传参
+	Channel             string      `json:"channel,omitempty"`               // 退款渠道
+	UserReceivedAccount string      `json:"user_received_account,omitempty"` // 用户接收退款金额的账户
+	SuccessTime         time.Time   `json:"success_time,omitempty"`          // 退款成功时间
+	CreateTime          time.Time   `json:"create_time,omitempty"`           // 退款创建时间
+	Status              string      `json:"status,omitempty"`                // 退款状态
+	Amount              types.Money `json:"amount,omitempty"`                // 金额
+	FundsAccount        string      `json:"funds_account,omitempty"`         // 资金账户
+	Message             string      `json:"message"`                         // 报文
 }

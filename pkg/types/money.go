@@ -30,9 +30,6 @@ func (m *Money) UnmarshalJSON(b []byte) error {
 
 func (m *Money) Scan(src any) error {
 	switch v := src.(type) {
-	case nil:
-		*m = 0
-		return nil
 	case int64:
 		*m = Money(v)
 		return nil
@@ -47,6 +44,9 @@ func (m *Money) Scan(src any) error {
 		return nil
 	case int8:
 		*m = Money(v)
+		return nil
+	case nil:
+		*m = 0
 		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for Money: %T", src)

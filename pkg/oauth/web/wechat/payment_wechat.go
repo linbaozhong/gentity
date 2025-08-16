@@ -15,6 +15,7 @@ import (
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/h5"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/jsapi"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/native"
+	"github.com/wechatpay-apiv3/wechatpay-go/services/refunddomestic"
 	"io"
 	"net/http"
 	"time"
@@ -190,6 +191,40 @@ func (w *wx) Notify(ctx context.Context, req *http.Request, resp *web.NotifyResp
 		TransactionId:  *transaction.TransactionId,
 	}
 	_body, _ := io.ReadAll(req.Body)
+	resp.Message = string(_body)
+	return nil
+}
+
+func (w *wx) Refund(ctx context.Context, req *web.RefundReq, resp *web.RefundResp) error {
+	_cli := refunddomestic.RefundsApiService{Client: w.client()}
+	rsp, result, e := _cli.Create(ctx, refunddomestic.CreateRequest{
+		OutTradeNo:  core.String(req.OutTradeNo),
+		OutRefundNo: core.String(req.OutRefundNo),
+		Reason:      core.String(req.Reason),
+		Amount: &refunddomestic.AmountReq{
+			Refund: core.Int64(req.Amount.Int64()),
+			Total:  core.Int64(req.Amount.Int64()),
+		},
+		NotifyUrl: core.String(req.NotifyUrl),
+	})
+	if e != nil {
+		return e
+	}
+	if result.Response.StatusCode != 200 {
+		return errors.New(result.Response.Status)
+	}
+	resp.RefundId = *rsp.RefundId
+	resp.OutRefundNo = *rsp.OutRefundNo
+	resp.TransactionId = *rsp.TransactionId
+	resp.OutTradeNo = *rsp.OutTradeNo
+	resp.Channel = string(*rsp.Channel)
+	resp.UserReceivedAccount = *rsp.UserReceivedAccount
+	resp.SuccessTime = *rsp.SuccessTime
+	resp.CreateTime = *rsp.CreateTime
+	resp.Status = string(*rsp.Status)
+	resp.Amount = types.Money(*rsp.Amount.Refund)
+	resp.FundsAccount = string(*rsp.FundsAccount)
+	_body, _ := io.ReadAll(result.Response.Body)
 	resp.Message = string(_body)
 	return nil
 }
