@@ -17,6 +17,7 @@ package no
 import (
 	"errors"
 	"github.com/bwmarrin/snowflake"
+	"github.com/linbaozhong/gentity/pkg/types"
 	"golang.org/x/sync/singleflight"
 	"strconv"
 )
@@ -54,7 +55,7 @@ func GetId(node uint) (snowflake.ID, error) {
 }
 
 // GetMustId 获取Id,node 为节点号,取值范围为[0,1023]
-func GetMustId(node uint) snowflake.ID {
+func GetMustId(node uint) types.BigInt {
 	id, _ := GetId(node)
-	return id
+	return types.BigInt(id)
 }
