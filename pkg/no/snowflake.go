@@ -52,3 +52,9 @@ func GetId(node uint) (snowflake.ID, error) {
 	}
 	return getGenerateNode(int64(node)).Generate(), nil
 }
+
+// GetMustId 获取Id,node 为节点号,取值范围为[0,1023]
+func GetMustId(node uint) snowflake.ID {
+	id, _ := GetId(node)
+	return id
+}
