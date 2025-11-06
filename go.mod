@@ -18,6 +18,7 @@ require (
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/redis/go-redis/v9 v9.11.0
 	github.com/sekrat/aescrypter v1.0.0
+	github.com/silenceper/wechat/v2 v2.1.10
 	github.com/spf13/cobra v1.9.1
 	github.com/tidwall/match v1.1.1
 	github.com/tidwall/pretty v1.2.1
@@ -43,6 +44,7 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
+	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/golang/glog v1.2.4 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/gomarkdown/markdown v0.0.0-20240328165702-4d01890c35c0 // indirect
@@ -74,6 +76,7 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/tdewolff/minify/v2 v2.20.19 // indirect
 	github.com/tdewolff/parse/v2 v2.7.12 // indirect
+	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/ulikunitz/lz v0.4.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect

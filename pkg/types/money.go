@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Money 以分为单位的金额类型，前端显示为元
 type Money int64
 
 func (m Money) MarshalJSON() ([]byte, error) {
