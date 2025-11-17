@@ -199,7 +199,7 @@ func (o *orm) SetExpr(fns ...dialect.ExprSetter) Builder {
 	// tmpExprCols = append(tmpExprCols, o.exprCols...)
 	for _, fn := range fns {
 		ex, val := fn()
-		tmpExprCols = append(o.exprCols, expr{colName: ex, arg: val})
+		tmpExprCols = append(tmpExprCols, expr{colName: ex, arg: val})
 	}
 	o.exprCols = tmpExprCols
 	return o
