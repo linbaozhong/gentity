@@ -298,15 +298,12 @@ func (f *Field) Lte(val any) Condition {
 
 func checkSlice(vals ...any) error {
 	for _, val := range vals {
-		// // 使用反射判断是否为切片类型
-		// if reflect.TypeOf(val).Kind() == reflect.Slice {
-		// 	return errors.New("params cannot be slices")
-		// }
 		switch val.(type) {
 		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string, bool, time.Time:
 			continue
 		case types.Int, types.Int8, types.Int16, types.Int32, types.Int64, types.Uint, types.Uint8, types.Uint16,
-			types.Uint32, types.Uint64, types.Float32, types.Float64, types.String, types.Bool, types.Time:
+			types.Uint32, types.Uint64, types.Float32, types.Float64, types.String, types.Bool, types.Time,
+			types.BigInt, types.Money:
 			continue
 		default:
 			return errors.New("Parameter type error")
@@ -332,6 +329,7 @@ func (f *Field) In(vals ...any) Condition {
 		sb.WriteString(" In (")
 		sb.WriteString(strings.Repeat(Placeholder+",", l)[:(len(Placeholder)+1)*l-1])
 		sb.WriteString(")")
+
 		return sb.String(), vals
 	}
 }
