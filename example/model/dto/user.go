@@ -13,7 +13,7 @@ type UserRegisterReq struct {
 	Email    string            `json:"email" url:"email" form:"email" valid:"email~Email格式错误,required"`
 	Content  types.Float64     `valid:"runelength(50|100),required"`
 	Age      int8              `valid:"range(18|60),required"`
-	AuthorIP int64             `valid:"ipv4"`
+	AuthorIP int64             `valid:"ipv4,min(1)"`
 	Date     time.Time         `valid:"required"`
 	Get      *UserRegisterResp `valid:"required" json:"get"`
 	Amount   types.Money       `valid:"required"`

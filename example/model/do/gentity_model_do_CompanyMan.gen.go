@@ -31,49 +31,60 @@ func NewCompanyMan() *CompanyMan {
 
 // MarshalJSON
 func (p *CompanyMan) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf   = bytes.NewBuffer((make([]byte, 0, 13*50)))
+		_comma bool
+	)
 	_buf.WriteByte('{')
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
 	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		writeField("id", types.Marshal(p.Id))
 	}
 	if p.AccountId != 0 {
-		_buf.WriteString(`"account_id":` + types.Marshal(p.AccountId) + `,`)
+		writeField("account_id", types.Marshal(p.AccountId))
 	}
 	if p.Company != 0 {
-		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
+		writeField("company", types.Marshal(p.Company))
 	}
 	if p.RealName != "" {
-		_buf.WriteString(`"real_name":` + types.Marshal(p.RealName) + `,`)
+		writeField("real_name", types.Marshal(p.RealName))
 	}
 	if p.Email != "" {
-		_buf.WriteString(`"email":` + types.Marshal(p.Email) + `,`)
+		writeField("email", types.Marshal(p.Email))
 	}
 	if p.Roles != "" {
-		_buf.WriteString(`"roles":` + types.Marshal(p.Roles) + `,`)
+		writeField("roles", types.Marshal(p.Roles))
 	}
 	if p.Gender != "" {
-		_buf.WriteString(`"gender":` + types.Marshal(p.Gender) + `,`)
+		writeField("gender", types.Marshal(p.Gender))
 	}
 	if p.Genre != 0 {
-		_buf.WriteString(`"genre":` + types.Marshal(p.Genre) + `,`)
+		writeField("genre", types.Marshal(p.Genre))
 	}
 	if p.IsActivate != 0 {
-		_buf.WriteString(`"is_activate":` + types.Marshal(p.IsActivate) + `,`)
+		writeField("is_activate", types.Marshal(p.IsActivate))
 	}
 	if !p.LoginTime.IsZero() {
-		_buf.WriteString(`"login_time":` + types.Marshal(p.LoginTime) + `,`)
+		writeField("login_time", types.Marshal(p.LoginTime))
 	}
 	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+		writeField("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+		writeField("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
-	}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
+		writeField("utime", types.Marshal(p.Utime))
 	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
@@ -156,6 +167,27 @@ func (p *CompanyMan) TableName() string {
 	return CompanyManTableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var companymanFieldToPtrFunc = map[dialect.Field]func(*CompanyMan) any{
+	tblcompanyman.Id:         func(p *CompanyMan) any { return &p.Id },
+	tblcompanyman.AccountId:  func(p *CompanyMan) any { return &p.AccountId },
+	tblcompanyman.Company:    func(p *CompanyMan) any { return &p.Company },
+	tblcompanyman.RealName:   func(p *CompanyMan) any { return &p.RealName },
+	tblcompanyman.Email:      func(p *CompanyMan) any { return &p.Email },
+	tblcompanyman.Roles:      func(p *CompanyMan) any { return &p.Roles },
+	tblcompanyman.Gender:     func(p *CompanyMan) any { return &p.Gender },
+	tblcompanyman.Genre:      func(p *CompanyMan) any { return &p.Genre },
+	tblcompanyman.IsActivate: func(p *CompanyMan) any { return &p.IsActivate },
+	tblcompanyman.LoginTime:  func(p *CompanyMan) any { return &p.LoginTime },
+	tblcompanyman.State:      func(p *CompanyMan) any { return &p.State },
+	tblcompanyman.Ctime:      func(p *CompanyMan) any { return &p.Ctime },
+	tblcompanyman.Utime:      func(p *CompanyMan) any { return &p.Utime },
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *CompanyMan) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompanyman.ReadableFields
@@ -163,33 +195,8 @@ func (p *CompanyMan) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		switch col {
-		case tblcompanyman.Id:
-			_vals = append(_vals, &p.Id)
-		case tblcompanyman.AccountId:
-			_vals = append(_vals, &p.AccountId)
-		case tblcompanyman.Company:
-			_vals = append(_vals, &p.Company)
-		case tblcompanyman.RealName:
-			_vals = append(_vals, &p.RealName)
-		case tblcompanyman.Email:
-			_vals = append(_vals, &p.Email)
-		case tblcompanyman.Roles:
-			_vals = append(_vals, &p.Roles)
-		case tblcompanyman.Gender:
-			_vals = append(_vals, &p.Gender)
-		case tblcompanyman.Genre:
-			_vals = append(_vals, &p.Genre)
-		case tblcompanyman.IsActivate:
-			_vals = append(_vals, &p.IsActivate)
-		case tblcompanyman.LoginTime:
-			_vals = append(_vals, &p.LoginTime)
-		case tblcompanyman.State:
-			_vals = append(_vals, &p.State)
-		case tblcompanyman.Ctime:
-			_vals = append(_vals, &p.Ctime)
-		case tblcompanyman.Utime:
-			_vals = append(_vals, &p.Utime)
+		if ptrFunc, ok := companymanFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
@@ -231,6 +238,49 @@ func (p *CompanyMan) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 	return p.AssignValues(args...)
 }
 
+// 定义字段到值检查和获取函数的映射
+var companymanFieldToValueFunc = map[dialect.Field]func(*CompanyMan) (string, any, bool){
+	tblcompanyman.Id: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.Id.Quote(), p.Id, p.Id == 0
+	},
+	tblcompanyman.AccountId: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.AccountId.Quote(), p.AccountId, p.AccountId == 0
+	},
+	tblcompanyman.Company: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.Company.Quote(), p.Company, p.Company == 0
+	},
+	tblcompanyman.RealName: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.RealName.Quote(), p.RealName, p.RealName == ""
+	},
+	tblcompanyman.Email: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.Email.Quote(), p.Email, p.Email == ""
+	},
+	tblcompanyman.Roles: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.Roles.Quote(), p.Roles, p.Roles == ""
+	},
+	tblcompanyman.Gender: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.Gender.Quote(), p.Gender, p.Gender == ""
+	},
+	tblcompanyman.Genre: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.Genre.Quote(), p.Genre, p.Genre == 0
+	},
+	tblcompanyman.IsActivate: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.IsActivate.Quote(), p.IsActivate, p.IsActivate == 0
+	},
+	tblcompanyman.LoginTime: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.LoginTime.Quote(), p.LoginTime, p.LoginTime.IsZero()
+	},
+	tblcompanyman.State: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.State.Quote(), p.State, p.State == 0
+	},
+	tblcompanyman.Ctime: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+	},
+	tblcompanyman.Utime: func(p *CompanyMan) (string, any, bool) {
+		return tblcompanyman.Utime.Quote(), p.Utime, p.Utime.IsZero()
+	},
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -240,140 +290,30 @@ func (p *CompanyMan) AssignValues(args ...dialect.Field) ([]string, []any) {
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tblcompanyman.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			case tblcompanyman.Id:
-				if p.Id == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.Id.Quote())
-				_vals = append(_vals, p.Id)
-			case tblcompanyman.AccountId:
-				if p.AccountId == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.AccountId.Quote())
-				_vals = append(_vals, p.AccountId)
-			case tblcompanyman.Company:
-				if p.Company == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.Company.Quote())
-				_vals = append(_vals, p.Company)
-			case tblcompanyman.RealName:
-				if p.RealName == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.RealName.Quote())
-				_vals = append(_vals, p.RealName)
-			case tblcompanyman.Email:
-				if p.Email == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.Email.Quote())
-				_vals = append(_vals, p.Email)
-			case tblcompanyman.Roles:
-				if p.Roles == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.Roles.Quote())
-				_vals = append(_vals, p.Roles)
-			case tblcompanyman.Gender:
-				if p.Gender == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.Gender.Quote())
-				_vals = append(_vals, p.Gender)
-			case tblcompanyman.Genre:
-				if p.Genre == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.Genre.Quote())
-				_vals = append(_vals, p.Genre)
-			case tblcompanyman.IsActivate:
-				if p.IsActivate == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.IsActivate.Quote())
-				_vals = append(_vals, p.IsActivate)
-			case tblcompanyman.LoginTime:
-				if p.LoginTime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.LoginTime.Quote())
-				_vals = append(_vals, p.LoginTime)
-			case tblcompanyman.State:
-				if p.State == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.State.Quote())
-				_vals = append(_vals, p.State)
-			case tblcompanyman.Ctime:
-				if p.Ctime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.Ctime.Quote())
-				_vals = append(_vals, p.Ctime)
-			case tblcompanyman.Utime:
-				if p.Utime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblcompanyman.Utime.Quote())
-				_vals = append(_vals, p.Utime)
+			if valueFunc, exists := companymanFieldToValueFunc[arg]; exists {
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tblcompanyman.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		case tblcompanyman.Id:
-			_cols = append(_cols, tblcompanyman.Id.Quote())
-			_vals = append(_vals, p.Id)
-		case tblcompanyman.AccountId:
-			_cols = append(_cols, tblcompanyman.AccountId.Quote())
-			_vals = append(_vals, p.AccountId)
-		case tblcompanyman.Company:
-			_cols = append(_cols, tblcompanyman.Company.Quote())
-			_vals = append(_vals, p.Company)
-		case tblcompanyman.RealName:
-			_cols = append(_cols, tblcompanyman.RealName.Quote())
-			_vals = append(_vals, p.RealName)
-		case tblcompanyman.Email:
-			_cols = append(_cols, tblcompanyman.Email.Quote())
-			_vals = append(_vals, p.Email)
-		case tblcompanyman.Roles:
-			_cols = append(_cols, tblcompanyman.Roles.Quote())
-			_vals = append(_vals, p.Roles)
-		case tblcompanyman.Gender:
-			_cols = append(_cols, tblcompanyman.Gender.Quote())
-			_vals = append(_vals, p.Gender)
-		case tblcompanyman.Genre:
-			_cols = append(_cols, tblcompanyman.Genre.Quote())
-			_vals = append(_vals, p.Genre)
-		case tblcompanyman.IsActivate:
-			_cols = append(_cols, tblcompanyman.IsActivate.Quote())
-			_vals = append(_vals, p.IsActivate)
-		case tblcompanyman.LoginTime:
-			_cols = append(_cols, tblcompanyman.LoginTime.Quote())
-			_vals = append(_vals, p.LoginTime)
-		case tblcompanyman.State:
-			_cols = append(_cols, tblcompanyman.State.Quote())
-			_vals = append(_vals, p.State)
-		case tblcompanyman.Ctime:
-			_cols = append(_cols, tblcompanyman.Ctime.Quote())
-			_vals = append(_vals, p.Ctime)
-		case tblcompanyman.Utime:
-			_cols = append(_cols, tblcompanyman.Utime.Quote())
-			_vals = append(_vals, p.Utime)
+		if valueFunc, exists := companymanFieldToValueFunc[arg]; exists {
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals

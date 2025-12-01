@@ -137,8 +137,10 @@ func getUnmarshalJSON(t Field) string {
 		return prefix + t.Type + "(value.Int())"
 	case "uint", "uint8", "uint16", "uint32",
 		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
-		"types.BigInt", "types.Money":
+		"types.BigInt":
 		return prefix + t.Type + "(value.Uint())"
+	case "types.Money":
+		return `e = types.Unmarshal(value, &p.` + t.Name + `)`
 	case "float32", "types.Float32", "types.Float64":
 		return prefix + t.Type + "(value.Float())"
 	case "float64":

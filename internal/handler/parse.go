@@ -145,6 +145,7 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			if _namejson.Col == "" {
 				if _namejson.Json.Name == "" {
 					_namejson.Col = getFieldName(field.Name)
+					_namejson.Json.Name = _namejson.Col
 				} else {
 					_namejson.Col = _namejson.Json.Name
 				}

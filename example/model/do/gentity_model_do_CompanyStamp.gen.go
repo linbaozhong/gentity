@@ -31,43 +31,54 @@ func NewCompanyStamp() *CompanyStamp {
 
 // MarshalJSON
 func (p *CompanyStamp) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf   = bytes.NewBuffer((make([]byte, 0, 11*50)))
+		_comma bool
+	)
 	_buf.WriteByte('{')
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
 	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		writeField("id", types.Marshal(p.Id))
 	}
 	if p.Company != 0 {
-		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
+		writeField("company", types.Marshal(p.Company))
 	}
 	if p.Url != "" {
-		_buf.WriteString(`"url":` + types.Marshal(p.Url) + `,`)
+		writeField("url", types.Marshal(p.Url))
 	}
 	if p.Genre != 0 {
-		_buf.WriteString(`"genre":` + types.Marshal(p.Genre) + `,`)
+		writeField("genre", types.Marshal(p.Genre))
 	}
 	if p.IsDefault != 0 {
-		_buf.WriteString(`"is_default":` + types.Marshal(p.IsDefault) + `,`)
+		writeField("is_default", types.Marshal(p.IsDefault))
 	}
 	if p.Creator != 0 {
-		_buf.WriteString(`"creator":` + types.Marshal(p.Creator) + `,`)
+		writeField("creator", types.Marshal(p.Creator))
 	}
 	if p.CreatorName != "" {
-		_buf.WriteString(`"creator_name":` + types.Marshal(p.CreatorName) + `,`)
+		writeField("creator_name", types.Marshal(p.CreatorName))
 	}
 	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+		writeField("state", types.Marshal(p.State))
 	}
 	if p.Status != 0 {
-		_buf.WriteString(`"status":` + types.Marshal(p.Status) + `,`)
+		writeField("status", types.Marshal(p.Status))
 	}
 	if !p.Ctime.IsZero() {
-		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+		writeField("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
-	}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
+		writeField("utime", types.Marshal(p.Utime))
 	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
@@ -144,6 +155,25 @@ func (p *CompanyStamp) TableName() string {
 	return CompanyStampTableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var companystampFieldToPtrFunc = map[dialect.Field]func(*CompanyStamp) any{
+	tblcompanystamp.Id:          func(p *CompanyStamp) any { return &p.Id },
+	tblcompanystamp.Company:     func(p *CompanyStamp) any { return &p.Company },
+	tblcompanystamp.Url:         func(p *CompanyStamp) any { return &p.Url },
+	tblcompanystamp.Genre:       func(p *CompanyStamp) any { return &p.Genre },
+	tblcompanystamp.IsDefault:   func(p *CompanyStamp) any { return &p.IsDefault },
+	tblcompanystamp.Creator:     func(p *CompanyStamp) any { return &p.Creator },
+	tblcompanystamp.CreatorName: func(p *CompanyStamp) any { return &p.CreatorName },
+	tblcompanystamp.State:       func(p *CompanyStamp) any { return &p.State },
+	tblcompanystamp.Status:      func(p *CompanyStamp) any { return &p.Status },
+	tblcompanystamp.Ctime:       func(p *CompanyStamp) any { return &p.Ctime },
+	tblcompanystamp.Utime:       func(p *CompanyStamp) any { return &p.Utime },
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *CompanyStamp) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompanystamp.ReadableFields
@@ -151,29 +181,8 @@ func (p *CompanyStamp) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		switch col {
-		case tblcompanystamp.Id:
-			_vals = append(_vals, &p.Id)
-		case tblcompanystamp.Company:
-			_vals = append(_vals, &p.Company)
-		case tblcompanystamp.Url:
-			_vals = append(_vals, &p.Url)
-		case tblcompanystamp.Genre:
-			_vals = append(_vals, &p.Genre)
-		case tblcompanystamp.IsDefault:
-			_vals = append(_vals, &p.IsDefault)
-		case tblcompanystamp.Creator:
-			_vals = append(_vals, &p.Creator)
-		case tblcompanystamp.CreatorName:
-			_vals = append(_vals, &p.CreatorName)
-		case tblcompanystamp.State:
-			_vals = append(_vals, &p.State)
-		case tblcompanystamp.Status:
-			_vals = append(_vals, &p.Status)
-		case tblcompanystamp.Ctime:
-			_vals = append(_vals, &p.Ctime)
-		case tblcompanystamp.Utime:
-			_vals = append(_vals, &p.Utime)
+		if ptrFunc, ok := companystampFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
@@ -215,6 +224,43 @@ func (p *CompanyStamp) RawAssignValues(args ...dialect.Field) ([]string, []any) 
 	return p.AssignValues(args...)
 }
 
+// 定义字段到值检查和获取函数的映射
+var companystampFieldToValueFunc = map[dialect.Field]func(*CompanyStamp) (string, any, bool){
+	tblcompanystamp.Id: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.Id.Quote(), p.Id, p.Id == 0
+	},
+	tblcompanystamp.Company: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.Company.Quote(), p.Company, p.Company == 0
+	},
+	tblcompanystamp.Url: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.Url.Quote(), p.Url, p.Url == ""
+	},
+	tblcompanystamp.Genre: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.Genre.Quote(), p.Genre, p.Genre == 0
+	},
+	tblcompanystamp.IsDefault: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.IsDefault.Quote(), p.IsDefault, p.IsDefault == 0
+	},
+	tblcompanystamp.Creator: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.Creator.Quote(), p.Creator, p.Creator == 0
+	},
+	tblcompanystamp.CreatorName: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.CreatorName.Quote(), p.CreatorName, p.CreatorName == ""
+	},
+	tblcompanystamp.State: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.State.Quote(), p.State, p.State == 0
+	},
+	tblcompanystamp.Status: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.Status.Quote(), p.Status, p.Status == 0
+	},
+	tblcompanystamp.Ctime: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+	},
+	tblcompanystamp.Utime: func(p *CompanyStamp) (string, any, bool) {
+		return tblcompanystamp.Utime.Quote(), p.Utime, p.Utime.IsZero()
+	},
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -224,122 +270,30 @@ func (p *CompanyStamp) AssignValues(args ...dialect.Field) ([]string, []any) {
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tblcompanystamp.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			case tblcompanystamp.Id:
-				if p.Id == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Id.Quote())
-				_vals = append(_vals, p.Id)
-			case tblcompanystamp.Company:
-				if p.Company == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Company.Quote())
-				_vals = append(_vals, p.Company)
-			case tblcompanystamp.Url:
-				if p.Url == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Url.Quote())
-				_vals = append(_vals, p.Url)
-			case tblcompanystamp.Genre:
-				if p.Genre == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Genre.Quote())
-				_vals = append(_vals, p.Genre)
-			case tblcompanystamp.IsDefault:
-				if p.IsDefault == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.IsDefault.Quote())
-				_vals = append(_vals, p.IsDefault)
-			case tblcompanystamp.Creator:
-				if p.Creator == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Creator.Quote())
-				_vals = append(_vals, p.Creator)
-			case tblcompanystamp.CreatorName:
-				if p.CreatorName == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.CreatorName.Quote())
-				_vals = append(_vals, p.CreatorName)
-			case tblcompanystamp.State:
-				if p.State == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.State.Quote())
-				_vals = append(_vals, p.State)
-			case tblcompanystamp.Status:
-				if p.Status == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Status.Quote())
-				_vals = append(_vals, p.Status)
-			case tblcompanystamp.Ctime:
-				if p.Ctime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Ctime.Quote())
-				_vals = append(_vals, p.Ctime)
-			case tblcompanystamp.Utime:
-				if p.Utime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblcompanystamp.Utime.Quote())
-				_vals = append(_vals, p.Utime)
+			if valueFunc, exists := companystampFieldToValueFunc[arg]; exists {
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tblcompanystamp.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		case tblcompanystamp.Id:
-			_cols = append(_cols, tblcompanystamp.Id.Quote())
-			_vals = append(_vals, p.Id)
-		case tblcompanystamp.Company:
-			_cols = append(_cols, tblcompanystamp.Company.Quote())
-			_vals = append(_vals, p.Company)
-		case tblcompanystamp.Url:
-			_cols = append(_cols, tblcompanystamp.Url.Quote())
-			_vals = append(_vals, p.Url)
-		case tblcompanystamp.Genre:
-			_cols = append(_cols, tblcompanystamp.Genre.Quote())
-			_vals = append(_vals, p.Genre)
-		case tblcompanystamp.IsDefault:
-			_cols = append(_cols, tblcompanystamp.IsDefault.Quote())
-			_vals = append(_vals, p.IsDefault)
-		case tblcompanystamp.Creator:
-			_cols = append(_cols, tblcompanystamp.Creator.Quote())
-			_vals = append(_vals, p.Creator)
-		case tblcompanystamp.CreatorName:
-			_cols = append(_cols, tblcompanystamp.CreatorName.Quote())
-			_vals = append(_vals, p.CreatorName)
-		case tblcompanystamp.State:
-			_cols = append(_cols, tblcompanystamp.State.Quote())
-			_vals = append(_vals, p.State)
-		case tblcompanystamp.Status:
-			_cols = append(_cols, tblcompanystamp.Status.Quote())
-			_vals = append(_vals, p.Status)
-		case tblcompanystamp.Ctime:
-			_cols = append(_cols, tblcompanystamp.Ctime.Quote())
-			_vals = append(_vals, p.Ctime)
-		case tblcompanystamp.Utime:
-			_cols = append(_cols, tblcompanystamp.Utime.Quote())
-			_vals = append(_vals, p.Utime)
+		if valueFunc, exists := companystampFieldToValueFunc[arg]; exists {
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals

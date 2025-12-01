@@ -15,7 +15,9 @@
 package types
 
 import (
+	"encoding/binary"
 	"fmt"
+	"math"
 	"strconv"
 )
 
@@ -39,12 +41,35 @@ func (f32 *Float32) Scan(src any) error {
 	}
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (f32 Float32) IsNil() bool {
+	return f32 == NilFloat32
+}
+
+// IsZero 是否零值
+func (f32 Float32) IsZero() bool {
+	return f32 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (f32 Float32) IsEmpty() bool {
+	return f32 == NilFloat32 || f32 == 0
+}
+
 func (f32 Float32) Float32() float32 {
 	return float32(f32)
 }
 
 func (f32 Float32) String() string {
 	return strconv.FormatFloat(float64(f32), 'f', -1, 32)
+}
+
+func (f32 Float32) Bytes() []byte {
+	return binary.BigEndian.AppendUint32(nil, math.Float32bits(f32.Float32()))
+}
+
+func (f32 *Float32) FromBytes(b []byte) {
+	*f32 = Float32(math.Float32frombits(binary.BigEndian.Uint32(b)))
 }
 
 func (f32 Float32) MarshalJSON() ([]byte, error) {
@@ -78,12 +103,35 @@ func (f64 *Float64) Scan(src any) error {
 	}
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (f64 Float64) IsNil() bool {
+	return f64 == NilFloat64
+}
+
+// IsZero 是否零值
+func (f64 Float64) IsZero() bool {
+	return f64 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (f64 Float64) IsEmpty() bool {
+	return f64 == NilFloat64 || f64 == 0
+}
+
 func (f64 Float64) Float64() float64 {
 	return float64(f64)
 }
 
 func (f64 Float64) String() string {
 	return strconv.FormatFloat(float64(f64), 'f', -1, 64)
+}
+
+func (f64 Float64) Bytes() []byte {
+	return binary.BigEndian.AppendUint64(nil, math.Float64bits(f64.Float64()))
+}
+
+func (f64 *Float64) FromBytes(b []byte) {
+	*f64 = Float64(math.Float64frombits(binary.BigEndian.Uint64(b)))
 }
 
 func (f64 Float64) MarshalJSON() ([]byte, error) {

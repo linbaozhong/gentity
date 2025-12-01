@@ -19,7 +19,6 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
-	"github.com/linbaozhong/gentity/pkg/cachego"
 )
 
 type (
@@ -31,7 +30,7 @@ type (
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 		Debug() bool
-		Cache(string) cachego.Cache
+		//Cache(string) cachego.Cache
 		IsDB() bool
 	}
 )

@@ -50,22 +50,19 @@ func (p *{{.StructName}}) Check() error {
 {{- if contains .ParseTag "@response"}}
 // MarshalJSON
 func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
-	_buf.WriteByte('{')
+	write := types.NewJsonWriter({{len .Columns}} * 50)
 	{{- range $key, $value := .Columns}}
-		{{- if $value.Json.OmitEmpty}}
-		if {{getNotZeroValue $value}} {
-			_buf.WriteString(`"{{ $value.Json.Name }}":`+types.Marshal(p.{{$value.Name}})+`,`)
-		}
-		{{- else}}
-		_buf.WriteString(`"{{ $value.Json.Name }}":`+types.Marshal(p.{{$value.Name}})+`,`)
+		{{- if ne $value.Json.Name "-" }}
+			{{- if $value.Json.OmitEmpty}}
+			if {{getNotZeroValue $value}} {
+				write.WriteKV("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
+			}
+			{{- else}}
+				write.WriteKV("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
+			{{- end}}
 		{{- end}}
 	{{- end}}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
-	}
-	_buf.WriteByte('}')
-	return _buf.Bytes(), nil
+	return write.Bytes(), nil
 }
 {{end}}
 
@@ -92,7 +89,7 @@ func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
 		_result.ForEach(func(key, value gjson.Result) bool {
 			switch key.Str {
 			{{- range $key, $value := .Columns}}
-				{{- if and (ne $value.Json.Name "") (ne $value.Json.Name "-")}}
+				{{- if ne $value.Json.Name "-" }}
 				case "{{ $value.Json.Name }}":
 					{{getUnmarshalJSON $value}}
 				{{- end}}
@@ -125,7 +122,7 @@ func (p *{{.StructName}}) UnmarshalValues(m map[string][]string) error {
 			value := gjson.Result{Type:gjson.String,Raw: v[0],Str: v[0]}
 			switch k {
 			{{- range $key, $value := .Columns}}
-				{{- if and (ne $value.Json.Name "") (ne $value.Json.Name "-")}}
+				{{- if ne $value.Json.Name "-" }}
 				case "{{ $value.Json.Name }}":
 					{{getUnmarshalJSON $value}}
 				{{- end}}

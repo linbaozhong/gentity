@@ -15,7 +15,9 @@
 package types
 
 import (
+	"encoding/binary"
 	"fmt"
+	"runtime"
 	"strconv"
 )
 
@@ -46,8 +48,27 @@ func (i8 Uint8) Uint8() uint8 {
 	return uint8(i8)
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i8 Uint8) IsNil() bool {
+	return i8 == NilUint8
+}
+
+// IsZero 是否零值
+func (i8 Uint8) IsZero() bool {
+	return i8 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i8 Uint8) IsEmpty() bool {
+	return i8 == NilUint8 || i8 == 0
+}
+
 func (i8 Uint8) String() string {
 	return strconv.FormatUint(uint64(i8), 10)
+}
+
+func (i8 Uint8) Bytes() []byte {
+	return []byte{byte(i8)}
 }
 
 func (i8 Uint8) MarshalJSON() ([]byte, error) {
@@ -81,12 +102,31 @@ func (i16 *Uint16) Scan(src any) error {
 	}
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i16 Uint16) IsNil() bool {
+	return i16 == NilUint16
+}
+
+// IsZero 是否零值
+func (i16 Uint16) IsZero() bool {
+	return i16 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i16 Uint16) IsEmpty() bool {
+	return i16 == NilUint16 || i16 == 0
+}
+
 func (i16 Uint16) Uint16() uint16 {
 	return uint16(i16)
 }
 
 func (i16 Uint16) String() string {
 	return strconv.FormatUint(uint64(i16), 10)
+}
+
+func (i16 Uint16) Bytes() []byte {
+	return binary.BigEndian.AppendUint16(nil, uint16(i16))
 }
 
 func (i16 Uint16) MarshalJSON() ([]byte, error) {
@@ -120,12 +160,31 @@ func (i32 *Uint32) Scan(src any) error {
 	}
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i32 Uint32) IsNil() bool {
+	return i32 == NilUint32
+}
+
+// IsZero 是否零值
+func (i32 Uint32) IsZero() bool {
+	return i32 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i32 Uint32) IsEmpty() bool {
+	return i32 == NilUint32 || i32 == 0
+}
+
 func (i32 Uint32) Uint32() uint32 {
 	return uint32(i32)
 }
 
 func (i32 Uint32) String() string {
 	return strconv.FormatUint(uint64(i32), 10)
+}
+
+func (i32 Uint32) Bytes() []byte {
+	return binary.BigEndian.AppendUint32(nil, uint32(i32))
 }
 
 func (i32 Uint32) MarshalJSON() ([]byte, error) {
@@ -159,12 +218,31 @@ func (i64 *Uint64) Scan(src any) error {
 	}
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i64 Uint64) IsNil() bool {
+	return i64 == NilUint64
+}
+
+// IsZero 是否零值
+func (i64 Uint64) IsZero() bool {
+	return i64 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i64 Uint64) IsEmpty() bool {
+	return i64 == NilUint64 || i64 == 0
+}
+
 func (i64 Uint64) Uint64() uint64 {
 	return uint64(i64)
 }
 
 func (i64 Uint64) String() string {
 	return strconv.FormatUint(uint64(i64), 10)
+}
+
+func (i64 Uint64) Bytes() []byte {
+	return binary.BigEndian.AppendUint64(nil, uint64(i64))
 }
 
 func (i64 Uint64) MarshalJSON() ([]byte, error) {
@@ -198,12 +276,34 @@ func (i *Uint) Scan(src any) error {
 	}
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i Uint) IsNil() bool {
+	return i == NilUint
+}
+
+// IsZero 是否零值
+func (i Uint) IsZero() bool {
+	return i == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i Uint) IsEmpty() bool {
+	return i == NilUint || i == 0
+}
+
 func (i Uint) Uint() uint {
 	return uint(i)
 }
 
 func (i Uint) String() string {
 	return strconv.FormatUint(uint64(i), 10)
+}
+func (i Uint) Bytes() []byte {
+	if runtime.GOARCH == "arm64" || runtime.GOARCH == "amd64" {
+		return binary.BigEndian.AppendUint64(nil, uint64(i))
+	} else {
+		return binary.BigEndian.AppendUint32(nil, uint32(i))
+	}
 }
 
 func (i Uint) MarshalJSON() ([]byte, error) {

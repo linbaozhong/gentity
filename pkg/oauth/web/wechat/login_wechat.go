@@ -21,52 +21,18 @@ import (
 	"github.com/linbaozhong/gentity/pkg/oauth/web"
 	"io"
 	"net/http"
+	"net/url"
 )
 
-type wx struct {
-	appid     string
-	appSecret string
-	lang      string
-}
-type option func(w *wx)
+func (w *wx) Authorize(ctx context.Context, state string, isMobile bool) (string, error) {
+	params := url.Values{}
+	params.Set("appid", w.appid)
+	params.Set("redirect_uri", w.redirectURI)
+	params.Set("response_type", "code")
+	params.Set("scope", "snsapi_userinfo")             // 授权范围
+	params.Set("state", web.Wechat.String()+":"+state) // 防CSRF令牌
 
-// 微信 API 地址
-const (
-	wechatAuthURL     = "https://open.weixin.qq.com/connect/qrconnect"
-	wechatTokenURL    = "https://api.weixin.qq.com/sns/oauth2/access_token"
-	wechatUserInfoURL = "https://api.weixin.qq.com/sns/userinfo"
-	redirectURI       = "http://your-domain.com/wx/callback" // 替换为你的回调地址
-)
-
-func WithAppId(appid string) option {
-	return func(w *wx) {
-		w.appid = appid
-	}
-}
-
-func WithLang(lang string) option {
-	return func(w *wx) {
-		w.lang = lang
-	}
-}
-
-func WithAppSecret(appSecret string) option {
-	return func(w *wx) {
-		w.appSecret = appSecret
-	}
-}
-
-func New(opts ...option) web.Loginer {
-	w := &wx{}
-	for _, opt := range opts {
-		opt(w)
-	}
-	return w
-}
-
-func (w *wx) Authorize(ctx context.Context, state string) (string, error) {
-	return fmt.Sprintf("%s?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_login&state=%s#wechat_redirect",
-		wechatAuthURL, w.appid, redirectURI, state), nil
+	return fmt.Sprintf("%s?%s#wechat_redirect", wechatAuthURL, params.Encode()), nil
 }
 
 func (w *wx) Callback(ctx context.Context, code, state string) (*web.OauthTokenRsp, error) {
@@ -87,11 +53,34 @@ func (w *wx) Callback(ctx context.Context, code, state string) (*web.OauthTokenR
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err
 	}
-	return &web.OauthTokenRsp{}, nil
+	return &result, nil
 }
 
-func (w *wx) GetUserInfo(ctx context.Context, token string) (*web.UserInfoRsp, error) {
-	return &web.UserInfoRsp{}, nil
+func (w *wx) GetUserInfo(ctx context.Context, token, openid string) (*web.UserInfoRsp, error) {
+	// 构造正确的 URL
+	url := fmt.Sprintf("%s?access_token=%s&openid=%s&lang=%s",
+		wechatUserInfoURL, token, openid, w.lang)
+
+	// 发起 HTTP 请求
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// 读取响应体
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// 解析 JSON 响应
+	var userInfo web.UserInfoRsp
+	if err := json.Unmarshal(body, &userInfo); err != nil {
+		return nil, err
+	}
+
+	return &userInfo, nil
 }
 
 func (w *wx) GetPlatform() string {

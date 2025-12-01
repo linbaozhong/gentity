@@ -31,52 +31,63 @@ func NewCompanyDocument() *CompanyDocument {
 
 // MarshalJSON
 func (p *CompanyDocument) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf   = bytes.NewBuffer((make([]byte, 0, 14*50)))
+		_comma bool
+	)
 	_buf.WriteByte('{')
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
 	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		writeField("id", types.Marshal(p.Id))
 	}
 	if p.Company != 0 {
-		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
+		writeField("company", types.Marshal(p.Company))
 	}
 	if p.TemplateId != 0 {
-		_buf.WriteString(`"template_id":` + types.Marshal(p.TemplateId) + `,`)
+		writeField("template_id", types.Marshal(p.TemplateId))
 	}
 	if p.Title != "" {
-		_buf.WriteString(`"title":` + types.Marshal(p.Title) + `,`)
+		writeField("title", types.Marshal(p.Title))
 	}
 	if p.Classify != 0 {
-		_buf.WriteString(`"classify":` + types.Marshal(p.Classify) + `,`)
+		writeField("classify", types.Marshal(p.Classify))
 	}
 	if p.Genre != 0 {
-		_buf.WriteString(`"genre":` + types.Marshal(p.Genre) + `,`)
+		writeField("genre", types.Marshal(p.Genre))
 	}
 	if p.HandleGenre != 0 {
-		_buf.WriteString(`"handle_genre":` + types.Marshal(p.HandleGenre) + `,`)
+		writeField("handle_genre", types.Marshal(p.HandleGenre))
 	}
 	if p.Job != "" {
-		_buf.WriteString(`"job":` + types.Marshal(p.Job) + `,`)
+		writeField("job", types.Marshal(p.Job))
 	}
 	if p.VariableMode != 0 {
-		_buf.WriteString(`"variable_mode":` + types.Marshal(p.VariableMode) + `,`)
+		writeField("variable_mode", types.Marshal(p.VariableMode))
 	}
 	if p.IsDefault != 0 {
-		_buf.WriteString(`"is_default":` + types.Marshal(p.IsDefault) + `,`)
+		writeField("is_default", types.Marshal(p.IsDefault))
 	}
 	if p.CanDefault != 0 {
-		_buf.WriteString(`"can_default":` + types.Marshal(p.CanDefault) + `,`)
+		writeField("can_default", types.Marshal(p.CanDefault))
 	}
 	if p.Modifier != 0 {
-		_buf.WriteString(`"modifier":` + types.Marshal(p.Modifier) + `,`)
+		writeField("modifier", types.Marshal(p.Modifier))
 	}
 	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+		writeField("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
-	}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
+		writeField("ctime", types.Marshal(p.Ctime))
 	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
@@ -162,6 +173,28 @@ func (p *CompanyDocument) TableName() string {
 	return CompanyDocumentTableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var companydocumentFieldToPtrFunc = map[dialect.Field]func(*CompanyDocument) any{
+	tblcompanydocument.Id:           func(p *CompanyDocument) any { return &p.Id },
+	tblcompanydocument.Company:      func(p *CompanyDocument) any { return &p.Company },
+	tblcompanydocument.TemplateId:   func(p *CompanyDocument) any { return &p.TemplateId },
+	tblcompanydocument.Title:        func(p *CompanyDocument) any { return &p.Title },
+	tblcompanydocument.Classify:     func(p *CompanyDocument) any { return &p.Classify },
+	tblcompanydocument.Genre:        func(p *CompanyDocument) any { return &p.Genre },
+	tblcompanydocument.HandleGenre:  func(p *CompanyDocument) any { return &p.HandleGenre },
+	tblcompanydocument.Job:          func(p *CompanyDocument) any { return &p.Job },
+	tblcompanydocument.VariableMode: func(p *CompanyDocument) any { return &p.VariableMode },
+	tblcompanydocument.IsDefault:    func(p *CompanyDocument) any { return &p.IsDefault },
+	tblcompanydocument.CanDefault:   func(p *CompanyDocument) any { return &p.CanDefault },
+	tblcompanydocument.Modifier:     func(p *CompanyDocument) any { return &p.Modifier },
+	tblcompanydocument.State:        func(p *CompanyDocument) any { return &p.State },
+	tblcompanydocument.Ctime:        func(p *CompanyDocument) any { return &p.Ctime },
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *CompanyDocument) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompanydocument.ReadableFields
@@ -169,35 +202,8 @@ func (p *CompanyDocument) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		switch col {
-		case tblcompanydocument.Id:
-			_vals = append(_vals, &p.Id)
-		case tblcompanydocument.Company:
-			_vals = append(_vals, &p.Company)
-		case tblcompanydocument.TemplateId:
-			_vals = append(_vals, &p.TemplateId)
-		case tblcompanydocument.Title:
-			_vals = append(_vals, &p.Title)
-		case tblcompanydocument.Classify:
-			_vals = append(_vals, &p.Classify)
-		case tblcompanydocument.Genre:
-			_vals = append(_vals, &p.Genre)
-		case tblcompanydocument.HandleGenre:
-			_vals = append(_vals, &p.HandleGenre)
-		case tblcompanydocument.Job:
-			_vals = append(_vals, &p.Job)
-		case tblcompanydocument.VariableMode:
-			_vals = append(_vals, &p.VariableMode)
-		case tblcompanydocument.IsDefault:
-			_vals = append(_vals, &p.IsDefault)
-		case tblcompanydocument.CanDefault:
-			_vals = append(_vals, &p.CanDefault)
-		case tblcompanydocument.Modifier:
-			_vals = append(_vals, &p.Modifier)
-		case tblcompanydocument.State:
-			_vals = append(_vals, &p.State)
-		case tblcompanydocument.Ctime:
-			_vals = append(_vals, &p.Ctime)
+		if ptrFunc, ok := companydocumentFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
@@ -239,6 +245,52 @@ func (p *CompanyDocument) RawAssignValues(args ...dialect.Field) ([]string, []an
 	return p.AssignValues(args...)
 }
 
+// 定义字段到值检查和获取函数的映射
+var companydocumentFieldToValueFunc = map[dialect.Field]func(*CompanyDocument) (string, any, bool){
+	tblcompanydocument.Id: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.Id.Quote(), p.Id, p.Id == 0
+	},
+	tblcompanydocument.Company: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.Company.Quote(), p.Company, p.Company == 0
+	},
+	tblcompanydocument.TemplateId: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.TemplateId.Quote(), p.TemplateId, p.TemplateId == 0
+	},
+	tblcompanydocument.Title: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.Title.Quote(), p.Title, p.Title == ""
+	},
+	tblcompanydocument.Classify: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.Classify.Quote(), p.Classify, p.Classify == 0
+	},
+	tblcompanydocument.Genre: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.Genre.Quote(), p.Genre, p.Genre == 0
+	},
+	tblcompanydocument.HandleGenre: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.HandleGenre.Quote(), p.HandleGenre, p.HandleGenre == 0
+	},
+	tblcompanydocument.Job: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.Job.Quote(), p.Job, p.Job == ""
+	},
+	tblcompanydocument.VariableMode: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.VariableMode.Quote(), p.VariableMode, p.VariableMode == 0
+	},
+	tblcompanydocument.IsDefault: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.IsDefault.Quote(), p.IsDefault, p.IsDefault == 0
+	},
+	tblcompanydocument.CanDefault: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.CanDefault.Quote(), p.CanDefault, p.CanDefault == 0
+	},
+	tblcompanydocument.Modifier: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.Modifier.Quote(), p.Modifier, p.Modifier == 0
+	},
+	tblcompanydocument.State: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.State.Quote(), p.State, p.State == 0
+	},
+	tblcompanydocument.Ctime: func(p *CompanyDocument) (string, any, bool) {
+		return tblcompanydocument.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+	},
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -248,149 +300,30 @@ func (p *CompanyDocument) AssignValues(args ...dialect.Field) ([]string, []any) 
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tblcompanydocument.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			case tblcompanydocument.Id:
-				if p.Id == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.Id.Quote())
-				_vals = append(_vals, p.Id)
-			case tblcompanydocument.Company:
-				if p.Company == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.Company.Quote())
-				_vals = append(_vals, p.Company)
-			case tblcompanydocument.TemplateId:
-				if p.TemplateId == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.TemplateId.Quote())
-				_vals = append(_vals, p.TemplateId)
-			case tblcompanydocument.Title:
-				if p.Title == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.Title.Quote())
-				_vals = append(_vals, p.Title)
-			case tblcompanydocument.Classify:
-				if p.Classify == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.Classify.Quote())
-				_vals = append(_vals, p.Classify)
-			case tblcompanydocument.Genre:
-				if p.Genre == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.Genre.Quote())
-				_vals = append(_vals, p.Genre)
-			case tblcompanydocument.HandleGenre:
-				if p.HandleGenre == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.HandleGenre.Quote())
-				_vals = append(_vals, p.HandleGenre)
-			case tblcompanydocument.Job:
-				if p.Job == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.Job.Quote())
-				_vals = append(_vals, p.Job)
-			case tblcompanydocument.VariableMode:
-				if p.VariableMode == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.VariableMode.Quote())
-				_vals = append(_vals, p.VariableMode)
-			case tblcompanydocument.IsDefault:
-				if p.IsDefault == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.IsDefault.Quote())
-				_vals = append(_vals, p.IsDefault)
-			case tblcompanydocument.CanDefault:
-				if p.CanDefault == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.CanDefault.Quote())
-				_vals = append(_vals, p.CanDefault)
-			case tblcompanydocument.Modifier:
-				if p.Modifier == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.Modifier.Quote())
-				_vals = append(_vals, p.Modifier)
-			case tblcompanydocument.State:
-				if p.State == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.State.Quote())
-				_vals = append(_vals, p.State)
-			case tblcompanydocument.Ctime:
-				if p.Ctime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblcompanydocument.Ctime.Quote())
-				_vals = append(_vals, p.Ctime)
+			if valueFunc, exists := companydocumentFieldToValueFunc[arg]; exists {
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tblcompanydocument.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		case tblcompanydocument.Id:
-			_cols = append(_cols, tblcompanydocument.Id.Quote())
-			_vals = append(_vals, p.Id)
-		case tblcompanydocument.Company:
-			_cols = append(_cols, tblcompanydocument.Company.Quote())
-			_vals = append(_vals, p.Company)
-		case tblcompanydocument.TemplateId:
-			_cols = append(_cols, tblcompanydocument.TemplateId.Quote())
-			_vals = append(_vals, p.TemplateId)
-		case tblcompanydocument.Title:
-			_cols = append(_cols, tblcompanydocument.Title.Quote())
-			_vals = append(_vals, p.Title)
-		case tblcompanydocument.Classify:
-			_cols = append(_cols, tblcompanydocument.Classify.Quote())
-			_vals = append(_vals, p.Classify)
-		case tblcompanydocument.Genre:
-			_cols = append(_cols, tblcompanydocument.Genre.Quote())
-			_vals = append(_vals, p.Genre)
-		case tblcompanydocument.HandleGenre:
-			_cols = append(_cols, tblcompanydocument.HandleGenre.Quote())
-			_vals = append(_vals, p.HandleGenre)
-		case tblcompanydocument.Job:
-			_cols = append(_cols, tblcompanydocument.Job.Quote())
-			_vals = append(_vals, p.Job)
-		case tblcompanydocument.VariableMode:
-			_cols = append(_cols, tblcompanydocument.VariableMode.Quote())
-			_vals = append(_vals, p.VariableMode)
-		case tblcompanydocument.IsDefault:
-			_cols = append(_cols, tblcompanydocument.IsDefault.Quote())
-			_vals = append(_vals, p.IsDefault)
-		case tblcompanydocument.CanDefault:
-			_cols = append(_cols, tblcompanydocument.CanDefault.Quote())
-			_vals = append(_vals, p.CanDefault)
-		case tblcompanydocument.Modifier:
-			_cols = append(_cols, tblcompanydocument.Modifier.Quote())
-			_vals = append(_vals, p.Modifier)
-		case tblcompanydocument.State:
-			_cols = append(_cols, tblcompanydocument.State.Quote())
-			_vals = append(_vals, p.State)
-		case tblcompanydocument.Ctime:
-			_cols = append(_cols, tblcompanydocument.Ctime.Quote())
-			_vals = append(_vals, p.Ctime)
+		if valueFunc, exists := companydocumentFieldToValueFunc[arg]; exists {
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals

@@ -16,6 +16,8 @@ package types
 
 import (
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/conv"
+	"runtime"
 	"strconv"
 )
 
@@ -46,9 +48,33 @@ func (i8 Int8) Int8() int8 {
 	return int8(i8)
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i8 Int8) IsNil() bool {
+	return i8 == NilInt8
+}
+
+// IsZero 是否零值
+func (i8 Int8) IsZero() bool {
+	return i8 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i8 Int8) IsEmpty() bool {
+	return i8 == NilInt8 || i8 == 0
+}
+
 func (i8 Int8) String() string {
 	return strconv.FormatInt(int64(i8), 10)
 }
+
+func (i8 Int8) Bytes() []byte {
+	return []byte{byte(i8)}
+}
+
+func (i8 *Int8) FromBytes(b []byte) {
+	*i8 = Int8(b[0])
+}
+
 func (i8 Int8) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i8), 10)), nil
 }
@@ -84,9 +110,34 @@ func (i16 Int16) Int16() int16 {
 	return int16(i16)
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i16 Int16) IsNil() bool {
+	return i16 == NilInt16
+}
+
+// IsZero 是否零值
+func (i16 Int16) IsZero() bool {
+	return i16 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i16 Int16) IsEmpty() bool {
+	return i16 == NilInt16 || i16 == 0
+}
+
 func (i16 Int16) String() string {
 	return strconv.FormatInt(int64(i16), 10)
 }
+
+func (i16 Int16) Bytes() []byte {
+	return conv.Base2Bytes(i16)
+}
+
+func (i16 *Int16) FromBytes(b []byte) {
+	_i16, _ := conv.Bytes2Base[int16](b)
+	*i16 = Int16(_i16)
+}
+
 func (i16 Int16) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i16), 10)), nil
 }
@@ -122,9 +173,34 @@ func (i32 Int32) Int32() int32 {
 	return int32(i32)
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i32 Int32) IsNil() bool {
+	return i32 == NilInt32
+}
+
+// IsZero 是否零值
+func (i32 Int32) IsZero() bool {
+	return i32 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i32 Int32) IsEmpty() bool {
+	return i32 == NilInt32 || i32 == 0
+}
+
 func (i32 Int32) String() string {
 	return strconv.FormatInt(int64(i32), 10)
 }
+
+func (i32 Int32) Bytes() []byte {
+	return conv.Base2Bytes(i32)
+}
+
+func (i32 *Int32) FromBytes(b []byte) {
+	_i32, _ := conv.Bytes2Base[int32](b)
+	*i32 = Int32(_i32)
+}
+
 func (i32 Int32) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i32), 10)), nil
 }
@@ -160,9 +236,34 @@ func (i64 Int64) Int64() int64 {
 	return int64(i64)
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i64 Int64) IsNil() bool {
+	return i64 == NilInt64
+}
+
+// IsZero 是否零值
+func (i64 Int64) IsZero() bool {
+	return i64 == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i64 Int64) IsEmpty() bool {
+	return i64 == NilInt64 || i64 == 0
+}
+
 func (i64 Int64) String() string {
 	return strconv.FormatInt(int64(i64), 10)
 }
+
+func (i64 Int64) Bytes() []byte {
+	return conv.Base2Bytes(i64)
+}
+
+func (i64 *Int64) FromBytes(b []byte) {
+	_i64, _ := conv.Bytes2Base[int64](b)
+	*i64 = Int64(_i64)
+}
+
 func (i64 Int64) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i64), 10)), nil
 }
@@ -198,9 +299,43 @@ func (i Int) Int() int {
 	return int(i)
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (i Int) IsNil() bool {
+	return i == NilInt
+}
+
+// IsZero 是否零值
+func (i Int) IsZero() bool {
+	return i == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i Int) IsEmpty() bool {
+	return i == NilInt || i == 0
+}
+
 func (i Int) String() string {
 	return strconv.FormatInt(int64(i), 10)
 }
+
+func (i Int) Bytes() []byte {
+	if runtime.GOARCH == "arm64" || runtime.GOARCH == "amd64" {
+		return conv.Base2Bytes(int64(i))
+	} else {
+		return conv.Base2Bytes(int32(i))
+	}
+}
+
+func (i *Int) FromBytes(b []byte) {
+	if runtime.GOARCH == "arm64" || runtime.GOARCH == "amd64" {
+		_i, _ := conv.Bytes2Base[int64](b)
+		*i = Int(_i)
+	} else {
+		_i, _ := conv.Bytes2Base[int32](b)
+		*i = Int(_i)
+	}
+}
+
 func (i Int) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.FormatInt(int64(i), 10)), nil
 }

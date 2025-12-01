@@ -2,6 +2,7 @@ package types
 
 import (
 	"database/sql/driver"
+	"encoding/binary"
 	"fmt"
 	"strconv"
 )
@@ -43,6 +44,20 @@ func (i BigInt) Uint() uint {
 	return uint(i)
 }
 
+func (i BigInt) Bytes() []byte {
+	return binary.BigEndian.AppendUint64(nil, uint64(i))
+}
+
+func (i *BigInt) FromBytes(b []byte) {
+	*i = BigInt(binary.BigEndian.Uint64(b))
+}
+
+func (i *BigInt) FromString(s string) error {
+	tem, e := strconv.ParseUint(s, 10, 64)
+	*i = BigInt(tem)
+	return e
+}
+
 func (i *BigInt) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:
@@ -58,4 +73,19 @@ func (i *BigInt) Scan(src any) error {
 
 func (i BigInt) Value() (driver.Value, error) {
 	return int64(i), nil
+}
+
+// IsNil 是否空值，注意空值!=零值
+func (i BigInt) IsNil() bool {
+	return i == NilUint64
+}
+
+// IsZero 是否零值
+func (i BigInt) IsZero() bool {
+	return i == 0
+}
+
+// IsEmpty 是否空值或零值
+func (i BigInt) IsEmpty() bool {
+	return i == NilUint64 || i == 0
 }

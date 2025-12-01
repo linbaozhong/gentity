@@ -30,13 +30,13 @@ var (
 
 type Cache interface {
 	Contains(ctx context.Context, key string) bool
-	ExistsOrSave(ctx context.Context, key string, value any, lifeTime ...time.Duration) bool
+	ExistsOrSave(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) bool
 	Delete(ctx context.Context, key string) error
 	PrefixDelete(ctx context.Context, prefix string) error
 	Fetch(ctx context.Context, key string) ([]byte, error)
 	FetchMulti(ctx context.Context, keys ...string) ([][]byte, error)
 	Flush(ctx context.Context) error
-	Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error
+	Save(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) error
 }
 
 // Hash 使用MemHash算法

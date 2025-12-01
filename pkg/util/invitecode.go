@@ -49,6 +49,9 @@ func GetInviteCode(uid uint64) (string, error) {
 // GetIDFromInviteCode 根据邀请码,获取用户id
 func GetIDFromInviteCode(inviteCode string) uint64 {
 	var uid uint64 = 0
+	if inviteCode == "" {
+		return uid
+	}
 	r := []rune(inviteCode[:])
 	for l := len(r) - 1; l >= 0; l-- {
 		uid = uid*30 + Alphabet_value[r[l]]

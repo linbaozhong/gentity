@@ -31,31 +31,42 @@ func NewCompanyRole() *CompanyRole {
 
 // MarshalJSON
 func (p *CompanyRole) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf   = bytes.NewBuffer((make([]byte, 0, 7*50)))
+		_comma bool
+	)
 	_buf.WriteByte('{')
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
 	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		writeField("id", types.Marshal(p.Id))
 	}
 	if p.Company != 0 {
-		_buf.WriteString(`"company":` + types.Marshal(p.Company) + `,`)
+		writeField("company", types.Marshal(p.Company))
 	}
 	if p.Name != "" {
-		_buf.WriteString(`"name":` + types.Marshal(p.Name) + `,`)
+		writeField("name", types.Marshal(p.Name))
 	}
 	if p.Descr != "" {
-		_buf.WriteString(`"descr":` + types.Marshal(p.Descr) + `,`)
+		writeField("descr", types.Marshal(p.Descr))
 	}
 	if p.Rules != "" {
-		_buf.WriteString(`"rules":` + types.Marshal(p.Rules) + `,`)
+		writeField("rules", types.Marshal(p.Rules))
 	}
 	if p.Type != 0 {
-		_buf.WriteString(`"type":` + types.Marshal(p.Type) + `,`)
+		writeField("type", types.Marshal(p.Type))
 	}
 	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
-	}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
+		writeField("state", types.Marshal(p.State))
 	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
@@ -120,6 +131,21 @@ func (p *CompanyRole) TableName() string {
 	return CompanyRoleTableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var companyroleFieldToPtrFunc = map[dialect.Field]func(*CompanyRole) any{
+	tblcompanyrole.Id:      func(p *CompanyRole) any { return &p.Id },
+	tblcompanyrole.Company: func(p *CompanyRole) any { return &p.Company },
+	tblcompanyrole.Name:    func(p *CompanyRole) any { return &p.Name },
+	tblcompanyrole.Descr:   func(p *CompanyRole) any { return &p.Descr },
+	tblcompanyrole.Rules:   func(p *CompanyRole) any { return &p.Rules },
+	tblcompanyrole.Type:    func(p *CompanyRole) any { return &p.Type },
+	tblcompanyrole.State:   func(p *CompanyRole) any { return &p.State },
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *CompanyRole) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompanyrole.ReadableFields
@@ -127,21 +153,8 @@ func (p *CompanyRole) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		switch col {
-		case tblcompanyrole.Id:
-			_vals = append(_vals, &p.Id)
-		case tblcompanyrole.Company:
-			_vals = append(_vals, &p.Company)
-		case tblcompanyrole.Name:
-			_vals = append(_vals, &p.Name)
-		case tblcompanyrole.Descr:
-			_vals = append(_vals, &p.Descr)
-		case tblcompanyrole.Rules:
-			_vals = append(_vals, &p.Rules)
-		case tblcompanyrole.Type:
-			_vals = append(_vals, &p.Type)
-		case tblcompanyrole.State:
-			_vals = append(_vals, &p.State)
+		if ptrFunc, ok := companyroleFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
@@ -183,6 +196,31 @@ func (p *CompanyRole) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 	return p.AssignValues(args...)
 }
 
+// 定义字段到值检查和获取函数的映射
+var companyroleFieldToValueFunc = map[dialect.Field]func(*CompanyRole) (string, any, bool){
+	tblcompanyrole.Id: func(p *CompanyRole) (string, any, bool) {
+		return tblcompanyrole.Id.Quote(), p.Id, p.Id == 0
+	},
+	tblcompanyrole.Company: func(p *CompanyRole) (string, any, bool) {
+		return tblcompanyrole.Company.Quote(), p.Company, p.Company == 0
+	},
+	tblcompanyrole.Name: func(p *CompanyRole) (string, any, bool) {
+		return tblcompanyrole.Name.Quote(), p.Name, p.Name == ""
+	},
+	tblcompanyrole.Descr: func(p *CompanyRole) (string, any, bool) {
+		return tblcompanyrole.Descr.Quote(), p.Descr, p.Descr == ""
+	},
+	tblcompanyrole.Rules: func(p *CompanyRole) (string, any, bool) {
+		return tblcompanyrole.Rules.Quote(), p.Rules, p.Rules == ""
+	},
+	tblcompanyrole.Type: func(p *CompanyRole) (string, any, bool) {
+		return tblcompanyrole.Type.Quote(), p.Type, p.Type == 0
+	},
+	tblcompanyrole.State: func(p *CompanyRole) (string, any, bool) {
+		return tblcompanyrole.State.Quote(), p.State, p.State == 0
+	},
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -192,86 +230,30 @@ func (p *CompanyRole) AssignValues(args ...dialect.Field) ([]string, []any) {
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tblcompanyrole.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			case tblcompanyrole.Id:
-				if p.Id == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrole.Id.Quote())
-				_vals = append(_vals, p.Id)
-			case tblcompanyrole.Company:
-				if p.Company == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrole.Company.Quote())
-				_vals = append(_vals, p.Company)
-			case tblcompanyrole.Name:
-				if p.Name == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrole.Name.Quote())
-				_vals = append(_vals, p.Name)
-			case tblcompanyrole.Descr:
-				if p.Descr == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrole.Descr.Quote())
-				_vals = append(_vals, p.Descr)
-			case tblcompanyrole.Rules:
-				if p.Rules == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrole.Rules.Quote())
-				_vals = append(_vals, p.Rules)
-			case tblcompanyrole.Type:
-				if p.Type == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrole.Type.Quote())
-				_vals = append(_vals, p.Type)
-			case tblcompanyrole.State:
-				if p.State == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompanyrole.State.Quote())
-				_vals = append(_vals, p.State)
+			if valueFunc, exists := companyroleFieldToValueFunc[arg]; exists {
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tblcompanyrole.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		case tblcompanyrole.Id:
-			_cols = append(_cols, tblcompanyrole.Id.Quote())
-			_vals = append(_vals, p.Id)
-		case tblcompanyrole.Company:
-			_cols = append(_cols, tblcompanyrole.Company.Quote())
-			_vals = append(_vals, p.Company)
-		case tblcompanyrole.Name:
-			_cols = append(_cols, tblcompanyrole.Name.Quote())
-			_vals = append(_vals, p.Name)
-		case tblcompanyrole.Descr:
-			_cols = append(_cols, tblcompanyrole.Descr.Quote())
-			_vals = append(_vals, p.Descr)
-		case tblcompanyrole.Rules:
-			_cols = append(_cols, tblcompanyrole.Rules.Quote())
-			_vals = append(_vals, p.Rules)
-		case tblcompanyrole.Type:
-			_cols = append(_cols, tblcompanyrole.Type.Quote())
-			_vals = append(_vals, p.Type)
-		case tblcompanyrole.State:
-			_cols = append(_cols, tblcompanyrole.State.Quote())
-			_vals = append(_vals, p.State)
+		if valueFunc, exists := companyroleFieldToValueFunc[arg]; exists {
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals

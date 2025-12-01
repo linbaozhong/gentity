@@ -14,39 +14,50 @@
 
 package util
 
-import (
-	"unsafe"
-)
+// //go:noescape
+// //go:linkname memhash runtime.memhash
+// func memhash(p unsafe.Pointer, h, s uintptr) uintptr
+//
+// type stringStruct struct {
+// 	str unsafe.Pointer
+// 	len int
+// }
 
-//go:noescape
-//go:linkname memhash runtime.memhash
-func memhash(p unsafe.Pointer, h, s uintptr) uintptr
-
-type stringStruct struct {
-	str unsafe.Pointer
-	len int
-}
-
-func MemHashString(s string) uintptr {
-	return MemHash([]byte(s))
+func MemHashString(s string) uint {
+	return HashString(s)
 }
 
 // MemHash
-func MemHash(b []byte) uintptr {
-	s := *(*stringStruct)(unsafe.Pointer(&b))
-	return memhash(s.str, 0, uintptr(s.len))
+func MemHash(b []byte) uint {
+	// s := *(*stringStruct)(unsafe.Pointer(&b))
+	// return uint(memhash(s.str, 0, uintptr(s.len)))
+	return HashByte(b)
 }
 
-// Hashfnv32 实现 FNV-1a 32 位哈希函数
-func Hashfnv32(key string) uint32 {
+// Hashfnv32 实现 FNV-1a 哈希函数
+func HashString(key string) uint {
 	const (
-		offset32 = 2166136261
-		prime32  = 16777619
+		offset64 = 14695981039346656037
+		prime64  = 1099511628211
 	)
-	hash := uint32(offset32)
-	for i := 0; i < len(key); i++ {
-		hash ^= uint32(key[i])
-		hash *= prime32
+	hash := uint64(offset64)
+	for _, c := range key {
+		hash ^= uint64(c)
+		hash *= prime64
 	}
-	return hash
+	return uint(hash)
+}
+
+// Hashfnv32 实现 FNV-1a 哈希函数
+func HashByte(key []byte) uint {
+	const (
+		offset64 = 14695981039346656037
+		prime64  = 1099511628211
+	)
+	hash := uint64(offset64)
+	for _, c := range key {
+		hash ^= uint64(c)
+		hash *= prime64
+	}
+	return uint(hash)
 }

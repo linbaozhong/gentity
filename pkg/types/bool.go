@@ -53,6 +53,21 @@ func (b Bool) Value() (driver.Value, error) {
 	return b > 0, nil
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (b Bool) IsNil() bool {
+	return b == NilBool
+}
+
+// IsZero 是否零值
+func (b Bool) IsZero() bool {
+	return b == 0
+}
+
+// IsEmpty 是否空值或零值
+func (b Bool) IsEmpty() bool {
+	return b == NilBool || b == 0
+}
+
 func (b Bool) Bool() bool {
 	return b > 0
 }
@@ -66,6 +81,19 @@ func (b Bool) String() string {
 		return "null"
 	}
 }
+
+func (b Bool) Bytes() []byte {
+	return []byte{byte(b)}
+}
+
+func (b *Bool) FromBytes(buf []byte) {
+	if len(buf) == 0 {
+		*b = -1
+		return
+	}
+	*b = Bool(buf[0])
+}
+
 func (b Bool) MarshalJSON() ([]byte, error) {
 	return []byte(b.String()), nil
 }

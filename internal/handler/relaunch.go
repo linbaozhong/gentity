@@ -117,7 +117,7 @@ var (
 				fmt.Println("ver." + version)
 				return
 			default:
-				showError("The command is not entered")
+				cmd.Help()
 				return
 			}
 

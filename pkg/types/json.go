@@ -15,6 +15,7 @@
 package types
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/conv"
@@ -64,6 +65,8 @@ func Marshal(s any) string {
 			return ""
 		}
 		return strconv.Quote(v.Format(time.DateTime))
+	case time.Duration: // 转为毫秒
+		return strconv.Quote(strconv.FormatInt(v.Milliseconds(), 10))
 	default:
 		if s == nil {
 			return "null"
@@ -86,4 +89,39 @@ func Marshal(s any) string {
 		}
 	}
 	return conv.Any2String(s)
+}
+
+type write struct {
+	buf   *bytes.Buffer
+	comma bool
+}
+
+func NewJsonWriter(keyLen int) *write {
+	w := &write{
+		buf:   bytes.NewBuffer(make([]byte, 0, keyLen)),
+		comma: false,
+	}
+	w.buf.WriteByte('{')
+	return w
+}
+
+func (w *write) WriteKV(k, v string) {
+	if w.comma {
+		w.buf.WriteByte(',')
+	}
+	w.buf.WriteByte('"')
+	w.buf.WriteString(k)
+	w.buf.WriteString(`":`)
+	w.buf.WriteString(v)
+	w.comma = true
+}
+
+func (w *write) String() string {
+	w.buf.WriteByte('}')
+	return w.buf.String()
+}
+
+func (w *write) Bytes() []byte {
+	w.buf.WriteByte('}')
+	return w.buf.Bytes()
 }

@@ -22,6 +22,7 @@ import (
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
 	"github.com/linbaozhong/gentity/example/model/do"
 	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"testing"
 )
 
@@ -30,15 +31,15 @@ var (
 )
 
 func init() {
-	// var err error
-	// dbx, err = ace.Connect("mysql",
-	// 	"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// dbx.SetMaxOpenConns(50)
-	// dbx.SetMaxIdleConns(25)
-	// dbx.SetDebug(true)
+	var err error
+	dbx, err = ace.Connect("mysql",
+		"root:123456@tcp(0.0.0.0:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbx.SetMaxOpenConns(50)
+	dbx.SetMaxIdleConns(25)
+	dbx.SetDebug(true)
 }
 
 // TestCreateSet 测试函数，用于测试不同方式插入数据的功能。
@@ -179,10 +180,10 @@ func TestUpdateSet(t *testing.T) {
 	// result 为执行结果，err 为可能出现的错误
 	result, err := ace.
 		Table(do.CompanyTableName).
-		Set(
-			tblcompany.LongName.Set("aaaaaa"),
+		SetExpr(
+			tblcompany.LongName.Incr("bbb"),
 			// 设置公司的状态为 1
-			tblcompany.State.Set(1),
+			tblcompany.State.Incr(2),
 		).
 		Where(tblcompany.Id.Eq(1)).
 		Update(dbx).

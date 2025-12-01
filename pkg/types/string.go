@@ -37,8 +37,31 @@ func (s *String) Scan(src any) error {
 	return nil
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (s String) IsNil() bool {
+	return s == NilString
+}
+
+// IsZero 是否零值
+func (s String) IsZero() bool {
+	return s == ""
+}
+
+// IsEmpty 是否空值或零值
+func (s String) IsEmpty() bool {
+	return s == NilString || s == ""
+}
+
 func (s String) String() string {
 	return string(s)
+}
+
+func (s String) Bytes() []byte {
+	return []byte(s)
+}
+
+func (s *String) FromString(str string) {
+	*s = String(str)
 }
 
 func (s String) MarshalJSON() ([]byte, error) {

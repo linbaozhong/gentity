@@ -53,6 +53,21 @@ func (t Time) Value() (driver.Value, error) {
 	return t.Time, nil
 }
 
+// IsNil 是否空值，注意空值!=零值
+func (t Time) IsNil() bool {
+	return t.Time == NilTime
+}
+
+// IsZero 是否零值
+func (t Time) IsZero() bool {
+	return t.Time.IsZero()
+}
+
+// IsEmpty 是否空值或零值
+func (t Time) IsEmpty() bool {
+	return t.Time == NilTime || t.Time.IsZero()
+}
+
 func (t Time) Now() Time {
 	return Time{time.Now()}
 }
@@ -60,8 +75,18 @@ func (t Time) Now() Time {
 func Now() Time {
 	return Time{time.Now()}
 }
+
 func (t Time) String() string {
 	return t.Format(time.DateTime)
+}
+
+func (t Time) Bytes() []byte {
+	return []byte(t.String())
+}
+
+func (t *Time) FromBytes(b []byte) {
+	t2, _ := time.Parse(time.DateTime, string(b))
+	*t = Time{t2}
 }
 
 func (t Time) MarshalJSON() ([]byte, error) {

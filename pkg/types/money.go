@@ -3,10 +3,12 @@ package types
 import (
 	"database/sql/driver"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"strconv"
 	"strings"
 )
 
+// Money 以分为单位的金额类型，前端显示为元
 type Money int64
 
 func (m Money) MarshalJSON() ([]byte, error) {
@@ -27,45 +29,78 @@ func (m *Money) UnmarshalJSON(b []byte) error {
 	return e
 }
 
-func (i *Money) Scan(src any) error {
+func (m *Money) Scan(src any) error {
 	switch v := src.(type) {
-	case nil:
-		*i = 0
-		return nil
 	case int64:
-		*i = Money(v)
+		*m = Money(v)
 		return nil
 	case int:
-		*i = Money(v)
+		*m = Money(v)
 		return nil
 	case int32:
-		*i = Money(v)
+		*m = Money(v)
 		return nil
 	case int16:
-		*i = Money(v)
+		*m = Money(v)
 		return nil
 	case int8:
-		*i = Money(v)
+		*m = Money(v)
+		return nil
+	case nil:
+		*m = 0
 		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for Money: %T", src)
 	}
 }
-func (i Money) Value() (driver.Value, error) {
-	return int64(i), nil
+func (m Money) Value() (driver.Value, error) {
+	return int64(m), nil
 }
 
-func (i Money) Int() int {
-	return int(i)
+// IsNil 是否空值，注意空值!=零值
+func (m Money) IsNil() bool {
+	return m == NilInt64
 }
 
-func (i Money) Int64() int64 {
-	return int64(i)
+// IsZero 是否零值
+func (m Money) IsZero() bool {
+	return m == 0
+}
+
+// IsEmpty 是否空值或零值
+func (m Money) IsEmpty() bool {
+	return m == NilInt64 || m == 0
+}
+
+func (m Money) Int() int {
+	return int(m)
+}
+
+func (m Money) Int64() int64 {
+	return int64(m)
+}
+
+func (m Money) String() string {
+	return strconv.FormatInt(int64(m), 10)
+}
+
+func (m Money) Bytes() []byte {
+	return conv.Base2Bytes(m)
+}
+
+func (m *Money) FromBytes(b []byte) {
+	_m, _ := conv.Bytes2Base[int64](b)
+	*m = Money(_m)
+}
+
+func (m *Money) FromString(str string) {
+	_m, _ := strconv.ParseInt(str, 10, 64)
+	*m = Money(_m)
 }
 
 // Yuan 金额分精确到元
-func (m Money) Yuan() float64 {
-	return float64(m) / 100
+func (m Money) Yuan() Float64 {
+	return Float64(m) / 100
 }
 
 // 金额分小写转中文大写金额

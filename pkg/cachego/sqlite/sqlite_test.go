@@ -24,12 +24,11 @@ func TestCache(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cc := New(ctx,
-		WithName("a"),
+	cc := New(ctx, "a",
 		WithPrefix("abc"),
 	)
 
-	e := cc.Save(ctx, "bbb", "456", time.Second*10)
+	e := cc.Save(ctx, "bbb", []byte("456"), time.Second*10)
 	if e != nil {
 		t.Fatal(e)
 	}

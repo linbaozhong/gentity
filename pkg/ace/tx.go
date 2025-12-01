@@ -38,6 +38,7 @@ func (t *Tx) Mapper() *reflectx.Mapper {
 func (t *Tx) Cache(name string) cachego.Cache {
 	return t.cache(name)
 }
+
 func (t *Tx) Debug() bool {
 	return t.debug
 }

@@ -31,28 +31,39 @@ func NewAccount() *Account {
 
 // MarshalJSON
 func (p *Account) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf   = bytes.NewBuffer((make([]byte, 0, 6*50)))
+		_comma bool
+	)
 	_buf.WriteByte('{')
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
 	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		writeField("id", types.Marshal(p.Id))
 	}
 	if p.LoginName != "" {
-		_buf.WriteString(`"login_name":` + types.Marshal(p.LoginName) + `,`)
+		writeField("login_name", types.Marshal(p.LoginName))
 	}
 	if p.Password != "" {
-		_buf.WriteString(`"password":` + types.Marshal(p.Password) + `,`)
+		writeField("password", types.Marshal(p.Password))
 	}
 	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+		writeField("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+		writeField("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
-	}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
+		writeField("utime", types.Marshal(p.Utime))
 	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
@@ -114,6 +125,20 @@ func (p *Account) TableName() string {
 	return AccountTableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var accountFieldToPtrFunc = map[dialect.Field]func(*Account) any{
+	tblaccount.Id:        func(p *Account) any { return &p.Id },
+	tblaccount.LoginName: func(p *Account) any { return &p.LoginName },
+	tblaccount.Password:  func(p *Account) any { return &p.Password },
+	tblaccount.State:     func(p *Account) any { return &p.State },
+	tblaccount.Ctime:     func(p *Account) any { return &p.Ctime },
+	tblaccount.Utime:     func(p *Account) any { return &p.Utime },
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *Account) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblaccount.ReadableFields
@@ -121,19 +146,8 @@ func (p *Account) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		switch col {
-		case tblaccount.Id:
-			_vals = append(_vals, &p.Id)
-		case tblaccount.LoginName:
-			_vals = append(_vals, &p.LoginName)
-		case tblaccount.Password:
-			_vals = append(_vals, &p.Password)
-		case tblaccount.State:
-			_vals = append(_vals, &p.State)
-		case tblaccount.Ctime:
-			_vals = append(_vals, &p.Ctime)
-		case tblaccount.Utime:
-			_vals = append(_vals, &p.Utime)
+		if ptrFunc, ok := accountFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
@@ -175,6 +189,28 @@ func (p *Account) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 	return p.AssignValues(args...)
 }
 
+// 定义字段到值检查和获取函数的映射
+var accountFieldToValueFunc = map[dialect.Field]func(*Account) (string, any, bool){
+	tblaccount.Id: func(p *Account) (string, any, bool) {
+		return tblaccount.Id.Quote(), p.Id, p.Id == 0
+	},
+	tblaccount.LoginName: func(p *Account) (string, any, bool) {
+		return tblaccount.LoginName.Quote(), p.LoginName, p.LoginName == ""
+	},
+	tblaccount.Password: func(p *Account) (string, any, bool) {
+		return tblaccount.Password.Quote(), p.Password, p.Password == ""
+	},
+	tblaccount.State: func(p *Account) (string, any, bool) {
+		return tblaccount.State.Quote(), p.State, p.State == 0
+	},
+	tblaccount.Ctime: func(p *Account) (string, any, bool) {
+		return tblaccount.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+	},
+	tblaccount.Utime: func(p *Account) (string, any, bool) {
+		return tblaccount.Utime.Quote(), p.Utime, p.Utime.IsZero()
+	},
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -184,77 +220,30 @@ func (p *Account) AssignValues(args ...dialect.Field) ([]string, []any) {
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tblaccount.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			case tblaccount.Id:
-				if p.Id == 0 {
-					continue
-				}
-				_cols = append(_cols, tblaccount.Id.Quote())
-				_vals = append(_vals, p.Id)
-			case tblaccount.LoginName:
-				if p.LoginName == "" {
-					continue
-				}
-				_cols = append(_cols, tblaccount.LoginName.Quote())
-				_vals = append(_vals, p.LoginName)
-			case tblaccount.Password:
-				if p.Password == "" {
-					continue
-				}
-				_cols = append(_cols, tblaccount.Password.Quote())
-				_vals = append(_vals, p.Password)
-			case tblaccount.State:
-				if p.State == 0 {
-					continue
-				}
-				_cols = append(_cols, tblaccount.State.Quote())
-				_vals = append(_vals, p.State)
-			case tblaccount.Ctime:
-				if p.Ctime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblaccount.Ctime.Quote())
-				_vals = append(_vals, p.Ctime)
-			case tblaccount.Utime:
-				if p.Utime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblaccount.Utime.Quote())
-				_vals = append(_vals, p.Utime)
+			if valueFunc, exists := accountFieldToValueFunc[arg]; exists {
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tblaccount.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		case tblaccount.Id:
-			_cols = append(_cols, tblaccount.Id.Quote())
-			_vals = append(_vals, p.Id)
-		case tblaccount.LoginName:
-			_cols = append(_cols, tblaccount.LoginName.Quote())
-			_vals = append(_vals, p.LoginName)
-		case tblaccount.Password:
-			_cols = append(_cols, tblaccount.Password.Quote())
-			_vals = append(_vals, p.Password)
-		case tblaccount.State:
-			_cols = append(_cols, tblaccount.State.Quote())
-			_vals = append(_vals, p.State)
-		case tblaccount.Ctime:
-			_cols = append(_cols, tblaccount.Ctime.Quote())
-			_vals = append(_vals, p.Ctime)
-		case tblaccount.Utime:
-			_cols = append(_cols, tblaccount.Utime.Quote())
-			_vals = append(_vals, p.Utime)
+		if valueFunc, exists := accountFieldToValueFunc[arg]; exists {
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals

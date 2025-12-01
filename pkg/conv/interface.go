@@ -2,7 +2,6 @@ package conv
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -452,7 +451,7 @@ func Any2Float64(s any, def ...float64) float64 {
 	}
 }
 
-func Any2String(s any) string {
+func Any2String(s any, def ...string) string {
 	if ss, ok := s.(Stringer); ok {
 		return ss.String()
 	}
@@ -495,7 +494,10 @@ func Any2String(s any) string {
 	default:
 		b, e := json.Marshal(v)
 		if e != nil {
-			return fmt.Sprintf("%+v", v)
+			if len(def) > 0 {
+				return def[0]
+			}
+			return ""
 		}
 		return string(b)
 	}

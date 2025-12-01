@@ -38,9 +38,9 @@ import (
 type CompanyDao interface {
 	// FindByID 根据ID查询公司信息
 	// @Statement SELECT company.id,account.id FROM company as c,account as a WHERE a.id = :do.Account.ID
-	FindByID(ctx context.Context, id int) (*do.Company, error)
+	FindByID(ctx context.Context, id int) (comp *do.Company, err error)
 	// Create 创建公司信息
-	// @Statement INSERT INTO company (long_name, short_name, address, email, contact_name, contact_telephone, contact_mobile, contact_email, legal_name, creator, state, status, ctime, utime) values (:long_name, :short_name, :address, :email, :contact_name, :contact_telephone, :contact_mobile, :contact_email, :legal_name, :creator, :state, :status, :ctime, :utime)
+	// @Statement INSERT INTO company (long_name, short_name, address, email, contact_name, contact_telephone, contact_mobile, contact_email, legal_name, creator, state, status, ctime, utime) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	Create(ctx context.Context, company *do.Company) (int64, error)
 	// Update 更新公司信息
 	// @Statement Update company Set long_name = :company.LongName,short_name = :company.ShortName WHERE id = :company.ID

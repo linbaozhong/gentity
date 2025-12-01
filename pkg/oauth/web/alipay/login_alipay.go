@@ -22,70 +22,9 @@ import (
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
-type ali struct {
-	appid      string
-	privateKey string
-	publicKey  string
-	returnUrl  string
-	notifyUrl  string
-}
-
-var (
-	aliClient *alipay.Client
-)
-
-type option func(a *ali)
-
-func WithAppId(appid string) option {
-	return func(a *ali) {
-		a.appid = appid
-	}
-}
-func WithPrivateKey(privateKey string) option {
-	return func(a *ali) {
-		a.privateKey = privateKey
-	}
-}
-func WithPublicKey(publicKey string) option {
-	return func(a *ali) {
-		a.publicKey = publicKey
-	}
-}
-func WithReturnUrl(returnUrl string) option {
-	return func(a *ali) {
-		a.returnUrl = returnUrl
-	}
-}
-func WithNotifyUrl(notifyUrl string) option {
-	return func(a *ali) {
-		a.notifyUrl = notifyUrl
-	}
-}
-
-func New(opts ...option) web.Loginer {
-	a := &ali{}
-	for _, opt := range opts {
-		opt(a)
-	}
-	return a
-}
-
-func (a *ali) client() *alipay.Client {
-	if aliClient == nil {
-		var e error
-		aliClient, e = alipay.New(a.appid, a.privateKey, true)
-		if e != nil {
-			panic(e)
-		}
-		aliClient.LoadAliPayPublicKey(a.publicKey)
-	}
-
-	return aliClient
-}
-
 // Authorize 生成支付宝授权链接
-func (a *ali) Authorize(ctx context.Context, state string) (string, error) {
-	u, e := a.client().PublicAppAuthorize([]string{"auth_user"}, a.returnUrl, state)
+func (a *ali) Authorize(ctx context.Context, state string, isMobile bool) (string, error) {
+	u, e := a.client().PublicAppAuthorize([]string{"auth_user"}, a.returnUrl, web.Alipay.String()+":"+state)
 	if e != nil {
 		return "", e
 	}
@@ -122,7 +61,7 @@ func (a *ali) Callback(ctx context.Context, code, state string) (*web.OauthToken
 }
 
 // GetUserInfo 获取用户信息
-func (a *ali) GetUserInfo(ctx context.Context, token string) (*web.UserInfoRsp, error) {
+func (a *ali) GetUserInfo(ctx context.Context, token, openid string) (*web.UserInfoRsp, error) {
 	_res, e := a.client().UserInfoShare(ctx,
 		alipay.UserInfoShare{
 			AuthToken: token,

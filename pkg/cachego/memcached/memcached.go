@@ -68,7 +68,7 @@ func (m *memcached) Contains(ctx context.Context, key string) bool {
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (m *memcached) ExistsOrSave(ctx context.Context, key string, value any, lifeTime ...time.Duration) bool {
+func (m *memcached) ExistsOrSave(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -146,7 +146,7 @@ func (m *memcached) Flush(ctx context.Context) error {
 }
 
 // Save a value in Memcached storage by key
-func (m *memcached) Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error {
+func (m *memcached) Save(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) error {
 	val, err := conv.Any2Bytes(value)
 	if err != nil {
 		return err

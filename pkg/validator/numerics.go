@@ -16,6 +16,7 @@ package validator
 
 import (
 	"github.com/linbaozhong/gentity/pkg/conv"
+	"math"
 )
 
 // InRangeInt returns true if value lies between left and right border
@@ -65,4 +66,16 @@ func InRange(value interface{}, left interface{}, right interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func Max(value interface{}, left interface{}) bool {
+	intValue := conv.Any2Float64(value, math.MaxFloat64)
+	intLeft := conv.Any2Float64(left)
+	return intValue <= intLeft
+}
+
+func Min(value interface{}, left interface{}) bool {
+	intValue := conv.Any2Float64(value)
+	intLeft := conv.Any2Float64(left, math.MaxFloat64)
+	return intValue >= intLeft
 }

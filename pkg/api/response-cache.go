@@ -63,6 +63,6 @@ func ReadCache(ctx Context, lefetime ...time.Duration) bool {
 	return e == nil
 }
 
-func setCache(ctx context.Context, key cacheKey, val any) {
+func setCache(ctx context.Context, key cacheKey, val []byte) {
 	respCache.Save(ctx, key.Key, val, key.Duration)
 }

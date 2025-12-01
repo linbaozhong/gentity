@@ -19,6 +19,7 @@ import (
 	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/util"
 	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"strings"
@@ -50,12 +51,12 @@ var (
 	cacheOnce sync.Once
 )
 
-// WithName 设置缓存名称
-func WithName(name string) option {
-	return func(o *sqlite) {
-		o.name = name
-	}
-}
+// // WithName 设置缓存名称
+// func WithName(name string) option {
+// 	return func(o *sqlite) {
+// 		o.name = name
+// 	}
+// }
 
 // WithPrefix 设置key前缀
 func WithPrefix(prefix string) option {
@@ -74,12 +75,12 @@ func WithInterval(d time.Duration) option {
 // WithExpired 设置过期时间
 func WithExpired(duration time.Duration) option {
 	return func(o *sqlite) {
-		o.duration = time.Now().Unix() + int64(duration.Seconds())
+		o.duration = int64(duration.Seconds())
 	}
 }
 
 // New 创建一个sqlite缓存实例
-func New(ctx context.Context, opts ...option) cachego.Cache {
+func New(ctx context.Context, name string, opts ...option) cachego.Cache {
 	cacheOnce.Do(func() {
 		var err error
 		err = os.MkdirAll("./cache", 0755)
@@ -95,13 +96,17 @@ func New(ctx context.Context, opts ...option) cachego.Cache {
 
 	obj := &sqlite{
 		db:       cacheDB,
-		name:     cacheTableName,
+		name:     name,
 		interval: cacheCleanupInterval,
 		lastTime: time.Now(),
 	}
 
 	for _, opt := range opts {
 		opt(obj)
+	}
+
+	if obj.name == "" {
+		obj.name = cacheTableName + "_" + util.GetRandLowerString(4)
 	}
 
 	obj.storage(ctx, obj.name)
@@ -131,7 +136,7 @@ func (s *sqlite) Contains(ctx context.Context, key string) bool {
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value any, lifeTime ...time.Duration) bool {
+func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -139,7 +144,7 @@ func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value any, lifeTi
 		return false
 	}
 
-	duration := s.duration
+	duration := time.Now().Unix() + s.duration
 	if len(lifeTime) > 0 {
 		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
@@ -216,12 +221,12 @@ func (s *sqlite) Flush(ctx context.Context) error {
 	return err
 }
 
-func (s *sqlite) Save(ctx context.Context, key string, value any, lifeTime ...time.Duration) error {
+func (s *sqlite) Save(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) error {
 	var (
 		stmt *sql.Stmt
 		err  error
 	)
-	duration := s.duration
+	duration := time.Now().Unix() + s.duration
 	if len(lifeTime) > 0 {
 		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
 	}
@@ -253,7 +258,7 @@ func (s *sqlite) getKey(key string) string {
 func (s *sqlite) storage(ctx context.Context, name string) error {
 	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS "`+name+`" (
 			"key" TEXT NOT NULL DEFAULT '',
-			"value" TEXT NOT NULL DEFAULT '',
+			"value" BLOB NOT NULL DEFAULT '',
 			"expire" integer NOT NULL DEFAULT 0,
 			PRIMARY KEY ("key")
 		)`)

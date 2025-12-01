@@ -27,6 +27,8 @@ var ParamTagMap = map[string]string{
 	"rsapub":          "IsRsaPub",
 	"minstringlength": "MinStringLength",
 	"maxstringlength": "MaxStringLength",
+	"min":             "Min",
+	"max":             "Max",
 }
 
 // ParamTagRegexMap maps param tags to their respective regexes.
@@ -40,6 +42,8 @@ var ParamTagRegexMap = map[string]*regexp.Regexp{
 	"rsapub":          regexp.MustCompile("^rsapub\\((\\d+)\\)$"),
 	"minstringlength": regexp.MustCompile("^minstringlength\\((\\d+)\\)$"),
 	"maxstringlength": regexp.MustCompile("^maxstringlength\\((\\d+)\\)$"),
+	"min":             regexp.MustCompile("^min\\((\\d+)\\)$"),
+	"max":             regexp.MustCompile("^max\\((\\d+)\\)$"),
 }
 
 var TagMap = map[string]string{

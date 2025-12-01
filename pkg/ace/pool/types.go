@@ -56,6 +56,9 @@ func (a *Model) Put2Pool() bool {
 // Get4Pool 方法，用于从池中取出对象时
 // 将 ace_put 设置为 false，防止重复放入池中
 func (a *Model) Get4Pool() {
+	if !a.ace_put {
+		return
+	}
 	a.mu.Lock()
 	a.ace_put = false
 	a.mu.Unlock()

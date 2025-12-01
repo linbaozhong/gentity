@@ -31,55 +31,66 @@ func NewCompany() *Company {
 
 // MarshalJSON
 func (p *Company) MarshalJSON() ([]byte, error) {
-	var _buf = bytes.NewBuffer(nil)
+	var (
+		_buf   = bytes.NewBuffer((make([]byte, 0, 15*50)))
+		_comma bool
+	)
 	_buf.WriteByte('{')
+
+	writeField := func(key string, value string) {
+		if _comma {
+			_buf.WriteByte(',')
+		}
+		_buf.WriteByte('"')
+		_buf.WriteString(key)
+		_buf.WriteString(`":`)
+		_buf.WriteString(value)
+		_comma = true
+	}
 	if p.Id != 0 {
-		_buf.WriteString(`"id":` + types.Marshal(p.Id) + `,`)
+		writeField("id", types.Marshal(p.Id))
 	}
 	if p.LongName != "" {
-		_buf.WriteString(`"long_name":` + types.Marshal(p.LongName) + `,`)
+		writeField("long_name", types.Marshal(p.LongName))
 	}
 	if p.ShortName != "" {
-		_buf.WriteString(`"short_name":` + types.Marshal(p.ShortName) + `,`)
+		writeField("short_name", types.Marshal(p.ShortName))
 	}
 	if p.Address != "" {
-		_buf.WriteString(`"address":` + types.Marshal(p.Address) + `,`)
+		writeField("address", types.Marshal(p.Address))
 	}
 	if p.Email != "" {
-		_buf.WriteString(`"email":` + types.Marshal(p.Email) + `,`)
+		writeField("email", types.Marshal(p.Email))
 	}
 	if p.ContactName != "" {
-		_buf.WriteString(`"contact_name":` + types.Marshal(p.ContactName) + `,`)
+		writeField("contact_name", types.Marshal(p.ContactName))
 	}
 	if p.ContactTelephone != "" {
-		_buf.WriteString(`"contact_telephone":` + types.Marshal(p.ContactTelephone) + `,`)
+		writeField("contact_telephone", types.Marshal(p.ContactTelephone))
 	}
 	if p.ContactMobile != "" {
-		_buf.WriteString(`"contact_mobile":` + types.Marshal(p.ContactMobile) + `,`)
+		writeField("contact_mobile", types.Marshal(p.ContactMobile))
 	}
 	if p.ContactEmail != "" {
-		_buf.WriteString(`"contact_email":` + types.Marshal(p.ContactEmail) + `,`)
+		writeField("contact_email", types.Marshal(p.ContactEmail))
 	}
 	if p.LegalName != "" {
-		_buf.WriteString(`"legal_name":` + types.Marshal(p.LegalName) + `,`)
+		writeField("legal_name", types.Marshal(p.LegalName))
 	}
 	if p.Creator != 0 {
-		_buf.WriteString(`"creator":` + types.Marshal(p.Creator) + `,`)
+		writeField("creator", types.Marshal(p.Creator))
 	}
 	if p.State != 0 {
-		_buf.WriteString(`"state":` + types.Marshal(p.State) + `,`)
+		writeField("state", types.Marshal(p.State))
 	}
 	if p.Status != 0 {
-		_buf.WriteString(`"status":` + types.Marshal(p.Status) + `,`)
+		writeField("status", types.Marshal(p.Status))
 	}
 	if !p.Ctime.IsZero() {
-		_buf.WriteString(`"ctime":` + types.Marshal(p.Ctime) + `,`)
+		writeField("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		_buf.WriteString(`"utime":` + types.Marshal(p.Utime) + `,`)
-	}
-	if l := _buf.Len(); l > 1 {
-		_buf.Truncate(l - 1)
+		writeField("utime", types.Marshal(p.Utime))
 	}
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
@@ -168,6 +179,29 @@ func (p *Company) TableName() string {
 	return CompanyTableName
 }
 
+// 定义一个映射表，将字段与对应的指针获取函数关联
+var companyFieldToPtrFunc = map[dialect.Field]func(*Company) any{
+	tblcompany.Id:               func(p *Company) any { return &p.Id },
+	tblcompany.LongName:         func(p *Company) any { return &p.LongName },
+	tblcompany.ShortName:        func(p *Company) any { return &p.ShortName },
+	tblcompany.Address:          func(p *Company) any { return &p.Address },
+	tblcompany.Email:            func(p *Company) any { return &p.Email },
+	tblcompany.ContactName:      func(p *Company) any { return &p.ContactName },
+	tblcompany.ContactTelephone: func(p *Company) any { return &p.ContactTelephone },
+	tblcompany.ContactMobile:    func(p *Company) any { return &p.ContactMobile },
+	tblcompany.ContactEmail:     func(p *Company) any { return &p.ContactEmail },
+	tblcompany.LegalName:        func(p *Company) any { return &p.LegalName },
+	tblcompany.Creator:          func(p *Company) any { return &p.Creator },
+	tblcompany.State:            func(p *Company) any { return &p.State },
+	tblcompany.Status:           func(p *Company) any { return &p.Status },
+	tblcompany.Ctime:            func(p *Company) any { return &p.Ctime },
+	tblcompany.Utime:            func(p *Company) any { return &p.Utime },
+}
+
+// AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
+// 如果未传入任何字段参数，则默认使用 ReadableFields 中的字段。
+// 参数 args 为可变参数，代表需要获取指针的字段。
+// 返回值为一个包含对应字段指针的切片。
 func (p *Company) AssignPtr(args ...dialect.Field) []any {
 	if len(args) == 0 {
 		args = tblcompany.ReadableFields
@@ -175,37 +209,8 @@ func (p *Company) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		switch col {
-		case tblcompany.Id:
-			_vals = append(_vals, &p.Id)
-		case tblcompany.LongName:
-			_vals = append(_vals, &p.LongName)
-		case tblcompany.ShortName:
-			_vals = append(_vals, &p.ShortName)
-		case tblcompany.Address:
-			_vals = append(_vals, &p.Address)
-		case tblcompany.Email:
-			_vals = append(_vals, &p.Email)
-		case tblcompany.ContactName:
-			_vals = append(_vals, &p.ContactName)
-		case tblcompany.ContactTelephone:
-			_vals = append(_vals, &p.ContactTelephone)
-		case tblcompany.ContactMobile:
-			_vals = append(_vals, &p.ContactMobile)
-		case tblcompany.ContactEmail:
-			_vals = append(_vals, &p.ContactEmail)
-		case tblcompany.LegalName:
-			_vals = append(_vals, &p.LegalName)
-		case tblcompany.Creator:
-			_vals = append(_vals, &p.Creator)
-		case tblcompany.State:
-			_vals = append(_vals, &p.State)
-		case tblcompany.Status:
-			_vals = append(_vals, &p.Status)
-		case tblcompany.Ctime:
-			_vals = append(_vals, &p.Ctime)
-		case tblcompany.Utime:
-			_vals = append(_vals, &p.Utime)
+		if ptrFunc, ok := companyFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
@@ -247,6 +252,55 @@ func (p *Company) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 	return p.AssignValues(args...)
 }
 
+// 定义字段到值检查和获取函数的映射
+var companyFieldToValueFunc = map[dialect.Field]func(*Company) (string, any, bool){
+	tblcompany.Id: func(p *Company) (string, any, bool) {
+		return tblcompany.Id.Quote(), p.Id, p.Id == 0
+	},
+	tblcompany.LongName: func(p *Company) (string, any, bool) {
+		return tblcompany.LongName.Quote(), p.LongName, p.LongName == ""
+	},
+	tblcompany.ShortName: func(p *Company) (string, any, bool) {
+		return tblcompany.ShortName.Quote(), p.ShortName, p.ShortName == ""
+	},
+	tblcompany.Address: func(p *Company) (string, any, bool) {
+		return tblcompany.Address.Quote(), p.Address, p.Address == ""
+	},
+	tblcompany.Email: func(p *Company) (string, any, bool) {
+		return tblcompany.Email.Quote(), p.Email, p.Email == ""
+	},
+	tblcompany.ContactName: func(p *Company) (string, any, bool) {
+		return tblcompany.ContactName.Quote(), p.ContactName, p.ContactName == ""
+	},
+	tblcompany.ContactTelephone: func(p *Company) (string, any, bool) {
+		return tblcompany.ContactTelephone.Quote(), p.ContactTelephone, p.ContactTelephone == ""
+	},
+	tblcompany.ContactMobile: func(p *Company) (string, any, bool) {
+		return tblcompany.ContactMobile.Quote(), p.ContactMobile, p.ContactMobile == ""
+	},
+	tblcompany.ContactEmail: func(p *Company) (string, any, bool) {
+		return tblcompany.ContactEmail.Quote(), p.ContactEmail, p.ContactEmail == ""
+	},
+	tblcompany.LegalName: func(p *Company) (string, any, bool) {
+		return tblcompany.LegalName.Quote(), p.LegalName, p.LegalName == ""
+	},
+	tblcompany.Creator: func(p *Company) (string, any, bool) {
+		return tblcompany.Creator.Quote(), p.Creator, p.Creator == 0
+	},
+	tblcompany.State: func(p *Company) (string, any, bool) {
+		return tblcompany.State.Quote(), p.State, p.State == 0
+	},
+	tblcompany.Status: func(p *Company) (string, any, bool) {
+		return tblcompany.Status.Quote(), p.Status, p.Status == 0
+	},
+	tblcompany.Ctime: func(p *Company) (string, any, bool) {
+		return tblcompany.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+	},
+	tblcompany.Utime: func(p *Company) (string, any, bool) {
+		return tblcompany.Utime.Quote(), p.Utime, p.Utime.IsZero()
+	},
+}
+
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
@@ -256,158 +310,30 @@ func (p *Company) AssignValues(args ...dialect.Field) ([]string, []any) {
 		_cols []string
 		_vals []any
 	)
-
-	if len(args) == 0 {
-		args = tblcompany.WritableFields
-		_lens = len(args)
+	if _lens > 0 {
 		_cols = make([]string, 0, _lens)
 		_vals = make([]any, 0, _lens)
 		for _, arg := range args {
-			switch arg {
-			case tblcompany.Id:
-				if p.Id == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompany.Id.Quote())
-				_vals = append(_vals, p.Id)
-			case tblcompany.LongName:
-				if p.LongName == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompany.LongName.Quote())
-				_vals = append(_vals, p.LongName)
-			case tblcompany.ShortName:
-				if p.ShortName == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompany.ShortName.Quote())
-				_vals = append(_vals, p.ShortName)
-			case tblcompany.Address:
-				if p.Address == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompany.Address.Quote())
-				_vals = append(_vals, p.Address)
-			case tblcompany.Email:
-				if p.Email == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompany.Email.Quote())
-				_vals = append(_vals, p.Email)
-			case tblcompany.ContactName:
-				if p.ContactName == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompany.ContactName.Quote())
-				_vals = append(_vals, p.ContactName)
-			case tblcompany.ContactTelephone:
-				if p.ContactTelephone == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompany.ContactTelephone.Quote())
-				_vals = append(_vals, p.ContactTelephone)
-			case tblcompany.ContactMobile:
-				if p.ContactMobile == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompany.ContactMobile.Quote())
-				_vals = append(_vals, p.ContactMobile)
-			case tblcompany.ContactEmail:
-				if p.ContactEmail == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompany.ContactEmail.Quote())
-				_vals = append(_vals, p.ContactEmail)
-			case tblcompany.LegalName:
-				if p.LegalName == "" {
-					continue
-				}
-				_cols = append(_cols, tblcompany.LegalName.Quote())
-				_vals = append(_vals, p.LegalName)
-			case tblcompany.Creator:
-				if p.Creator == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompany.Creator.Quote())
-				_vals = append(_vals, p.Creator)
-			case tblcompany.State:
-				if p.State == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompany.State.Quote())
-				_vals = append(_vals, p.State)
-			case tblcompany.Status:
-				if p.Status == 0 {
-					continue
-				}
-				_cols = append(_cols, tblcompany.Status.Quote())
-				_vals = append(_vals, p.Status)
-			case tblcompany.Ctime:
-				if p.Ctime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblcompany.Ctime.Quote())
-				_vals = append(_vals, p.Ctime)
-			case tblcompany.Utime:
-				if p.Utime.IsZero() {
-					continue
-				}
-				_cols = append(_cols, tblcompany.Utime.Quote())
-				_vals = append(_vals, p.Utime)
+			if valueFunc, exists := companyFieldToValueFunc[arg]; exists {
+				colName, value, _ := valueFunc(p)
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
 			}
 		}
 		return _cols, _vals
 	}
 
+	args = tblcompany.WritableFields
+	_lens = len(args)
 	_cols = make([]string, 0, _lens)
 	_vals = make([]any, 0, _lens)
 	for _, arg := range args {
-		switch arg {
-		case tblcompany.Id:
-			_cols = append(_cols, tblcompany.Id.Quote())
-			_vals = append(_vals, p.Id)
-		case tblcompany.LongName:
-			_cols = append(_cols, tblcompany.LongName.Quote())
-			_vals = append(_vals, p.LongName)
-		case tblcompany.ShortName:
-			_cols = append(_cols, tblcompany.ShortName.Quote())
-			_vals = append(_vals, p.ShortName)
-		case tblcompany.Address:
-			_cols = append(_cols, tblcompany.Address.Quote())
-			_vals = append(_vals, p.Address)
-		case tblcompany.Email:
-			_cols = append(_cols, tblcompany.Email.Quote())
-			_vals = append(_vals, p.Email)
-		case tblcompany.ContactName:
-			_cols = append(_cols, tblcompany.ContactName.Quote())
-			_vals = append(_vals, p.ContactName)
-		case tblcompany.ContactTelephone:
-			_cols = append(_cols, tblcompany.ContactTelephone.Quote())
-			_vals = append(_vals, p.ContactTelephone)
-		case tblcompany.ContactMobile:
-			_cols = append(_cols, tblcompany.ContactMobile.Quote())
-			_vals = append(_vals, p.ContactMobile)
-		case tblcompany.ContactEmail:
-			_cols = append(_cols, tblcompany.ContactEmail.Quote())
-			_vals = append(_vals, p.ContactEmail)
-		case tblcompany.LegalName:
-			_cols = append(_cols, tblcompany.LegalName.Quote())
-			_vals = append(_vals, p.LegalName)
-		case tblcompany.Creator:
-			_cols = append(_cols, tblcompany.Creator.Quote())
-			_vals = append(_vals, p.Creator)
-		case tblcompany.State:
-			_cols = append(_cols, tblcompany.State.Quote())
-			_vals = append(_vals, p.State)
-		case tblcompany.Status:
-			_cols = append(_cols, tblcompany.Status.Quote())
-			_vals = append(_vals, p.Status)
-		case tblcompany.Ctime:
-			_cols = append(_cols, tblcompany.Ctime.Quote())
-			_vals = append(_vals, p.Ctime)
-		case tblcompany.Utime:
-			_cols = append(_cols, tblcompany.Utime.Quote())
-			_vals = append(_vals, p.Utime)
+		if valueFunc, exists := companyFieldToValueFunc[arg]; exists {
+			colName, value, valid := valueFunc(p)
+			if !valid {
+				_cols = append(_cols, colName)
+				_vals = append(_vals, value)
+			}
 		}
 	}
 	return _cols, _vals
