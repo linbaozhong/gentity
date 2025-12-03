@@ -19,10 +19,18 @@ import "github.com/linbaozhong/gentity/pkg/ace/dialect"
 type Columner interface {
 	Table(a any) Builder
 	GetTableName() string
+	// GetCols 获取 orm 对象要查询的列。
 	GetCols() []dialect.Field
+	// Distinct 设置查询结果去重，并指定去重的列。
+	Distinct(cols ...dialect.Field) Builder
+	// Cols 指定要查询的列
 	Cols(cols ...dialect.Field) Builder
+	// Func 添加聚合函数到查询中
 	Func(fns ...dialect.Function) Builder
+	// Omits 忽略指定的列
 	Omit(cols ...dialect.Field) Builder
+	// PureCols 只包含指定的列，忽略其他列
+	PureCols(cols ...dialect.Field) Builder
 }
 
 // GetCols 获取 orm 对象要查询的列。
@@ -33,7 +41,7 @@ func (s *orm) GetCols() []dialect.Field {
 // Distinct 设置查询结果去重，并指定去重的列。
 func (o *orm) Distinct(cols ...dialect.Field) Builder {
 	o.distinct = true
-	o.cols = append(o.cols, cols...)
+	o.cols = cols
 	return o
 }
 
@@ -46,6 +54,12 @@ func (o *orm) Cols(cols ...dialect.Field) Builder {
 // Omits 忽略指定的列
 func (o *orm) Omit(cols ...dialect.Field) Builder {
 	o.omits = append(o.omits, cols...)
+	return o
+}
+
+// PureCols 只包含指定的列，忽略其他列
+func (o *orm) PureCols(cols ...dialect.Field) Builder {
+	o.cols = cols
 	return o
 }
 

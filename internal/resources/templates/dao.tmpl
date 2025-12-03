@@ -384,6 +384,42 @@ func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([
 	return _objs, false, e
 }
 
+// Column 查询所有符合条件的记录的指定列
+func (p *{{$structNameLower}}) Column(ctx context.Context, s ace.SelectBuilder) ([]any, error) {
+	defer p.Free()
+	if len(s.GetTableName()) == 0{
+		s.Table({{$package}}.{{$structName}}TableName)
+	}
+
+	_cols := s.GetCols()
+	if len(_cols) == 0 {
+		s.PureCols(tbl{{$structNameLower}}.PrimaryKey)
+	}else{
+		s.PureCols(_cols[0])
+	}
+
+	_rows, e := s.
+		ToSql(p.toSql).
+		Select(p.db).
+		Query(ctx)
+	if e != nil {
+		log.Error(e)
+		return nil, e
+	}
+	defer _rows.Close()
+
+	_objs := []any{}
+	for _rows.Next() {
+		var _v any
+		e := _rows.Scan(&_v)
+		if e != nil {
+			log.Error(e)
+			return nil, e
+		}
+		_objs = append(_objs, _v)
+	}
+	return _objs, nil
+}
 
 // Count
 func (p *{{$structNameLower}}) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
