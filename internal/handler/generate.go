@@ -23,7 +23,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"text/template"
 )
@@ -286,7 +285,7 @@ func getValidParamFunc(t, n string) (fo funcObj) {
 
 	if fn, ok := validator.ParamTagMap[tag]; ok {
 		fo.Func = fn
-		fo.Param = strconv.Quote(strings.Join(_params, `","`))
+		fo.Param = "\"" + strings.Join(_params, `","`) + "\""
 		return
 	}
 	return
