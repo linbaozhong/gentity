@@ -172,23 +172,37 @@ func (o *orm) Set(fns ...dialect.Setter) Builder {
 	copy(tmpCols, o.cols)
 	tmpParams := make([]any, len(o.params), len(o.params)+l)
 	copy(tmpParams, o.params)
-	// tmpCols = append(tmpCols, o.cols...)
-	// tmpParams = append(tmpParams, o.params...)
+	tmpExprCols := make([]expr, len(o.exprCols), len(o.exprCols)+l)
+	copy(tmpExprCols, o.exprCols)
 
 	for _, fn := range fns {
-		c, val := fn()
-		tmpCols = append(tmpCols, c)
-		tmpParams = append(tmpParams, val)
+		c, val, op := fn()
+		if e, ok := val.(error); ok {
+			o.err = e
+			return o
+		}
+		if op == dialect.Op_Normal {
+			tmpCols = append(tmpCols, c)
+			tmpParams = append(tmpParams, val)
+		} else {
+			ex, val, e := dialect.ParseSetter(fn)
+			if e == nil {
+				tmpExprCols = append(tmpExprCols, expr{colName: ex, arg: val})
+			}
+		}
 	}
 	o.cols = tmpCols
 	o.params = tmpParams
+	o.exprCols = tmpExprCols
 	return o
 }
 
+// Deprecated: 请使用 Set
+//
 // SetExpr
 // 用于设置更新语句中的表达式
 // 例如：SetExpr(dialect.Expr("age", "age + 1"))
-func (o *orm) SetExpr(fns ...dialect.ExprSetter) Builder {
+func (o *orm) SetExpr(fns ...dialect.Setter) Builder {
 	l := len(fns)
 	if l == 0 || o.err != nil {
 		return o
@@ -198,7 +212,11 @@ func (o *orm) SetExpr(fns ...dialect.ExprSetter) Builder {
 	copy(tmpExprCols, o.exprCols)
 
 	for _, fn := range fns {
-		ex, val := fn()
+		ex, val, e := dialect.ParseSetter(fn)
+		if e != nil {
+			o.err = e
+			return o
+		}
 		tmpExprCols = append(tmpExprCols, expr{colName: ex, arg: val})
 	}
 	o.exprCols = tmpExprCols

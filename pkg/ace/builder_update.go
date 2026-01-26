@@ -25,7 +25,7 @@ import (
 type UpdateBuilder interface {
 	Columner
 	Set(fns ...dialect.Setter) Builder
-	SetExpr(fns ...dialect.ExprSetter) Builder
+	SetExpr(fns ...dialect.Setter) Builder
 	Wherer
 	Update(x ...Executer) Updater
 	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。

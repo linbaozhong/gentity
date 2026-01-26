@@ -53,9 +53,11 @@ func Set(fns ...dialect.Setter) Builder {
 	return newOrm().Set(fns...)
 }
 
+// Deprecated: 请使用 Set
+//
 // SetExpr
 // 用于设置更新语句中的表达式
 // 例如：SetExpr(dialect.Expr("age", "age + 1"))
-func SetExpr(fns ...dialect.ExprSetter) Builder {
+func SetExpr(fns ...dialect.Setter) Builder {
 	return newOrm().SetExpr(fns...)
 }

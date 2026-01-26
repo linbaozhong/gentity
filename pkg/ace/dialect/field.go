@@ -34,6 +34,9 @@ type (
 	// 		~string |
 	// 		time.Time | types.Time
 	// }
+
+	SetOp int8 // 赋值运算符
+
 	Field struct {
 		Name      string
 		Json      string
@@ -42,18 +45,29 @@ type (
 		Type      string
 	}
 
-	Function   func() string
-	Condition  func() (string, any)
-	Order      func() (string, []Field)
-	Setter     func() (Field, any)
-	ExprSetter func() (string, any)
+	Function  func() string
+	Condition func() (string, any)
+	Order     func() (string, []Field)
+	Setter    func() (Field, any, SetOp)
+	// Setter     func() (Field, any)
+	// ExprSetter func() (string, any)
+	// // SetFunc 为替换Setter和ExprSetter进行的兼容测试
+	// SetFunc func() (Field, any, SetOp)
+)
+
+const (
+	Op_Normal    SetOp = iota // 普通赋值
+	Op_Increment              // 自增
+	Op_Decrement              // 自减
+	Op_Replace                // 替换
+	Op_Expr                   // 其它表达式
 )
 
 // Quote 为字段添加引号
 func (f *Field) Quote() string {
 	var sb strings.Builder
-	// 预先计算并分配足够的内存空间
-	sb.Grow(len(f.TableName()) + len(".") + len(f.FieldName()))
+	// 预先计算并分配足够的内存空间：len(f.TableName()) + len(".") + len(f.FieldName())
+	sb.Grow(len(f.TableName()) + 1 + len(f.FieldName()))
 	sb.WriteString(f.TableName())
 	sb.WriteString(".")
 	sb.WriteString(f.FieldName())
@@ -63,8 +77,8 @@ func (f *Field) Quote() string {
 // TableName 为表名添加引号
 func (f *Field) TableName() string {
 	var sb strings.Builder
-	// 预先计算并分配足够的内存空间
-	sb.Grow(len(Quote_Char) + len(f.Table) + len(Quote_Char))
+	// 预先计算并分配足够的内存空间：len(Quote_Char) + len(f.Table) + len(Quote_Char)
+	sb.Grow(len(f.Table) + 2)
 	sb.WriteString(Quote_Char)
 	sb.WriteString(f.Table)
 	sb.WriteString(Quote_Char)
@@ -74,8 +88,8 @@ func (f *Field) TableName() string {
 // FieldName 为字段名添加引号
 func (f *Field) FieldName() string {
 	var sb strings.Builder
-	// 预先计算并分配足够的内存空间
-	sb.Grow(len(Quote_Char) + len(f.Name) + len(Quote_Char))
+	// 预先计算并分配足够的内存空间：len(Quote_Char) + len(f.Name) + len(Quote_Char)
+	sb.Grow(len(f.Name) + 2)
 	sb.WriteString(Quote_Char)
 	sb.WriteString(f.Name)
 	sb.WriteString(Quote_Char)
@@ -84,68 +98,67 @@ func (f *Field) FieldName() string {
 
 // Set 为字段设置值
 func (f *Field) Set(val any) Setter {
-	return func() (Field, any) {
-		return *f, val
+	return func() (Field, any, SetOp) {
+		return *f, val, Op_Normal
 	}
 }
 
 // Incr 自增
 // val 默认为1
-func (f *Field) Incr(val ...any) ExprSetter {
+func (f *Field) Incr(val ...any) Setter {
 	var v any
-	if len(val) > 0 && val[0] != nil {
-		v = val[0]
-	} else {
+	if len(val) == 0 || val[0] == nil {
 		v = 1
+	} else {
+		v = val[0]
 	}
-	return func() (string, any) {
-		// 使用 strings.Builder 进行字符串拼接
+	return func() (Field, any, SetOp) {
+		return *f, v, Op_Increment
+	}
+	// return func() (string, any) {
+	// 	// 使用 strings.Builder 进行字符串拼接
+	// 	var sb strings.Builder
+	// 	// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(f.Quote()) + len(" + ") + len(Placeholder)
+	// 	sb.Grow(len(f.Quote())*2 + 7)
+	// 	sb.WriteString(f.Quote())
+	// 	sb.WriteString(" = ")
+	// 	sb.WriteString(f.Quote())
+	// 	sb.WriteString(" + ")
+	// 	sb.WriteString(Placeholder)
+	// 	return sb.String(), v
+	// }
+}
+
+func ParseSetter(set Setter) (string, any, error) {
+	f, v, op := set()
+	if e, ok := v.(error); ok {
+		return "", nil, e
+	}
+	switch op {
+	case Op_Increment:
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" = ") + len(f.Quote()) + len(" + ") + len(Placeholder))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(f.Quote()) + len(" + ") + len(Placeholder)
+		sb.Grow(len(f.Quote())*2 + 7)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" = ")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" + ")
 		sb.WriteString(Placeholder)
-		return sb.String(), v
-	}
-}
-
-// Decr 自减
-// val 默认为1
-func (f *Field) Decr(val ...any) ExprSetter {
-	var v any
-	if len(val) > 0 && val[0] != nil {
-		v = val[0]
-	} else {
-		v = 1
-	}
-	return func() (string, any) {
-		// 使用 strings.Builder 进行字符串拼接
+		return sb.String(), v, nil
+	case Op_Decrement:
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" = ") + len(f.Quote()) + len(" - ") + len(Placeholder))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(f.Quote()) + len(" - ") + len(Placeholder)
+		sb.Grow(len(f.Quote())*2 + 7)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" = ")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" - ")
 		sb.WriteString(Placeholder)
-
-		return sb.String(), v
-	}
-}
-
-// Replace 替换
-func (f *Field) Replace(old, new string) ExprSetter {
-	return func() (string, any) {
-		// 参数校验
-		if old == "" {
-			return "1 = 0", Err_Expression_Empty_Param
-		}
+		return sb.String(), v, nil
+	case Op_Replace:
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" = REPLACE(") + len(f.Quote()) + len(",?,?)"))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = REPLACE(") + len(f.Quote()) + len(",?,?)")
+		sb.Grow(len(f.Quote())*2 + 16)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" = REPLACE(")
 		sb.WriteString(f.Quote())
@@ -154,26 +167,106 @@ func (f *Field) Replace(old, new string) ExprSetter {
 		sb.WriteString(",")
 		sb.WriteString(Placeholder)
 		sb.WriteString(")")
-		return sb.String(), []any{old, new}
-	}
-}
-
-// Expr 其它表达式
-func (f *Field) Expr(expr string) ExprSetter {
-	return func() (string, any) {
-		if expr == "" {
-			return "", Err_Expression_Empty_Param
-		}
+		return sb.String(), v, nil
+	case Op_Expr:
 		// 使用 strings.Builder 进行字符串拼接
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" = ") + len(Placeholder))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(Placeholder)
+		sb.Grow(len(f.Quote()) + 4)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" = ")
 		sb.WriteString(Placeholder)
 
-		return sb.String(), expr
+		return sb.String(), v, nil
+	default:
+		return f.Quote(), v, Err_Expression_Empty_Param
 	}
+}
+
+// Decr 自减
+// val 默认为1
+func (f *Field) Decr(val ...any) Setter {
+	var v any
+	if len(val) == 0 || val[0] == nil {
+		v = 1
+	} else {
+		v = val[0]
+	}
+	return func() (Field, any, SetOp) {
+		return *f, v, Op_Decrement
+	}
+	// return func() (string, any) {
+	// 	// 使用 strings.Builder 进行字符串拼接
+	// 	var sb strings.Builder
+	// 	// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(f.Quote()) + len(" - ") + len(Placeholder)
+	// 	sb.Grow(len(f.Quote())*2 + 7)
+	// 	sb.WriteString(f.Quote())
+	// 	sb.WriteString(" = ")
+	// 	sb.WriteString(f.Quote())
+	// 	sb.WriteString(" - ")
+	// 	sb.WriteString(Placeholder)
+	//
+	// 	return sb.String(), v
+	// }
+}
+
+// Replace 替换
+func (f *Field) Replace(old, new string) Setter {
+	// 参数校验
+	if old == "" {
+		return func() (Field, any, SetOp) {
+			return *f, Err_Expression_Empty_Param, Op_Replace
+		}
+	}
+
+	return func() (Field, any, SetOp) {
+		return *f, []any{old, new}, Op_Replace
+	}
+	// return func() (string, any) {
+	// 	// 参数校验
+	// 	if old == "" {
+	// 		return "1 = 0", Err_Expression_Empty_Param
+	// 	}
+	// 	var sb strings.Builder
+	// 	// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = REPLACE(") + len(f.Quote()) + len(",?,?)")
+	// 	sb.Grow(len(f.Quote())*2 + 16)
+	// 	sb.WriteString(f.Quote())
+	// 	sb.WriteString(" = REPLACE(")
+	// 	sb.WriteString(f.Quote())
+	// 	sb.WriteString(",")
+	// 	sb.WriteString(Placeholder)
+	// 	sb.WriteString(",")
+	// 	sb.WriteString(Placeholder)
+	// 	sb.WriteString(")")
+	// 	return sb.String(), []any{old, new}
+	// }
+}
+
+// Expr 其它表达式
+func (f *Field) Expr(expr string) Setter {
+	// 参数校验
+	if expr == "" {
+		return func() (Field, any, SetOp) {
+			return *f, Err_Expression_Empty_Param, Op_Replace
+		}
+	}
+	return func() (Field, any, SetOp) {
+		return *f, expr, Op_Expr
+	}
+	// return func() (string, any) {
+	// 	if expr == "" {
+	// 		return "", Err_Expression_Empty_Param
+	// 	}
+	// 	// 使用 strings.Builder 进行字符串拼接
+	// 	var sb strings.Builder
+	// 	// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(Placeholder)
+	// 	sb.Grow(len(f.Quote()) + 4)
+	// 	sb.WriteString(f.Quote())
+	// 	sb.WriteString(" = ")
+	// 	sb.WriteString(Placeholder)
+	//
+	// 	return sb.String(), expr
+	// }
 }
 
 // Eq 等于
@@ -186,8 +279,8 @@ func (f *Field) Eq(val any) Condition {
 
 		// 使用 strings.Builder 进行字符串拼接
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" = ") + len(Placeholder))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(Placeholder)
+		sb.Grow(len(f.Quote()) + 4)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" = ")
 		sb.WriteString(Placeholder)
@@ -206,8 +299,8 @@ func (f *Field) NotEq(val any) Condition {
 
 		// 使用 strings.Builder 进行字符串拼接
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" != ") + len(Placeholder))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" != ") + len(Placeholder)
+		sb.Grow(len(f.Quote()) + 5)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" != ")
 		sb.WriteString(Placeholder)
@@ -226,8 +319,8 @@ func (f *Field) Gt(val any) Condition {
 
 		// 使用 strings.Builder 进行字符串拼接
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" > ") + len(Placeholder))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" > ") + len(Placeholder)
+		sb.Grow(len(f.Quote()) + 4)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" > ")
 		sb.WriteString(Placeholder)
@@ -246,8 +339,8 @@ func (f *Field) Gte(val any) Condition {
 
 		// 使用 strings.Builder 进行字符串拼接
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" >= ") + len(Placeholder))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" >= ") + len(Placeholder)
+		sb.Grow(len(f.Quote()) + 5)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" >= ")
 		sb.WriteString(Placeholder)
@@ -266,8 +359,8 @@ func (f *Field) Lt(val any) Condition {
 
 		// 使用 strings.Builder 进行字符串拼接
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" < ") + len(Placeholder))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" < ") + len(Placeholder)
+		sb.Grow(len(f.Quote()) + 4)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" < ")
 		sb.WriteString(Placeholder)
@@ -286,8 +379,8 @@ func (f *Field) Lte(val any) Condition {
 
 		// 使用 strings.Builder 进行字符串拼接
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(f.Quote()) + len(" <= ") + len(Placeholder))
+		// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" <= ") + len(Placeholder)
+		sb.Grow(len(f.Quote()) + 5)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" <= ")
 		sb.WriteString(Placeholder)
@@ -324,7 +417,8 @@ func (f *Field) In(vals ...any) Condition {
 		}
 
 		var sb strings.Builder
-		sb.Grow(len(f.Quote()) + len(" In (") + (len(Placeholder)+1)*l)
+		// 预分配足够的内存空间：len(f.Quote()) + len(" In (") + (len(Placeholder)+1)*l
+		sb.Grow(2*l + len(f.Quote()) + 5)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" In (")
 		sb.WriteString(strings.Repeat(Placeholder+",", l)[:(len(Placeholder)+1)*l-1])
@@ -346,7 +440,8 @@ func (f *Field) NotIn(vals ...any) Condition {
 		}
 
 		var sb strings.Builder
-		sb.Grow(len(f.Quote()) + len(" Not In (") + (len(Placeholder)+1)*l)
+		// 预分配足够的内存空间：len(f.Quote()) + len(" Not In (") + (len(Placeholder)+1)*l
+		sb.Grow(2*l + len(f.Quote()) + 9)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" Not In (")
 		sb.WriteString(strings.Repeat(Placeholder+",", l)[:(len(Placeholder)+1)*l-1])
@@ -365,7 +460,8 @@ func (f *Field) Between(vals ...any) Condition {
 			return "1 = 0", err
 		}
 		var sb strings.Builder
-		sb.Grow(len(f.Quote()) + len(" Between ") + len(Placeholder) + len(" And ") + len(Placeholder))
+		// 预分配足够的内存空间：len(f.Quote()) + len(" Between ") + len(Placeholder) + len(" And ") + len(Placeholder)
+		sb.Grow(len(f.Quote()) + 16)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" Between ")
 		sb.WriteString(Placeholder)
@@ -385,8 +481,8 @@ func (f *Field) Like(val any) Condition {
 
 		// 使用 strings.Builder 进行字符串拼接
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len("(") + len(f.Quote()) + len(" LIKE CONCAT('%',") + len(Placeholder) + len(",'%'))"))
+		// 预先计算并分配足够的内存空间：len("(") + len(f.Quote()) + len(" LIKE CONCAT('%',") + len(Placeholder) + len(",'%'))")
+		sb.Grow(len(f.Quote()) + 25)
 		sb.WriteString("(")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" LIKE CONCAT('%',")
@@ -405,8 +501,8 @@ func (f *Field) Llike(val any) Condition {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len("(") + len(f.Quote()) + len(" LIKE CONCAT('%',") + len(Placeholder) + len("))"))
+		// 预先计算并分配足够的内存空间：len("(") + len(f.Quote()) + len(" LIKE CONCAT('%',") + len(Placeholder) + len("))")
+		sb.Grow(len(f.Quote()) + 21)
 		sb.WriteString("(")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" LIKE CONCAT('%',")
@@ -425,8 +521,8 @@ func (f *Field) Rlike(val any) Condition {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len("(") + len(f.Quote()) + len(" LIKE CONCAT(") + len(Placeholder) + len(",'%'))"))
+		// 预先计算并分配足够的内存空间：len("(") + len(f.Quote()) + len(" LIKE CONCAT(") + len(Placeholder) + len(",'%'))")
+		sb.Grow(len(f.Quote()) + 21)
 		sb.WriteString("(")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" LIKE CONCAT(")
@@ -440,8 +536,8 @@ func (f *Field) Rlike(val any) Condition {
 func (f *Field) Null() Condition {
 	return func() (string, any) {
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(" ISNULL(") + len(f.Quote()) + len(")"))
+		// 预先计算并分配足够的内存空间：len(" ISNULL(") + len(f.Quote()) + len(")")
+		sb.Grow(len(f.Quote()) + 9)
 		sb.WriteString(" ISNULL(")
 		sb.WriteString(f.Quote())
 		sb.WriteString(")")
@@ -453,8 +549,8 @@ func (f *Field) Null() Condition {
 func (f *Field) NotNull() Condition {
 	return func() (string, any) {
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len(" NOT ISNULL(") + len(f.Quote()) + len(")"))
+		// 预先计算并分配足够的内存空间：len(" NOT ISNULL(") + len(f.Quote()) + len(")")
+		sb.Grow(len(f.Quote()) + 13)
 		sb.WriteString(" NOT ISNULL(")
 		sb.WriteString(f.Quote())
 		sb.WriteString(")")
@@ -468,8 +564,8 @@ func (f *Field) AsName(name string) string {
 		return f.Quote()
 	}
 	var sb strings.Builder
-	// 预先计算并分配足够的内存空间
-	sb.Grow(len(f.Quote()) + len(" AS ") + len(name))
+	// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" AS ") + len(name)
+	sb.Grow(len(f.Quote()) + 4 + len(name))
 	sb.WriteString(f.Quote())
 	sb.WriteString(" AS ")
 	sb.WriteString(name)
@@ -484,9 +580,9 @@ func (f *Field) Sum(as ...string) Function {
 	}
 	return func() string {
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len("IFNULL(Sum(") + len(f.Quote()) + len("),0) AS ") + len(a))
-		sb.WriteString("IFNULL(Sum(")
+		// 预先计算并分配足够的内存空间：len(" IFNULL(Sum(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		sb.Grow(len(f.Quote()) + 20 + len(a))
+		sb.WriteString(" IFNULL(Sum(")
 		sb.WriteString(f.Quote())
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)
@@ -502,9 +598,9 @@ func (f *Field) Avg(as ...string) Function {
 	}
 	return func() string {
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len("IFNULL(Avg(") + len(f.Quote()) + len("),0) AS ") + len(a))
-		sb.WriteString("IFNULL(Avg(")
+		// 预先计算并分配足够的内存空间：len(" IFNULL(Avg(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		sb.Grow(len(f.Quote()) + 20 + len(a))
+		sb.WriteString(" IFNULL(Avg(")
 		sb.WriteString(f.Quote())
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)
@@ -520,9 +616,9 @@ func (f *Field) Count(as ...string) Function {
 	}
 	return func() string {
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len("IFNULL(Count(") + len(f.Quote()) + len("),0) AS ") + len(a))
-		sb.WriteString("IFNULL(Count(")
+		// 预先计算并分配足够的内存空间：len(" IFNULL(Count(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		sb.Grow(len(f.Quote()) + 22 + len(a))
+		sb.WriteString(" IFNULL(Count(")
 		sb.WriteString(f.Quote())
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)
@@ -538,9 +634,9 @@ func (f *Field) Max(as ...string) Function {
 	}
 	return func() string {
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len("IFNULL(Max(") + len(f.Quote()) + len("),0) AS ") + len(a))
-		sb.WriteString("IFNULL(Max(")
+		// 预先计算并分配足够的内存空间：len(" IFNULL(Max(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		sb.Grow(len(f.Quote()) + 20 + len(a))
+		sb.WriteString(" IFNULL(Max(")
 		sb.WriteString(f.Quote())
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)
@@ -556,9 +652,9 @@ func (f *Field) Min(as ...string) Function {
 	}
 	return func() string {
 		var sb strings.Builder
-		// 预先计算并分配足够的内存空间
-		sb.Grow(len("IFNULL(Min(") + len(f.Quote()) + len("),0) AS ") + len(a))
-		sb.WriteString("IFNULL(Min(")
+		// 预先计算并分配足够的内存空间：len("IFNULL(Min(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		sb.Grow(len(f.Quote()) + 20 + len(a))
+		sb.WriteString(" IFNULL(Min(")
 		sb.WriteString(f.Quote())
 		sb.WriteString("),0) AS ")
 		sb.WriteString(a)

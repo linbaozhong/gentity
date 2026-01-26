@@ -76,8 +76,11 @@ func WithSet(args ...dialect.Setter) Option {
 	}
 }
 
-// WithExpr 用表达式为字段赋值
-func WithSetExpr(args ...dialect.ExprSetter) Option {
+// Deprecated: 请使用 WithSet
+//
+// WithExpr
+// 用表达式为字段赋值
+func WithSetExpr(args ...dialect.Setter) Option {
 	return func(o Builder) {
 		o.SetExpr(args...)
 	}
