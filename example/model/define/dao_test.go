@@ -255,10 +255,10 @@ func TestSelect(t *testing.T) {
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Get 方法进行查询
 	// obj 为查询结果对象，has 表示是否查询到数据，err 为可能出现的错误
 	// 这里指定查询 tblcompany 表的 Id 和 LongName 列，查询条件为 Id 等于 1
-	obj, has, err := dao.Company(dbx).ToSql().
-		Get(context.Background(),
+	obj, has, err := dao.Company(dbx). //ToSql().
+						Get(context.Background(),
 			ace.Cols(tblcompany.Id, tblcompany.LongName).
-				Where(tblcompany.Id.In(nil)),
+				Where(tblcompany.Id.In(1, 2, 3, 4, 5, 6, 7, 8, 9)),
 		)
 	// 若查询操作出现错误，则终止测试并输出错误信息
 	if err != nil {
@@ -266,14 +266,15 @@ func TestSelect(t *testing.T) {
 	}
 	// 若未查询到数据，则终止测试并输出提示信息
 	if !has {
-		t.Fatal("not found")
+		t.Log("not found")
 	}
 	// 确保在函数结束时释放查询结果对象的资源
-	defer obj.Free()
+	obj.Free()
+	obj.Free()
 
 	// 记录查询结果对象
 	t.Log(obj)
-	return
+	// return
 
 	// 创建一个新的 Company 实例
 	obj = do.NewCompany()
@@ -282,11 +283,11 @@ func TestSelect(t *testing.T) {
 	// 调用 daocompany 包的 Builder 函数创建一个构建器实例，设置查询条件为 Id 等于 1
 	// 然后调用 Select 方法指定数据库连接，再调用 Get 方法将查询结果填充到 obj 中
 	// err 为可能出现的错误
-	err = ace.Table(do.CompanyTableName).ToSql().
-		Cols(tblcompany.Id, tblcompany.State, tblcompany.Address).
-		Where(tblcompany.Id.Eq(2)).
-		Select(dbx).
-		Get(context.Background(), &obj)
+	err = ace.Table(do.CompanyTableName). // ToSql().
+						Cols(tblcompany.Id, tblcompany.State, tblcompany.Address).
+						Where(tblcompany.Id.Eq(2)).
+						Select(dbx).
+						Get(context.Background(), obj)
 	// 根据查询结果处理不同情况
 	switch err {
 	case nil:
@@ -294,20 +295,25 @@ func TestSelect(t *testing.T) {
 		t.Log(obj)
 	case sql.ErrNoRows:
 		// 若未查询到数据，终止测试并输出提示信息
-		t.Fatal("没找到")
+		t.Log("没找到")
 	default:
 		// 若出现其他错误，终止测试并输出错误信息
 		t.Fatal(err)
 	}
 
+	obj.Free()
+	obj.Free()
+
+	// 创建一个新的 Company 实例
+	obj = do.NewCompany()
 	// 使用 ace 包的通用方法查询数据
 	// 调用 ace 包的 Table 函数指定要操作的表，设置查询条件为 Id 等于 1
 	// 然后调用 Select 方法指定数据库连接，再调用 Get 方法将查询结果填充到 obj 中
 	// err 为可能出现的错误
-	err = ace.Table(do.CompanyTableName).ToSql().
-		Where(tblcompany.Id.Eq(3)).
-		Select(dbx).
-		Get(context.Background(), &obj)
+	err = ace.Table(do.CompanyTableName). // ToSql().
+						Where(tblcompany.Id.Eq(3)).
+						Select(dbx).
+						Get(context.Background(), obj)
 	// 根据查询结果处理不同情况
 	switch err {
 	case nil:

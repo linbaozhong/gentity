@@ -30,7 +30,7 @@ func (p *objPool) Get() any {
 	}
 	// 尝试将对象断言为types.Modeler类型。
 	if m, ok := obj.(PoolModeler); ok {
-		m.Get4Pool()
+		m.get4Pool()
 		return m
 	}
 	// 如果类型断言失败，创建一个新的对象。
@@ -44,7 +44,7 @@ func (p *objPool) Put(obj PoolModeler) {
 		return
 	}
 
-	if obj.Put2Pool() {
+	if obj.put2Pool() {
 		return
 	}
 	// 重置对象状态，并将其放回对象池中。

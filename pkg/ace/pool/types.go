@@ -33,17 +33,17 @@ type (
 		// Put2Pool 方法，用于判断是否已经放入池中
 		// 如果已经放入池中，返回 true，否则返回 false
 		// 并将 ace_put 设置为 true，防止重复放入池中
-		Put2Pool() bool
+		put2Pool() bool
 		// Get4Pool 方法，用于从池中取出对象时
 		// 将 ace_put 设置为 false，防止重复放入池中
-		Get4Pool()
+		get4Pool()
 	}
 )
 
 // Put2Pool 方法，用于判断是否已经放入池中
 // 如果已经放入池中，返回 true，否则返回 false
 // 并将 ace_put 设置为 true，防止重复放入池中
-func (a *Model) Put2Pool() bool {
+func (a *Model) put2Pool() bool {
 	if a.ace_put {
 		return true
 	}
@@ -55,7 +55,7 @@ func (a *Model) Put2Pool() bool {
 
 // Get4Pool 方法，用于从池中取出对象时
 // 将 ace_put 设置为 false，防止重复放入池中
-func (a *Model) Get4Pool() {
+func (a *Model) get4Pool() {
 	if !a.ace_put {
 		return
 	}
