@@ -19,7 +19,7 @@ var (
 func init() {
 	var err error
 	dbx, err = ace.Connect("mysql",
-		"ssld_dev:Cu83&sr66@tcp(123.56.5.53:13306)/dispatch?charset=utf8mb4&parseTime=True&loc=Local")
+		"root:123456@tcp(0.0.0.0:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
 	if err != nil {
 		log.Fatal(err)
 	}
