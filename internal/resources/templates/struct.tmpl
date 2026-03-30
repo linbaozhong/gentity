@@ -25,15 +25,14 @@ import (
 const {{$structName}}TableName = "{{.TableName}}"
 
 var (
-	{{$structNameLower}}Pool = pool.New(app.Context,func() any {
+	{{$structNameLower}}Pool = pool.New[*{{.StructName}}](app.Context,func() any {
 		_obj := &{{.StructName}}{}
 		return _obj
 	})
 )
 
 func New{{.StructName}}() *{{.StructName}} {
-	_obj := {{$structNameLower}}Pool.Get().(*{{.StructName}})
-	return _obj
+	return {{$structNameLower}}Pool.Get()
 }
 
 // MarshalJSON

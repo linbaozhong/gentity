@@ -41,7 +41,7 @@ type {{$structNameLower}} struct {
 }
 
 var(
-	{{$structNameLower}}Pool = pool.New(app.Context, func() any {
+	{{$structNameLower}}Pool = pool.New[*{{$structNameLower}}](app.Context, func() any {
 		_obj := &{{$structNameLower}}{}
 		return _obj
 	})
@@ -51,7 +51,7 @@ var(
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
 func {{$structName}}(exec ...ace.Executer) *{{$structNameLower}} {
-	_obj := {{$structNameLower}}Pool.Get().(*{{$structNameLower}})
+	_obj := {{$structNameLower}}Pool.Get()
 	_obj.db = ace.GetExec(exec...)
 {{- if .HasCache}}
 	_obj.cache = _obj.db.Cache({{$package}}.{{$structName}}TableName)

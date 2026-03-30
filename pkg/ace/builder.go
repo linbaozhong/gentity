@@ -70,14 +70,14 @@ type (
 )
 
 var (
-	ormPool = pool.New(app.Context, func() any {
+	ormPool = pool.New[*orm](app.Context, func() any {
 		obj := &orm{}
 		return obj
 	})
 )
 
 func newOrm() *orm {
-	obj := ormPool.Get().(*orm)
+	obj := ormPool.Get()
 	obj.commandString.Reset()
 	return obj
 }
