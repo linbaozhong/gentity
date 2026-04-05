@@ -26,29 +26,27 @@ type A struct {
 	Age  int
 }
 
-var poolA = New(app.Context, func() any {
+var poolA = New[*A](app.Context, func() any {
 	_obj := &A{}
-	_obj.UUID()
 	return _obj
 })
 
 func NewA() *A {
-	obj := poolA.Get().(*A)
+	obj := poolA.Get()
 	// time.Sleep(time.Millisecond)
 	// _obj.Name = time.Now().String()
 	return obj
 }
 func (a *A) Reset() {
-	a = nil
+	a.Name = ""
+	a.Age = 0
 }
 func (a *A) Free() {
-	a.Reset()
 	poolA.Put(a)
 }
 
 func (a *A) Clone() *A {
 	_a := *a
-	_a.UUID()
 	return &_a
 	// return &(*a)
 }
