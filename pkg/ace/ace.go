@@ -21,6 +21,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"sync"
 )
 
 const (
@@ -48,6 +49,7 @@ var (
 	Err_ToSql = errors.New("the SQL command terminates execution after the ToSql() method")
 
 	_obj        *DB
+	_once       sync.Once
 	Transaction func(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
 	// // Db 实验
 	// Db *sql.DB
@@ -70,27 +72,33 @@ var (
 
 // Connect
 func Connect(driverName, dns string) (*DB, error) {
-	dialect.Register(driverName)
-	db, e := sql.Open(driverName, dns)
-	if e != nil {
-		return nil, e
-	}
-	if e = db.Ping(); e != nil {
-		db.Close()
-		return nil, e
-	}
+	var err error
+	_once.Do(func() {
+		dialect.Register(driverName)
+		db, e := sql.Open(driverName, dns)
+		if e != nil {
+			err = e
+			return
+		}
+		if e = db.Ping(); e != nil {
+			db.Close()
+			err = e
+			return
+		}
 
-	_obj = &DB{}
-	_obj.DB = db
-	_obj.driverName = driverName
-	_obj.mapper = mapper()
-	_obj.debug = false
+		_obj = &DB{}
+		_obj.DB = db
+		_obj.driverName = driverName
+		_obj.mapper = mapper()
+		_obj.debug = false
 
-	app.RegisterServiceCloser(_obj)
-	// 注册事务方法
-	Transaction = _obj.Transaction
+		app.RegisterServiceCloser(_obj)
+		// 注册事务方法
+		Transaction = _obj.Transaction
 
-	return _obj, e
+	})
+
+	return _obj, err
 }
 
 // GetDB
