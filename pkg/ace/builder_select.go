@@ -58,6 +58,12 @@ type Selecter interface {
 	Count(ctx context.Context, cond ...dialect.Condition) (int64, error)
 	// Sum 返回总和
 	Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error)
+	// Avg 返回平均值
+	Avg(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error)
+	// Max 返回最大值
+	Max(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error)
+	// Min 返回最小值
+	Min(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error)
 	// Select 执行原生查询，返回指定列的数据
 	RawQuery(ctx context.Context, sqlStr string, args ...any) (*sql.Rows, error)
 	// SelectMap 执行原生查询，返回 map[string]any
@@ -328,6 +334,150 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 		sums[cols[i].Name] = sum[i]
 	}
 	return sums, nil
+}
+
+// Avg 返回平均值
+func (s *read) Avg(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	for _, col := range cols {
+		s.Func(col.Avg())
+	}
+	s.Where(cond...)
+	s.command.WriteString("SELECT ")
+	s.command.WriteString(strings.Join(s.funcs, ","))
+
+	// FROM TABLE
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	for _, j := range s.join {
+		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	}
+
+	// WHERE
+	if s.where.Len() > 0 {
+		s.command.WriteString(" WHERE " + s.where.String())
+	}
+
+	// LIMIT
+	if s.limit != "" {
+		s.command.WriteString(s.limit)
+	}
+
+	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
+	if err != nil {
+		return nil, err
+	}
+
+	var avg = make([]any, len(cols))
+	err = row.Scan(avg...)
+	if err != nil {
+		return nil, err
+	}
+
+	avgs := make(map[string]any, len(cols))
+	for i := range avg {
+		avgs[cols[i].Name] = avg[i]
+	}
+	return avgs, nil
+}
+
+// Max 返回最大值
+func (s *read) Max(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	for _, col := range cols {
+		s.Func(col.Max())
+	}
+	s.Where(cond...)
+	s.command.WriteString("SELECT ")
+	s.command.WriteString(strings.Join(s.funcs, ","))
+
+	// FROM TABLE
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	for _, j := range s.join {
+		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	}
+
+	// WHERE
+	if s.where.Len() > 0 {
+		s.command.WriteString(" WHERE " + s.where.String())
+	}
+
+	// LIMIT
+	if s.limit != "" {
+		s.command.WriteString(s.limit)
+	}
+
+	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
+	if err != nil {
+		return nil, err
+	}
+
+	var max = make([]any, len(cols))
+	err = row.Scan(max...)
+	if err != nil {
+		return nil, err
+	}
+
+	maxs := make(map[string]any, len(cols))
+	for i := range max {
+		maxs[cols[i].Name] = max[i]
+	}
+	return maxs, nil
+}
+
+// Min 返回最小值
+func (s *read) Min(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+	defer s.Free()
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	for _, col := range cols {
+		s.Func(col.Min())
+	}
+	s.Where(cond...)
+	s.command.WriteString("SELECT ")
+	s.command.WriteString(strings.Join(s.funcs, ","))
+
+	// FROM TABLE
+	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	for _, j := range s.join {
+		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	}
+
+	// WHERE
+	if s.where.Len() > 0 {
+		s.command.WriteString(" WHERE " + s.where.String())
+	}
+
+	// LIMIT
+	if s.limit != "" {
+		s.command.WriteString(s.limit)
+	}
+
+	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
+	if err != nil {
+		return nil, err
+	}
+
+	var min = make([]any, len(cols))
+	err = row.Scan(min...)
+	if err != nil {
+		return nil, err
+	}
+
+	mins := make(map[string]any, len(cols))
+	for i := range min {
+		mins[cols[i].Name] = min[i]
+	}
+	return mins, nil
 }
 
 // Select 执行原生的 SQL 查询

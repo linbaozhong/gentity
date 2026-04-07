@@ -236,6 +236,29 @@ func (p *{{$structNameLower}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col
 		)
 }
 
+
+// DeleteByIds 按主键列表批量删除
+// ids: 主键列表
+// 返回值: 影响的行数，错误信息
+func (p *{{$structNameLower}}) DeleteByIds(ctx context.Context, ids []any) (int64, error) {
+	defer p.Free()
+	if len(ids) == 0 {
+		return 0, nil
+	}
+
+	_result, e := ace.Table({{$package}}.{{$structName}}TableName).
+		Where(tbl{{$structNameLower}}.PrimaryKey.In(ids...)).
+		ToSql(p.toSql).
+		Delete(p.db).
+		Exec(ctx)
+	if e != nil {
+		log.Error(e)
+		return 0, e
+	}
+	return _result.RowsAffected()
+}
+
+
 // Get 查询第一个符合条件的记录
 //  s: 选择器，用于构建sql语句
 // 返回值:
@@ -308,6 +331,39 @@ func (p *{{$structNameLower}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {
 	return p.Get(ctx, ace.Table({{$package}}.{{$structName}}TableName).Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
 {{- end}}
 }
+
+
+// GetByIds 按主键列表批量查询
+// ids: 主键列表
+// cols: 要查询的列名，如果为空，则查询所有可读列
+func (p *{{$structNameLower}}) GetByIds(ctx context.Context, ids []any, cols ...dialect.Field) ([]*{{$package}}.{{$structName}}, error) {
+	defer p.Free()
+	if len(ids) == 0 {
+		return []*{{$package}}.{{$structName}}{}, nil
+	}
+
+	s := ace.Table({{$package}}.{{$structName}}TableName).
+		Where(tbl{{$structNameLower}}.PrimaryKey.In(ids...))
+	if len(cols) == 0 {
+		cols = tbl{{$structNameLower}}.ReadableFields
+		s.Cols(cols...)
+	}
+
+	_rows, e := s.
+		ToSql(p.toSql).
+		Select(p.db).
+		Query(ctx)
+	if e != nil {
+		log.Error(e)
+		return nil, e
+	}
+	defer _rows.Close()
+
+	_obj := {{$package}}.New{{$structName}}()
+	_objs, _, e := _obj.Scan(_rows, cols...)
+	return _objs, e
+}
+
 
 // Cell 查询第一个符合条件的记录的第一个列
 //  s: 选择器，用于构建sql语句
