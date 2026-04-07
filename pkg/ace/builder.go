@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"reflect"
@@ -70,7 +69,7 @@ type (
 )
 
 var (
-	ormPool = pool.New[*orm](app.Context, func() any {
+	ormPool = pool.New[*orm](func() any {
 		obj := &orm{}
 		return obj
 	})

@@ -9,7 +9,6 @@ import (
 	"database/sql"
 	"errors"
 	"{{.ModulePath}}/define/table/tbl{{ $structNameLower }}"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -25,7 +24,7 @@ import (
 const {{$structName}}TableName = "{{.TableName}}"
 
 var (
-	{{$structNameLower}}Pool = pool.New[*{{.StructName}}](app.Context,func() any {
+	{{$structNameLower}}Pool = pool.New[*{{.StructName}}](func() any {
 		_obj := &{{.StructName}}{}
 		return _obj
 	})

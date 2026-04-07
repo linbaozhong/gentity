@@ -2,7 +2,6 @@
 package pool
 
 import (
-	"context"
 	"sync"
 )
 
@@ -12,7 +11,7 @@ type objPool[T PoolModeler] struct {
 }
 
 // New 创建并返回一个新的对象池。fn 是一个函数，用于创建新对象。
-func New[T PoolModeler](ctx context.Context, fn func() any) *objPool[T] {
+func New[T PoolModeler](fn func() any) *objPool[T] {
 	p := &objPool[T]{
 		pool: &sync.Pool{
 			New: func() any {
