@@ -3,13 +3,11 @@
 package do
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanydocument"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,79 +16,62 @@ import (
 const CompanyDocumentTableName = "company_document"
 
 var (
-	companydocumentPool = pool.New(app.Context, func() any {
+	companydocumentPool = pool.New[*CompanyDocument](func() any {
 		_obj := &CompanyDocument{}
 		return _obj
 	})
 )
 
 func NewCompanyDocument() *CompanyDocument {
-	_obj := companydocumentPool.Get().(*CompanyDocument)
-	return _obj
+	return companydocumentPool.Get()
 }
 
 // MarshalJSON
 func (p *CompanyDocument) MarshalJSON() ([]byte, error) {
-	var (
-		_buf   = bytes.NewBuffer((make([]byte, 0, 14*50)))
-		_comma bool
-	)
-	_buf.WriteByte('{')
-
-	writeField := func(key string, value string) {
-		if _comma {
-			_buf.WriteByte(',')
-		}
-		_buf.WriteByte('"')
-		_buf.WriteString(key)
-		_buf.WriteString(`":`)
-		_buf.WriteString(value)
-		_comma = true
-	}
+	write := types.NewJsonWriter(14 * 50)
 	if p.Id != 0 {
-		writeField("id", types.Marshal(p.Id))
+		write.WriteKV("id", types.Marshal(p.Id))
 	}
 	if p.Company != 0 {
-		writeField("company", types.Marshal(p.Company))
+		write.WriteKV("company", types.Marshal(p.Company))
 	}
 	if p.TemplateId != 0 {
-		writeField("template_id", types.Marshal(p.TemplateId))
+		write.WriteKV("template_id", types.Marshal(p.TemplateId))
 	}
 	if p.Title != "" {
-		writeField("title", types.Marshal(p.Title))
+		write.WriteKV("title", types.Marshal(p.Title))
 	}
 	if p.Classify != 0 {
-		writeField("classify", types.Marshal(p.Classify))
+		write.WriteKV("classify", types.Marshal(p.Classify))
 	}
 	if p.Genre != 0 {
-		writeField("genre", types.Marshal(p.Genre))
+		write.WriteKV("genre", types.Marshal(p.Genre))
 	}
 	if p.HandleGenre != 0 {
-		writeField("handle_genre", types.Marshal(p.HandleGenre))
+		write.WriteKV("handle_genre", types.Marshal(p.HandleGenre))
 	}
 	if p.Job != "" {
-		writeField("job", types.Marshal(p.Job))
+		write.WriteKV("job", types.Marshal(p.Job))
 	}
 	if p.VariableMode != 0 {
-		writeField("variable_mode", types.Marshal(p.VariableMode))
+		write.WriteKV("variable_mode", types.Marshal(p.VariableMode))
 	}
 	if p.IsDefault != 0 {
-		writeField("is_default", types.Marshal(p.IsDefault))
+		write.WriteKV("is_default", types.Marshal(p.IsDefault))
 	}
 	if p.CanDefault != 0 {
-		writeField("can_default", types.Marshal(p.CanDefault))
+		write.WriteKV("can_default", types.Marshal(p.CanDefault))
 	}
 	if p.Modifier != 0 {
-		writeField("modifier", types.Marshal(p.Modifier))
+		write.WriteKV("modifier", types.Marshal(p.Modifier))
 	}
 	if p.State != 0 {
-		writeField("state", types.Marshal(p.State))
+		write.WriteKV("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		writeField("ctime", types.Marshal(p.Ctime))
+		write.WriteKV("ctime", types.Marshal(p.Ctime))
 	}
-	_buf.WriteByte('}')
-	return _buf.Bytes(), nil
+	return write.Bytes(), nil
 }
 
 // UnmarshalJSON

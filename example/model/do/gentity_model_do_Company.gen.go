@@ -3,13 +3,11 @@
 package do
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,82 +16,65 @@ import (
 const CompanyTableName = "company"
 
 var (
-	companyPool = pool.New(app.Context, func() any {
+	companyPool = pool.New[*Company](func() any {
 		_obj := &Company{}
 		return _obj
 	})
 )
 
 func NewCompany() *Company {
-	_obj := companyPool.Get().(*Company)
-	return _obj
+	return companyPool.Get()
 }
 
 // MarshalJSON
 func (p *Company) MarshalJSON() ([]byte, error) {
-	var (
-		_buf   = bytes.NewBuffer((make([]byte, 0, 15*50)))
-		_comma bool
-	)
-	_buf.WriteByte('{')
-
-	writeField := func(key string, value string) {
-		if _comma {
-			_buf.WriteByte(',')
-		}
-		_buf.WriteByte('"')
-		_buf.WriteString(key)
-		_buf.WriteString(`":`)
-		_buf.WriteString(value)
-		_comma = true
-	}
+	write := types.NewJsonWriter(15 * 50)
 	if p.Id != 0 {
-		writeField("id", types.Marshal(p.Id))
+		write.WriteKV("id", types.Marshal(p.Id))
 	}
 	if p.LongName != "" {
-		writeField("long_name", types.Marshal(p.LongName))
+		write.WriteKV("long_name", types.Marshal(p.LongName))
 	}
 	if p.ShortName != "" {
-		writeField("short_name", types.Marshal(p.ShortName))
+		write.WriteKV("short_name", types.Marshal(p.ShortName))
 	}
 	if p.Address != "" {
-		writeField("address", types.Marshal(p.Address))
+		write.WriteKV("address", types.Marshal(p.Address))
 	}
 	if p.Email != "" {
-		writeField("email", types.Marshal(p.Email))
+		write.WriteKV("email", types.Marshal(p.Email))
 	}
 	if p.ContactName != "" {
-		writeField("contact_name", types.Marshal(p.ContactName))
+		write.WriteKV("contact_name", types.Marshal(p.ContactName))
 	}
 	if p.ContactTelephone != "" {
-		writeField("contact_telephone", types.Marshal(p.ContactTelephone))
+		write.WriteKV("contact_telephone", types.Marshal(p.ContactTelephone))
 	}
 	if p.ContactMobile != "" {
-		writeField("contact_mobile", types.Marshal(p.ContactMobile))
+		write.WriteKV("contact_mobile", types.Marshal(p.ContactMobile))
 	}
 	if p.ContactEmail != "" {
-		writeField("contact_email", types.Marshal(p.ContactEmail))
+		write.WriteKV("contact_email", types.Marshal(p.ContactEmail))
 	}
 	if p.LegalName != "" {
-		writeField("legal_name", types.Marshal(p.LegalName))
+		write.WriteKV("legal_name", types.Marshal(p.LegalName))
 	}
 	if p.Creator != 0 {
-		writeField("creator", types.Marshal(p.Creator))
+		write.WriteKV("creator", types.Marshal(p.Creator))
 	}
 	if p.State != 0 {
-		writeField("state", types.Marshal(p.State))
+		write.WriteKV("state", types.Marshal(p.State))
 	}
 	if p.Status != 0 {
-		writeField("status", types.Marshal(p.Status))
+		write.WriteKV("status", types.Marshal(p.Status))
 	}
 	if !p.Ctime.IsZero() {
-		writeField("ctime", types.Marshal(p.Ctime))
+		write.WriteKV("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		writeField("utime", types.Marshal(p.Utime))
+		write.WriteKV("utime", types.Marshal(p.Utime))
 	}
-	_buf.WriteByte('}')
-	return _buf.Bytes(), nil
+	return write.Bytes(), nil
 }
 
 // UnmarshalJSON

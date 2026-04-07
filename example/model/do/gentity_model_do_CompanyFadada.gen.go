@@ -3,13 +3,11 @@
 package do
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyfadada"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,79 +16,62 @@ import (
 const CompanyFadadaTableName = "company_fadada"
 
 var (
-	companyfadadaPool = pool.New(app.Context, func() any {
+	companyfadadaPool = pool.New[*CompanyFadada](func() any {
 		_obj := &CompanyFadada{}
 		return _obj
 	})
 )
 
 func NewCompanyFadada() *CompanyFadada {
-	_obj := companyfadadaPool.Get().(*CompanyFadada)
-	return _obj
+	return companyfadadaPool.Get()
 }
 
 // MarshalJSON
 func (p *CompanyFadada) MarshalJSON() ([]byte, error) {
-	var (
-		_buf   = bytes.NewBuffer((make([]byte, 0, 14*50)))
-		_comma bool
-	)
-	_buf.WriteByte('{')
-
-	writeField := func(key string, value string) {
-		if _comma {
-			_buf.WriteByte(',')
-		}
-		_buf.WriteByte('"')
-		_buf.WriteString(key)
-		_buf.WriteString(`":`)
-		_buf.WriteString(value)
-		_comma = true
-	}
+	write := types.NewJsonWriter(14 * 50)
 	if p.Id != 0 {
-		writeField("id", types.Marshal(p.Id))
+		write.WriteKV("id", types.Marshal(p.Id))
 	}
 	if p.CompanyName != "" {
-		writeField("company_name", types.Marshal(p.CompanyName))
+		write.WriteKV("company_name", types.Marshal(p.CompanyName))
 	}
 	if p.CustomerId != "" {
-		writeField("customer_id", types.Marshal(p.CustomerId))
+		write.WriteKV("customer_id", types.Marshal(p.CustomerId))
 	}
 	if p.TransactionNo != "" {
-		writeField("transaction_no", types.Marshal(p.TransactionNo))
+		write.WriteKV("transaction_no", types.Marshal(p.TransactionNo))
 	}
 	if p.Url != "" {
-		writeField("url", types.Marshal(p.Url))
+		write.WriteKV("url", types.Marshal(p.Url))
 	}
 	if p.CertInfo != "" {
-		writeField("cert_info", types.Marshal(p.CertInfo))
+		write.WriteKV("cert_info", types.Marshal(p.CertInfo))
 	}
 	if p.Status != 0 {
-		writeField("status", types.Marshal(p.Status))
+		write.WriteKV("status", types.Marshal(p.Status))
 	}
 	if p.HasCertificate != 0 {
-		writeField("has_certificate", types.Marshal(p.HasCertificate))
+		write.WriteKV("has_certificate", types.Marshal(p.HasCertificate))
 	}
 	if p.AuthSign != 0 {
-		writeField("auth_sign", types.Marshal(p.AuthSign))
+		write.WriteKV("auth_sign", types.Marshal(p.AuthSign))
 	}
 	if p.AuthTransactionId != "" {
-		writeField("auth_transaction_id", types.Marshal(p.AuthTransactionId))
+		write.WriteKV("auth_transaction_id", types.Marshal(p.AuthTransactionId))
 	}
 	if p.AuthContractId != "" {
-		writeField("auth_contract_id", types.Marshal(p.AuthContractId))
+		write.WriteKV("auth_contract_id", types.Marshal(p.AuthContractId))
 	}
 	if p.AuthResult != "" {
-		writeField("auth_result", types.Marshal(p.AuthResult))
+		write.WriteKV("auth_result", types.Marshal(p.AuthResult))
 	}
 	if p.State != 0 {
-		writeField("state", types.Marshal(p.State))
+		write.WriteKV("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		writeField("ctime", types.Marshal(p.Ctime))
+		write.WriteKV("ctime", types.Marshal(p.Ctime))
 	}
-	_buf.WriteByte('}')
-	return _buf.Bytes(), nil
+	return write.Bytes(), nil
 }
 
 // UnmarshalJSON

@@ -3,13 +3,11 @@
 package do
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyman"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,76 +16,59 @@ import (
 const CompanyManTableName = "company_man"
 
 var (
-	companymanPool = pool.New(app.Context, func() any {
+	companymanPool = pool.New[*CompanyMan](func() any {
 		_obj := &CompanyMan{}
 		return _obj
 	})
 )
 
 func NewCompanyMan() *CompanyMan {
-	_obj := companymanPool.Get().(*CompanyMan)
-	return _obj
+	return companymanPool.Get()
 }
 
 // MarshalJSON
 func (p *CompanyMan) MarshalJSON() ([]byte, error) {
-	var (
-		_buf   = bytes.NewBuffer((make([]byte, 0, 13*50)))
-		_comma bool
-	)
-	_buf.WriteByte('{')
-
-	writeField := func(key string, value string) {
-		if _comma {
-			_buf.WriteByte(',')
-		}
-		_buf.WriteByte('"')
-		_buf.WriteString(key)
-		_buf.WriteString(`":`)
-		_buf.WriteString(value)
-		_comma = true
-	}
+	write := types.NewJsonWriter(13 * 50)
 	if p.Id != 0 {
-		writeField("id", types.Marshal(p.Id))
+		write.WriteKV("id", types.Marshal(p.Id))
 	}
 	if p.AccountId != 0 {
-		writeField("account_id", types.Marshal(p.AccountId))
+		write.WriteKV("account_id", types.Marshal(p.AccountId))
 	}
 	if p.Company != 0 {
-		writeField("company", types.Marshal(p.Company))
+		write.WriteKV("company", types.Marshal(p.Company))
 	}
 	if p.RealName != "" {
-		writeField("real_name", types.Marshal(p.RealName))
+		write.WriteKV("real_name", types.Marshal(p.RealName))
 	}
 	if p.Email != "" {
-		writeField("email", types.Marshal(p.Email))
+		write.WriteKV("email", types.Marshal(p.Email))
 	}
 	if p.Roles != "" {
-		writeField("roles", types.Marshal(p.Roles))
+		write.WriteKV("roles", types.Marshal(p.Roles))
 	}
 	if p.Gender != "" {
-		writeField("gender", types.Marshal(p.Gender))
+		write.WriteKV("gender", types.Marshal(p.Gender))
 	}
 	if p.Genre != 0 {
-		writeField("genre", types.Marshal(p.Genre))
+		write.WriteKV("genre", types.Marshal(p.Genre))
 	}
 	if p.IsActivate != 0 {
-		writeField("is_activate", types.Marshal(p.IsActivate))
+		write.WriteKV("is_activate", types.Marshal(p.IsActivate))
 	}
 	if !p.LoginTime.IsZero() {
-		writeField("login_time", types.Marshal(p.LoginTime))
+		write.WriteKV("login_time", types.Marshal(p.LoginTime))
 	}
 	if p.State != 0 {
-		writeField("state", types.Marshal(p.State))
+		write.WriteKV("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		writeField("ctime", types.Marshal(p.Ctime))
+		write.WriteKV("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		writeField("utime", types.Marshal(p.Utime))
+		write.WriteKV("utime", types.Marshal(p.Utime))
 	}
-	_buf.WriteByte('}')
-	return _buf.Bytes(), nil
+	return write.Bytes(), nil
 }
 
 // UnmarshalJSON

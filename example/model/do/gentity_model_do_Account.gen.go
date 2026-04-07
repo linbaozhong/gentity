@@ -3,13 +3,11 @@
 package do
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,55 +16,38 @@ import (
 const AccountTableName = "account"
 
 var (
-	accountPool = pool.New(app.Context, func() any {
+	accountPool = pool.New[*Account](func() any {
 		_obj := &Account{}
 		return _obj
 	})
 )
 
 func NewAccount() *Account {
-	_obj := accountPool.Get().(*Account)
-	return _obj
+	return accountPool.Get()
 }
 
 // MarshalJSON
 func (p *Account) MarshalJSON() ([]byte, error) {
-	var (
-		_buf   = bytes.NewBuffer((make([]byte, 0, 6*50)))
-		_comma bool
-	)
-	_buf.WriteByte('{')
-
-	writeField := func(key string, value string) {
-		if _comma {
-			_buf.WriteByte(',')
-		}
-		_buf.WriteByte('"')
-		_buf.WriteString(key)
-		_buf.WriteString(`":`)
-		_buf.WriteString(value)
-		_comma = true
-	}
+	write := types.NewJsonWriter(6 * 50)
 	if p.Id != 0 {
-		writeField("id", types.Marshal(p.Id))
+		write.WriteKV("id", types.Marshal(p.Id))
 	}
 	if p.LoginName != "" {
-		writeField("login_name", types.Marshal(p.LoginName))
+		write.WriteKV("login_name", types.Marshal(p.LoginName))
 	}
 	if p.Password != "" {
-		writeField("password", types.Marshal(p.Password))
+		write.WriteKV("password", types.Marshal(p.Password))
 	}
 	if p.State != 0 {
-		writeField("state", types.Marshal(p.State))
+		write.WriteKV("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		writeField("ctime", types.Marshal(p.Ctime))
+		write.WriteKV("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		writeField("utime", types.Marshal(p.Utime))
+		write.WriteKV("utime", types.Marshal(p.Utime))
 	}
-	_buf.WriteByte('}')
-	return _buf.Bytes(), nil
+	return write.Bytes(), nil
 }
 
 // UnmarshalJSON

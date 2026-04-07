@@ -3,13 +3,11 @@
 package do
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyrule"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,64 +16,47 @@ import (
 const CompanyRuleTableName = "company_rule"
 
 var (
-	companyrulePool = pool.New(app.Context, func() any {
+	companyrulePool = pool.New[*CompanyRule](func() any {
 		_obj := &CompanyRule{}
 		return _obj
 	})
 )
 
 func NewCompanyRule() *CompanyRule {
-	_obj := companyrulePool.Get().(*CompanyRule)
-	return _obj
+	return companyrulePool.Get()
 }
 
 // MarshalJSON
 func (p *CompanyRule) MarshalJSON() ([]byte, error) {
-	var (
-		_buf   = bytes.NewBuffer((make([]byte, 0, 9*50)))
-		_comma bool
-	)
-	_buf.WriteByte('{')
-
-	writeField := func(key string, value string) {
-		if _comma {
-			_buf.WriteByte(',')
-		}
-		_buf.WriteByte('"')
-		_buf.WriteString(key)
-		_buf.WriteString(`":`)
-		_buf.WriteString(value)
-		_comma = true
-	}
+	write := types.NewJsonWriter(9 * 50)
 	if p.Id != 0 {
-		writeField("id", types.Marshal(p.Id))
+		write.WriteKV("id", types.Marshal(p.Id))
 	}
 	if p.Pid != 0 {
-		writeField("pid", types.Marshal(p.Pid))
+		write.WriteKV("pid", types.Marshal(p.Pid))
 	}
 	if p.Path != "" {
-		writeField("path", types.Marshal(p.Path))
+		write.WriteKV("path", types.Marshal(p.Path))
 	}
 	if p.Title != "" {
-		writeField("title", types.Marshal(p.Title))
+		write.WriteKV("title", types.Marshal(p.Title))
 	}
 	if p.Type != 0 {
-		writeField("type", types.Marshal(p.Type))
+		write.WriteKV("type", types.Marshal(p.Type))
 	}
 	if p.IsPrivate != 0 {
-		writeField("is_private", types.Marshal(p.IsPrivate))
+		write.WriteKV("is_private", types.Marshal(p.IsPrivate))
 	}
 	if p.State != 0 {
-		writeField("state", types.Marshal(p.State))
+		write.WriteKV("state", types.Marshal(p.State))
 	}
 	if p.Descr != "" {
-		writeField("descr", types.Marshal(p.Descr))
+		write.WriteKV("descr", types.Marshal(p.Descr))
 	}
 	if p.Belong != 0 {
-		writeField("belong", types.Marshal(p.Belong))
+		write.WriteKV("belong", types.Marshal(p.Belong))
 	}
-	_buf.WriteByte('}')
-	return _buf.Bytes(), nil
+	return write.Bytes(), nil
 }
 
 // UnmarshalJSON

@@ -3,13 +3,11 @@
 package do
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tbldocumenttemplate"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,70 +16,53 @@ import (
 const DocumentTemplateTableName = "document_template"
 
 var (
-	documenttemplatePool = pool.New(app.Context, func() any {
+	documenttemplatePool = pool.New[*DocumentTemplate](func() any {
 		_obj := &DocumentTemplate{}
 		return _obj
 	})
 )
 
 func NewDocumentTemplate() *DocumentTemplate {
-	_obj := documenttemplatePool.Get().(*DocumentTemplate)
-	return _obj
+	return documenttemplatePool.Get()
 }
 
 // MarshalJSON
 func (p *DocumentTemplate) MarshalJSON() ([]byte, error) {
-	var (
-		_buf   = bytes.NewBuffer((make([]byte, 0, 11*50)))
-		_comma bool
-	)
-	_buf.WriteByte('{')
-
-	writeField := func(key string, value string) {
-		if _comma {
-			_buf.WriteByte(',')
-		}
-		_buf.WriteByte('"')
-		_buf.WriteString(key)
-		_buf.WriteString(`":`)
-		_buf.WriteString(value)
-		_comma = true
-	}
+	write := types.NewJsonWriter(11 * 50)
 	if p.Id != 0 {
-		writeField("id", types.Marshal(p.Id))
+		write.WriteKV("id", types.Marshal(p.Id))
 	}
 	if p.Genre != 0 {
-		writeField("genre", types.Marshal(p.Genre))
+		write.WriteKV("genre", types.Marshal(p.Genre))
 	}
 	if p.Company != 0 {
-		writeField("company", types.Marshal(p.Company))
+		write.WriteKV("company", types.Marshal(p.Company))
 	}
 	if p.Way != 0 {
-		writeField("way", types.Marshal(p.Way))
+		write.WriteKV("way", types.Marshal(p.Way))
 	}
 	if p.AuthSign != 0 {
-		writeField("auth_sign", types.Marshal(p.AuthSign))
+		write.WriteKV("auth_sign", types.Marshal(p.AuthSign))
 	}
 	if p.Title != "" {
-		writeField("title", types.Marshal(p.Title))
+		write.WriteKV("title", types.Marshal(p.Title))
 	}
 	if p.Content != "" {
-		writeField("content", types.Marshal(p.Content))
+		write.WriteKV("content", types.Marshal(p.Content))
 	}
 	if p.Url != "" {
-		writeField("url", types.Marshal(p.Url))
+		write.WriteKV("url", types.Marshal(p.Url))
 	}
 	if p.HasForm != 0 {
-		writeField("has_form", types.Marshal(p.HasForm))
+		write.WriteKV("has_form", types.Marshal(p.HasForm))
 	}
 	if p.State != 0 {
-		writeField("state", types.Marshal(p.State))
+		write.WriteKV("state", types.Marshal(p.State))
 	}
 	if !p.Utime.IsZero() {
-		writeField("utime", types.Marshal(p.Utime))
+		write.WriteKV("utime", types.Marshal(p.Utime))
 	}
-	_buf.WriteByte('}')
-	return _buf.Bytes(), nil
+	return write.Bytes(), nil
 }
 
 // UnmarshalJSON

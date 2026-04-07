@@ -25,7 +25,6 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
@@ -41,7 +40,7 @@ type {{$structNameLower}} struct {
 }
 
 var(
-	{{$structNameLower}}Pool = pool.New[*{{$structNameLower}}](app.Context, func() any {
+	{{$structNameLower}}Pool = pool.New[*{{$structNameLower}}](func() any {
 		_obj := &{{$structNameLower}}{}
 		return _obj
 	})

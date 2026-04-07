@@ -3,13 +3,11 @@
 package do
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanystamp"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -18,70 +16,53 @@ import (
 const CompanyStampTableName = "company_stamp"
 
 var (
-	companystampPool = pool.New(app.Context, func() any {
+	companystampPool = pool.New[*CompanyStamp](func() any {
 		_obj := &CompanyStamp{}
 		return _obj
 	})
 )
 
 func NewCompanyStamp() *CompanyStamp {
-	_obj := companystampPool.Get().(*CompanyStamp)
-	return _obj
+	return companystampPool.Get()
 }
 
 // MarshalJSON
 func (p *CompanyStamp) MarshalJSON() ([]byte, error) {
-	var (
-		_buf   = bytes.NewBuffer((make([]byte, 0, 11*50)))
-		_comma bool
-	)
-	_buf.WriteByte('{')
-
-	writeField := func(key string, value string) {
-		if _comma {
-			_buf.WriteByte(',')
-		}
-		_buf.WriteByte('"')
-		_buf.WriteString(key)
-		_buf.WriteString(`":`)
-		_buf.WriteString(value)
-		_comma = true
-	}
+	write := types.NewJsonWriter(11 * 50)
 	if p.Id != 0 {
-		writeField("id", types.Marshal(p.Id))
+		write.WriteKV("id", types.Marshal(p.Id))
 	}
 	if p.Company != 0 {
-		writeField("company", types.Marshal(p.Company))
+		write.WriteKV("company", types.Marshal(p.Company))
 	}
 	if p.Url != "" {
-		writeField("url", types.Marshal(p.Url))
+		write.WriteKV("url", types.Marshal(p.Url))
 	}
 	if p.Genre != 0 {
-		writeField("genre", types.Marshal(p.Genre))
+		write.WriteKV("genre", types.Marshal(p.Genre))
 	}
 	if p.IsDefault != 0 {
-		writeField("is_default", types.Marshal(p.IsDefault))
+		write.WriteKV("is_default", types.Marshal(p.IsDefault))
 	}
 	if p.Creator != 0 {
-		writeField("creator", types.Marshal(p.Creator))
+		write.WriteKV("creator", types.Marshal(p.Creator))
 	}
 	if p.CreatorName != "" {
-		writeField("creator_name", types.Marshal(p.CreatorName))
+		write.WriteKV("creator_name", types.Marshal(p.CreatorName))
 	}
 	if p.State != 0 {
-		writeField("state", types.Marshal(p.State))
+		write.WriteKV("state", types.Marshal(p.State))
 	}
 	if p.Status != 0 {
-		writeField("status", types.Marshal(p.Status))
+		write.WriteKV("status", types.Marshal(p.Status))
 	}
 	if !p.Ctime.IsZero() {
-		writeField("ctime", types.Marshal(p.Ctime))
+		write.WriteKV("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		writeField("utime", types.Marshal(p.Utime))
+		write.WriteKV("utime", types.Marshal(p.Utime))
 	}
-	_buf.WriteByte('}')
-	return _buf.Bytes(), nil
+	return write.Bytes(), nil
 }
 
 // UnmarshalJSON
