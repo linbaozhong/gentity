@@ -25,7 +25,7 @@ type Wherer interface {
 	Or(fns ...dialect.Condition) Builder
 }
 
-// Where 添加查询条件。
+// Where 添加查询条件，子条件之间为 and 关系。
 func (o *orm) Where(fns ...dialect.Condition) Builder {
 	if len(fns) == 0 || o.err != nil {
 		return o
@@ -61,7 +61,7 @@ func (o *orm) Where(fns ...dialect.Condition) Builder {
 	return o
 }
 
-// And 添加 AND 查询条件。
+// And 添加 AND 查询条件，所有子条件之间为 or 关系。
 func (o *orm) And(fns ...dialect.Condition) Builder {
 	if len(fns) == 0 || o.err != nil {
 		return o
@@ -108,7 +108,7 @@ func parseWhereParams(val any, params *[]any) error {
 	return nil
 }
 
-// Or 添加 OR 查询条件。
+// Or 添加 OR 查询条件，子条件之间为 and 关系。
 func (o *orm) Or(fns ...dialect.Condition) Builder {
 	if len(fns) == 0 || o.err != nil {
 		return o
