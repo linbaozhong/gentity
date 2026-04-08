@@ -61,6 +61,24 @@ func (c *conditions) Or(fns ...dialect.Condition) *conditions {
 	return c
 }
 
+// AndOr 函数用于将多个条件组合成一个 AND 括号，内部条件之间为 OR 关系。
+// 它接收可变数量的 Condition 类型的参数，返回一个新的 conditions 类型的切片。
+func (c *conditions) AndOr(fns ...dialect.Condition) *conditions {
+	if len(fns) > 0 {
+		*c = append(*c, andOr(fns...))
+	}
+	return c
+}
+
+// OrAnd 函数用于将多个条件组合成一个 OR 括号，内部条件之间为 AND 关系。
+// 它接收可变数量的 Condition 类型的参数，返回一个新的 conditions 类型的切片。
+func (c *conditions) OrAnd(fns ...dialect.Condition) *conditions {
+	if len(fns) > 0 {
+		*c = append(*c, orAnd(fns...))
+	}
+	return c
+}
+
 // ToSlice 函数用于获取 conditions 类型的切片。它返回一个包含所有条件的切片。
 // 该函数可用于将 conditions 类型的切片转换为其他类型的切片。
 func (c *conditions) ToSlice() []dialect.Condition {
@@ -72,7 +90,9 @@ func (c *conditions) Len() int {
 	return len(*c)
 }
 
-func or(fns ...dialect.Condition) dialect.Condition {
+// buildSimpleCondition 构建简单条件（每个条件前都加操作符）
+// 用于 or 和 and 方法
+func buildSimpleCondition(fns []dialect.Condition, operator string) dialect.Condition {
 	return func() (string, any) {
 		if len(fns) == 0 {
 			return "", nil
@@ -82,17 +102,60 @@ func or(fns ...dialect.Condition) dialect.Condition {
 			params = make([]any, 0, len(fns))
 		)
 
-		buf.WriteString(dialect.Operator_or + "(")
+		for _, fn := range fns {
+			cond, val := fn()
+
+			// 空值检查：跳过空条件
+			if cond == "" {
+				continue
+			}
+
+			buf.WriteString(operator)
+			buf.WriteString(cond)
+
+			// 参数处理
+			if vals, ok := val.([]any); ok {
+				params = append(params, vals...)
+			} else {
+				params = append(params, val)
+			}
+		}
+
+		return buf.String(), params
+	}
+}
+
+// buildBracketsCondition 构建带括号的条件（第一个条件前不加操作符）
+// 用于 andOr 和 orAnd 方法
+func buildBracketsCondition(fns []dialect.Condition, prefix, innerOperator string) dialect.Condition {
+	return func() (string, any) {
+		if len(fns) == 0 {
+			return "", nil
+		}
+		var (
+			buf    strings.Builder
+			params = make([]any, 0, len(fns))
+		)
+
+		buf.WriteString(prefix)
 		for i, fn := range fns {
 			cond, val := fn()
+
+			// 空值检查：跳过空条件
+			if cond == "" {
+				continue
+			}
+
 			if i > 0 {
 				if strings.HasPrefix(cond, dialect.Operator_or) || strings.HasPrefix(cond, dialect.Operator_and) {
 					buf.WriteString(" ")
 				} else {
-					buf.WriteString(dialect.Operator_and)
+					buf.WriteString(innerOperator)
 				}
 			}
 			buf.WriteString(cond)
+
+			// 参数处理
 			if vals, ok := val.([]any); ok {
 				params = append(params, vals...)
 			} else {
@@ -105,37 +168,20 @@ func or(fns ...dialect.Condition) dialect.Condition {
 	}
 }
 
+func or(fns ...dialect.Condition) dialect.Condition {
+	return buildSimpleCondition(fns, dialect.Operator_or)
+}
+
 func and(fns ...dialect.Condition) dialect.Condition {
-	return func() (string, any) {
-		if len(fns) == 0 {
-			return "", nil
-		}
-		var (
-			buf    strings.Builder
-			params = make([]any, 0, len(fns))
-		)
+	return buildSimpleCondition(fns, dialect.Operator_and)
+}
 
-		buf.WriteString(dialect.Operator_and + "(")
-		for i, fn := range fns {
-			cond, val := fn()
-			if i > 0 {
-				if strings.HasPrefix(cond, dialect.Operator_or) || strings.HasPrefix(cond, dialect.Operator_and) {
-					buf.WriteString(" ")
-				} else {
-					buf.WriteString(dialect.Operator_or)
-				}
-			}
-			buf.WriteString(cond)
-			if vals, ok := val.([]any); ok {
-				params = append(params, vals...)
-			} else {
-				params = append(params, val)
-			}
-		}
-		buf.WriteString(")")
+func andOr(fns ...dialect.Condition) dialect.Condition {
+	return buildBracketsCondition(fns, dialect.Operator_and+"(", dialect.Operator_or)
+}
 
-		return buf.String(), params
-	}
+func orAnd(fns ...dialect.Condition) dialect.Condition {
+	return buildBracketsCondition(fns, dialect.Operator_or+"(", dialect.Operator_and)
 }
 
 // -------------------
