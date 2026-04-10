@@ -66,7 +66,7 @@ func serviceContext[A, B any](ctx Context, req *A, resp *B,
 	}()
 
 	if e := read(ctx, req); e != nil {
-		return resp, Param_Invalid.SetInfo(e)
+		return resp, types.NewParam("serviceContext.read", e, "参数无效")
 	}
 	if e := Validate(req); e != nil {
 		return resp, e
@@ -95,7 +95,7 @@ func service[A, B any](ctx Context, req *A, resp *B,
 	}()
 
 	if e := read(ctx, req); e != nil {
-		return resp, Param_Invalid.SetInfo(e)
+		return resp, types.NewParam("service.read", e, "参数无效")
 	}
 	if e := Validate(req); e != nil {
 		return resp, e

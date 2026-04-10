@@ -25,7 +25,6 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
-	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
@@ -91,7 +90,6 @@ func (p *{{$structNameLower}}) Insert(ctx context.Context, sets ...dialect.Sette
 		Create(p.db).
 		Exec(ctx)
 	if e != nil {
-		log.Error(e)
 		return 0, e
 	}
 	return _result.LastInsertId()
@@ -107,7 +105,6 @@ func (p *{{$structNameLower}}) InsertOne(ctx context.Context, bean *{{$package}}
 		Create(p.db).
 		Struct(ctx, bean)
 	if e != nil {
-		log.Error(e)
 		return false, e
 	}
 
@@ -135,7 +132,6 @@ func (p *{{$structNameLower}}) InsertBatch(ctx context.Context, beans []*{{$pack
 		Create(p.db).
 		BatchStruct(ctx, _args...)
 	if e != nil {
-		log.Error(e)
 		return 0, e
 	}
 
@@ -155,7 +151,6 @@ func (p *{{$structNameLower}}) Update(ctx context.Context, sets []dialect.Setter
 		Update(p.db).
 		Exec(ctx)
 	if e != nil {
-		log.Error(e)
 		return false, e
 	}
 	_n, e := _result.RowsAffected()
@@ -180,7 +175,6 @@ func (p *{{$structNameLower}}) UpdateOne(ctx context.Context, bean *{{$package}}
 		Update(p.db).
 		Struct(ctx, bean)
 	if e != nil {
-		log.Error(e)
 		return false, e
 	}
 
@@ -206,7 +200,6 @@ func (p *{{$structNameLower}}) UpdateBatch(ctx context.Context, beans []*{{$pack
 		Update(p.db).
 		BatchStruct(ctx, _args...)
 	if e != nil {
-		log.Error(e)
 		return false, e
 	}
 	_n, e := _result.RowsAffected()
@@ -222,7 +215,6 @@ func (p *{{$structNameLower}}) Delete(ctx context.Context, cond ...dialect.Condi
 		Delete(p.db).
 		Exec(ctx)
 	if e != nil {
-		log.Error(e)
 		return false, e
 	}
 	_n, e := _result.RowsAffected()
@@ -252,7 +244,6 @@ func (p *{{$structNameLower}}) DeleteByIds(ctx context.Context, ids []any) (int6
 		Delete(p.db).
 		Exec(ctx)
 	if e != nil {
-		log.Error(e)
 		return 0, e
 	}
 	return _result.RowsAffected()
@@ -289,7 +280,6 @@ func (p *{{$structNameLower}}) Get(ctx context.Context, s ace.SelectBuilder) (*{
 		Select(p.db).
 		QueryRow(ctx)
 	if e!= nil {
-		log.Error(e)
 		return nil, false, e
 	}
 	_obj := {{$package}}.New{{$structName}}()
@@ -300,7 +290,6 @@ func (p *{{$structNameLower}}) Get(ctx context.Context, s ace.SelectBuilder) (*{
 	case sql.ErrNoRows:
 		return _obj, false, nil
 	default:
-		log.Error(e)
 		return _obj, false, e
 	}
 }
@@ -354,7 +343,6 @@ func (p *{{$structNameLower}}) GetByIds(ctx context.Context, ids []any, cols ...
 		Select(p.db).
 		Query(ctx)
 	if e != nil {
-		log.Error(e)
 		return nil, e
 	}
 	defer _rows.Close()
@@ -388,7 +376,6 @@ func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (an
 		Select(p.db).
 		QueryRow(ctx)
 	if e!= nil {
-		log.Error(e)
 		return nil, false, e
 	}
 	var _v any
@@ -399,7 +386,6 @@ func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (an
 	case sql.ErrNoRows:
 		return _v, false, nil
 	default:
-		log.Error(e)
 		return _v, false, e
 	}
 }
@@ -422,7 +408,6 @@ func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([
 		Select(p.db).
 		Query(ctx)
 	if e != nil {
-		log.Error(e)
 		return nil, false, e
 	}
 	defer _rows.Close()
@@ -435,7 +420,7 @@ func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([
 	if e == nil || e == sql.ErrNoRows {
 		return _objs, false, nil
 	}
-	log.Error(e)
+
 	return _objs, false, e
 }
 
@@ -458,7 +443,6 @@ func (p *{{$structNameLower}}) Column(ctx context.Context, s ace.SelectBuilder) 
 		Select(p.db).
 		Query(ctx)
 	if e != nil {
-		log.Error(e)
 		return nil, e
 	}
 	defer _rows.Close()
@@ -468,7 +452,6 @@ func (p *{{$structNameLower}}) Column(ctx context.Context, s ace.SelectBuilder) 
 		var _v any
 		e := _rows.Scan(&_v)
 		if e != nil {
-			log.Error(e)
 			return nil, e
 		}
 		_objs = append(_objs, _v)
@@ -503,7 +486,6 @@ func (p *{{$structNameLower}}) Exists(ctx context.Context, cond ...dialect.Condi
 		Select(p.db).
 		QueryRow(ctx)
 	if e != nil {
-		log.Error(e)
 		return false, e
 	}
 
@@ -525,7 +507,6 @@ func (p *{{$structNameLower}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKe
 	defer p.Free()
 	for _, _id := range ids {
 		if e := p.cache.Delete(ctx, GetIdHashKey(_id)); e != nil {
-			log.Error(e)
 			return e
 		}
 	}
@@ -537,7 +518,6 @@ func (p *{{$structNameLower}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKe
 func (p *{{$structNameLower}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (*{{$package}}.{{$structName}}, bool, error) {
 	_s,e := p.cache.Fetch(ctx, GetIdHashKey({{.PrimaryKey.Col}}))
 	if e != nil {
-		log.Error(e)
 		return nil, false, e
 	}
 	if len(_s)==0 {
@@ -546,7 +526,6 @@ func (p *{{$structNameLower}}) getCache(ctx context.Context, {{.PrimaryKey.Col}}
 	_obj := {{$package}}.New{{$structName}}()
 	e = json.Unmarshal(_s, _obj)
 	if e != nil {
-		log.Error(e)
 		return nil, false, e
 	}
 	return _obj, true,nil
@@ -556,7 +535,6 @@ func (p *{{$structNameLower}}) getCache(ctx context.Context, {{.PrimaryKey.Col}}
 func (p *{{$structNameLower}}) setCache(ctx context.Context, obj *{{$package}}.{{$structName}}) error {
 	_s,e := json.Marshal(obj)
 	if e != nil {
-		log.Error(e)
 		return e
 	}
 	return p.cache.Save(ctx, GetIdHashKey(obj.{{.PrimaryKey.Name}}), string(_s), {{.CacheData}})
@@ -601,7 +579,6 @@ func (p *{{$structNameLower}}) GetX(ctx context.Context, s ace.SelectBuilder) (*
 		Select(p.db).
 		QueryRow(ctx)
 	if e != nil {
-		log.Error(e)
 		return nil, false, e
 	}
 
@@ -625,7 +602,6 @@ func (p *{{$structNameLower}}) GetX(ctx context.Context, s ace.SelectBuilder) (*
 	case sql.ErrNoRows:
 		return _obj, false, nil
 	default:
-		log.Error(e)
 		return _obj, false, e
 	}
 }
@@ -662,7 +638,6 @@ func (p *{{$structNameLower}}) ListX(ctx context.Context, s ace.SelectBuilder) (
 		Select(p.db).
 		Query(ctx)
 	if e != nil {
-		log.Error(e)
 		return nil, false, e
 	}
 	defer rows.Close()
@@ -702,7 +677,7 @@ func (p *{{$structNameLower}}) ListX(ctx context.Context, s ace.SelectBuilder) (
 	if e == nil || e == sql.ErrNoRows {
 		return _objs, false, nil
 	}
-	log.Error(e)
+
 	return _objs, false, e
 }
 
