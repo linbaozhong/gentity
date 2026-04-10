@@ -16,7 +16,6 @@ package api
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
@@ -40,7 +39,6 @@ func Get[A, B any](
 	_, e := serviceContext(ctx, &req, &resp, readGetRequest[A], callService)
 	if e != nil {
 		Fail(ctx, e)
-		log.Error(e)
 		return e
 	}
 	if len(after) > 0 {
@@ -66,7 +64,6 @@ func Post[A, B any](
 	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
 	if e != nil {
 		Fail(ctx, e)
-		log.Error(e)
 		return e
 	}
 	if len(after) > 0 {
@@ -86,7 +83,6 @@ func Redirect[A any](ctx Context,
 	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
 	if e != nil {
 		Fail(ctx, e)
-		log.Error(e)
 		return e
 	}
 	ctx.Redirect(resp)
@@ -105,7 +101,6 @@ func Stream[A, B any](
 	_, e := service(ctx, &req, &resp, readPostRequest[A], callService)
 	if e != nil {
 		Fail(ctx, e)
-		log.Error(e)
 		return e
 	}
 	if len(after) > 0 {

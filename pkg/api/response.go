@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"io"
@@ -39,7 +40,7 @@ func Fail(c Context, e error, args ...any) error {
 	} else {
 		j.Info = fmt.Sprintf("%s", args[0])
 	}
-
+	log.Error(e)
 	return c.JSON(j)
 }
 
