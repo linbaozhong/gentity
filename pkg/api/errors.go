@@ -1,7 +1,8 @@
-package err
+package api
 
 import (
 	"errors"
+	"github.com/linbaozhong/gentity/pkg/log"
 	"strings"
 )
 
@@ -49,6 +50,63 @@ func (e *AppError) Unwrap() error {
 		return nil
 	}
 	return e.Err
+}
+
+func (e *AppError) HandleContextError(c Context, err error) {
+	// 设置错误到上下文
+	c.SetErr(err)
+
+	// 记录错误日志
+	logError(c, err)
+
+	// 根据错误类型返回不同的响应
+	var appErr *AppError
+	if ok := As(err, &appErr); ok && appErr != nil {
+		switch appErr.Type {
+		case ErrorTypeDB:
+			c.StatusCode(500)
+			c.JSON(map[string]interface{}{
+				"code":    500,
+				"message": "数据库操作失败",
+				"op":      appErr.Op,
+			})
+		case ErrorTypeValidation:
+			c.StatusCode(400)
+			c.JSON(map[string]interface{}{
+				"code":    400,
+				"message": appErr.Message,
+				"op":      appErr.Op,
+			})
+		case ErrorTypePermission:
+			c.StatusCode(403)
+			c.JSON(map[string]interface{}{
+				"code":    403,
+				"message": appErr.Message,
+				"op":      appErr.Op,
+			})
+		case ErrorTypeNotFound:
+			c.StatusCode(404)
+			c.JSON(map[string]interface{}{
+				"code":    404,
+				"message": appErr.Message,
+				"op":      appErr.Op,
+			})
+		default:
+			c.StatusCode(500)
+			c.JSON(map[string]interface{}{
+				"code":    500,
+				"message": appErr.Message,
+				"op":      appErr.Op,
+			})
+		}
+	} else {
+		// 不是 AppError，返回通用错误
+		c.StatusCode(500)
+		c.JSON(map[string]interface{}{
+			"code":    500,
+			"message": "系统错误",
+		})
+	}
 }
 
 // New 创建新错误
@@ -153,4 +211,38 @@ func IsNotFoundError(err error) bool {
 		return appErr.Type == ErrorTypeNotFound
 	}
 	return false
+}
+
+// logError 记录错误日志
+func logError(c Context, err error) {
+	// 获取请求信息
+	path := c.Path()
+	method := c.Method()
+	ip := c.RemoteAddr()
+
+	// 根据错误类型记录不同级别的日志
+	var appErr *AppError
+	if ok := As(err, &appErr); ok && appErr != nil {
+		switch appErr.Type {
+		case ErrorTypeDB:
+			log.Errorf("【数据库错误】%s %s - IP: %s - 操作: %s - 错误: %v",
+				method, path, ip, appErr.Op, appErr.Err)
+		case ErrorTypeValidation:
+			log.Warnf("【验证错误】%s %s - IP: %s - 操作: %s - 错误: %v",
+				method, path, ip, appErr.Op, appErr.Err)
+		case ErrorTypePermission:
+			log.Warnf("【权限错误】%s %s - IP: %s - 操作: %s - 错误: %v",
+				method, path, ip, appErr.Op, appErr.Err)
+		case ErrorTypeNotFound:
+			log.Infof("【未找到】%s %s - IP: %s - 操作: %s - 错误: %v",
+				method, path, ip, appErr.Op, appErr.Err)
+		default:
+			log.Errorf("【未知错误】%s %s - IP: %s - 错误: %v",
+				method, path, ip, err)
+		}
+	} else {
+		// 不是 AppError，记录为普通错误
+		log.Errorf("【系统错误】%s %s - IP: %s - 错误: %v",
+			method, path, ip, err)
+	}
 }

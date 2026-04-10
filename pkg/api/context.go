@@ -25,10 +25,15 @@ import (
 )
 
 type (
-	Application = *iris.Application
-	Context     = iris.Context
-	Party       = iris.Party
-	Handler     = iris.Handler
+	Application  = *iris.Application
+	Context      = iris.Context
+	Party        = iris.Party
+	Handler      = iris.Handler
+	ErrorHandler interface {
+		HandleContextError(ctx *Context, err error)
+	}
+	// ErrorHandlerFunc a function shortcut for ErrorHandler interface.
+	ErrorHandlerFunc func(ctx *Context, err error)
 )
 
 func NewApplication(name, version string) Application {
