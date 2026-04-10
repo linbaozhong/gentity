@@ -59,6 +59,7 @@ func (e *Error) Join(err error) error {
 	return errors.Join(e, err)
 }
 
+// SetMessage 设置消息
 func (e *Error) SetMessage(i any) *Error {
 	if i == nil {
 		return e
@@ -70,6 +71,12 @@ func (e *Error) SetMessage(i any) *Error {
 	} else {
 		e.Message = fmt.Sprint(i)
 	}
+	return e
+}
+
+// SetOp 设置操作名称
+func (e *Error) SetOp(op string) *Error {
+	e.Op = op
 	return e
 }
 
@@ -136,15 +143,6 @@ func WrapDB(err error, op string) *Error {
 		return nil
 	}
 	return newError(ErrorTypeDB, op, err)
-}
-
-// GetOp 获取操作名称
-func GetOp(err error) string {
-	var appErr *Error
-	if ok := As(err, &appErr); ok && appErr != nil {
-		return appErr.Op
-	}
-	return ""
 }
 
 // As 检查错误是否为 Error 类型
