@@ -30,7 +30,7 @@ func Fail(c Context, e error, args ...any) error {
 	defer j.Free()
 
 	if er, ok := e.(*types.Error); ok {
-		j.Code = er.Code
+		j.Code = util.IIF(er.Code == 0, UnKnown.Code, er.Code)
 		j.Message = getErrorMessage(er)
 	} else if len(args) == 0 {
 		j.Code = UnKnown.Code
