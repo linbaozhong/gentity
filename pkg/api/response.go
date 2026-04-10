@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"github.com/linbaozhong/gentity/pkg/util"
 	"io"
@@ -32,15 +31,16 @@ func Fail(c Context, e error, args ...any) error {
 
 	if er, ok := e.(*types.Error); ok {
 		j.Code = er.Code
-		j.Message = er.Error()
-		j.Info = er.Info
+		j.Message = getErrorMessage(er)
 	} else if len(args) == 0 {
 		j.Code = UnKnown.Code
 		j.Message = e.Error()
 	} else {
-		j.Info = fmt.Sprintf("%s", args[0])
+		j.Message = fmt.Sprintf("%s", args[0])
 	}
-	log.Error(e)
+	// 记录错误日志
+	go logError(c, e)
+
 	return c.JSON(j)
 }
 

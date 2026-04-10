@@ -14,7 +14,6 @@ type JsonResult struct {
 	Code    int    `json:"code"`
 	Data    any    `json:"data"`
 	Message string `json:"msg"`
-	Info    string `json:"info"` // dev消息
 }
 
 var resultPool = sync.Pool{
@@ -35,7 +34,6 @@ func (j *JsonResult) Free() {
 	j.Code = 0
 	j.Data = nil
 	j.Message = ""
-	j.Info = ""
 	resultPool.Put(j)
 }
 
@@ -45,7 +43,6 @@ func (j JsonResult) MarshalJSON() ([]byte, error) {
 	_buf.WriteString(`"code":` + Marshal(j.Code) + `,`)
 	_buf.WriteString(`"data":` + Marshal(j.Data) + `,`)
 	_buf.WriteString(`"msg":` + Marshal(j.Message) + `,`)
-	_buf.WriteString(`"info":` + Marshal(j.Info))
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
 }
