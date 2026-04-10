@@ -73,15 +73,19 @@ func (e *Error) SetMessage(i any) *Error {
 	return e
 }
 
-func NewError(code int, message string) *Error {
-	return &Error{
+func NewError(code int, message string, ops ...string) *Error {
+	e := &Error{
 		Code:    code,
 		Message: message,
 	}
+	if len(ops) > 0 {
+		e.Op = ops[0]
+	}
+	return e
 }
 
 // newError 创建新错误
-func newError(typ ErrorType, op string, err error, message ...string) *Error {
+func newError(typ ErrorType, op string, err error, messages ...string) *Error {
 	if err == nil {
 		return nil
 	}
@@ -90,8 +94,8 @@ func newError(typ ErrorType, op string, err error, message ...string) *Error {
 		Op:   op,
 		Err:  err,
 	}
-	if len(message) > 0 {
-		e.Message = message[0]
+	if len(messages) > 0 {
+		e.Message = messages[0]
 	}
 	return e
 }
