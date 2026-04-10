@@ -86,9 +86,6 @@ func NewError(code int, message string, ops ...string) *Error {
 
 // newError 创建新错误
 func newError(typ ErrorType, op string, err error, messages ...string) *Error {
-	if err == nil {
-		return nil
-	}
 	e := &Error{
 		Type: typ,
 		Op:   op,
@@ -127,11 +124,17 @@ func NewParam(op string, err error, message string) *Error {
 
 // Wrap 包装错误，添加操作信息
 func Wrap(err error, op string) *Error {
+	if err == nil {
+		return nil
+	}
 	return newError(ErrorTypeUnknown, op, err)
 }
 
 // WrapDB 包装数据库错误
 func WrapDB(err error, op string) *Error {
+	if err == nil {
+		return nil
+	}
 	return newError(ErrorTypeDB, op, err)
 }
 
