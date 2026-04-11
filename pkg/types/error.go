@@ -11,7 +11,7 @@ type ErrorType int
 
 const (
 	// ErrorTypeUnknown 未知错误
-	ErrorTypeUnknown ErrorType = iota
+	ErrorTypeUnknown ErrorType = -100 * (iota + 1)
 	// ErrorTypeDB 数据库错误
 	ErrorTypeDB
 	// ErrorTypeValidation 验证错误
@@ -25,11 +25,10 @@ const (
 )
 
 type Error struct {
-	Type    ErrorType `json:"-"`
-	Op      string    `json:"-"`    // 操作名称
-	Err     error     `json:"-"`    // 原始错误
-	Code    int       `json:"code"` // 用户可见错误码
-	Message string    `json:"msg"`  // 用户可见的消息
+	Op      string `json:"-"`    // 操作名称
+	Err     error  `json:"-"`    // 原始错误
+	Code    int    `json:"code"` // 用户可见错误码
+	Message string `json:"msg"`  // 用户可见的消息
 }
 
 func (e *Error) Error() string {
@@ -94,7 +93,7 @@ func NewError(code int, message string, ops ...string) *Error {
 // newError 创建新错误
 func newError(typ ErrorType, op string, err error, messages ...string) *Error {
 	e := &Error{
-		Type: typ,
+		Code: int(typ),
 		Op:   op,
 		Err:  err,
 	}
@@ -154,7 +153,7 @@ func As(err error, target **Error) bool {
 func IsDBError(err error) bool {
 	var appErr *Error
 	if ok := As(err, &appErr); ok && appErr != nil {
-		return appErr.Type == ErrorTypeDB
+		return appErr.Code == int(ErrorTypeDB)
 	}
 	return false
 }
@@ -163,7 +162,7 @@ func IsDBError(err error) bool {
 func IsValidationError(err error) bool {
 	var appErr *Error
 	if ok := As(err, &appErr); ok && appErr != nil {
-		return appErr.Type == ErrorTypeValidation
+		return appErr.Code == int(ErrorTypeValidation)
 	}
 	return false
 }
@@ -172,7 +171,7 @@ func IsValidationError(err error) bool {
 func IsPermissionError(err error) bool {
 	var appErr *Error
 	if ok := As(err, &appErr); ok && appErr != nil {
-		return appErr.Type == ErrorTypePermission
+		return appErr.Code == int(ErrorTypePermission)
 	}
 	return false
 }
@@ -181,7 +180,7 @@ func IsPermissionError(err error) bool {
 func IsNotFoundError(err error) bool {
 	var appErr *Error
 	if ok := As(err, &appErr); ok && appErr != nil {
-		return appErr.Type == ErrorTypeNotFound
+		return appErr.Code == int(ErrorTypeNotFound)
 	}
 	return false
 }
@@ -190,7 +189,7 @@ func IsNotFoundError(err error) bool {
 func IsParamError(err error) bool {
 	var appErr *Error
 	if ok := As(err, &appErr); ok && appErr != nil {
-		return appErr.Type == ErrorTypeParam
+		return appErr.Code == int(ErrorTypeParam)
 	}
 	return false
 }

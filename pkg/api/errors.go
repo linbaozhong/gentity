@@ -15,7 +15,7 @@ func logError(c Context, err error) {
 	// 根据错误类型记录不同级别的日志
 	var appErr *types.Error
 	if ok := types.As(err, &appErr); ok && appErr != nil {
-		switch appErr.Type {
+		switch types.ErrorType(appErr.Code) {
 		case types.ErrorTypeDB:
 			log.Errorf("【数据库错误】%s %s - IP: %s - 操作: %s - 错误: %v",
 				method, path, ip, appErr.Op, appErr.Err)
@@ -30,6 +30,9 @@ func logError(c Context, err error) {
 				method, path, ip, appErr.Op, appErr.Err)
 		case types.ErrorTypeNotFound:
 			log.Infof("【未找到】%s %s - IP: %s - 操作: %s - 错误: %v",
+				method, path, ip, appErr.Op, appErr.Err)
+		case types.ErrorTypeUnknown:
+			log.Panicf("【未知错误】%s %s - IP: %s - 操作: %s - 错误: %v",
 				method, path, ip, appErr.Op, appErr.Err)
 		default:
 			log.Errorf("【未知错误】%s %s - IP: %s - 错误: %v",
@@ -49,7 +52,7 @@ func getErrorMessage(err error) string {
 		if appErr.Message != "" {
 			return appErr.Message
 		}
-		switch appErr.Type {
+		switch types.ErrorType(appErr.Code) {
 		case types.ErrorTypeDB:
 			return "数据库错误"
 		case types.ErrorTypeValidation:

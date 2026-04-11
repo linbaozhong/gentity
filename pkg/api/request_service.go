@@ -16,6 +16,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/kataras/iris/v12"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
@@ -60,8 +61,13 @@ func serviceContext[A, B any](ctx Context, req *A, resp *B,
 
 	defer func() {
 		if e := recover(); e != nil {
-			log.Panic(e)
-			Fail(ctx, types.NewError(iris.StatusInternalServerError, "内部服务器错误"))
+			var err error
+			if eerr, ok := e.(error); ok {
+				err = eerr
+			} else {
+				err = fmt.Errorf("%v", e)
+			}
+			Fail(ctx, types.Wrap(err, "内部服务器错误"))
 		}
 	}()
 
@@ -89,8 +95,13 @@ func service[A, B any](ctx Context, req *A, resp *B,
 
 	defer func() {
 		if e := recover(); e != nil {
-			log.Panic(e)
-			Fail(ctx, types.NewError(iris.StatusInternalServerError, "内部服务器错误"))
+			var err error
+			if eerr, ok := e.(error); ok {
+				err = eerr
+			} else {
+				err = fmt.Errorf("%v", e)
+			}
+			Fail(ctx, types.Wrap(err, "内部服务器错误"))
 		}
 	}()
 
