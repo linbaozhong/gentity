@@ -20,6 +20,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"net/http"
 	"time"
 )
 
@@ -67,12 +68,12 @@ func serviceContext[A, B any](ctx Context, req *A, resp *B,
 			} else {
 				err = fmt.Errorf("%v", e)
 			}
-			Fail(ctx, types.Wrap(err, "内部服务器错误"))
+			Fail(ctx, types.NewError(http.StatusInternalServerError, "内部服务器错误").Join(err))
 		}
 	}()
 
 	if e := read(ctx, req); e != nil {
-		return resp, types.NewParam("serviceContext.read", e, "反序列化参数错误")
+		return resp, types.NewError(http.StatusBadRequest, "反序列化参数错误", "serviceContext.read").Join(e)
 	}
 	if e := Validate(req); e != nil {
 		return resp, e
@@ -101,12 +102,12 @@ func service[A, B any](ctx Context, req *A, resp *B,
 			} else {
 				err = fmt.Errorf("%v", e)
 			}
-			Fail(ctx, types.Wrap(err, "内部服务器错误"))
+			Fail(ctx, types.NewError(http.StatusInternalServerError, "内部服务器错误").Join(err))
 		}
 	}()
 
 	if e := read(ctx, req); e != nil {
-		return resp, types.NewParam("service.read", e, "反序列化参数错误")
+		return resp, types.NewError(http.StatusBadRequest, "反序列化参数错误", "service.read").Join(e)
 	}
 	if e := Validate(req); e != nil {
 		return resp, e

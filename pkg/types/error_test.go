@@ -15,15 +15,9 @@
 package types
 
 import (
-	"errors"
 	"testing"
 )
 
 func TestError1(t *testing.T) {
-	e := NewNotFound("op string", errors.New("test error"), "test message")
-	t.Log(e)
-	var err *Error
-	if ok := As(e, &err); ok {
-		t.Log(err.Message)
-	}
+
 }
