@@ -78,17 +78,27 @@ func Marshal(s any) string {
 			}
 			return string(b)
 		}
-		switch reflect.Indirect(reflect.ValueOf(s)).Kind() {
-		case reflect.Struct, reflect.Slice, reflect.Map:
-			b, e := json.Marshal(s)
-			if e != nil {
-				return fmt.Sprintf("%+v", s)
-			}
 
-			return string(b)
+		sVal := reflect.Indirect(reflect.ValueOf(s))
+		switch sVal.Kind() {
+		case reflect.Struct:
+		case reflect.Slice:
+			if sVal.Len() == 0 {
+				return "[]"
+			}
+		case reflect.Map:
+			if sVal.Len() == 0 {
+				return "{}"
+			}
+		default:
+			return conv.Any2String(s)
 		}
+		b, e := json.Marshal(s)
+		if e != nil {
+			return fmt.Sprintf("%+v", s)
+		}
+		return string(b)
 	}
-	return conv.Any2String(s)
 }
 
 type write struct {
