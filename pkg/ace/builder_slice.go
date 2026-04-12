@@ -102,22 +102,25 @@ func buildSimpleCondition(fns []dialect.Condition, operator string) dialect.Cond
 			params = make([]any, 0, len(fns))
 		)
 
-		for _, fn := range fns {
+		for i, fn := range fns {
 			cond, val := fn()
 
 			// 空值检查：跳过空条件
 			if cond == "" {
 				continue
 			}
-
-			buf.WriteString(operator)
+			if i > 0 {
+				buf.WriteString(operator)
+			}
 			buf.WriteString(cond)
 
 			// 参数处理
 			if vals, ok := val.([]any); ok {
 				params = append(params, vals...)
 			} else {
-				params = append(params, val)
+				if val == nil {
+					params = append(params, val)
+				}
 			}
 		}
 
@@ -159,7 +162,9 @@ func buildBracketsCondition(fns []dialect.Condition, prefix, innerOperator strin
 			if vals, ok := val.([]any); ok {
 				params = append(params, vals...)
 			} else {
-				params = append(params, val)
+				if val != nil {
+					params = append(params, val)
+				}
 			}
 		}
 		buf.WriteString(")")

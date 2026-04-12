@@ -132,7 +132,9 @@ func parseWhereParams(val any, params *[]any) error {
 	case []any:
 		*params = append(*params, v...)
 	default:
-		*params = append(*params, val)
+		if v != nil {
+			*params = append(*params, v)
+		}
 	}
 	return nil
 }
