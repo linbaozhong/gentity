@@ -17,8 +17,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/kataras/iris/v12"
-	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"net/http"
 	"time"
@@ -145,13 +143,4 @@ func readPostRequest[A any](ctx Context, req *A) error {
 			return ReadQuery(ctx, req)
 		}
 	}
-}
-
-func RecoverFun(ctx Context) {
-	defer func() {
-		if e := recover(); e != nil {
-			log.Panic(e)
-			Fail(ctx, types.NewError(iris.StatusInternalServerError, "内部服务器错误"))
-		}
-	}()
 }

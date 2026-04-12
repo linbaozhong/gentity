@@ -18,6 +18,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"net/http"
 	"time"
 
 	"github.com/kataras/iris/v12/middleware/logger"
@@ -87,11 +88,11 @@ func debug(name, version string) Handler {
 }
 
 func NoRoute(c Context) {
-	Fail(c, types.NewError(iris.StatusMethodNotAllowed, "方法不允许"))
+	Fail(c, types.NewError(http.StatusMethodNotAllowed, "方法不允许"))
 }
 
 func NoMethod(c Context) {
-	Fail(c, types.NewError(iris.StatusNotFound, "方法未找到"))
+	Fail(c, types.NewError(http.StatusNotFound, "方法未找到"))
 }
 
 func Recovery() Handler {
@@ -99,7 +100,7 @@ func Recovery() Handler {
 		defer func() {
 			if e := recover(); e != nil {
 				log.Panic(e)
-				Fail(c, types.NewError(iris.StatusInternalServerError, "内部服务器错误"))
+				Fail(c, types.NewError(http.StatusInternalServerError, "内部服务器错误"))
 			}
 		}()
 		c.Next()
