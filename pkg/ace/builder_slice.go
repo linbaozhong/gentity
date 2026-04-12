@@ -118,7 +118,7 @@ func buildSimpleCondition(fns []dialect.Condition, operator string) dialect.Cond
 			if vals, ok := val.([]any); ok {
 				params = append(params, vals...)
 			} else {
-				if val == nil {
+				if val != nil {
 					params = append(params, val)
 				}
 			}
