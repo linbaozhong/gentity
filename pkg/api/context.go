@@ -99,7 +99,7 @@ func Recovery() Handler {
 	return func(c Context) {
 		defer func() {
 			if e := recover(); e != nil {
-				log.Panic(e)
+				log.Warn(e)
 				Fail(c, types.NewError(http.StatusInternalServerError, "内部服务器错误"))
 			}
 		}()
