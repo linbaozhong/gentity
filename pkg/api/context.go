@@ -15,8 +15,8 @@
 package api
 
 import (
+	"fmt"
 	"github.com/kataras/iris/v12"
-	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"net/http"
 	"time"
@@ -99,8 +99,13 @@ func Recovery() Handler {
 	return func(c Context) {
 		defer func() {
 			if e := recover(); e != nil {
-				log.Warn(e)
-				Fail(c, types.NewError(http.StatusInternalServerError, "内部服务器错误"))
+				if err, ok := e.(error); ok {
+					Fail(c, types.NewError(http.StatusInternalServerError, "内部服务器错误").
+						SetOp("Recovery").Join(err))
+					return
+				}
+				Fail(c, types.NewError(http.StatusInternalServerError, "内部服务器错误").
+					Join(fmt.Errorf("%v", e)))
 			}
 		}()
 		c.Next()

@@ -38,8 +38,7 @@ func Get[A, B any](
 
 	_, e := serviceContext(ctx, &req, &resp, readGetRequest[A], callService)
 	if e != nil {
-		Fail(ctx, e)
-		return e
+		return Fail(ctx, e)
 	}
 	if len(after) > 0 {
 		after[0](ctx, &resp)
@@ -63,8 +62,7 @@ func Post[A, B any](
 
 	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
 	if e != nil {
-		Fail(ctx, e)
-		return e
+		return Fail(ctx, e)
 	}
 	if len(after) > 0 {
 		after[0](ctx, &resp)
@@ -82,8 +80,7 @@ func Redirect[A any](ctx Context,
 	)
 	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
 	if e != nil {
-		Fail(ctx, e)
-		return e
+		return Fail(ctx, e)
 	}
 	ctx.Redirect(resp)
 	return nil
@@ -100,8 +97,7 @@ func Stream[A, B any](
 	)
 	_, e := service(ctx, &req, &resp, readPostRequest[A], callService)
 	if e != nil {
-		Fail(ctx, e)
-		return e
+		return Fail(ctx, e)
 	}
 	if len(after) > 0 {
 		after[0](ctx, &resp)
