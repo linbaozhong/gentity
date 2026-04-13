@@ -18,6 +18,64 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
+type Wherer interface {
+	Where(fns ...dialect.Condition) Builder
+	RawWhere(cond string, params ...any) Builder
+	And(fns ...dialect.Condition) Builder
+	Or(fns ...dialect.Condition) Builder
+	AndOr(fns ...dialect.Condition) Builder
+	OrAnd(fns ...dialect.Condition) Builder
+}
+
+// Where 添加查询条件，子条件之间为 and 关系。
+func (o *orm) Where(fns ...dialect.Condition) Builder {
+	return o.And(fns...)
+}
+
+// RawWhere 添加原生查询条件
+func (o *orm) RawWhere(cond string, params ...any) Builder {
+	if o.where.Len() > 0 {
+		o.where.WriteString(dialect.Operator_and)
+	}
+	o.where.WriteString(cond)
+	o.whereParams = append(o.whereParams, params...)
+	return o
+}
+
+// And 添加 AND 查询条件，子条件之间为 and 关系。
+func (o *orm) And(fns ...dialect.Condition) Builder {
+	return o.buildWhereSimpleCondition(fns, dialect.Operator_and)
+}
+
+// AndOr 添加 AND 查询条件，所有子条件之间为 or 关系。
+func (o *orm) AndOr(fns ...dialect.Condition) Builder {
+	return o.buildWhereBracketsCondition(fns, dialect.Operator_and, dialect.Operator_or)
+}
+
+func parseWhereParams(val any, params *[]any) error {
+	switch v := val.(type) {
+	case error:
+		return v
+	case []any:
+		*params = append(*params, v...)
+	default:
+		if v != nil {
+			*params = append(*params, v)
+		}
+	}
+	return nil
+}
+
+// Or 添加 OR 查询条件，子条件之间为 or 关系。
+func (o *orm) Or(fns ...dialect.Condition) Builder {
+	return o.buildWhereSimpleCondition(fns, dialect.Operator_or)
+}
+
+// OrAnd 添加 OR 查询条件，子条件之间为 and 关系。
+func (o *orm) OrAnd(fns ...dialect.Condition) Builder {
+	return o.buildWhereBracketsCondition(fns, dialect.Operator_or, dialect.Operator_and)
+}
+
 // buildWhereSimpleCondition 构建简单WHERE条件（每个条件前都加操作符）
 // 用于 Or 和 And 方法
 // fns: 条件函数数组
@@ -100,51 +158,4 @@ func (o *orm) buildWhereBracketsCondition(fns []dialect.Condition, prefixOperato
 	o.where.WriteString(")")
 
 	return o
-}
-
-type Wherer interface {
-	Where(fns ...dialect.Condition) Builder
-	And(fns ...dialect.Condition) Builder
-	Or(fns ...dialect.Condition) Builder
-	AndOr(fns ...dialect.Condition) Builder
-	OrAnd(fns ...dialect.Condition) Builder
-}
-
-// Where 添加查询条件，子条件之间为 and 关系。
-func (o *orm) Where(fns ...dialect.Condition) Builder {
-	return o.And(fns...)
-}
-
-// And 添加 AND 查询条件，子条件之间为 and 关系。
-func (o *orm) And(fns ...dialect.Condition) Builder {
-	return o.buildWhereSimpleCondition(fns, dialect.Operator_and)
-}
-
-// AndOr 添加 AND 查询条件，所有子条件之间为 or 关系。
-func (o *orm) AndOr(fns ...dialect.Condition) Builder {
-	return o.buildWhereBracketsCondition(fns, dialect.Operator_and, dialect.Operator_or)
-}
-
-func parseWhereParams(val any, params *[]any) error {
-	switch v := val.(type) {
-	case error:
-		return v
-	case []any:
-		*params = append(*params, v...)
-	default:
-		if v != nil {
-			*params = append(*params, v)
-		}
-	}
-	return nil
-}
-
-// Or 添加 OR 查询条件，子条件之间为 or 关系。
-func (o *orm) Or(fns ...dialect.Condition) Builder {
-	return o.buildWhereSimpleCondition(fns, dialect.Operator_or)
-}
-
-// OrAnd 添加 OR 查询条件，子条件之间为 and 关系。
-func (o *orm) OrAnd(fns ...dialect.Condition) Builder {
-	return o.buildWhereBracketsCondition(fns, dialect.Operator_or, dialect.Operator_and)
 }
