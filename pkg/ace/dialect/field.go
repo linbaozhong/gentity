@@ -16,6 +16,7 @@ package dialect
 
 import (
 	"errors"
+	"fmt"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"strings"
 	"time"
@@ -657,6 +658,23 @@ func (f *Field) Min(as ...string) Function {
 		sb.WriteString(" IFNULL(Min(")
 		sb.WriteString(f.Quote())
 		sb.WriteString("),0) AS ")
+		sb.WriteString(a)
+		return sb.String()
+	}
+}
+
+func (f *Field) Distance(lng, lat float64, as ...string) Function {
+	var a = f.Name
+	if len(as) > 0 {
+		a = as[0]
+	}
+	return func() string {
+		var sb strings.Builder
+		sb.Grow(len(f.Quote()) + 20 + len(a))
+		sb.WriteString(
+			fmt.Sprintf("ST_Distance_Sphere(%s, ST_GeomFromText('POINT(%f %f)'))",
+				f.Quote(), lng, lat))
+		sb.WriteString(" AS ")
 		sb.WriteString(a)
 		return sb.String()
 	}
