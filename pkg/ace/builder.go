@@ -39,29 +39,31 @@ type (
 		CreateBuilder
 		UpdateBuilder
 		DeleteBuilder
+
+		parse() (strings.Builder, []any)
 	}
 
 	orm struct {
 		pool.Model
-		db            Executer
-		table         string
-		join          [][3]string
-		joinParams    []any
-		distinct      bool
-		cols          []dialect.Field
-		funcs         []string
-		omits         []dialect.Field
-		groupBy       strings.Builder
-		having        strings.Builder
-		havingParams  []any
-		orderBy       strings.Builder
-		limit         string
-		where         strings.Builder
-		whereParams   []any
-		exprCols      []expr
-		params        []any
-		command       strings.Builder
-		commandString strings.Builder
+		db           Executer
+		table        string
+		join         [][3]string
+		joinParams   []any
+		distinct     bool
+		cols         []dialect.Field
+		funcs        []string
+		omits        []dialect.Field
+		groupBy      strings.Builder
+		having       strings.Builder
+		havingParams []any
+		orderBy      strings.Builder
+		limit        string
+		where        strings.Builder
+		whereParams  []any
+		exprCols     []expr
+		params       []any
+		command      strings.Builder
+		// commandString strings.Builder
 		// toSql 为true时，仅打印SQL语句，不执行
 		toSql bool
 		err   error
@@ -77,7 +79,7 @@ var (
 
 func newOrm() *orm {
 	obj := ormPool.Get()
-	obj.commandString.Reset()
+	// obj.commandString.Reset()
 	return obj
 }
 
@@ -129,10 +131,11 @@ func (o *orm) Reset() {
 
 // String 返回 orm 对象的 SQL 语句和参数的字符串表示。
 func (o *orm) String() string {
-	if o.commandString.Len() == 0 {
-		o.commandString.WriteString(fmt.Sprintf("%s  %v \n", o.command.String(), o.mergeParams()))
-	}
-	return o.commandString.String()
+	// if o.commandString.Len() == 0 {
+	// 	o.commandString.WriteString(fmt.Sprintf("%s  %v \n", o.command.String(), o.mergeParams()))
+	// }
+	// return o.commandString.String()
+	return fmt.Sprintf("%s  %v \n", o.command.String(), o.mergeParams())
 }
 
 // Table 设置 orm 对象的表名。
@@ -281,8 +284,8 @@ func (o *orm) Clone() Builder {
 	newOrm.command.Reset()
 	newOrm.command.WriteString(o.command.String())
 
-	newOrm.commandString.Reset()
-	newOrm.commandString.WriteString(o.commandString.String())
+	// newOrm.commandString.Reset()
+	// newOrm.commandString.WriteString(o.commandString.String())
 
 	return &newOrm
 }
@@ -299,7 +302,7 @@ func (o *orm) mergeParams() []any {
 }
 
 // parse
-func (o *orm) parse() []dialect.Field {
+func (o *orm) parse() (strings.Builder, []any) {
 	o.command.WriteString("SELECT ")
 
 	var cols = util.SliceDiff(o.cols, o.omits)
@@ -324,7 +327,12 @@ func (o *orm) parse() []dialect.Field {
 	}
 
 	// FROM TABLE
-	o.command.WriteString(" FROM " + dialect.Quote_Char + o.table + dialect.Quote_Char)
+	if strings.HasPrefix(o.table, "(") {
+		// 如果表名以(开头，则不加引号
+		o.command.WriteString(" FROM " + o.table)
+	} else {
+		o.command.WriteString(" FROM " + dialect.Quote_Char + o.table + dialect.Quote_Char)
+	}
 	for _, j := range o.join {
 		o.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	}
@@ -352,12 +360,12 @@ func (o *orm) parse() []dialect.Field {
 		o.command.WriteString(o.limit)
 	}
 
-	return cols
+	return o.command, o.mergeParams()
 }
 
 // query
 func (o *orm) query(ctx context.Context) (*sql.Rows, error) {
-	_ = o.parse()
+	_, _ = o.parse()
 	return o.rows(ctx, o.command.String(), o.mergeParams()...)
 }
 

@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -33,6 +34,7 @@ type SelectBuilder interface {
 	PageByBookmark(size uint, bm dialect.Condition) Builder
 	Limit(size uint, start ...uint) Builder
 	Select(x ...Executer) Selecter
+	Sub(b Builder, as ...string) Builder
 	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
 	ToSql(...bool) Builder
 }
@@ -86,6 +88,17 @@ func (o *orm) Select(x ...Executer) Selecter {
 	}
 }
 
+// Sub 子查询
+func (o *orm) Sub(b Builder, as ...string) Builder {
+	cmd, params := b.parse()
+	o.table = "(" + cmd.String() + ")"
+	o.whereParams = append(o.whereParams, params...)
+	if len(as) > 0 {
+		o.table = fmt.Sprintf("%s AS %s", o.table, as[0])
+	}
+	return o
+}
+
 // Query
 func (s *read) Query(ctx context.Context) (*sql.Rows, error) {
 	defer s.Free()
@@ -103,7 +116,7 @@ func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 		return nil, s.err
 	}
 
-	_ = s.parse()
+	_, _ = s.parse()
 
 	return s.row(ctx, s.command.String(), s.mergeParams()...)
 }

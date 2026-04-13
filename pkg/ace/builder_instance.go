@@ -26,7 +26,7 @@ func Table(t any) Builder {
 // 	return newOrm().Distinct(cols...)
 // }
 
-// Cols 设置查询字段
+// Cols 设置查询字段,聚合函数使用 Func 方法
 func Cols(cols ...dialect.Field) Builder {
 	return newOrm().Cols(cols...)
 }
@@ -36,7 +36,7 @@ func Omit(cols ...dialect.Field) Builder {
 	return newOrm().Omit(cols...)
 }
 
-// Func 聚合函数查询
+// Func 聚合函数查询,字段查询使用 Cols 方法
 func Func(fns ...dialect.Function) Builder {
 	return newOrm().Func(fns...)
 }
