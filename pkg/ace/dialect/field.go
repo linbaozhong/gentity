@@ -29,14 +29,6 @@ var (
 )
 
 type (
-	// FieldType interface {
-	// 	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-	// 		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
-	// 		~float32 | ~float64 |
-	// 		~string |
-	// 		time.Time | types.Time
-	// }
-
 	SetOp int8 // 赋值运算符
 
 	Field struct {
@@ -51,10 +43,6 @@ type (
 	Condition func() (string, any)
 	Order     func() (string, []Field)
 	Setter    func() (Field, any, SetOp)
-	// Setter     func() (Field, any)
-	// ExprSetter func() (string, any)
-	// // SetFunc 为替换Setter和ExprSetter进行的兼容测试
-	// SetFunc func() (Field, any, SetOp)
 )
 
 const (
@@ -689,12 +677,14 @@ func (f *Field) Distance(lng, lat float64, as ...string) Function {
 func (f *Field) MBRContains(lng, lat, radius float64) Function {
 	lat_offset := radius / 111320
 	lng_offset := radius / (111320 * math.Cos(lat*math.Pi/180))
+	lat1, lat2 := lat+lat_offset, lat-lat_offset
+	lng1, lng2 := lng+lng_offset, lng-lng_offset
 	return func() string {
 		var sb strings.Builder
 		sb.Grow(len(f.Quote()) + 20 + len(f.Name))
 		sb.WriteString(
-			fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',),4326),%s)",
-				f.Quote()))
+			fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
+				lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote()))
 		return sb.String()
 	}
 }
