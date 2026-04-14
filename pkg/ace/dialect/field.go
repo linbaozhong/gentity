@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"math"
 	"strings"
 	"time"
 )
@@ -663,6 +664,7 @@ func (f *Field) Min(as ...string) Function {
 	}
 }
 
+// Distance POINT类型字段到指定定位的距离
 func (f *Field) Distance(lng, lat float64, as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
@@ -670,12 +672,29 @@ func (f *Field) Distance(lng, lat float64, as ...string) Function {
 	}
 	return func() string {
 		var sb strings.Builder
-		sb.Grow(len(f.Quote()) + 20 + len(a))
+		sb.Grow(len(f.Quote()) + 80 + len(a))
 		sb.WriteString(
-			fmt.Sprintf("ST_Distance_Sphere(%s, ST_GeomFromText('POINT(%f %f)'))",
-				f.Quote(), lng, lat))
+			fmt.Sprintf("ST_Distance_Sphere(%s, ST_PointFromText(CONCAT('POINT(%f %f)')),4326)",
+				f.Quote(), lat, lng))
 		sb.WriteString(" AS ")
 		sb.WriteString(a)
+		return sb.String()
+	}
+}
+
+// MBRContains 判断点是否在指定距离（米）的范围内
+// @param lng 经度
+// @param lat 纬度
+// @param radius 半径(米)
+func (f *Field) MBRContains(lng, lat, radius float64) Function {
+	lat_offset := radius / 111320
+	lng_offset := radius / (111320 * math.Cos(lat*math.Pi/180))
+	return func() string {
+		var sb strings.Builder
+		sb.Grow(len(f.Quote()) + 20 + len(f.Name))
+		sb.WriteString(
+			fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',),4326),%s)",
+				f.Quote()))
 		return sb.String()
 	}
 }

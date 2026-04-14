@@ -21,10 +21,10 @@ import (
 	"math"
 )
 
-// Point 表示 MySQL POINT 类型
+// Point 表示 MySQL POINT 类型（SRID 4326 - WGS84）
 type Point struct {
-	X float64 // 经度
-	Y float64 // 纬度
+	X float64 // 纬度 (Latitude)
+	Y float64 // 经度 (Longitude)
 }
 
 // Scan 实现 sql.Scanner 接口
@@ -38,15 +38,39 @@ func (p *Point) Scan(value interface{}) error {
 		return errors.New("cannot scan non-bytes into Point")
 	}
 
-	// MySQL WKB 格式解析
+	// MySQL EWKB 格式（包含 SRID 4326）
+	// 总长度 25 字节：
+	// 字节 0: 字节序标记
+	// 字节 1-4: 几何类型 (POINT + SRID 标志位)
+	// 字节 5-8: SRID
+	// 字节 9-17: X 坐标
+	// 字节 17-25: Y 坐标
 	if len(bytes) < 25 {
-		return errors.New("invalid point data")
+		return errors.New("invalid point data: expected 25 bytes, got " + string(rune(len(bytes))))
 	}
 
-	// 跳过 SRID（4字节）和字节序标记
-	// X = 经度，Y = 纬度
-	p.X = math.Float64frombits(binary.LittleEndian.Uint64(bytes[5:13]))
-	p.Y = math.Float64frombits(binary.LittleEndian.Uint64(bytes[13:21]))
+	// 检查字节序
+	if bytes[0] != 1 {
+		return errors.New("unsupported byte order, only little-endian is supported")
+	}
+
+	// 解析几何类型（包含 SRID 标志位 0x20000000）
+	// POINT 类型 + SRID 标志位 = 0x20000001
+	geoType := binary.LittleEndian.Uint32(bytes[1:5])
+	if geoType != 0x20000001 {
+		return errors.New("unsupported geometry type or missing SRID")
+	}
+
+	// 解析 SRID
+	srid := binary.LittleEndian.Uint32(bytes[5:9])
+	if srid != 4326 {
+		return errors.New("unsupported SRID, only SRID 4326 is supported")
+	}
+
+	// 解析 X 坐标（纬度）
+	p.X = math.Float64frombits(binary.LittleEndian.Uint64(bytes[9:17]))
+	// 解析 Y 坐标（经度）
+	p.Y = math.Float64frombits(binary.LittleEndian.Uint64(bytes[17:25]))
 
 	return nil
 }
@@ -57,13 +81,19 @@ func (p Point) Value() (driver.Value, error) {
 		return nil, nil
 	}
 
-	// 构建 WKB 格式
-	buf := make([]byte, 21)
-	buf[0] = 1 // 小端序
-	buf[1] = 1 // POINT 类型
+	// 构建 EWKB 格式（包含 SRID 4326）
+	// 总长度 25 字节
+	buf := make([]byte, 25)
 
-	binary.LittleEndian.PutUint64(buf[5:13], math.Float64bits(p.X))
-	binary.LittleEndian.PutUint64(buf[13:21], math.Float64bits(p.Y))
+	buf[0] = 1 // 小端序
+	// 几何类型：POINT (1) + SRID 标志位 (0x20000000)
+	binary.LittleEndian.PutUint32(buf[1:5], 0x20000001)
+	// SRID 4326 (WGS84)
+	binary.LittleEndian.PutUint32(buf[5:9], 4326)
+	// X 坐标（纬度）
+	binary.LittleEndian.PutUint64(buf[9:17], math.Float64bits(p.X))
+	// Y 坐标（经度）
+	binary.LittleEndian.PutUint64(buf[17:25], math.Float64bits(p.Y))
 
 	return buf, nil
 }
