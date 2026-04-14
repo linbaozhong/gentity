@@ -42,7 +42,7 @@ func (j JsonResult) MarshalJSON() ([]byte, error) {
 	_buf.WriteByte('{')
 	_buf.WriteString(`"code":` + Marshal(j.Code) + `,`)
 	_buf.WriteString(`"data":` + Marshal(j.Data) + `,`)
-	_buf.WriteString(`"msg":` + Marshal(j.Message) + `,`)
+	_buf.WriteString(`"msg":` + Marshal(j.Message))
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
 }
