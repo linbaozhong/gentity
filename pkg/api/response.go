@@ -61,7 +61,10 @@ func Ok(c Context, args ...any) error {
 			}
 		}
 	}
-	return c.JSON(j)
+	if e := c.JSON(j); e != nil {
+		return Fail(c, e)
+	}
+	return nil
 }
 
 // SendLocalFile 发送本地文件
