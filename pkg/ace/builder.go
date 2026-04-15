@@ -31,6 +31,10 @@ type (
 		Free()
 		String() string
 		Clone() Builder
+		// Table 设置 orm 对象的表名。
+		// 如果 a 是字符串，代表数据库表名
+		// 如果 a 是实现了 TableNamer 接口的结构体，可以通过 TableName()方法提取数据库表名
+		// 如果 a 是 Builder 接口的对象，表示该查询使用了子查询。
 		Table(a any, as ...string) Builder
 
 		Columner
@@ -140,6 +144,9 @@ func (o *orm) String() string {
 }
 
 // Table 设置 orm 对象的表名。
+// 如果 a 是字符串，代表数据库表名
+// 如果 a 是实现了 TableNamer 接口的结构体，可以通过 TableName()方法提取数据库表名
+// 如果 a 是 Builder 接口的对象，表示该查询使用了子查询。
 func (o *orm) Table(a any, as ...string) Builder {
 	switch v := a.(type) {
 	case string:
