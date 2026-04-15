@@ -22,7 +22,6 @@ import (
 )
 
 type DeleteBuilder interface {
-	Table(a any) Builder
 	GetTableName() string
 	Wherer
 	Delete(x ...Executer) Deleter

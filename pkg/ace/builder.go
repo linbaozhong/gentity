@@ -31,6 +31,7 @@ type (
 		Free()
 		String() string
 		Clone() Builder
+		Table(a any, as ...string) Builder
 
 		Columner
 		Wherer
@@ -139,12 +140,19 @@ func (o *orm) String() string {
 }
 
 // Table 设置 orm 对象的表名。
-func (o *orm) Table(a any) Builder {
+func (o *orm) Table(a any, as ...string) Builder {
 	switch v := a.(type) {
 	case string:
 		o.table = v
 	case dialect.TableNamer:
 		o.table = v.TableName()
+	case Builder:
+		cmd, params := v.parse()
+		o.table = "(" + cmd.String() + ")"
+		o.whereParams = append(o.whereParams, params...)
+		if len(as) > 0 {
+			o.table = fmt.Sprintf("%s AS %s", o.table, as[0])
+		}
 	default:
 		// 避免多次调用 reflect.ValueOf 和 reflect.Indirect
 		value := reflect.ValueOf(a)

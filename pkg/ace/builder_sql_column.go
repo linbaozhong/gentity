@@ -17,7 +17,6 @@ package ace
 import "github.com/linbaozhong/gentity/pkg/ace/dialect"
 
 type Columner interface {
-	Table(a any) Builder
 	GetTableName() string
 	// GetCols 获取 orm 对象要查询的列。
 	GetCols() []dialect.Field
