@@ -674,17 +674,22 @@ func (f *Field) Distance(lng, lat float64, as ...string) Function {
 // @param lng 经度
 // @param lat 纬度
 // @param radius 半径(米)
-func (f *Field) MBRContains(lng, lat, radius float64) Function {
+func (f *Field) MBRContains(lng, lat, radius float64) Condition {
 	lat_offset := radius / 111320
-	lng_offset := radius / (111320 * math.Cos(lat*math.Pi/180))
 	lat1, lat2 := lat+lat_offset, lat-lat_offset
+
+	lng_offset := radius / (111320 * math.Cos(lat*math.Pi/180))
 	lng1, lng2 := lng+lng_offset, lng-lng_offset
-	return func() string {
-		var sb strings.Builder
-		sb.Grow(len(f.Quote()) + 20 + len(f.Name))
-		sb.WriteString(
-			fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
-				lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote()))
-		return sb.String()
+	// return func() string {
+	// 	var sb strings.Builder
+	// 	sb.Grow(len(f.Quote()) + 20 + len(f.Name))
+	// 	sb.WriteString(
+	// 		fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
+	// 			lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote()))
+	// 	return sb.String()
+	// }
+	return func() (string, any) {
+		return fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
+			lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote()), nil
 	}
 }
