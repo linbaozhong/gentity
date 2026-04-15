@@ -86,14 +86,14 @@ func (f *Field) FieldName() string {
 	return sb.String()
 }
 
-// Set 为字段设置值
+// Set 赋值：为字段设置值
 func (f *Field) Set(val any) Setter {
 	return func() (Field, any, SetOp) {
 		return *f, val, Op_Normal
 	}
 }
 
-// Incr 自增
+// Incr 赋值：自增
 // val 默认为1
 func (f *Field) Incr(val ...any) Setter {
 	var v any
@@ -173,7 +173,7 @@ func ParseSetter(set Setter) (string, any, error) {
 	}
 }
 
-// Decr 自减
+// Decr 赋值：自减
 // val 默认为1
 func (f *Field) Decr(val ...any) Setter {
 	var v any
@@ -200,7 +200,7 @@ func (f *Field) Decr(val ...any) Setter {
 	// }
 }
 
-// Replace 替换
+// Replace 赋值：替换
 func (f *Field) Replace(old, new string) Setter {
 	// 参数校验
 	if old == "" {
@@ -232,7 +232,7 @@ func (f *Field) Replace(old, new string) Setter {
 	// }
 }
 
-// Expr 其它表达式
+// Expr 赋值：其它表达式
 func (f *Field) Expr(expr string) Setter {
 	// 参数校验
 	if expr == "" {
@@ -243,23 +243,9 @@ func (f *Field) Expr(expr string) Setter {
 	return func() (Field, any, SetOp) {
 		return *f, expr, Op_Expr
 	}
-	// return func() (string, any) {
-	// 	if expr == "" {
-	// 		return "", Err_Expression_Empty_Param
-	// 	}
-	// 	// 使用 strings.Builder 进行字符串拼接
-	// 	var sb strings.Builder
-	// 	// 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(Placeholder)
-	// 	sb.Grow(len(f.Quote()) + 4)
-	// 	sb.WriteString(f.Quote())
-	// 	sb.WriteString(" = ")
-	// 	sb.WriteString(Placeholder)
-	//
-	// 	return sb.String(), expr
-	// }
 }
 
-// Eq 等于
+// Eq 条件：等于
 func (f *Field) Eq(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
@@ -279,7 +265,7 @@ func (f *Field) Eq(val any) Condition {
 	}
 }
 
-// NotEq 不等于
+// NotEq 条件：不等于
 func (f *Field) NotEq(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
@@ -299,7 +285,7 @@ func (f *Field) NotEq(val any) Condition {
 	}
 }
 
-// Gt 大于
+// Gt 条件：大于
 func (f *Field) Gt(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
@@ -319,7 +305,7 @@ func (f *Field) Gt(val any) Condition {
 	}
 }
 
-// Gte 大于或等于
+// Gte 条件：大于或等于
 func (f *Field) Gte(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
@@ -339,7 +325,7 @@ func (f *Field) Gte(val any) Condition {
 	}
 }
 
-// Lt 小于
+// Lt 条件：小于
 func (f *Field) Lt(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
@@ -359,7 +345,7 @@ func (f *Field) Lt(val any) Condition {
 	}
 }
 
-// Lte 小于或等于
+// Lte 条件：小于或等于
 func (f *Field) Lte(val any) Condition {
 	return func() (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
@@ -395,7 +381,7 @@ func checkSlice(vals ...any) error {
 	return nil
 }
 
-// In 包含
+// In 条件：包含
 func (f *Field) In(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
@@ -418,7 +404,7 @@ func (f *Field) In(vals ...any) Condition {
 	}
 }
 
-// NotIn 不包含
+// NotIn 条件：不包含
 func (f *Field) NotIn(vals ...any) Condition {
 	return func() (string, any) {
 		l := len(vals)
@@ -440,7 +426,7 @@ func (f *Field) NotIn(vals ...any) Condition {
 	}
 }
 
-// Between 在区间
+// Between 条件：在区间
 func (f *Field) Between(vals ...any) Condition {
 	return func() (string, any) {
 		if len(vals) != 2 {
@@ -461,7 +447,7 @@ func (f *Field) Between(vals ...any) Condition {
 	}
 }
 
-// Like 匹配
+// Like 条件：匹配
 func (f *Field) Like(val any) Condition {
 	return func() (string, any) {
 		// 检查 val 是否为空
@@ -483,7 +469,7 @@ func (f *Field) Like(val any) Condition {
 	}
 }
 
-// Llike 左匹配
+// Llike 条件：左匹配
 func (f *Field) Llike(val any) Condition {
 	return func() (string, any) {
 		// 检查 val 是否为空
@@ -503,7 +489,7 @@ func (f *Field) Llike(val any) Condition {
 	}
 }
 
-// Rlike 右匹配
+// Rlike 条件：右匹配
 func (f *Field) Rlike(val any) Condition {
 	return func() (string, any) {
 		// 检查 val 是否为空
@@ -522,7 +508,7 @@ func (f *Field) Rlike(val any) Condition {
 	}
 }
 
-// Null 为空
+// Null 条件：为空
 func (f *Field) Null() Condition {
 	return func() (string, any) {
 		var sb strings.Builder
@@ -535,7 +521,7 @@ func (f *Field) Null() Condition {
 	}
 }
 
-// NotNull 不为空
+// NotNull 条件：不为空
 func (f *Field) NotNull() Condition {
 	return func() (string, any) {
 		var sb strings.Builder
@@ -562,7 +548,7 @@ func (f *Field) AsName(name string) string {
 	return sb.String()
 }
 
-// Sum 合计
+// Sum 聚合表达式：合计
 func (f *Field) Sum(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
@@ -580,7 +566,7 @@ func (f *Field) Sum(as ...string) Function {
 	}
 }
 
-// Avg 平均
+// Avg 聚合表达式：平均
 func (f *Field) Avg(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
@@ -598,7 +584,7 @@ func (f *Field) Avg(as ...string) Function {
 	}
 }
 
-// Count 计数
+// Count 聚合表达式：计数
 func (f *Field) Count(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
@@ -616,7 +602,7 @@ func (f *Field) Count(as ...string) Function {
 	}
 }
 
-// Max 最大值
+// Max 聚合表达式：最大值
 func (f *Field) Max(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
@@ -634,7 +620,7 @@ func (f *Field) Max(as ...string) Function {
 	}
 }
 
-// Min 最小值
+// Min 聚合表达式：最小值
 func (f *Field) Min(as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
@@ -652,7 +638,7 @@ func (f *Field) Min(as ...string) Function {
 	}
 }
 
-// Distance POINT类型字段到指定定位的距离
+// Distance 列表达式：POINT类型字段到指定定位的距离
 func (f *Field) Distance(lng, lat float64, as ...string) Function {
 	var a = f.Name
 	if len(as) > 0 {
@@ -670,7 +656,7 @@ func (f *Field) Distance(lng, lat float64, as ...string) Function {
 	}
 }
 
-// MBRContains 判断点是否在指定距离（米）的范围内
+// MBRContains 条件：判断点是否在指定距离（米）的范围内
 // @param lng 经度
 // @param lat 纬度
 // @param radius 半径(米)
@@ -680,14 +666,6 @@ func (f *Field) MBRContains(lng, lat, radius float64) Condition {
 
 	lng_offset := radius / (111320 * math.Cos(lat*math.Pi/180))
 	lng1, lng2 := lng+lng_offset, lng-lng_offset
-	// return func() string {
-	// 	var sb strings.Builder
-	// 	sb.Grow(len(f.Quote()) + 20 + len(f.Name))
-	// 	sb.WriteString(
-	// 		fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
-	// 			lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote()))
-	// 	return sb.String()
-	// }
 	return func() (string, any) {
 		return fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
 			lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote()), nil
