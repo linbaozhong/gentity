@@ -17,7 +17,6 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
@@ -33,8 +32,10 @@ type SelectBuilder interface {
 	Page(pageIndex, pageSize uint) Builder
 	PageByBookmark(size uint, bm dialect.Condition) Builder
 	Limit(size uint, start ...uint) Builder
+	// Select 创建查询器
 	Select(x ...Executer) Selecter
-	Sub(b Builder, as ...string) Builder
+	// // Sub 子查询
+	// Sub(b Builder, as ...string) Builder
 	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
 	ToSql(...bool) Builder
 }
@@ -80,7 +81,7 @@ type read struct {
 	*orm
 }
 
-// Read 创建查询器
+// Select 创建查询器
 func (o *orm) Select(x ...Executer) Selecter {
 	o.connect(x...)
 	return &read{
@@ -88,16 +89,16 @@ func (o *orm) Select(x ...Executer) Selecter {
 	}
 }
 
-// Sub 子查询
-func (o *orm) Sub(b Builder, as ...string) Builder {
-	cmd, params := b.parse()
-	o.table = "(" + cmd.String() + ")"
-	o.whereParams = append(o.whereParams, params...)
-	if len(as) > 0 {
-		o.table = fmt.Sprintf("%s AS %s", o.table, as[0])
-	}
-	return o
-}
+// // Sub 子查询
+// func (o *orm) Sub(b Builder, as ...string) Builder {
+// 	cmd, params := b.parse()
+// 	o.table = "(" + cmd.String() + ")"
+// 	o.whereParams = append(o.whereParams, params...)
+// 	if len(as) > 0 {
+// 		o.table = fmt.Sprintf("%s AS %s", o.table, as[0])
+// 	}
+// 	return o
+// }
 
 // Query
 func (s *read) Query(ctx context.Context) (*sql.Rows, error) {

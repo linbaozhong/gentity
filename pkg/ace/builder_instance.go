@@ -17,8 +17,8 @@ package ace
 import "github.com/linbaozhong/gentity/pkg/ace/dialect"
 
 // Table 设置表名
-func Table(t any) Builder {
-	return newOrm().Table(t)
+func Table(t any, as ...string) Builder {
+	return newOrm().Table(t, as...)
 }
 
 // // Distinct 设置去重字段
