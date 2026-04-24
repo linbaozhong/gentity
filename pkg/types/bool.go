@@ -17,6 +17,7 @@ package types
 import (
 	"database/sql/driver"
 	"fmt"
+	"reflect"
 	"strconv"
 )
 
@@ -83,7 +84,77 @@ func (b Bool) String() string {
 }
 
 func (b Bool) Bytes() []byte {
-	return []byte{byte(b)}
+	return []byte(b.String())
+}
+
+func (b Bool) Ptr() *bool {
+	if b < 0 {
+		return nil
+	}
+	tem := b > 0
+	return &tem
+}
+
+// 3. 添加 Set 方法，方便链式创建
+func (b Bool) SetTrue() Bool {
+	b = 1
+	return b
+}
+func (b Bool) SetFalse() Bool { b = 0; return b }
+func (b Bool) SetNil() Bool   { b = -1; return b }
+
+// 4. 添加构造函数
+func NewBool(v bool) Bool {
+	if v {
+		return 1
+	}
+	return 0
+}
+func NewBoolFrom(v interface{}) (Bool, error) {
+	switch v := v.(type) {
+	case nil:
+		return -1, nil
+	case bool:
+		if v {
+			return 1, nil
+		}
+		return 0, nil
+	case int, int8, int16, int32, int64:
+		if reflect.ValueOf(v).Int() > 0 {
+			return 1, nil
+		} else if reflect.ValueOf(v).Int() == 0 {
+			return 0, nil
+		}
+		return -1, nil
+	case uint, uint8, uint16, uint32, uint64:
+		if reflect.ValueOf(v).Uint() > 0 {
+			return 1, nil
+		}
+		return 0, nil
+	case float32, float64:
+		if reflect.ValueOf(v).Float() > 0 {
+			return 1, nil
+		} else if reflect.ValueOf(v).Float() == 0 {
+			return 0, nil
+		}
+		return -1, nil
+	case string:
+		if v == "" || v == "null" {
+			return -1, nil
+		}
+		parsed, err := strconv.ParseBool(v)
+		if err != nil {
+			return -1, fmt.Errorf("cannot parse bool from string: %w", err)
+		}
+		if parsed {
+			return 1, nil
+		}
+		return 0, nil
+	case []byte:
+		return NewBoolFrom(string(v))
+	default:
+		return -1, fmt.Errorf("unsupported type for Bool: %T", v)
+	}
 }
 
 func (b *Bool) FromBytes(buf []byte) {

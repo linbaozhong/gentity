@@ -39,12 +39,22 @@ func (t *Time) Scan(src any) error {
 		*t = Time{v}
 		return nil
 	case []byte:
-		t2, err := time.Parse(time.DateTime, string(v))
-		if err != nil {
-			return err
+		// 尝试多种格式
+		layouts := []string{
+			"2006-01-02 15:04:05",  // MySQL datetime
+			"2006-01-02T15:04:05Z", // ISO 8601
+			"2006-01-02T15:04:05-07:00",
+			"2006-01-02 15:04:05.000",
+			"2006-01-02",
 		}
-		*t = Time{t2}
-		return nil
+		s := string(v)
+		for _, layout := range layouts {
+			if parsed, err := time.Parse(layout, s); err == nil {
+				t.Time = parsed
+				return nil
+			}
+		}
+		return fmt.Errorf("cannot parse time: %s", s)
 	default:
 		return fmt.Errorf("unsupported scan type for Time: %T", src)
 	}
@@ -76,6 +86,10 @@ func Now() Time {
 	return Time{time.Now()}
 }
 
+func (t Time) Unix() int64 {
+	return t.Time.Unix()
+}
+
 func (t Time) String() string {
 	return t.Format(time.DateTime)
 }
@@ -87,6 +101,14 @@ func (t Time) Bytes() []byte {
 func (t *Time) FromBytes(b []byte) {
 	t2, _ := time.Parse(time.DateTime, string(b))
 	*t = Time{t2}
+}
+
+// 支持自定义格式化
+func (t Time) FormatStr(layout string) string {
+	if t.IsNil() {
+		return ""
+	}
+	return t.Time.Format(layout)
 }
 
 func (t Time) MarshalJSON() ([]byte, error) {
