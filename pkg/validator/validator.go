@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
+	"github.com/linbaozhong/gentity/pkg/types"
 	"io"
 	"net"
 	"net/url"
@@ -39,6 +40,11 @@ const rfc3339WithoutZone = "2006-01-02T15:04:05"
 var (
 	whiteSpacesAndMinus = regexp.MustCompile(`[\s-]+`)
 )
+
+// IsRequired 是否为必填项
+func IsRequired(str string) bool {
+	return str != types.NilString
+}
 
 // IsMobile checks if the string is a mobile number.
 func IsMobile(str string) bool {

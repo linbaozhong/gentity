@@ -47,6 +47,7 @@ var ParamTagRegexMap = map[string]*regexp.Regexp{
 }
 
 var TagMap = map[string]string{
+	"required":           "IsRequired",
 	"email":              "IsEmail",
 	"url":                "IsURL",
 	"dialstring":         "IsDialString",
