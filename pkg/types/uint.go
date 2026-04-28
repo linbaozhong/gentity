@@ -49,8 +49,8 @@ func (i8 Uint8) Uint8() uint8 {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (i8 Uint8) IsNil() bool {
-	return i8 == NilUint8
+func (i8 *Uint8) IsNil() bool {
+	return i8 == nil
 }
 
 // IsZero 是否零值
@@ -59,8 +59,8 @@ func (i8 Uint8) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (i8 Uint8) IsEmpty() bool {
-	return i8 == NilUint8 || i8 == 0
+func (i8 *Uint8) IsEmpty() bool {
+	return i8 == nil || *i8 == 0
 }
 
 func (i8 Uint8) String() string {
@@ -103,8 +103,8 @@ func (i16 *Uint16) Scan(src any) error {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (i16 Uint16) IsNil() bool {
-	return i16 == NilUint16
+func (i16 *Uint16) IsNil() bool {
+	return i16 == nil
 }
 
 // IsZero 是否零值
@@ -113,8 +113,8 @@ func (i16 Uint16) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (i16 Uint16) IsEmpty() bool {
-	return i16 == NilUint16 || i16 == 0
+func (i16 *Uint16) IsEmpty() bool {
+	return i16 == nil || *i16 == 0
 }
 
 func (i16 Uint16) Uint16() uint16 {
@@ -161,8 +161,8 @@ func (i32 *Uint32) Scan(src any) error {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (i32 Uint32) IsNil() bool {
-	return i32 == NilUint32
+func (i32 *Uint32) IsNil() bool {
+	return i32 == nil
 }
 
 // IsZero 是否零值
@@ -171,8 +171,8 @@ func (i32 Uint32) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (i32 Uint32) IsEmpty() bool {
-	return i32 == NilUint32 || i32 == 0
+func (i32 *Uint32) IsEmpty() bool {
+	return i32 == nil || *i32 == 0
 }
 
 func (i32 Uint32) Uint32() uint32 {
@@ -219,8 +219,8 @@ func (i64 *Uint64) Scan(src any) error {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (i64 Uint64) IsNil() bool {
-	return i64 == NilUint64
+func (i64 *Uint64) IsNil() bool {
+	return i64 == nil
 }
 
 // IsZero 是否零值
@@ -229,8 +229,8 @@ func (i64 Uint64) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (i64 Uint64) IsEmpty() bool {
-	return i64 == NilUint64 || i64 == 0
+func (i64 *Uint64) IsEmpty() bool {
+	return i64 == nil || *i64 == 0
 }
 
 func (i64 Uint64) Uint64() uint64 {
@@ -277,8 +277,8 @@ func (i *Uint) Scan(src any) error {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (i Uint) IsNil() bool {
-	return i == NilUint
+func (i *Uint) IsNil() bool {
+	return i == nil
 }
 
 // IsZero 是否零值
@@ -287,8 +287,8 @@ func (i Uint) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (i Uint) IsEmpty() bool {
-	return i == NilUint || i == 0
+func (i *Uint) IsEmpty() bool {
+	return i == nil || *i == 0
 }
 
 func (i Uint) Uint() uint {

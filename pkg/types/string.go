@@ -38,8 +38,8 @@ func (s *String) Scan(src any) error {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (s String) IsNil() bool {
-	return s == NilString
+func (s *String) IsNil() bool {
+	return s == nil
 }
 
 // IsZero 是否零值
@@ -48,8 +48,8 @@ func (s String) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (s String) IsEmpty() bool {
-	return s == NilString || s == ""
+func (s *String) IsEmpty() bool {
+	return s == nil || *s == ""
 }
 
 func (s String) String() string {

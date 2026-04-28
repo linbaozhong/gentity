@@ -58,8 +58,8 @@ func (m Money) Value() (driver.Value, error) {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (m Money) IsNil() bool {
-	return m == NilInt64
+func (m *Money) IsNil() bool {
+	return m == nil
 }
 
 // IsZero 是否零值
@@ -68,8 +68,8 @@ func (m Money) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (m Money) IsEmpty() bool {
-	return m == NilInt64 || m == 0
+func (m *Money) IsEmpty() bool {
+	return m == nil || *m == 0
 }
 
 func (m Money) Int() int {

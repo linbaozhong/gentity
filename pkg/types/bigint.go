@@ -76,8 +76,8 @@ func (i BigInt) Value() (driver.Value, error) {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (i BigInt) IsNil() bool {
-	return i == NilUint64
+func (i *BigInt) IsNil() bool {
+	return i == nil
 }
 
 // IsZero 是否零值
@@ -86,6 +86,6 @@ func (i BigInt) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (i BigInt) IsEmpty() bool {
-	return i == NilUint64 || i == 0
+func (i *BigInt) IsEmpty() bool {
+	return i == nil || *i == 0
 }

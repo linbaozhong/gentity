@@ -21,7 +21,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
-	"github.com/linbaozhong/gentity/pkg/types"
 	"io"
 	"net"
 	"net/url"
@@ -42,8 +41,8 @@ var (
 )
 
 // IsRequired 是否为必填项
-func IsRequired(str string) bool {
-	return str != types.NilString
+func IsRequired(str *string) bool {
+	return str != nil
 }
 
 // IsMobile checks if the string is a mobile number.

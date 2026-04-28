@@ -14,29 +14,24 @@
 
 package types
 
-import (
-	"math"
-	"time"
-)
-
-const (
-	Nil        = math.MaxUint64
-	NilBool    = Bool(-1)
-	NilString  = "NULL"
-	NilInt     = math.MinInt
-	NilInt8    = math.MinInt8
-	NilInt16   = math.MinInt16
-	NilInt32   = math.MinInt32
-	NilInt64   = math.MinInt64
-	NilUint    = math.MaxUint
-	NilUint8   = math.MaxUint8
-	NilUint16  = math.MaxUint16
-	NilUint32  = math.MaxUint32
-	NilUint64  = math.MaxUint64
-	NilFloat64 = math.MaxFloat64
-	NilFloat32 = math.MaxFloat32
-)
-
-var (
-	NilTime = time.Time{}
-)
+// const (
+// 	Nil        = math.MaxUint64
+// 	NilBool    = Bool(-1)
+// 	NilString  = "NULL"
+// 	NilInt     = math.MinInt
+// 	NilInt8    = math.MinInt8
+// 	NilInt16   = math.MinInt16
+// 	NilInt32   = math.MinInt32
+// 	NilInt64   = math.MinInt64
+// 	NilUint    = math.MaxUint
+// 	NilUint8   = math.MaxUint8
+// 	NilUint16  = math.MaxUint16
+// 	NilUint32  = math.MaxUint32
+// 	NilUint64  = math.MaxUint64
+// 	NilFloat64 = math.MaxFloat64
+// 	NilFloat32 = math.MaxFloat32
+// )
+//
+// var (
+// 	NilTime = time.Time{}
+// )

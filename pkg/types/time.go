@@ -64,8 +64,8 @@ func (t Time) Value() (driver.Value, error) {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (t Time) IsNil() bool {
-	return t.Time == NilTime
+func (t *Time) IsNil() bool {
+	return t == nil
 }
 
 // IsZero 是否零值
@@ -74,8 +74,8 @@ func (t Time) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (t Time) IsEmpty() bool {
-	return t.Time == NilTime || t.Time.IsZero()
+func (t *Time) IsEmpty() bool {
+	return t == nil || t.Time.IsZero()
 }
 
 func (t Time) Now() Time {

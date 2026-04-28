@@ -42,8 +42,8 @@ func (f32 *Float32) Scan(src any) error {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (f32 Float32) IsNil() bool {
-	return f32 == NilFloat32
+func (f32 *Float32) IsNil() bool {
+	return f32 == nil
 }
 
 // IsZero 是否零值
@@ -52,8 +52,8 @@ func (f32 Float32) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (f32 Float32) IsEmpty() bool {
-	return f32 == NilFloat32 || f32 == 0
+func (f32 *Float32) IsEmpty() bool {
+	return f32 == nil || *f32 == 0
 }
 
 func (f32 Float32) Float32() float32 {
@@ -104,8 +104,8 @@ func (f64 *Float64) Scan(src any) error {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (f64 Float64) IsNil() bool {
-	return f64 == NilFloat64
+func (f64 *Float64) IsNil() bool {
+	return f64 == nil
 }
 
 // IsZero 是否零值
@@ -114,8 +114,8 @@ func (f64 Float64) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (f64 Float64) IsEmpty() bool {
-	return f64 == NilFloat64 || f64 == 0
+func (f64 *Float64) IsEmpty() bool {
+	return f64 == nil || *f64 == 0
 }
 
 func (f64 Float64) Float64() float64 {

@@ -212,7 +212,13 @@ func getTypeNil(t Field) any {
 	}
 }
 func getFieldString(t Field) string {
-	switch t.Type {
+	k := t.Type
+	if k[0] == '*' {
+		// return `p.` + t.Name
+		k = k[1:]
+	}
+
+	switch k {
 	case "string":
 		return `p.` + t.Name
 	case "types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64",

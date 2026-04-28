@@ -55,8 +55,8 @@ func (b Bool) Value() (driver.Value, error) {
 }
 
 // IsNil 是否空值，注意空值!=零值
-func (b Bool) IsNil() bool {
-	return b == NilBool
+func (b *Bool) IsNil() bool {
+	return b == nil
 }
 
 // IsZero 是否零值
@@ -65,8 +65,8 @@ func (b Bool) IsZero() bool {
 }
 
 // IsEmpty 是否空值或零值
-func (b Bool) IsEmpty() bool {
-	return b == NilBool || b == 0
+func (b *Bool) IsEmpty() bool {
+	return b == nil || *b == 0
 }
 
 func (b Bool) Bool() bool {
