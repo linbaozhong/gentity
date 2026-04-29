@@ -4,13 +4,21 @@ import (
 	"database/sql/driver"
 	"encoding/binary"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/util"
 	"strconv"
+	"time"
+)
+
+var (
+	hashid = util.NewHashID(time.Now().String())
 )
 
 type BigInt uint64
 
 func (i BigInt) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.Quote(i.String())), nil
+	// return []byte(strconv.Quote(i.String())), nil
+	s, e := hashid.Encode(i.Uint64())
+	return []byte(strconv.Quote(s)), e
 }
 
 func (i *BigInt) UnmarshalJSON(b []byte) error {
@@ -20,7 +28,8 @@ func (i *BigInt) UnmarshalJSON(b []byte) error {
 		*i = BigInt(0)
 		return nil
 	}
-	tem, e := strconv.ParseUint(c, 10, 64)
+	// tem, e := strconv.ParseUint(c, 10, 64)
+	tem, e := hashid.Decode(c)
 	*i = BigInt(tem)
 	return e
 }
