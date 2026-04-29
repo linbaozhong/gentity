@@ -51,13 +51,16 @@ type TempData struct {
 
 // Field struct 字段
 type Field struct {
-	Name   string   // 字段名
+	Name string // 字段名
+	// info   typeInfo // 字段长度(占用字节数)
 	Col    string   // 数据库列名
 	Json   jsonObj  // json名
 	Type   string   // 类型
 	Rw     string   // 数据库读写标志
 	Valids []string // 数据校验规则
+	// idx    int      // 索引
 }
+
 type jsonObj struct {
 	Name      string
 	OmitEmpty bool
@@ -375,3 +378,69 @@ func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(io
 	}
 	return e
 }
+
+//
+// // typeInfo 记录类型的对齐系数和占用大小 (基于 64 位系统)
+// type typeInfo struct {
+// 	size  int
+// 	align int
+// }
+
+// // 内置类型的大小和对齐系数映射表
+// var builtinTypes = map[string]typeInfo{
+// 	// 布尔
+// 	"bool": {1, 1},
+// 	// 整数
+// 	"int8": {1, 1}, "uint8": {1, 1}, "byte": {1, 1},
+// 	"int16": {2, 2}, "uint16": {2, 2},
+// 	"int32": {4, 4}, "uint32": {4, 4}, "float32": {4, 4}, "rune": {4, 4},
+// 	"int64": {8, 8}, "uint64": {8, 8}, "float64": {8, 8},
+// 	"int": {8, 8}, "uint": {8, 8}, "uintptr": {8, 8},
+// 	// 复数
+// 	"complex64": {8, 4}, "complex128": {16, 8},
+// 	// 字符串 (64位系统下，指针8+长度8)
+// 	"string": {16, 8},
+//
+// 	// ==========================================
+// 	// 接口类型标识符
+// 	// ==========================================
+// 	// any 是 interface{} 的别名，底层是 eface (type指针 + data指针)，16字节，8对齐
+// 	"any": {16, 8},
+// 	// error 是 interface 的特例，底层是 iface (itab指针 + data指针)，16字节，8对齐
+// 	"error": {16, 8},
+//
+// 	// ==========================================
+// 	// 常见跨包类型 (精确硬编码)
+// 	// ==========================================
+// 	"time.Time":       {24, 8},
+// 	"sync.Mutex":      {8, 8},
+// 	"decimal.Decimal": {16, 8},
+// 	"types.Money":     {8, 8},
+// 	"types.BigInt":    {8, 8},
+// 	"types.String":    {16, 8},
+// 	"types.Int":       {8, 8},
+// 	"types.Int8":      {1, 1},
+// 	"types.Int16":     {2, 2},
+// 	"types.Int32":     {4, 4},
+// 	"types.Int64":     {8, 8},
+// 	"types.Uint":      {8, 8},
+// 	"types.Uint8":     {1, 1},
+// 	"types.Uint16":    {2, 2},
+// 	"types.Uint32":    {4, 4},
+// 	"types.Uint64":    {8, 8},
+// 	"types.Float32":   {4, 4},
+// 	"types.Float64":   {8, 8},
+// 	"types.Time":      {8, 8},
+// 	"types.Bool":      {1, 1},
+// 	"types.Point":     {8, 8},
+// }
+//
+// // getExprInfo 根据 AST 表达式推断类型信息
+// func getExprInfo(typeName string) typeInfo {
+// 	// 基础类型 (int, string 等)
+// 	if info, ok := builtinTypes[typeName]; ok {
+// 		return info
+// 	}
+// 	// 同包内的未知自定义类型, 安全起见按 8 字节对齐处理
+// 	return typeInfo{8, 8}
+// }

@@ -131,6 +131,8 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			}
 			_namejson.Name = field.Name
 			_namejson.Type = field.Type.String()
+			// _namejson.info = getExprInfo(_namejson.Type)
+			// _namejson.idx = i
 			_namejson.Rw = rw
 
 			if strings.HasPrefix(_namejson.Type, "types") {
@@ -152,6 +154,15 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			}
 
 			_tempData.Columns = append(_tempData.Columns, _namejson)
+			// sort.SliceStable(_tempData.Columns, func(i, j int) bool {
+			// 	if _tempData.Columns[i].info.align != _tempData.Columns[j].info.align {
+			// 		return _tempData.Columns[i].info.align > _tempData.Columns[j].info.align
+			// 	}
+			// 	if _tempData.Columns[i].info.size != _tempData.Columns[j].info.size {
+			// 		return _tempData.Columns[i].info.size > _tempData.Columns[j].info.size
+			// 	}
+			// 	return _tempData.Columns[i].idx < _tempData.Columns[j].idx
+			// })
 			if pk != "" {
 				_tempData.HasPrimaryKey = true
 				// _tempData.Keys = append(_tempData.Keys, _namejson)
@@ -167,7 +178,6 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 		}
 		_tplsData = append(_tplsData, _tempData)
 	}
-
 	return _tplsData, e
 }
 
