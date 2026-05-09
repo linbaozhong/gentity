@@ -106,22 +106,7 @@ func DB2Struct(tables []*sqlparser.Table, packageName string) ([]byte, error) {
 		// buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + ParseField(table.Name) + " struct {\n")
 		buf.WriteString("\tpool.Model\n")
-		//
-		// for i := 0; i < len(table.ColumnsX); i++ {
-		// 	typeName := ParseFieldAceType(table.ColumnsX[i])
-		// 	table.ColumnsX[i].Type = typeName
-		// 	table.ColumnsX[i].Info = sqlparser.GetTypeInfo(typeName)
-		// 	table.ColumnsX[i].Index = i
-		// }
-		// sort.SliceStable(table.ColumnsX, func(i, j int) bool {
-		// 	if table.ColumnsX[i].Info.Align != table.ColumnsX[j].Info.Align {
-		// 		return table.ColumnsX[i].Info.Align > table.ColumnsX[j].Info.Align
-		// 	}
-		// 	if table.ColumnsX[i].Info.Size != table.ColumnsX[j].Info.Size {
-		// 		return table.ColumnsX[i].Info.Size > table.ColumnsX[j].Info.Size
-		// 	}
-		// 	return table.ColumnsX[i].Index < table.ColumnsX[j].Index
-		// })
+
 		parseColumnType(table.ColumnsX)
 		//
 		for _, col := range table.ColumnsX {
