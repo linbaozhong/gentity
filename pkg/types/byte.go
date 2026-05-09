@@ -19,7 +19,8 @@ import "fmt"
 type Bytes []byte
 
 // ////////////////////////////
-// Byte
+// todo: 只解决数据库返回null问题，其它情况未处理
+
 func (b *Bytes) Scan(src any) error {
 	switch v := src.(type) {
 	case nil:

@@ -98,13 +98,14 @@ func (t Time) Bytes() []byte {
 	return []byte(t.String())
 }
 
+// FromBytes 从字节数组反序列化,解析失败时设为零值
 func (t *Time) FromBytes(b []byte) {
 	t2, _ := time.Parse(time.DateTime, string(b))
 	*t = Time{t2}
 }
 
 // 支持自定义格式化
-func (t Time) FormatStr(layout string) string {
+func (t *Time) FormatStr(layout string) string {
 	if t.IsNil() {
 		return ""
 	}

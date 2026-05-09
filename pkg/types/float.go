@@ -15,6 +15,7 @@
 package types
 
 import (
+	"database/sql/driver"
 	"encoding/binary"
 	"fmt"
 	"math"
@@ -25,6 +26,8 @@ type (
 	Float64 float64
 	Float32 float32
 )
+
+const floatEpsilon = 1e-9
 
 // //////////////////////////////////////
 // Float32
@@ -40,6 +43,9 @@ func (f32 *Float32) Scan(src any) error {
 		return fmt.Errorf("unsupported scan type for Float32: %T", src)
 	}
 }
+func (f32 Float32) Value() (driver.Value, error) {
+	return float64(f32), nil
+}
 
 // IsNil 是否空值，注意空值!=零值
 func (f32 *Float32) IsNil() bool {
@@ -48,12 +54,12 @@ func (f32 *Float32) IsNil() bool {
 
 // IsZero 是否零值
 func (f32 Float32) IsZero() bool {
-	return f32 == 0
+	return math.Abs(float64(f32)) < floatEpsilon
 }
 
 // IsEmpty 是否空值或零值
 func (f32 *Float32) IsEmpty() bool {
-	return f32 == nil || *f32 == 0
+	return f32 == nil || math.Abs(float64(*f32)) < floatEpsilon
 }
 
 func (f32 Float32) Float32() float32 {
@@ -103,6 +109,10 @@ func (f64 *Float64) Scan(src any) error {
 	}
 }
 
+func (f64 Float64) Value() (driver.Value, error) {
+	return float64(f64), nil
+}
+
 // IsNil 是否空值，注意空值!=零值
 func (f64 *Float64) IsNil() bool {
 	return f64 == nil
@@ -110,12 +120,12 @@ func (f64 *Float64) IsNil() bool {
 
 // IsZero 是否零值
 func (f64 Float64) IsZero() bool {
-	return f64 == 0
+	return math.Abs(float64(f64)) < floatEpsilon
 }
 
 // IsEmpty 是否空值或零值
 func (f64 *Float64) IsEmpty() bool {
-	return f64 == nil || *f64 == 0
+	return f64 == nil || math.Abs(float64(*f64)) < floatEpsilon
 }
 
 func (f64 Float64) Float64() float64 {

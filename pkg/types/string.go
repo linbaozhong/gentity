@@ -15,6 +15,7 @@
 package types
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"strconv"
 )
@@ -35,6 +36,9 @@ func (s *String) Scan(src any) error {
 		return fmt.Errorf("unsupported scan type for String: %T", src)
 	}
 	return nil
+}
+func (s String) Value() (driver.Value, error) {
+	return string(s), nil
 }
 
 // IsNil 是否空值，注意空值!=零值

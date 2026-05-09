@@ -39,6 +39,9 @@ func (i8 *Uint8) Scan(src any) error {
 	case int64:
 		*i8 = Uint8(v)
 		return nil
+	case int:
+		*i8 = Uint8(v)
+		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for Uint8: %T", src)
 	}
@@ -95,6 +98,9 @@ func (i16 *Uint16) Scan(src any) error {
 		*i16 = 0
 		return nil
 	case int64:
+		*i16 = Uint16(v)
+		return nil
+	case int:
 		*i16 = Uint16(v)
 		return nil
 	default:
@@ -155,6 +161,9 @@ func (i32 *Uint32) Scan(src any) error {
 	case int64:
 		*i32 = Uint32(v)
 		return nil
+	case int:
+		*i32 = Uint32(v)
+		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for Uint32: %T", src)
 	}
@@ -213,6 +222,9 @@ func (i64 *Uint64) Scan(src any) error {
 	case int64:
 		*i64 = Uint64(v)
 		return nil
+	case int:
+		*i64 = Uint64(v)
+		return nil
 	default:
 		return fmt.Errorf("unsupported scan type for Uint64: %T", src)
 	}
@@ -269,6 +281,9 @@ func (i *Uint) Scan(src any) error {
 		*i = 0
 		return nil
 	case int64:
+		*i = Uint(v)
+		return nil
+	case int:
 		*i = Uint(v)
 		return nil
 	default:

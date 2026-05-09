@@ -20,5 +20,7 @@ type example struct {
 }
 
 func TestMoney(t *testing.T) {
-
+	var m Money = 0
+	e := m.UnmarshalJSON([]byte("-.1"))
+	t.Log(e, m)
 }

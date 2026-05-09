@@ -50,6 +50,8 @@ func (b *Bool) Scan(src any) error {
 		return fmt.Errorf("unsupported scan type for Bool: %T", src)
 	}
 }
+
+// Value 写入数据库不能有null值
 func (b Bool) Value() (driver.Value, error) {
 	return b > 0, nil
 }
@@ -61,12 +63,12 @@ func (b *Bool) IsNil() bool {
 
 // IsZero 是否零值
 func (b Bool) IsZero() bool {
-	return b == 0
+	return b == -1
 }
 
 // IsEmpty 是否空值或零值
 func (b *Bool) IsEmpty() bool {
-	return b == nil || *b == 0
+	return b == nil || *b == -1
 }
 
 func (b Bool) Bool() bool {
@@ -95,13 +97,12 @@ func (b Bool) Ptr() *bool {
 	return &tem
 }
 
-// 3. 添加 Set 方法，方便链式创建
-func (b Bool) SetTrue() Bool {
-	b = 1
-	return b
+// SetTrue
+func (b *Bool) SetTrue() {
+	*b = 1
 }
-func (b Bool) SetFalse() Bool { b = 0; return b }
-func (b Bool) SetNil() Bool   { b = -1; return b }
+func (b *Bool) SetFalse() { *b = 0 }
+func (b *Bool) SetNil()   { *b = -1 }
 
 // 4. 添加构造函数
 func NewBool(v bool) Bool {

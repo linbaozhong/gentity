@@ -18,15 +18,33 @@ func (m Money) MarshalJSON() ([]byte, error) {
 
 func (m *Money) UnmarshalJSON(b []byte) error {
 	c := bytes2String(b)
-	fen, e := strconv.ParseFloat(c, 10)
-	if e != nil {
-		return e
+	if c == "" {
+		*m = 0
+		return nil
 	}
-	i, e := strconv.ParseInt(strconv.FormatFloat(fen*100, 'f', 0, 64), 10, 64)
-	if e == nil {
-		*m = Money(i)
+
+	dotIdx := strings.Index(c, ".")
+	var fenStr string
+	if dotIdx >= 0 {
+		intPart := c[:dotIdx]
+		decPart := c[dotIdx+1:]
+		if len(decPart) >= 2 {
+			decPart = decPart[:2] // 多余位截断（四舍五入可选）
+		} else if len(decPart) == 1 {
+			decPart = decPart + "0" // 补齐两位
+		} else {
+			decPart = decPart + "00" // 无小数位补 00
+		}
+		fenStr = intPart + decPart
+	} else {
+		fenStr = c + "00"
 	}
-	return e
+	fen, err := strconv.ParseInt(fenStr, 10, 64)
+	if err != nil {
+		return err
+	}
+	*m = Money(fen)
+	return nil
 }
 
 func (m *Money) Scan(src any) error {
@@ -88,11 +106,13 @@ func (m Money) Bytes() []byte {
 	return conv.Base2Bytes(m)
 }
 
+// FromBytes 从字节数组反序列化,解析失败时设为零值
 func (m *Money) FromBytes(b []byte) {
 	_m, _ := conv.Bytes2Base[int64](b)
 	*m = Money(_m)
 }
 
+// FromString 从字符串反序列化,解析失败时设为零值
 func (m *Money) FromString(str string) {
 	_m, _ := strconv.ParseInt(str, 10, 64)
 	*m = Money(_m)
