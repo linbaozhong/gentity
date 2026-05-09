@@ -10,14 +10,10 @@ import (
 	"errors"
 	"{{.ModulePath}}/define/table/tbl{{ $structNameLower }}"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
-	{{- if .HasCustomType }}
-	"github.com/linbaozhong/gentity/pkg/types"
-	{{- end}}
-	{{- if .HasTime }}
-	"time"
+	{{- range .Imports}}
+		"{{.}}"
 	{{- end}}
 )
 

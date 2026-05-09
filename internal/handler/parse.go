@@ -138,7 +138,7 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			if strings.HasPrefix(_namejson.Type, "types") {
 				_tempData.HasCustomType = true
 			}
-			if _namejson.Type == "time.Time" {
+			if _namejson.Type == "time.Time" || _namejson.Type == "*time.Time" {
 				_tempData.HasTime = true
 			} else if _namejson.Type == "Visitor" {
 				_tempData.VisitorName = _namejson.Name
