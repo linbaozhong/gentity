@@ -312,42 +312,44 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	for _, col := range cols {
 		s.Func(col.Sum())
 	}
-	s.Where(cond...)
-	s.command.WriteString("SELECT ")
-	s.command.WriteString(strings.Join(s.funcs, ","))
+	return s.aggregateQuery(ctx, cols, cond...)
 
-	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
-	for _, j := range s.join {
-		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	}
-
-	// WHERE
-	if s.where.Len() > 0 {
-		s.command.WriteString(" WHERE " + s.where.String())
-	}
-
-	// LIMIT
-	if s.limit != "" {
-		s.command.WriteString(s.limit)
-	}
-
-	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
-	if err != nil {
-		return nil, err
-	}
-
-	var sum = make([]any, len(cols))
-	err = row.Scan(sum...)
-	if err != nil {
-		return nil, err
-	}
-
-	sums := make(map[string]any, len(cols))
-	for i := range sum {
-		sums[cols[i].Name] = sum[i]
-	}
-	return sums, nil
+	// s.Where(cond...)
+	// s.command.WriteString("SELECT ")
+	// s.command.WriteString(strings.Join(s.funcs, ","))
+	//
+	// // FROM TABLE
+	// s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	// for _, j := range s.join {
+	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// }
+	//
+	// // WHERE
+	// if s.where.Len() > 0 {
+	// 	s.command.WriteString(" WHERE " + s.where.String())
+	// }
+	//
+	// // LIMIT
+	// if s.limit != "" {
+	// 	s.command.WriteString(s.limit)
+	// }
+	//
+	// row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// var sum = make([]any, len(cols))
+	// err = row.Scan(sum...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// sums := make(map[string]any, len(cols))
+	// for i := range sum {
+	// 	sums[cols[i].Name] = sum[i]
+	// }
+	// return sums, nil
 }
 
 // Avg 返回平均值
@@ -360,42 +362,44 @@ func (s *read) Avg(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	for _, col := range cols {
 		s.Func(col.Avg())
 	}
-	s.Where(cond...)
-	s.command.WriteString("SELECT ")
-	s.command.WriteString(strings.Join(s.funcs, ","))
+	return s.aggregateQuery(ctx, cols, cond...)
 
-	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
-	for _, j := range s.join {
-		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	}
-
-	// WHERE
-	if s.where.Len() > 0 {
-		s.command.WriteString(" WHERE " + s.where.String())
-	}
-
-	// LIMIT
-	if s.limit != "" {
-		s.command.WriteString(s.limit)
-	}
-
-	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
-	if err != nil {
-		return nil, err
-	}
-
-	var avg = make([]any, len(cols))
-	err = row.Scan(avg...)
-	if err != nil {
-		return nil, err
-	}
-
-	avgs := make(map[string]any, len(cols))
-	for i := range avg {
-		avgs[cols[i].Name] = avg[i]
-	}
-	return avgs, nil
+	// s.Where(cond...)
+	// s.command.WriteString("SELECT ")
+	// s.command.WriteString(strings.Join(s.funcs, ","))
+	//
+	// // FROM TABLE
+	// s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	// for _, j := range s.join {
+	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// }
+	//
+	// // WHERE
+	// if s.where.Len() > 0 {
+	// 	s.command.WriteString(" WHERE " + s.where.String())
+	// }
+	//
+	// // LIMIT
+	// if s.limit != "" {
+	// 	s.command.WriteString(s.limit)
+	// }
+	//
+	// row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// var avg = make([]any, len(cols))
+	// err = row.Scan(avg...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// avgs := make(map[string]any, len(cols))
+	// for i := range avg {
+	// 	avgs[cols[i].Name] = avg[i]
+	// }
+	// return avgs, nil
 }
 
 // Max 返回最大值
@@ -408,42 +412,44 @@ func (s *read) Max(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	for _, col := range cols {
 		s.Func(col.Max())
 	}
-	s.Where(cond...)
-	s.command.WriteString("SELECT ")
-	s.command.WriteString(strings.Join(s.funcs, ","))
+	return s.aggregateQuery(ctx, cols, cond...)
 
-	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
-	for _, j := range s.join {
-		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	}
-
-	// WHERE
-	if s.where.Len() > 0 {
-		s.command.WriteString(" WHERE " + s.where.String())
-	}
-
-	// LIMIT
-	if s.limit != "" {
-		s.command.WriteString(s.limit)
-	}
-
-	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
-	if err != nil {
-		return nil, err
-	}
-
-	var max = make([]any, len(cols))
-	err = row.Scan(max...)
-	if err != nil {
-		return nil, err
-	}
-
-	maxs := make(map[string]any, len(cols))
-	for i := range max {
-		maxs[cols[i].Name] = max[i]
-	}
-	return maxs, nil
+	// s.Where(cond...)
+	// s.command.WriteString("SELECT ")
+	// s.command.WriteString(strings.Join(s.funcs, ","))
+	//
+	// // FROM TABLE
+	// s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	// for _, j := range s.join {
+	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// }
+	//
+	// // WHERE
+	// if s.where.Len() > 0 {
+	// 	s.command.WriteString(" WHERE " + s.where.String())
+	// }
+	//
+	// // LIMIT
+	// if s.limit != "" {
+	// 	s.command.WriteString(s.limit)
+	// }
+	//
+	// row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// var max = make([]any, len(cols))
+	// err = row.Scan(max...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// maxs := make(map[string]any, len(cols))
+	// for i := range max {
+	// 	maxs[cols[i].Name] = max[i]
+	// }
+	// return maxs, nil
 }
 
 // Min 返回最小值
@@ -456,6 +462,49 @@ func (s *read) Min(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	for _, col := range cols {
 		s.Func(col.Min())
 	}
+	return s.aggregateQuery(ctx, cols, cond...)
+
+	// s.Where(cond...)
+	// s.command.WriteString("SELECT ")
+	// s.command.WriteString(strings.Join(s.funcs, ","))
+	//
+	// // FROM TABLE
+	// s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	// for _, j := range s.join {
+	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// }
+	//
+	// // WHERE
+	// if s.where.Len() > 0 {
+	// 	s.command.WriteString(" WHERE " + s.where.String())
+	// }
+	//
+	// // LIMIT
+	// if s.limit != "" {
+	// 	s.command.WriteString(s.limit)
+	// }
+	//
+	// row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// var min = make([]any, len(cols))
+	// err = row.Scan(min...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// mins := make(map[string]any, len(cols))
+	// for i := range min {
+	// 	mins[cols[i].Name] = min[i]
+	// }
+	// return mins, nil
+}
+
+// aggregateQuery 聚合查询的公共部分：构建SQL、执行查询、扫描结果
+// 调用前需要先设置 s.funcs 和 s.where
+func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	s.Where(cond...)
 	s.command.WriteString("SELECT ")
 	s.command.WriteString(strings.Join(s.funcs, ","))
@@ -481,17 +530,17 @@ func (s *read) Min(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 		return nil, err
 	}
 
-	var min = make([]any, len(cols))
-	err = row.Scan(min...)
+	var results = make([]any, len(cols))
+	err = row.Scan(results...)
 	if err != nil {
 		return nil, err
 	}
 
-	mins := make(map[string]any, len(cols))
-	for i := range min {
-		mins[cols[i].Name] = min[i]
+	resultMap := make(map[string]any, len(cols))
+	for i := range results {
+		resultMap[cols[i].Name] = results[i]
 	}
-	return mins, nil
+	return resultMap, nil
 }
 
 // Select 执行原生的 SQL 查询
@@ -549,10 +598,7 @@ func (se *read) RawQueryStruct(ctx context.Context, dest any, sqlStr string, arg
 			return sql.ErrNoRows
 		}
 		vals := d.AssignPtr()
-		err = rows.Scan(vals...)
-		if err != nil {
-			return err
-		}
+		return rows.Scan(vals...)
 	}
 	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
 	return r.scanAny(dest, false)

@@ -19,6 +19,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect/mysql"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/util"
@@ -28,6 +29,7 @@ import (
 
 type (
 	Builder interface {
+		// SetDialect(dialect dialect.Dialect) Builder
 		Free()
 		String() string
 		Clone() Builder
@@ -51,6 +53,8 @@ type (
 	orm struct {
 		pool.Model
 		db           Executer
+		dialect      dialect.Dialect // 数据库方言
+		paramIndex   int             // 参数索引计数器
 		table        string
 		join         [][3]string
 		joinParams   []any
@@ -94,6 +98,10 @@ func New(opts ...Option) Builder {
 	for _, opt := range opts {
 		opt(obj)
 	}
+	// 如果没有设置方言，默认使用 MySQL
+	if obj.dialect == nil {
+		obj.dialect = &mysql.MySQL{}
+	}
 	return obj
 }
 
@@ -103,7 +111,6 @@ func (o *orm) Free() {
 		return
 	}
 
-	_ = o.String()
 	if o.db.Debug() {
 		log.Info(o.String())
 	}
@@ -142,6 +149,12 @@ func (o *orm) String() string {
 	// return o.commandString.String()
 	return fmt.Sprintf("%s  %v \n", o.command.String(), o.mergeParams())
 }
+
+// // SetDialect 设置 orm 对象的数据库方言。
+// func (o *orm) SetDialect(d dialect.Dialect) Builder {
+// 	o.dialect = d
+// 	return o
+// }
 
 // Table 设置 orm 对象的表名。
 // 如果 a 是字符串，代表数据库表名
@@ -413,7 +426,7 @@ func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, 
 		defer stmt.Close()
 	}
 
-	return stmt.QueryRowContext(ctx, o.mergeParams()...), nil
+	return stmt.QueryRowContext(ctx, params...), nil
 }
 
 // connect 连接数据库
@@ -424,4 +437,18 @@ func (o *orm) connect(x ...Executer) Builder {
 		o.db = GetDB()
 	}
 	return o
+}
+
+func (o *orm) nextPlaceholder() string {
+	if o.dialect != nil {
+		ph := o.dialect.Placeholder(o.paramIndex)
+		o.paramIndex++
+		return ph
+	}
+	o.paramIndex++
+	return "?"
+}
+
+func (o *orm) resetParamIndex() {
+	o.paramIndex = 0
 }

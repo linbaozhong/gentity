@@ -15,7 +15,6 @@
 package ace
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
@@ -48,27 +47,9 @@ type (
 var (
 	Err_ToSql = errors.New("the SQL command terminates execution after the ToSql() method")
 
-	_obj        *DB
-	_once       sync.Once
-	Transaction func(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
-	// // Db 实验
-	// Db *sql.DB
+	_obj  *DB
+	_once sync.Once
 )
-
-// // Open 实验
-// func Open(driverName, dns string) (*sql.DB, error) {
-// 	dialect.Register(driverName)
-// 	var e error
-// 	Db, e = sql.Open(driverName, dns)
-// 	if e != nil {
-// 		return nil, e
-// 	}
-// 	if e = Db.Ping(); e != nil {
-// 		Db.Close()
-// 		return nil, e
-// 	}
-// 	return Db, e
-// }
 
 // Connect
 func Connect(driverName, dns string) (*DB, error) {
@@ -93,8 +74,8 @@ func Connect(driverName, dns string) (*DB, error) {
 		_obj.debug = false
 
 		app.RegisterServiceCloser(_obj)
-		// 注册事务方法
-		Transaction = _obj.Transaction
+		// // 注册事务方法
+		// Transaction = _obj.Transaction
 
 	})
 

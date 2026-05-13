@@ -85,3 +85,10 @@ func WithSetExpr(args ...dialect.Setter) Option {
 		o.SetExpr(args...)
 	}
 }
+
+// WithDialect 设置数据库方言
+func WithDialect(d dialect.Dialect) Option {
+	return func(o Builder) {
+		o.SetDialect(d)
+	}
+}

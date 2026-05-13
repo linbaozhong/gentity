@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mysql
+package postgres
 
 import (
 	"fmt"
@@ -21,10 +21,10 @@ import (
 
 const (
 	// Placeholder      = "?"
-	Quote_Char = "`"
-	PrimaryKey = "PRI"
-	AutoInc    = "AUTO_INCREMENT"
-	UniqueKey  = "UNI"
+	Quote_Char = "\""
+	PrimaryKey = "p"
+	AutoInc    = "SERIAL"
+	UniqueKey  = "u"
 )
 
 var Limit = func(offset, limit uint) string {
@@ -35,5 +35,5 @@ var Limit = func(offset, limit uint) string {
 }
 
 var Placeholder = func(index int) string {
-	return "?"
+	return fmt.Sprintf("$%d", index+1)
 }

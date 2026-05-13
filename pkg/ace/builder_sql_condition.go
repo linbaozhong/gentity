@@ -15,7 +15,9 @@
 package ace
 
 import (
+	"errors"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"strings"
 )
 
 type Wherer interface {
@@ -34,9 +36,47 @@ func (o *orm) Where(fns ...dialect.Condition) Builder {
 
 // RawWhere 添加原生查询条件
 func (o *orm) RawWhere(cond string, params ...any) Builder {
+	return o.RawWhereSafe(cond, params...)
+}
+
+// Err_RawWhere_Invalid_Condition 非法条件错误
+var Err_RawWhere_Invalid_Condition = errors.New("RawWhere: invalid condition format")
+
+// isValidCondition 验证条件格式
+func isValidCondition(cond string) bool {
+	// 允许：字母、数字、下划线、空格、常见操作符、括号
+	// 禁止：引号、分号、注释符号等可能导致注入的字符
+	if cond == "" {
+		return false
+	}
+	// 检查是否包含危险字符
+	dangerous := []string{"'", "\"", ";", "--", "/*", "*/", "xp_", "EXEC", "UNION"}
+	lower := strings.ToLower(cond)
+	for _, d := range dangerous {
+		if strings.Contains(lower, d) {
+			return false
+		}
+	}
+	return true
+}
+
+// RawWhereSafe 安全地添加原生查询条件
+// 支持格式：
+//   - 单个条件: "name = ?" 或 "age > ?"
+//   - 多个条件: "name = ? AND age > ?"
+//   - 括号组: "(name = ? OR age > ?)"
+//   - IN 子句: "status IN (?)"  (params 需传入 []any 类型)
+func (o *orm) RawWhereSafe(cond string, params ...any) Builder {
 	if o.where.Len() > 0 {
 		o.where.WriteString(dialect.Operator_and)
 	}
+
+	// 验证条件格式
+	if isValidCondition(cond) {
+		o.err = Err_RawWhere_Invalid_Condition
+		return o
+	}
+
 	o.where.WriteString(cond)
 	o.whereParams = append(o.whereParams, params...)
 	return o

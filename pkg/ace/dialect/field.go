@@ -17,10 +17,8 @@ package dialect
 import (
 	"errors"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/types"
 	"math"
 	"strings"
-	"time"
 )
 
 var (
@@ -367,16 +365,29 @@ func (f *Field) Lte(val any) Condition {
 
 func checkSlice(vals ...any) error {
 	for _, val := range vals {
-		switch val.(type) {
-		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string, bool, time.Time:
+		if val == nil {
 			continue
-		case types.Int, types.Int8, types.Int16, types.Int32, types.Int64, types.Uint, types.Uint8, types.Uint16,
-			types.Uint32, types.Uint64, types.Float32, types.Float64, types.String, types.Bool, types.Time,
-			types.BigInt, types.Money:
-			continue
-		default:
-			return errors.New("Parameter type error")
 		}
+		switch val.(type) {
+		case func():
+			return errors.New("function type is not allowed")
+		case chan any:
+			return errors.New("channel type is not allowed")
+		case complex64, complex128:
+			return errors.New("complex type is not allowed")
+		case struct{}:
+			return errors.New("struct type is not allowed in IN clause")
+		}
+		// switch val.(type) {
+		// case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string, bool, time.Time:
+		// 	continue
+		// case types.Int, types.Int8, types.Int16, types.Int32, types.Int64, types.Uint, types.Uint8, types.Uint16,
+		// 	types.Uint32, types.Uint64, types.Float32, types.Float64, types.String, types.Bool, types.Time,
+		// 	types.BigInt, types.Money:
+		// 	continue
+		// default:
+		// 	return errors.New("Parameter type error")
+		// }
 	}
 	return nil
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mysql
+package sqlite
 
 import (
 	"fmt"
@@ -21,15 +21,15 @@ import (
 
 const (
 	// Placeholder      = "?"
-	Quote_Char = "`"
-	PrimaryKey = "PRI"
-	AutoInc    = "AUTO_INCREMENT"
-	UniqueKey  = "UNI"
+	Quote_Char = "\""
+	PrimaryKey = "pk"
+	AutoInc    = "AUTOINCREMENT"
+	UniqueKey  = "unique"
 )
 
 var Limit = func(offset, limit uint) string {
 	if offset > 0 {
-		return fmt.Sprintf(" LIMIT %d,%d", offset, limit)
+		return fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
 	}
 	return fmt.Sprintf(" LIMIT %d", limit)
 }

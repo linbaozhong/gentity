@@ -1,21 +1,22 @@
-package ace
+package mysql
 
 import (
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/sqlparser"
 	"strings"
 )
 
 type Driverer interface {
-	GetTables(db *DB, dbName string) ([]*sqlparser.Table, error)
+	GetTables(db *ace.DB, dbName string) ([]*sqlparser.Table, error)
 }
 
-type mysql struct {
-}
+// type mysql struct {
+// }
+//
+// var Mysql mysql
 
-var Mysql mysql
-
-func getTables(db *DB, dbName string) ([]*sqlparser.Table, error) {
+func getTables(db *ace.DB, dbName string) ([]*sqlparser.Table, error) {
 	// 表名,表注释
 	rows, err := db.Query(`SELECT table_name,table_comment FROM information_schema.tables WHERE table_schema = ? and table_type = 'BASE TABLE'`, dbName)
 	if err != nil {
@@ -39,7 +40,7 @@ func getTables(db *DB, dbName string) ([]*sqlparser.Table, error) {
 	return ts, nil
 }
 
-func getColumns(db *DB, dbName string) (map[string][]*sqlparser.Column, error) {
+func getColumns(db *ace.DB, dbName string) (map[string][]*sqlparser.Column, error) {
 	// 表字段信息
 	rows, err := db.Query(`SELECT table_name,column_name,column_default,data_type,column_type,ifnull(character_maximum_length,0),ifnull(numeric_precision,0),ifnull(numeric_scale,0),column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema = ?`, dbName)
 	if err != nil {
@@ -71,7 +72,7 @@ func getColumns(db *DB, dbName string) (map[string][]*sqlparser.Column, error) {
 	return ms, nil
 }
 
-func (mysql) GetTables(db *DB, dbName string) ([]*sqlparser.Table, error) {
+func GetTables(db *ace.DB, dbName string) ([]*sqlparser.Table, error) {
 	// 表名,表注释
 	ts, err := getTables(db, dbName)
 	if err != nil {

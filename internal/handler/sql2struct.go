@@ -57,12 +57,10 @@ func db2struct(driver, dns, outputPath, packageName string) error {
 	if match == nil || len(match) == 0 {
 		return fmt.Errorf("Could not parse database name from the connection string.")
 	}
-	_dr, e := getDriver(driver)
-	if e != nil {
-		return e
-	}
+
+	dialect.Register(driver)
 	// match[1] 存储的就是 dbname 的值
-	tables, e := _dr.GetTables(_db, match[1])
+	tables, e := dialect.GetTables(_db, match[1])
 	if e != nil {
 		return e
 	}
@@ -88,12 +86,4 @@ func db2struct(driver, dns, outputPath, packageName string) error {
 		return e
 	}
 	return nil
-}
-
-func getDriver(driver string) (ace.Driverer, error) {
-	switch driver {
-	case "mysql":
-		return ace.Mysql, nil
-	}
-	return nil, fmt.Errorf("Unsupported driver %s", driver)
 }

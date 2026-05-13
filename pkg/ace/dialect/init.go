@@ -14,23 +14,55 @@
 
 package dialect
 
-import "github.com/linbaozhong/gentity/pkg/ace/dialect/mysql"
+import (
+	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect/mysql"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect/postgres"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect/sqlite"
+	"github.com/linbaozhong/gentity/pkg/sqlparser"
+)
+
+type (
+	limit       func(offset, limit uint) string
+	placeholder func(index int) string
+	getTables   func(db *ace.DB, dbName string) ([]*sqlparser.Table, error)
+)
 
 var (
-	Placeholder = "?"
+	Placeholder placeholder
 	Quote_Char  = "`"
 	PrimaryKey  = ""
 	AutoInc     = ""
 	UniqueKey   = ""
+	Limit       limit
+	GetTables   getTables
 )
 
 func Register(driverName string) {
 	switch driverName {
 	case "mysql":
-		Placeholder = mysql.Mysql_Placeholder
-		Quote_Char = mysql.Mysql_Quote_Char
-		PrimaryKey = mysql.Mysql_PrimaryKey
-		AutoInc = mysql.Mysql_AutoInc
-		UniqueKey = mysql.Mysql_UniqueKey
+		Placeholder = mysql.Placeholder
+		Quote_Char = mysql.Quote_Char
+		PrimaryKey = mysql.PrimaryKey
+		AutoInc = mysql.AutoInc
+		UniqueKey = mysql.UniqueKey
+		Limit = mysql.Limit
+		GetTables = mysql.GetTables
+	case "sqlite":
+		Placeholder = sqlite.Placeholder
+		Quote_Char = sqlite.Quote_Char
+		PrimaryKey = sqlite.PrimaryKey
+		AutoInc = sqlite.AutoInc
+		UniqueKey = sqlite.UniqueKey
+		Limit = sqlite.Limit
+		GetTables = sqlite.GetTables
+	case "postgres":
+		Placeholder = postgres.Placeholder
+		Quote_Char = postgres.Quote_Char
+		PrimaryKey = postgres.PrimaryKey
+		AutoInc = postgres.AutoInc
+		UniqueKey = postgres.UniqueKey
+		Limit = postgres.Limit
+		GetTables = postgres.GetTables
 	}
 }

@@ -12,28 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mysql
+// pkg/ace/dialect/postgres/postgres.go
+package postgres
 
-import (
-	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-)
+import "fmt"
 
-const (
-	// Placeholder      = "?"
-	Quote_Char = "`"
-	PrimaryKey = "PRI"
-	AutoInc    = "AUTO_INCREMENT"
-	UniqueKey  = "UNI"
-)
+type PostgreSQL struct{}
 
-var Limit = func(offset, limit uint) string {
+func (p *PostgreSQL) Name() string { return "postgres" }
+
+func (p *PostgreSQL) Quote(name string) string {
+	return `"` + name + `"`
+}
+
+func (p *PostgreSQL) Placeholder(index int) string {
+	return fmt.Sprintf("$%d", index+1)
+}
+
+func (p *PostgreSQL) Limit(offset, limit uint) string {
 	if offset > 0 {
-		return fmt.Sprintf(" LIMIT %d,%d", offset, limit)
+		return fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
 	}
 	return fmt.Sprintf(" LIMIT %d", limit)
 }
 
-var Placeholder = func(index int) string {
-	return "?"
-}
+func (p *PostgreSQL) AutoIncrement() string { return "SERIAL" }
+func (p *PostgreSQL) PrimaryKey() string    { return "p" }
+func (p *PostgreSQL) UniqueKey() string     { return "u" }

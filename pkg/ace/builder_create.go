@@ -69,7 +69,12 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 		c.command.WriteString(col.Quote())
 	}
 	c.command.WriteString(") VALUES ")
-	c.command.WriteString("(" + strings.Repeat("?,", lens)[:lens*2-1] + ")")
+
+	values := make([]string, lens)
+	for i := range values {
+		values[i] = "?"
+	}
+	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
 	if c.toSql {
 		log.Info(c.String())

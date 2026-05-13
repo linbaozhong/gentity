@@ -12,28 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mysql
+// pkg/ace/dialect/sqlite/sqlite.go
+package sqlite
 
-import (
-	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-)
+import "fmt"
 
-const (
-	// Placeholder      = "?"
-	Quote_Char = "`"
-	PrimaryKey = "PRI"
-	AutoInc    = "AUTO_INCREMENT"
-	UniqueKey  = "UNI"
-)
+type SQLite struct{}
 
-var Limit = func(offset, limit uint) string {
+func (s *SQLite) Name() string { return "sqlite" }
+
+func (s *SQLite) Quote(name string) string {
+	return `"` + name + `"`
+}
+
+func (s *SQLite) Placeholder(index int) string {
+	return "?"
+}
+
+func (s *SQLite) Limit(offset, limit uint) string {
 	if offset > 0 {
-		return fmt.Sprintf(" LIMIT %d,%d", offset, limit)
+		return fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
 	}
 	return fmt.Sprintf(" LIMIT %d", limit)
 }
 
-var Placeholder = func(index int) string {
-	return "?"
-}
+func (s *SQLite) AutoIncrement() string { return "AUTOINCREMENT" }
+func (s *SQLite) PrimaryKey() string    { return "pk" }
+func (s *SQLite) UniqueKey() string     { return "unique" }
