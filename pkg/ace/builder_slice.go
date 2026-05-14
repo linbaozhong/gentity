@@ -20,17 +20,20 @@ import (
 )
 
 type (
-	conditions []dialect.Condition
-	orders     []dialect.Order
-	sets       []dialect.Setter
-	fields     []dialect.Field
+	conditions struct {
+		s []dialect.Condition
+		i uint8
+	}
+	orders []dialect.Order
+	sets   []dialect.Setter
+	fields []dialect.Field
 )
 
 // Conds 函数用于创建一个条件列表。它接收可变数量的 Condition 类型的参数，
 // 返回一个 conditions 类型的切片，该切片包含了所有传入的条件。
 // 该函数可用于构建复杂的查询条件。
 func Conds(fns ...dialect.Condition) *conditions {
-	r := conditions(fns)
+	r := conditions{s: fns}
 	return &r
 }
 
@@ -38,7 +41,7 @@ func Conds(fns ...dialect.Condition) *conditions {
 // 将这些条件添加到 conditions 类型的切片中，并返回更新后的条件列表。
 func (c *conditions) Conds(fns ...dialect.Condition) *conditions {
 	if len(fns) > 0 {
-		*c = append(*c, fns...)
+		c.s = append(c.s, fns...)
 	}
 	return c
 }
@@ -47,7 +50,7 @@ func (c *conditions) Conds(fns ...dialect.Condition) *conditions {
 // 返回一个新的 conditions 类型的切片，该切片包含了所有传入的条件。
 func (c *conditions) And(fns ...dialect.Condition) *conditions {
 	if len(fns) > 0 {
-		*c = append(*c, and(fns...))
+		c.s = append(c.s, and(fns...))
 	}
 	return c
 }
@@ -56,7 +59,7 @@ func (c *conditions) And(fns ...dialect.Condition) *conditions {
 // 返回一个新的 conditions 类型的切片，该切片包含了所有传入的条件。
 func (c *conditions) Or(fns ...dialect.Condition) *conditions {
 	if len(fns) > 0 {
-		*c = append(*c, or(fns...))
+		c.s = append(c.s, or(fns...))
 	}
 	return c
 }
@@ -65,7 +68,7 @@ func (c *conditions) Or(fns ...dialect.Condition) *conditions {
 // 它接收可变数量的 Condition 类型的参数，返回一个新的 conditions 类型的切片。
 func (c *conditions) AndOr(fns ...dialect.Condition) *conditions {
 	if len(fns) > 0 {
-		*c = append(*c, andOr(fns...))
+		c.s = append(c.s, andOr(fns...))
 	}
 	return c
 }
@@ -74,7 +77,7 @@ func (c *conditions) AndOr(fns ...dialect.Condition) *conditions {
 // 它接收可变数量的 Condition 类型的参数，返回一个新的 conditions 类型的切片。
 func (c *conditions) OrAnd(fns ...dialect.Condition) *conditions {
 	if len(fns) > 0 {
-		*c = append(*c, orAnd(fns...))
+		c.s = append(c.s, orAnd(fns...))
 	}
 	return c
 }
@@ -82,12 +85,12 @@ func (c *conditions) OrAnd(fns ...dialect.Condition) *conditions {
 // ToSlice 函数用于获取 conditions 类型的切片。它返回一个包含所有条件的切片。
 // 该函数可用于将 conditions 类型的切片转换为其他类型的切片。
 func (c *conditions) ToSlice() []dialect.Condition {
-	return *c
+	return c.s
 }
 
 // Len 函数用于获取 conditions 类型的切片的长度。它返回 conditions 类型的切片的长度。
 func (c *conditions) Len() int {
-	return len(*c)
+	return len(c.s)
 }
 
 // buildSimpleCondition 构建简单条件（每个条件前都加操作符）
