@@ -60,7 +60,7 @@ func db2struct(driver, dns, outputPath, packageName string) error {
 
 	dialect.Register(driver)
 	// match[1] 存储的就是 dbname 的值
-	tables, e := dialect.GetTables(_db, match[1])
+	tables, e := dialect.GetTables(_db.DB, match[1])
 	if e != nil {
 		return e
 	}

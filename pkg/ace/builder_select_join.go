@@ -29,7 +29,7 @@ func (o *orm) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...
 
 		for _, fn := range fns {
 			on.WriteString(dialect.Operator_and)
-			cond, val := fn()
+			cond, val := fn(&o.paramIndex)
 
 			on.WriteString(cond)
 			if err := parseWhereParams(val, &tmpJoinParams); err != nil {

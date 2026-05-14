@@ -49,7 +49,7 @@ func (o *orm) Having(fns ...dialect.Condition) Builder {
 		if i > 0 {
 			o.having.WriteString(dialect.Operator_and)
 		}
-		cond, val := fn()
+		cond, val := fn(&o.paramIndex)
 		o.having.WriteString(cond)
 
 		if err := parseWhereParams(val, &tmpHavingParams); err != nil {

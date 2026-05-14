@@ -275,7 +275,7 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 	s.command.WriteString("SELECT COUNT(*)")
 
 	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
 	for _, j := range s.join {
 		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	}
@@ -319,7 +319,7 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	// s.command.WriteString(strings.Join(s.funcs, ","))
 	//
 	// // FROM TABLE
-	// s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	// s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
 	// for _, j := range s.join {
 	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	// }
@@ -369,7 +369,7 @@ func (s *read) Avg(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	// s.command.WriteString(strings.Join(s.funcs, ","))
 	//
 	// // FROM TABLE
-	// s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	// s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
 	// for _, j := range s.join {
 	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	// }
@@ -419,7 +419,7 @@ func (s *read) Max(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	// s.command.WriteString(strings.Join(s.funcs, ","))
 	//
 	// // FROM TABLE
-	// s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	// s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
 	// for _, j := range s.join {
 	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	// }
@@ -469,7 +469,7 @@ func (s *read) Min(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	// s.command.WriteString(strings.Join(s.funcs, ","))
 	//
 	// // FROM TABLE
-	// s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	// s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
 	// for _, j := range s.join {
 	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	// }
@@ -510,7 +510,7 @@ func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ..
 	s.command.WriteString(strings.Join(s.funcs, ","))
 
 	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char + s.table + dialect.Quote_Char)
+	s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
 	for _, j := range s.join {
 		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	}

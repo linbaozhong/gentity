@@ -61,7 +61,7 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
+	c.command.WriteString("INSERT INTO " + dialect.Quote_Char_Left + c.table + dialect.Quote_Char_Right + " (")
 	for i, col := range c.cols {
 		if i > 0 {
 			c.command.WriteString(",")
@@ -100,7 +100,7 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return nil, c.err
 	}
 
-	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
+	c.command.WriteString("INSERT INTO " + dialect.Quote_Char_Left + c.table + dialect.Quote_Char_Right + " (")
 
 	var _cols []string
 	_cols, c.params = bean.AssignValues(c.cols...)
@@ -135,7 +135,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return nil, dialect.ErrBeanEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + dialect.Quote_Char + c.table + dialect.Quote_Char + " (")
+	c.command.WriteString("INSERT INTO " + dialect.Quote_Char_Left + c.table + dialect.Quote_Char_Right + " (")
 
 	var _cols []string
 	_cols, c.params = beans[0].RawAssignValues(c.cols...)

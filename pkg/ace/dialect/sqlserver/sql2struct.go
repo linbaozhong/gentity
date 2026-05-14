@@ -1,4 +1,4 @@
-package mysql
+package sqlserver
 
 import (
 	"database/sql"
@@ -61,3 +61,22 @@ func GetColumns(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, erro
 	}
 	return ms, nil
 }
+
+// func GetTables(db *ace.DB, dbName string) ([]*sqlparser.Table, error) {
+// 	// 表名,表注释
+// 	ts, err := getTables(db, dbName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 表字段信息
+// 	ms, err := getColumns(db, dbName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	for _, t := range ts {
+// 		t.ColumnsX = ms[t.Name]
+// 	}
+// 	return ts, nil
+// }

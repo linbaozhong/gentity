@@ -134,7 +134,7 @@ func (o *orm) buildWhereSimpleCondition(fns []dialect.Condition, innerOperator s
 	copy(tmpWhereParams, o.whereParams)
 
 	for i, fn := range fns {
-		cond, val := fn()
+		cond, val := fn(&o.paramIndex)
 
 		// 空值检查：跳过空条件
 		if cond == "" {
@@ -174,7 +174,7 @@ func (o *orm) buildWhereBracketsCondition(fns []dialect.Condition, prefixOperato
 	copy(tmpWhereParams, o.whereParams)
 
 	for i, fn := range fns {
-		cond, val := fn()
+		cond, val := fn(&o.paramIndex)
 
 		// 空值检查：跳过空条件
 		if cond == "" {

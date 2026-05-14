@@ -19,7 +19,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
-	"github.com/linbaozhong/gentity/pkg/ace/dialect/mysql"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/util"
@@ -52,9 +51,9 @@ type (
 
 	orm struct {
 		pool.Model
-		db           Executer
-		dialect      dialect.Dialect // 数据库方言
-		paramIndex   int             // 参数索引计数器
+		db Executer
+		// dialect      dialect.Dialect // 数据库方言
+		paramIndex   uint8 // 参数索引计数器
 		table        string
 		join         [][3]string
 		joinParams   []any
@@ -98,10 +97,10 @@ func New(opts ...Option) Builder {
 	for _, opt := range opts {
 		opt(obj)
 	}
-	// 如果没有设置方言，默认使用 MySQL
-	if obj.dialect == nil {
-		obj.dialect = &mysql.MySQL{}
-	}
+	// // 如果没有设置方言，默认使用 MySQL
+	// if obj.dialect == nil {
+	// 	obj.dialect = &mysql.MySQL{}
+	// }
 	return obj
 }
 
@@ -121,6 +120,7 @@ func (o *orm) Free() {
 func (o *orm) Reset() {
 	o.db = nil
 	o.table = ""
+	o.paramIndex = 0
 	o.cols = o.cols[:0]   // []dialect.Field{} // o.cols[:0]
 	o.funcs = o.funcs[:0] // []string{}       // o.funcs[:0]
 	o.distinct = false
@@ -215,7 +215,7 @@ func (o *orm) Set(fns ...dialect.Setter) Builder {
 			tmpCols = append(tmpCols, c)
 			tmpParams = append(tmpParams, val)
 		} else {
-			ex, val, e := dialect.ParseSetter(fn)
+			ex, val, e := dialect.ParseSetter(fn, &o.paramIndex)
 			if e == nil {
 				tmpExprCols = append(tmpExprCols, expr{colName: ex, arg: val})
 			}
@@ -242,7 +242,7 @@ func (o *orm) SetExpr(fns ...dialect.Setter) Builder {
 	copy(tmpExprCols, o.exprCols)
 
 	for _, fn := range fns {
-		ex, val, e := dialect.ParseSetter(fn)
+		ex, val, e := dialect.ParseSetter(fn, &o.paramIndex)
 		if e != nil {
 			o.err = e
 			return o
@@ -359,7 +359,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 		// 如果表名以(开头，则不加引号
 		o.command.WriteString(" FROM " + o.table)
 	} else {
-		o.command.WriteString(" FROM " + dialect.Quote_Char + o.table + dialect.Quote_Char)
+		o.command.WriteString(" FROM " + dialect.Quote_Char_Left + o.table + dialect.Quote_Char_Right)
 	}
 	for _, j := range o.join {
 		o.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
@@ -437,18 +437,4 @@ func (o *orm) connect(x ...Executer) Builder {
 		o.db = GetDB()
 	}
 	return o
-}
-
-func (o *orm) nextPlaceholder() string {
-	if o.dialect != nil {
-		ph := o.dialect.Placeholder(o.paramIndex)
-		o.paramIndex++
-		return ph
-	}
-	o.paramIndex++
-	return "?"
-}
-
-func (o *orm) resetParamIndex() {
-	o.paramIndex = 0
 }

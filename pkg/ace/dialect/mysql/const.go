@@ -20,20 +20,24 @@ import (
 )
 
 const (
-	// Placeholder      = "?"
-	Quote_Char = "`"
-	PrimaryKey = "PRI"
-	AutoInc    = "AUTO_INCREMENT"
-	UniqueKey  = "UNI"
+	Quote_Char_Left  = "`"
+	Quote_Char_Right = "`"
+	PrimaryKey       = "PRI"
+	AutoInc          = "AUTO_INCREMENT"
+	UniqueKey        = "UNI"
 )
 
-var Limit = func(offset, limit uint) string {
+func Limit(offset, limit uint) string {
 	if offset > 0 {
 		return fmt.Sprintf(" LIMIT %d,%d", offset, limit)
 	}
 	return fmt.Sprintf(" LIMIT %d", limit)
 }
 
-var Placeholder = func(index int) string {
+func Placeholder(index *uint8) string {
 	return "?"
+}
+
+func Quote(name string) string {
+	return Quote_Char_Left + name + Quote_Char_Right
 }

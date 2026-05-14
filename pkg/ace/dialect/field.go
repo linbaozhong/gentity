@@ -38,17 +38,17 @@ type (
 	}
 
 	Function  func() string
-	Condition func() (string, any)
+	Condition func(*uint8) (string, any)
 	Order     func() (string, []Field)
 	Setter    func() (Field, any, SetOp)
 )
 
 const (
-	Op_Normal    SetOp = iota // 普通赋值
-	Op_Increment              // 自增
-	Op_Decrement              // 自减
-	Op_Replace                // 替换
-	Op_Expr                   // 其它表达式
+	Op_Normal    SetOp = iota // insert 赋值
+	Op_Increment              // update 自增
+	Op_Decrement              // update 自减
+	Op_Replace                // update 替换
+	Op_Expr                   // update 其它表达式
 )
 
 // Quote 为字段添加引号
@@ -65,22 +65,22 @@ func (f *Field) Quote() string {
 // TableName 为表名添加引号
 func (f *Field) TableName() string {
 	var sb strings.Builder
-	// 预先计算并分配足够的内存空间：len(Quote_Char) + len(f.Table) + len(Quote_Char)
+	// 预先计算并分配足够的内存空间：len(Quote_Char_Left) + len(f.Table) + len(Quote_Char_Right)
 	sb.Grow(len(f.Table) + 2)
-	sb.WriteString(Quote_Char)
+	sb.WriteString(Quote_Char_Left)
 	sb.WriteString(f.Table)
-	sb.WriteString(Quote_Char)
+	sb.WriteString(Quote_Char_Right)
 	return sb.String()
 }
 
 // FieldName 为字段名添加引号
 func (f *Field) FieldName() string {
 	var sb strings.Builder
-	// 预先计算并分配足够的内存空间：len(Quote_Char) + len(f.Name) + len(Quote_Char)
+	// 预先计算并分配足够的内存空间：len(Quote_Char_Left) + len(f.Name) + len(Quote_Char_Right)
 	sb.Grow(len(f.Name) + 2)
-	sb.WriteString(Quote_Char)
+	sb.WriteString(Quote_Char_Left)
 	sb.WriteString(f.Name)
-	sb.WriteString(Quote_Char)
+	sb.WriteString(Quote_Char_Right)
 	return sb.String()
 }
 
@@ -117,7 +117,7 @@ func (f *Field) Incr(val ...any) Setter {
 	// }
 }
 
-func ParseSetter(set Setter) (string, any, error) {
+func ParseSetter(set Setter, i *uint8) (string, any, error) {
 	f, v, op := set()
 	if e, ok := v.(error); ok {
 		return "", nil, e
@@ -131,7 +131,7 @@ func ParseSetter(set Setter) (string, any, error) {
 		sb.WriteString(" = ")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" + ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 		return sb.String(), v, nil
 	case Op_Decrement:
 		var sb strings.Builder
@@ -141,7 +141,7 @@ func ParseSetter(set Setter) (string, any, error) {
 		sb.WriteString(" = ")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" - ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 		return sb.String(), v, nil
 	case Op_Replace:
 		var sb strings.Builder
@@ -151,9 +151,9 @@ func ParseSetter(set Setter) (string, any, error) {
 		sb.WriteString(" = REPLACE(")
 		sb.WriteString(f.Quote())
 		sb.WriteString(",")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 		sb.WriteString(",")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 		sb.WriteString(")")
 		return sb.String(), v, nil
 	case Op_Expr:
@@ -163,7 +163,7 @@ func ParseSetter(set Setter) (string, any, error) {
 		sb.Grow(len(f.Quote()) + 4)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" = ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 
 		return sb.String(), v, nil
 	default:
@@ -245,7 +245,7 @@ func (f *Field) Expr(expr string) Setter {
 
 // Eq 条件：等于
 func (f *Field) Eq(val any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -257,7 +257,7 @@ func (f *Field) Eq(val any) Condition {
 		sb.Grow(len(f.Quote()) + 4)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" = ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 
 		return sb.String(), val
 	}
@@ -265,7 +265,7 @@ func (f *Field) Eq(val any) Condition {
 
 // NotEq 条件：不等于
 func (f *Field) NotEq(val any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -277,7 +277,7 @@ func (f *Field) NotEq(val any) Condition {
 		sb.Grow(len(f.Quote()) + 5)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" != ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 
 		return sb.String(), val
 	}
@@ -285,7 +285,7 @@ func (f *Field) NotEq(val any) Condition {
 
 // Gt 条件：大于
 func (f *Field) Gt(val any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -297,7 +297,7 @@ func (f *Field) Gt(val any) Condition {
 		sb.Grow(len(f.Quote()) + 4)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" > ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 
 		return sb.String(), val
 	}
@@ -305,7 +305,7 @@ func (f *Field) Gt(val any) Condition {
 
 // Gte 条件：大于或等于
 func (f *Field) Gte(val any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -317,7 +317,7 @@ func (f *Field) Gte(val any) Condition {
 		sb.Grow(len(f.Quote()) + 5)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" >= ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 
 		return sb.String(), val
 	}
@@ -325,7 +325,7 @@ func (f *Field) Gte(val any) Condition {
 
 // Lt 条件：小于
 func (f *Field) Lt(val any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -337,7 +337,7 @@ func (f *Field) Lt(val any) Condition {
 		sb.Grow(len(f.Quote()) + 4)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" < ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 
 		return sb.String(), val
 	}
@@ -345,7 +345,7 @@ func (f *Field) Lt(val any) Condition {
 
 // Lte 条件：小于或等于
 func (f *Field) Lte(val any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		// 空值检查，可根据实际需求决定是否保留
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -357,7 +357,7 @@ func (f *Field) Lte(val any) Condition {
 		sb.Grow(len(f.Quote()) + 5)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" <= ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 
 		return sb.String(), val
 	}
@@ -394,7 +394,7 @@ func checkSlice(vals ...any) error {
 
 // In 条件：包含
 func (f *Field) In(vals ...any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		l := len(vals)
 		if l == 0 {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -408,7 +408,14 @@ func (f *Field) In(vals ...any) Condition {
 		sb.Grow(2*l + len(f.Quote()) + 5)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" In (")
-		sb.WriteString(strings.Repeat(Placeholder+",", l)[:(len(Placeholder)+1)*l-1])
+		// sb.WriteString(strings.Repeat(Placeholder(i)+",", l)[:(len(Placeholder(i))+1)*l-1])
+		// 循环生成不同的占位符
+		for j := 0; j < l; j++ {
+			if j > 0 {
+				sb.WriteString(",")
+			}
+			sb.WriteString(Placeholder(i))
+		}
 		sb.WriteString(")")
 
 		return sb.String(), vals
@@ -417,7 +424,7 @@ func (f *Field) In(vals ...any) Condition {
 
 // NotIn 条件：不包含
 func (f *Field) NotIn(vals ...any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		l := len(vals)
 		if l == 0 {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -431,7 +438,14 @@ func (f *Field) NotIn(vals ...any) Condition {
 		sb.Grow(2*l + len(f.Quote()) + 9)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" Not In (")
-		sb.WriteString(strings.Repeat(Placeholder+",", l)[:(len(Placeholder)+1)*l-1])
+		// sb.WriteString(strings.Repeat(Placeholder(i)+",", l)[:(len(Placeholder(i))+1)*l-1])
+		// 循环生成不同的占位符
+		for j := 0; j < l; j++ {
+			if j > 0 {
+				sb.WriteString(",")
+			}
+			sb.WriteString(Placeholder(i))
+		}
 		sb.WriteString(")")
 		return sb.String(), vals
 	}
@@ -439,7 +453,7 @@ func (f *Field) NotIn(vals ...any) Condition {
 
 // Between 条件：在区间
 func (f *Field) Between(vals ...any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		if len(vals) != 2 {
 			return "1 = 0", errors.New("Between condition must have two value")
 		}
@@ -451,16 +465,16 @@ func (f *Field) Between(vals ...any) Condition {
 		sb.Grow(len(f.Quote()) + 16)
 		sb.WriteString(f.Quote())
 		sb.WriteString(" Between ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 		sb.WriteString(" And ")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 		return sb.String(), vals
 	}
 }
 
 // Like 条件：匹配
 func (f *Field) Like(val any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		// 检查 val 是否为空
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -473,7 +487,7 @@ func (f *Field) Like(val any) Condition {
 		sb.WriteString("(")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" LIKE CONCAT('%',")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 		sb.WriteString(",'%'))")
 
 		return sb.String(), val
@@ -482,7 +496,7 @@ func (f *Field) Like(val any) Condition {
 
 // Llike 条件：左匹配
 func (f *Field) Llike(val any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		// 检查 val 是否为空
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -493,7 +507,7 @@ func (f *Field) Llike(val any) Condition {
 		sb.WriteString("(")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" LIKE CONCAT('%',")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 		sb.WriteString("))")
 
 		return sb.String(), val
@@ -502,7 +516,7 @@ func (f *Field) Llike(val any) Condition {
 
 // Rlike 条件：右匹配
 func (f *Field) Rlike(val any) Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		// 检查 val 是否为空
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
@@ -513,7 +527,7 @@ func (f *Field) Rlike(val any) Condition {
 		sb.WriteString("(")
 		sb.WriteString(f.Quote())
 		sb.WriteString(" LIKE CONCAT(")
-		sb.WriteString(Placeholder)
+		sb.WriteString(Placeholder(i))
 		sb.WriteString(",'%'))")
 		return sb.String(), val
 	}
@@ -521,7 +535,7 @@ func (f *Field) Rlike(val any) Condition {
 
 // Null 条件：为空
 func (f *Field) Null() Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		var sb strings.Builder
 		// 预先计算并分配足够的内存空间：len(" ISNULL(") + len(f.Quote()) + len(")")
 		sb.Grow(len(f.Quote()) + 9)
@@ -534,7 +548,7 @@ func (f *Field) Null() Condition {
 
 // NotNull 条件：不为空
 func (f *Field) NotNull() Condition {
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		var sb strings.Builder
 		// 预先计算并分配足够的内存空间：len(" NOT ISNULL(") + len(f.Quote()) + len(")")
 		sb.Grow(len(f.Quote()) + 13)
@@ -677,7 +691,7 @@ func (f *Field) MBRContains(lng, lat, radius float64) Condition {
 
 	lng_offset := radius / (111320 * math.Cos(lat*math.Pi/180))
 	lng1, lng2 := lng+lng_offset, lng-lng_offset
-	return func() (string, any) {
+	return func(i *uint8) (string, any) {
 		return fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
 			lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote()), nil
 	}

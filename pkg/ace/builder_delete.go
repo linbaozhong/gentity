@@ -54,7 +54,7 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, d.err
 	}
 
-	d.command.WriteString("DELETE FROM " + dialect.Quote_Char + d.table + dialect.Quote_Char)
+	d.command.WriteString("DELETE FROM " + dialect.Quote_Char_Left + d.table + dialect.Quote_Char_Right)
 	// WHERE
 	if d.where.Len() > 0 {
 		d.command.WriteString(" WHERE " + d.where.String())

@@ -67,7 +67,7 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
+	u.command.WriteString("UPDATE " + dialect.Quote_Char_Left + u.table + dialect.Quote_Char_Right + " SET ")
 	_cols := make([]string, 0, lens)
 	for _, col := range u.cols {
 		_cols = append(_cols, col.Quote()+" = ?")
@@ -110,7 +110,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return nil, u.err
 	}
 
-	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
+	u.command.WriteString("UPDATE " + dialect.Quote_Char_Left + u.table + dialect.Quote_Char_Right + " SET ")
 	cols, vals := bean.AssignValues(u.cols...)
 	for i, col := range cols {
 		if i > 0 {
@@ -159,7 +159,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	u.command.WriteString("UPDATE " + dialect.Quote_Char + u.table + dialect.Quote_Char + " SET ")
+	u.command.WriteString("UPDATE " + dialect.Quote_Char_Left + u.table + dialect.Quote_Char_Right + " SET ")
 	cols, vals := beans[0].RawAssignValues(u.cols...)
 	for i, col := range cols {
 		if i > 0 {
