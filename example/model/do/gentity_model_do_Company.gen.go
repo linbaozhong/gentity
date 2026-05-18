@@ -362,18 +362,18 @@ func (p *Company) Insert(ctx context.Context, sets ...dialect.Setter) (int64, er
 
 // InsertOne
 // cols: 要插入的列名
-func (p *Company) InsertOne(ctx context.Context, bean *Company, cols ...dialect.Field) (bool, error) {
+func (p *Company) InsertOne(ctx context.Context, cols ...dialect.Field) (bool, error) {
 	defer p.Free()
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Cols(cols...).
 		ToSql(p.Debug()).
 		Create().
-		Struct(ctx, bean)
+		Struct(ctx, p)
 	if e != nil {
 		return false, e
 	}
 
-	bean.AssignPrimaryKeyValues(_result)
+	p.AssignPrimaryKeyValues(_result)
 
 	_n, e := _result.RowsAffected()
 	return _n > 0, e
@@ -432,13 +432,13 @@ func (p *Company) UpdateById(ctx context.Context, id types.BigInt, sets ...diale
 
 // UpdateOne
 // cols: 要插入的列名
-func (p *Company) UpdateOne(ctx context.Context, bean *Company, cols ...dialect.Field) (bool, error) {
+func (p *Company) UpdateOne(ctx context.Context, cols ...dialect.Field) (bool, error) {
 	defer p.Free()
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Cols(cols...).
 		ToSql(p.Debug()).
 		Update().
-		Struct(ctx, bean)
+		Struct(ctx, p)
 	if e != nil {
 		return false, e
 	}
