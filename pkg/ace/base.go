@@ -16,7 +16,8 @@ package ace
 
 type (
 	Base struct {
-		db *DB
+		db    *DB
+		debug bool
 	}
 )
 
@@ -28,4 +29,13 @@ func (a *Base) SetDB(d *DB) {
 // GetDB 获取db
 func (a *Base) GetDB() *DB {
 	return a.db
+}
+
+// Debug 设置debug
+func (a *Base) Debug(debug ...bool) bool {
+	if len(debug) > 0 {
+		a.debug = debug[0]
+		return a.debug
+	}
+	return false
 }

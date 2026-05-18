@@ -3,6 +3,7 @@
 package do
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
@@ -334,4 +335,414 @@ func (p *Company) AssignPrimaryKeyValues(result sql.Result) error {
 	}
 	p.Id = types.BigInt(_id)
 	return nil
+}
+
+// ToSql 仅打印SQL语句，不执行
+func (p *Company) ToSql() *Company {
+	p.Debug(true)
+	return p
+}
+
+// Insert 返回 LastInsertId
+func (p *Company) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
+	defer p.Free()
+	if len(sets) == 0 {
+		return 0, dialect.ErrSetterEmpty
+	}
+	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
+		Set(sets...).
+		ToSql(p.Debug()).
+		Create().
+		Exec(ctx)
+	if e != nil {
+		return 0, e
+	}
+	return _result.LastInsertId()
+}
+
+// InsertOne
+// cols: 要插入的列名
+func (p *Company) InsertOne(ctx context.Context, bean *Company, cols ...dialect.Field) (bool, error) {
+	defer p.Free()
+	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
+		Cols(cols...).
+		ToSql(p.Debug()).
+		Create().
+		Struct(ctx, bean)
+	if e != nil {
+		return false, e
+	}
+
+	bean.AssignPrimaryKeyValues(_result)
+
+	_n, e := _result.RowsAffected()
+	return _n > 0, e
+}
+
+// InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
+// cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
+func (p *Company) InsertBatch(ctx context.Context, beans []*Company, cols ...dialect.Field) (int64, error) {
+	defer p.Free()
+	_lens := len(beans)
+	if _lens == 0 {
+		return 0, dialect.ErrBeanEmpty
+	}
+	_args := make([]dialect.Modeler, 0, _lens)
+	for _, _bean := range beans {
+		_args = append(_args, _bean)
+	}
+	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
+		Cols(cols...).
+		ToSql(p.Debug()).
+		Create().
+		BatchStruct(ctx, _args...)
+	if e != nil {
+		return 0, e
+	}
+
+	return _result.RowsAffected()
+}
+
+// Update
+func (p *Company) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
+	defer p.Free()
+	if len(sets) == 0 {
+		return false, dialect.ErrSetterEmpty
+	}
+	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
+		Where(cond...).
+		Set(sets...).
+		ToSql(p.Debug()).
+		Update().
+		Exec(ctx)
+	if e != nil {
+		return false, e
+	}
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
+}
+
+// UpdateById
+func (p *Company) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error) {
+	return p.Update(ctx,
+		sets,
+		tblcompany.PrimaryKey.Eq(id),
+	)
+}
+
+// UpdateOne
+// cols: 要插入的列名
+func (p *Company) UpdateOne(ctx context.Context, bean *Company, cols ...dialect.Field) (bool, error) {
+	defer p.Free()
+	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
+		Cols(cols...).
+		ToSql(p.Debug()).
+		Update().
+		Struct(ctx, bean)
+	if e != nil {
+		return false, e
+	}
+
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
+}
+
+// UpdateBatch 批量更新,禁止在事务中使用
+// cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
+func (p *Company) UpdateBatch(ctx context.Context, beans []*Company, cols ...dialect.Field) (bool, error) {
+	defer p.Free()
+	_lens := len(beans)
+	if _lens == 0 {
+		return false, dialect.ErrBeanEmpty
+	}
+	_args := make([]dialect.Modeler, 0, _lens)
+	for _, _bean := range beans {
+		_args = append(_args, _bean)
+	}
+	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
+		Cols(cols...).
+		ToSql(p.Debug()).
+		Update().
+		BatchStruct(ctx, _args...)
+	if e != nil {
+		return false, e
+	}
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
+}
+
+// Delete
+func (p *Company) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+	defer p.Free()
+	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
+		Where(cond...).
+		ToSql(p.Debug()).
+		Delete().
+		Exec(ctx)
+	if e != nil {
+		return false, e
+	}
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
+}
+
+// DeleteById
+func (p *Company) DeleteById(ctx context.Context, id types.BigInt) (bool, error) {
+	return p.Delete(ctx,
+		tblcompany.PrimaryKey.Eq(id),
+	)
+}
+
+// DeleteByIds 按主键列表批量删除
+// ids: 主键列表
+// 返回值: 影响的行数，错误信息
+func (p *Company) DeleteByIds(ctx context.Context, ids []any) (int64, error) {
+	defer p.Free()
+	if len(ids) == 0 {
+		return 0, nil
+	}
+
+	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
+		Where(tblcompany.PrimaryKey.In(ids...)).
+		ToSql(p.Debug()).
+		Delete().
+		Exec(ctx)
+	if e != nil {
+		return 0, e
+	}
+	return _result.RowsAffected()
+}
+
+// Get 查询第一个符合条件的记录
+//
+//	s: 选择器，用于构建sql语句
+//
+// 返回值:
+//  1. *Company: 第一个符合条件的记录
+//  2. bool: 是否存在记录
+//  3. error: 错误信息
+//
+// 注意:
+//  1. 如果没有指定表名，则默认使用CompanyTableName
+//  2. 如果没有指定查询列，则默认使用tblcompany.ReadableFields
+//  3. 如果没有指定排序方式，则默认使用dialect.OrderAsc
+//  4. 如果没有指定条件，则默认查询所有记录
+//  5. 如果查询出错，则返回nil, false, error
+//  6. 如果没有查询到记录，则返回nil, false, nil
+//  7. 如果查询到记录，则返回记录, true, nil
+//  8. 如果查询到多条记录，则返回第一条记录, true, nil
+func (p *Company) Get(ctx context.Context, s ace.SelectBuilder) (*Company, bool, error) {
+	defer p.Free()
+	if len(s.GetTableName()) == 0 {
+		s.Table(CompanyTableName)
+	}
+	_cols := s.GetCols()
+	if len(_cols) == 0 {
+		_cols = tblcompany.ReadableFields
+		s.Cols(_cols...)
+	}
+	_row, e := s.SetDB(p.GetDB()).
+		ToSql(p.Debug()).
+		Select().
+		QueryRow(ctx)
+	if e != nil {
+		return nil, false, e
+	}
+	_obj := NewCompany(p.GetDB())
+	e = _row.Scan(_obj.AssignPtr(_cols...)...)
+	switch e {
+	case nil:
+		return _obj, true, nil
+	case sql.ErrNoRows:
+		return _obj, false, nil
+	default:
+		return _obj, false, e
+	}
+}
+
+// GetByID 按主键读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
+func (p *Company) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*Company, bool, error) {
+	defer p.Free()
+	return p.Get(ctx, ace.New(p.GetDB()).Table(CompanyTableName).Where(tblcompany.PrimaryKey.Eq(id)).Cols(cols...))
+}
+
+// GetByIds 按主键列表批量查询
+// ids: 主键列表
+// cols: 要查询的列名，如果为空，则查询所有可读列
+func (p *Company) GetByIds(ctx context.Context, ids []any, cols ...dialect.Field) ([]*Company, error) {
+	defer p.Free()
+	if len(ids) == 0 {
+		return []*Company{}, nil
+	}
+
+	s := ace.New(p.GetDB()).Table(CompanyTableName).
+		Where(tblcompany.PrimaryKey.In(ids...))
+	if len(cols) == 0 {
+		cols = tblcompany.ReadableFields
+		s.Cols(cols...)
+	}
+
+	_rows, e := s.
+		ToSql(p.Debug()).
+		Select().
+		Query(ctx)
+	if e != nil {
+		return nil, e
+	}
+	defer _rows.Close()
+
+	_obj := NewCompany(p.GetDB())
+	_objs, _, e := _obj.Scan(_rows, cols...)
+	return _objs, e
+}
+
+// Cell 查询第一个符合条件的记录的第一个列
+//
+//	s: 选择器，用于构建sql语句
+//
+// 返回值:
+//  1. any: 第一个符合条件的记录的第一个列
+//  2. bool: 是否存在记录
+//  3. error: 错误信息
+//
+// 注意:
+//  1. 如果没有指定表名，则默认使用CompanyTableName
+//  2. 如果没有指定查询列，则默认使用tblcompany.PrimaryKey
+func (p *Company) Cell(ctx context.Context, s ace.SelectBuilder) (any, bool, error) {
+	defer p.Free()
+	if len(s.GetTableName()) == 0 {
+		s.Table(CompanyTableName)
+	}
+
+	if len(s.GetCols()) == 0 {
+		s.Cols(tblcompany.PrimaryKey)
+	}
+	_row, e := s.SetDB(p.GetDB()).
+		ToSql(p.Debug()).
+		Select().
+		QueryRow(ctx)
+	if e != nil {
+		return nil, false, e
+	}
+	var _v any
+	e = _row.Scan(&_v)
+	switch e {
+	case nil:
+		return _v, true, nil
+	case sql.ErrNoRows:
+		return _v, false, nil
+	default:
+		return _v, false, e
+	}
+}
+
+// List 查询所有符合条件的记录
+func (p *Company) List(ctx context.Context, s ace.SelectBuilder) ([]*Company, bool, error) {
+	defer p.Free()
+	if len(s.GetTableName()) == 0 {
+		s.Table(CompanyTableName)
+	}
+
+	_cols := s.GetCols()
+	if len(_cols) == 0 {
+		_cols = tblcompany.ReadableFields
+		s.Cols(_cols...)
+	}
+
+	_rows, e := s.SetDB(p.GetDB()).
+		ToSql(p.Debug()).
+		Select().
+		Query(ctx)
+	if e != nil {
+		return nil, false, e
+	}
+	defer _rows.Close()
+
+	_obj := NewCompany(p.GetDB())
+	_objs, has, e := _obj.Scan(_rows, _cols...)
+	if has {
+		return _objs, true, nil
+	}
+	if e == nil || e == sql.ErrNoRows {
+		return _objs, false, nil
+	}
+
+	return _objs, false, e
+}
+
+// Column 查询所有符合条件的记录的指定列
+func (p *Company) Column(ctx context.Context, s ace.SelectBuilder) ([]any, error) {
+	defer p.Free()
+	if len(s.GetTableName()) == 0 {
+		s.Table(CompanyTableName)
+	}
+
+	_cols := s.GetCols()
+	if len(_cols) == 0 {
+		s.PureCols(tblcompany.PrimaryKey)
+	} else {
+		s.PureCols(_cols[0])
+	}
+
+	_rows, e := s.SetDB(p.GetDB()).
+		ToSql(p.Debug()).
+		Select().
+		Query(ctx)
+	if e != nil {
+		return nil, e
+	}
+	defer _rows.Close()
+
+	_objs := []any{}
+	for _rows.Next() {
+		var _v any
+		e := _rows.Scan(&_v)
+		if e != nil {
+			return nil, e
+		}
+		_objs = append(_objs, _v)
+	}
+	return _objs, nil
+}
+
+// Count
+func (p *Company) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
+	defer p.Free()
+	return ace.New(p.GetDB()).Table(CompanyTableName).
+		ToSql(p.Debug()).
+		Select().
+		Count(ctx, cond...)
+}
+
+// Sum
+func (p *Company) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+	defer p.Free()
+	return ace.New(p.GetDB()).Table(CompanyTableName).
+		ToSql(p.Debug()).
+		Select().
+		Sum(ctx, cols, cond...)
+}
+
+// Exists
+func (p *Company) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
+	defer p.Free()
+	_c := ace.New(p.GetDB()).Table(CompanyTableName).Cols(tblcompany.PrimaryKey).Where(cond...)
+	_row, e := _c.
+		ToSql(p.Debug()).
+		Select().
+		QueryRow(ctx)
+	if e != nil {
+		return false, e
+	}
+
+	var id types.BigInt
+	e = _row.Scan(&id)
+	switch e {
+	case nil:
+		return true, nil
+	case sql.ErrNoRows:
+		return false, nil
+	default:
+		return false, e
+	}
 }
