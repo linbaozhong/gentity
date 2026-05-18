@@ -15,29 +15,28 @@
 package sqlite
 
 import (
-	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const (
-	Quote_Char_Left  = "\""
-	Quote_Char_Right = "\""
-	PrimaryKey       = "PK"
-	AutoInc          = "AUTOINCREMENT"
-	UniqueKey        = "UNIQUE"
-)
-
-func Limit(offset, limit uint) string {
-	if offset > 0 {
-		return fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
-	}
-	return fmt.Sprintf(" LIMIT %d", limit)
-}
-
-func Placeholder(index *uint8) string {
-	return "?"
-}
-
-func Quote(name string) string {
-	return Quote_Char_Left + name + Quote_Char_Right
-}
+// const (
+// 	Quote_Char_Left  = "\""
+// 	Quote_Char_Right = "\""
+// 	PrimaryKey       = "PK"
+// 	AutoInc          = "AUTOINCREMENT"
+// 	UniqueKey        = "UNIQUE"
+// )
+//
+// func Limit(offset, limit uint) string {
+// 	if offset > 0 {
+// 		return fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
+// 	}
+// 	return fmt.Sprintf(" LIMIT %d", limit)
+// }
+//
+// func Placeholder(index *uint8) string {
+// 	return "?"
+// }
+//
+// func Quote(name string) string {
+// 	return Quote_Char_Left + name + Quote_Char_Right
+// }

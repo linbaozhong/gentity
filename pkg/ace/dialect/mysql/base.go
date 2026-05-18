@@ -14,29 +14,28 @@
 
 package mysql
 
-import (
-	_ "github.com/go-sql-driver/mysql"
-)
+import "fmt"
 
-// const (
-// 	Quote_Char_Left  = "`"
-// 	Quote_Char_Right = "`"
-// 	PrimaryKey       = "PRI"
-// 	AutoInc          = "AUTO_INCREMENT"
-// 	UniqueKey        = "UNI"
-// )
-//
-// func Limit(offset, limit uint) string {
-// 	if offset > 0 {
-// 		return fmt.Sprintf(" LIMIT %d,%d", offset, limit)
-// 	}
-// 	return fmt.Sprintf(" LIMIT %d", limit)
-// }
-//
-// func Placeholder(index *uint8) string {
-// 	return "?"
-// }
-//
-// func Quote(name string) string {
-// 	return Quote_Char_Left + name + Quote_Char_Right
-// }
+type MySQL struct{}
+
+func (m *MySQL) Name() string { return "mysql" }
+
+func (m *MySQL) Quote(name string) string {
+	return "`" + name + "`"
+}
+
+func (m *MySQL) Placeholder(index *uint8) string {
+	*index = *index + 1
+	return "?"
+}
+
+func (m *MySQL) Limit(offset, limit uint) string {
+	if offset > 0 {
+		return fmt.Sprintf(" LIMIT %d,%d", offset, limit)
+	}
+	return fmt.Sprintf(" LIMIT %d", limit)
+}
+
+func (m *MySQL) AutoIncrement() string { return "AUTO_INCREMENT" }
+func (m *MySQL) PrimaryKey() string    { return "PRI" }
+func (m *MySQL) UniqueKey() string     { return "UNI" }

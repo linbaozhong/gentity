@@ -1,6 +1,7 @@
 package do
 
 import (
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/types"
 )
@@ -9,6 +10,7 @@ import (
 // @tablename account
 type Account struct {
 	pool.Model
+	ace.Base
 	Id        types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`          //
 	LoginName types.String `json:"login_name,omitempty" db:"'login_name' size:200"` // 登录名（手机号）
 	Password  types.String `json:"password,omitempty" db:"'password' size:50"`      // 密码
@@ -21,6 +23,7 @@ type Account struct {
 // @tablename communication
 type Communication struct {
 	pool.Model
+	ace.Base
 	Id       types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`       // id
 	Company  types.BigInt `json:"company,omitempty" db:"'company' size:20"`     // 企业id
 	Phone    types.String `json:"phone,omitempty" db:"'phone' size:20"`         // 手机号
@@ -39,6 +42,7 @@ type Communication struct {
 // @tablename company
 type Company struct {
 	pool.Model
+	ace.Base
 	Id               types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                       //
 	LongName         types.String `json:"long_name,omitempty" db:"'long_name' size:100"`                // 全称
 	ShortName        types.String `json:"short_name,omitempty" db:"'short_name' size:100"`              // 简称
@@ -60,6 +64,7 @@ type Company struct {
 // @tablename company_document
 type CompanyDocument struct {
 	pool.Model
+	ace.Base
 	Id           types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`               //
 	Company      types.BigInt `json:"company,omitempty" db:"'company' size:20"`             // 企业id   0为系统文件
 	TemplateId   types.BigInt `json:"template_id,omitempty" db:"'template_id' size:20"`     // document_template表id
@@ -80,6 +85,7 @@ type CompanyDocument struct {
 // @tablename company_fadada
 type CompanyFadada struct {
 	pool.Model
+	ace.Base
 	Id                types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                                 // 企业id
 	CompanyName       types.String `json:"company_name,omitempty" db:"'company_name' size:100"`               // 企业名称
 	CustomerId        types.String `json:"customer_id,omitempty" db:"'customer_id' size:100"`                 // 客户编号
@@ -100,6 +106,7 @@ type CompanyFadada struct {
 // @tablename company_man
 type CompanyMan struct {
 	pool.Model
+	ace.Base
 	Id         types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`          // 操作员id
 	AccountId  types.BigInt `json:"account_id,omitempty" db:"'account_id' size:20"`  // 账号表id
 	Company    types.BigInt `json:"company,omitempty" db:"'company' size:20"`        // 企业表id
@@ -119,6 +126,7 @@ type CompanyMan struct {
 // @tablename company_material
 type CompanyMaterial struct {
 	pool.Model
+	ace.Base
 	Id         types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`          // id
 	Company    types.BigInt `json:"company,omitempty" db:"'company' size:20"`        // 派遣企业id
 	Name       types.String `json:"name,omitempty" db:"'name' size:100"`             // 名称
@@ -134,6 +142,7 @@ type CompanyMaterial struct {
 // @tablename company_role
 type CompanyRole struct {
 	pool.Model
+	ace.Base
 	Id      types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`   //
 	Company types.BigInt `json:"company,omitempty" db:"'company' size:20"` // 公司id
 	Name    types.String `json:"name,omitempty" db:"'name' size:10"`       // 角色名称
@@ -147,6 +156,7 @@ type CompanyRole struct {
 // @tablename company_rule
 type CompanyRule struct {
 	pool.Model
+	ace.Base
 	Id        types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`        //
 	Pid       types.BigInt `json:"pid,omitempty" db:"'pid' size:20"`              // 父级id
 	Path      types.String `json:"path,omitempty" db:"'path' size:45"`            // 标识
@@ -162,6 +172,7 @@ type CompanyRule struct {
 // @tablename company_stamp
 type CompanyStamp struct {
 	pool.Model
+	ace.Base
 	Id          types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                   // 签章图片ID，法大大生成
 	Company     types.BigInt `json:"company,omitempty" db:"'company' size:20"`            // 公司id
 	Url         types.String `json:"url,omitempty" db:"'url' size:100"`                   // 印章路径
@@ -179,6 +190,7 @@ type CompanyStamp struct {
 // @tablename department
 type Department struct {
 	pool.Model
+	ace.Base
 	Id      types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`   //
 	Name    types.String `json:"name,omitempty" db:"'name' size:15"`       // 部门名称
 	Descr   types.String `json:"descr,omitempty" db:"'descr' size:100"`    // 部门简介
@@ -191,6 +203,7 @@ type Department struct {
 // @tablename dispatched_employee
 type DispatchedEmployee struct {
 	pool.Model
+	ace.Base
 	Id                types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                         //
 	EmploymentCompany types.BigInt `json:"employment_company,omitempty" db:"'employment_company' size:20"` // 用工企业id
 	Employee          types.BigInt `json:"employee,omitempty" db:"'employee' size:20"`                     // 派遣企业员工id
@@ -218,6 +231,7 @@ type DispatchedEmployee struct {
 // @tablename dispatched_employee_contract
 type DispatchedEmployeeContract struct {
 	pool.Model
+	ace.Base
 	Id               types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                            //
 	ContractSubject  types.Money  `json:"contract_subject,omitempty" db:"'contract_subject' size:19"`   // 合同主体，企业id
 	ContractType     types.Int8   `json:"contract_type,omitempty" db:"'contract_type' size:3"`          // 合同类型
@@ -236,6 +250,7 @@ type DispatchedEmployeeContract struct {
 // @tablename document_offline
 type DocumentOffline struct {
 	pool.Model
+	ace.Base
 	Id                 types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                           // id
 	Employee           types.BigInt `json:"employee,omitempty" db:"'employee' size:20"`                       // 派遣企业员工id
 	DispatchedEmployee types.BigInt `json:"dispatched_employee,omitempty" db:"'dispatched_employee' size:20"` //  被派遣员工id
@@ -249,6 +264,7 @@ type DocumentOffline struct {
 // @tablename document_template
 type DocumentTemplate struct {
 	pool.Model
+	ace.Base
 	Id       types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`           //
 	Genre    types.Int8   `json:"genre,omitempty" db:"'genre' size:3"`              // 类型   1合同属性  2薪酬确认单
 	Company  types.BigInt `json:"company,omitempty" db:"'company' size:20"`         // 企业id   0为系统文件  默认分配文件使用的字段，该模板可手动分配给其他企业
@@ -266,6 +282,7 @@ type DocumentTemplate struct {
 // @tablename email_record
 type EmailRecord struct {
 	pool.Model
+	ace.Base
 	Id         types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`          // id
 	To         types.String `json:"to,omitempty" db:"'to' size:100"`                 // 发送地址
 	Cc         types.String `json:"cc,omitempty" db:"'cc' size:300"`                 // 抄送地址，多个逗号分割
@@ -283,6 +300,7 @@ type EmailRecord struct {
 // @tablename employee
 type Employee struct {
 	pool.Model
+	ace.Base
 	Id             types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                  //
 	Company        types.BigInt `json:"company,omitempty" db:"'company' size:20"`                // 派遣企业id
 	User           types.BigInt `json:"user,omitempty" db:"'user' size:20"`                      // 劳动者id
@@ -307,6 +325,7 @@ type Employee struct {
 // @tablename employee_material
 type EmployeeMaterial struct {
 	pool.Model
+	ace.Base
 	Id              types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                     // id
 	Employee        types.BigInt `json:"employee,omitempty" db:"'employee' size:20"`                 // 员工表id
 	CompanyMaterial types.BigInt `json:"company_material,omitempty" db:"'company_material' size:20"` // material_company表id
@@ -322,6 +341,7 @@ type EmployeeMaterial struct {
 // @tablename employee_upload
 type EmployeeUpload struct {
 	pool.Model
+	ace.Base
 	Id       types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`     // id
 	Employee types.BigInt `json:"employee,omitempty" db:"'employee' size:20"` // companys_mans表id
 	Name     types.String `json:"name,omitempty" db:"'name' size:100"`        // 名称
@@ -336,6 +356,7 @@ type EmployeeUpload struct {
 // @tablename employment_company
 type EmploymentCompany struct {
 	pool.Model
+	ace.Base
 	Id            types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`            //
 	Company       types.BigInt `json:"company,omitempty" db:"'company' size:20"`          // 企业表id
 	Name          types.String `json:"name,omitempty" db:"'name' size:100"`               // 名称
@@ -353,6 +374,7 @@ type EmploymentCompany struct {
 // @tablename ext_sign_batch
 type ExtSignBatch struct {
 	pool.Model
+	ace.Base
 	Id         types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                 // 批量手动签署交易号，长度<=32
 	BatchTitle types.String `json:"batch_title,omitempty" db:"'batch_title' size:100"` // 批量请求标题
 	CustomerId types.String `json:"customer_id,omitempty" db:"'customer_id' size:100"` // 客户编号
@@ -364,6 +386,7 @@ type ExtSignBatch struct {
 // @tablename ext_sign_transaction
 type ExtSignTransaction struct {
 	pool.Model
+	ace.Base
 	Id           types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                    // 手动签署交易号，长度<=32
 	SignDocument types.BigInt `json:"sign_document,omitempty" db:"'sign_document' size:20"` // sign_document表id
 	BatchId      types.BigInt `json:"batch_id,omitempty" db:"'batch_id' size:20"`           // ext_sign_batch表id
@@ -375,6 +398,7 @@ type ExtSignTransaction struct {
 // @tablename ext_transaction_fail
 type ExtTransactionFail struct {
 	pool.Model
+	ace.Base
 	Id           types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`               // id
 	Transaction  types.BigInt `json:"transaction,omitempty" db:"'transaction' size:20"`     // 手动签署交易号，长度<=32
 	SignDocument types.BigInt `json:"sign_document,omitempty" db:"'sign_document' size:20"` // sign_document表id
@@ -388,6 +412,7 @@ type ExtTransactionFail struct {
 // @tablename ext_transaction_succeed
 type ExtTransactionSucceed struct {
 	pool.Model
+	ace.Base
 	Id           types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                    // 手动签署交易号，长度<=32
 	SignDocument types.BigInt `json:"sign_document,omitempty" db:"'sign_document' size:20"` // sign_document表id
 	Status       types.String `json:"status,omitempty" db:"'status' size:50"`               // 状态
@@ -400,6 +425,7 @@ type ExtTransactionSucceed struct {
 // @tablename fadada_log
 type FadadaLog struct {
 	pool.Model
+	ace.Base
 	Id            types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                  //
 	CustomerId    types.String `json:"customer_id,omitempty" db:"'customer_id' size:100"`       // 客户编号
 	TransactionId types.String `json:"transaction_id,omitempty" db:"'transaction_id' size:100"` // 合同编号
@@ -418,6 +444,7 @@ type FadadaLog struct {
 // @tablename labor_contract
 type LaborContract struct {
 	pool.Model
+	ace.Base
 	Id                 types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                           // id
 	Company            types.BigInt `json:"company,omitempty" db:"'company' size:20"`                         // 企业id
 	Employee           types.BigInt `json:"employee,omitempty" db:"'employee' size:20"`                       // 派遣员工id
@@ -443,6 +470,7 @@ type LaborContract struct {
 // @tablename man
 type Man struct {
 	pool.Model
+	ace.Base
 	Id         types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`         //
 	Mobile     types.String `json:"mobile,omitempty" db:"'mobile' size:100"`        // 手机号码
 	Code       types.String `json:"code,omitempty" db:"'code' size:45"`             // 短信验证码,只用于绑定支付宝或微信,每次绑定成功后,用新的验证码替换,并且open_bind置为disable
@@ -463,6 +491,7 @@ type Man struct {
 // @tablename material_template
 type MaterialTemplate struct {
 	pool.Model
+	ace.Base
 	Id         types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`          // id
 	Name       types.String `json:"name,omitempty" db:"'name' size:100"`             // 名称
 	IsChecked  types.Int8   `json:"is_checked,omitempty" db:"'is_checked' size:3"`   // 默认是否选中  1选中   2未选中
@@ -474,6 +503,7 @@ type MaterialTemplate struct {
 // @tablename oper_log
 type OperLog struct {
 	pool.Model
+	ace.Base
 	Id       types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`          //
 	Endpoint types.String `json:"endpoint,omitempty" db:"'endpoint' size:50"`      // 终端名
 	User     types.BigInt `json:"user,omitempty" db:"'user' size:20"`              // 用户id
@@ -492,6 +522,7 @@ type OperLog struct {
 // @tablename pub_dict
 type PubDict struct {
 	pool.Model
+	ace.Base
 	Id    types.Uint32 `json:"id,omitempty" db:"'id' pk auto size:10"` //
 	Type  types.Uint8  `json:"type,omitempty" db:"'type' size:3"`      // 类型对应pub_dict -type=0
 	Code  types.Int16  `json:"code,omitempty" db:"'code' size:5"`      // 对应字典 id
@@ -504,6 +535,7 @@ type PubDict struct {
 // @tablename resign
 type Resign struct {
 	pool.Model
+	ace.Base
 	Id               types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                         // 离职id
 	Company          types.BigInt `json:"company,omitempty" db:"'company' size:20"`                       // 企业id
 	Employee         types.BigInt `json:"employee,omitempty" db:"'employee' size:20"`                     // 员工id
@@ -537,6 +569,7 @@ type Resign struct {
 // @tablename resign_flow
 type ResignFlow struct {
 	pool.Model
+	ace.Base
 	Id           types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                      // resign表id
 	Status       types.Int8   `json:"status,omitempty" db:"'status' size:3"`                  // 审核状态
 	StatusLog    types.String `json:"status_log,omitempty" db:"'status_log' size:65535"`      // 状态日志
@@ -552,6 +585,7 @@ type ResignFlow struct {
 // @tablename role
 type Role struct {
 	pool.Model
+	ace.Base
 	Id    types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"` //
 	Name  types.String `json:"name,omitempty" db:"'name' size:10"`     // 角色名称
 	State types.Int8   `json:"state,omitempty" db:"'state' size:3"`    // 状态:1=启用
@@ -563,6 +597,7 @@ type Role struct {
 // @tablename rule
 type Rule struct {
 	pool.Model
+	ace.Base
 	Id    types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"` //
 	Pid   types.BigInt `json:"pid,omitempty" db:"'pid' size:20"`       // 父级id
 	Path  types.String `json:"path,omitempty" db:"'path' size:45"`     // 标识
@@ -576,6 +611,7 @@ type Rule struct {
 // @tablename share_url_scheme
 type ShareUrlScheme struct {
 	pool.Model
+	ace.Base
 	Id    types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"` //
 	Peer  types.String `json:"peer,omitempty" db:"'peer' size:100"`    // 来自A或B或C
 	Type  types.Uint8  `json:"type,omitempty" db:"'type' size:3"`      // 分享类型：1=微信小程序
@@ -589,6 +625,7 @@ type ShareUrlScheme struct {
 // @tablename sign_document
 type SignDocument struct {
 	pool.Model
+	ace.Base
 	Id                  types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                                    // id
 	DispatchedEmployee  types.BigInt `json:"dispatched_employee,omitempty" db:"'dispatched_employee' size:20"`     //  被派遣员工id
 	Employee            types.BigInt `json:"employee,omitempty" db:"'employee' size:20"`                           // 派遣员工id
@@ -633,6 +670,7 @@ type SignDocument struct {
 // @tablename sign_document_variable
 type SignDocumentVariable struct {
 	pool.Model
+	ace.Base
 	Id       types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`          // id
 	Template types.BigInt `json:"template,omitempty" db:"'template' size:20"` // document_template表id
 	Value    types.String `json:"value,omitempty" db:"'value' size:65535"`    // 变量json串
@@ -645,6 +683,7 @@ type SignDocumentVariable struct {
 // @tablename sms
 type Sms struct {
 	pool.Model
+	ace.Base
 	Id        types.Money  `json:"id,omitempty" db:"'id' pk auto size:19"`         //
 	Phone     types.BigInt `json:"phone,omitempty" db:"'phone' size:20"`           //
 	Para      types.String `json:"para,omitempty" db:"'para' size:65535"`          // 模板变量
@@ -660,6 +699,7 @@ type Sms struct {
 // @tablename user
 type User struct {
 	pool.Model
+	ace.Base
 	Id                  types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                                //
 	Name                types.String `json:"name,omitempty" db:"'name' size:45"`                                    // 姓名
 	Email               types.String `json:"email,omitempty" db:"'email' size:64"`                                  // 邮箱
@@ -696,6 +736,7 @@ type User struct {
 // @tablename user_app
 type UserApp struct {
 	pool.Model
+	ace.Base
 	Id            types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`           //
 	User          types.BigInt `json:"user,omitempty" db:"'user' size:20"`               //
 	App           types.Int8   `json:"app,omitempty" db:"'app' size:3"`                  // 10=松果派
@@ -713,6 +754,7 @@ type UserApp struct {
 // @tablename user_fadada
 type UserFadada struct {
 	pool.Model
+	ace.Base
 	Id             types.BigInt `json:"id,omitempty" db:"'id' pk size:20"`                           // user表id
 	Name           types.String `json:"name,omitempty" db:"'name' size:100"`                         // 员工姓名
 	CustomerId     types.String `json:"customer_id,omitempty" db:"'customer_id' size:100"`           // 客户编号

@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyman"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -22,8 +23,10 @@ var (
 	})
 )
 
-func NewCompanyMan() *CompanyMan {
-	return companymanPool.Get()
+func NewCompanyMan(db *ace.DB) *CompanyMan {
+	_obj := companymanPool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -193,7 +196,7 @@ func (p *CompanyMan) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyMan,
 	}
 
 	for rows.Next() {
-		_p := NewCompanyMan()
+		_p := NewCompanyMan(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -222,43 +225,43 @@ func (p *CompanyMan) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 // 定义字段到值检查和获取函数的映射
 var companymanFieldToValueFunc = map[dialect.Field]func(*CompanyMan) (string, any, bool){
 	tblcompanyman.Id: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Id.Quote(), p.Id, p.Id == 0
+		return tblcompanyman.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
 	},
 	tblcompanyman.AccountId: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.AccountId.Quote(), p.AccountId, p.AccountId == 0
+		return tblcompanyman.AccountId.Quote(p.GetDB().Dialect()), p.AccountId, p.AccountId == 0
 	},
 	tblcompanyman.Company: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Company.Quote(), p.Company, p.Company == 0
+		return tblcompanyman.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
 	},
 	tblcompanyman.RealName: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.RealName.Quote(), p.RealName, p.RealName == ""
+		return tblcompanyman.RealName.Quote(p.GetDB().Dialect()), p.RealName, p.RealName == ""
 	},
 	tblcompanyman.Email: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Email.Quote(), p.Email, p.Email == ""
+		return tblcompanyman.Email.Quote(p.GetDB().Dialect()), p.Email, p.Email == ""
 	},
 	tblcompanyman.Roles: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Roles.Quote(), p.Roles, p.Roles == ""
+		return tblcompanyman.Roles.Quote(p.GetDB().Dialect()), p.Roles, p.Roles == ""
 	},
 	tblcompanyman.Gender: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Gender.Quote(), p.Gender, p.Gender == ""
+		return tblcompanyman.Gender.Quote(p.GetDB().Dialect()), p.Gender, p.Gender == ""
 	},
 	tblcompanyman.Genre: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Genre.Quote(), p.Genre, p.Genre == 0
+		return tblcompanyman.Genre.Quote(p.GetDB().Dialect()), p.Genre, p.Genre == 0
 	},
 	tblcompanyman.IsActivate: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.IsActivate.Quote(), p.IsActivate, p.IsActivate == 0
+		return tblcompanyman.IsActivate.Quote(p.GetDB().Dialect()), p.IsActivate, p.IsActivate == 0
 	},
 	tblcompanyman.LoginTime: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.LoginTime.Quote(), p.LoginTime, p.LoginTime.IsZero()
+		return tblcompanyman.LoginTime.Quote(p.GetDB().Dialect()), p.LoginTime, p.LoginTime.IsZero()
 	},
 	tblcompanyman.State: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.State.Quote(), p.State, p.State == 0
+		return tblcompanyman.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
 	},
 	tblcompanyman.Ctime: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+		return tblcompanyman.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
 	},
 	tblcompanyman.Utime: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Utime.Quote(), p.Utime, p.Utime.IsZero()
+		return tblcompanyman.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
 	},
 }
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/internal/schema"
 	"github.com/linbaozhong/gentity/pkg/ace"
-	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"go/format"
 	"os"
 	"path/filepath"
@@ -12,8 +11,6 @@ import (
 )
 
 func sql2struct(driver, sqlPath, outputPath, packageName string) error {
-	dialect.Register(driver)
-
 	_sqlPath, e := filepath.Abs(sqlPath)
 	if e != nil {
 		return e
@@ -28,7 +25,7 @@ func sql2struct(driver, sqlPath, outputPath, packageName string) error {
 	}
 	defer _f.Close()
 
-	_buf, e := schema.SqlFile2Struct(_sqlPath, packageName)
+	_buf, e := schema.SqlFile2Struct(driver, _sqlPath, packageName)
 	if e != nil {
 		return e
 	}
@@ -58,14 +55,13 @@ func db2struct(driver, dns, outputPath, packageName string) error {
 		return fmt.Errorf("Could not parse database name from the connection string.")
 	}
 
-	dialect.Register(driver)
 	// match[1] 存储的就是 dbname 的值
-	tables, e := dialect.GetTables(_db.DB, match[1])
+	tables, e := _db.Dialect().GetTables(_db.DB, match[1])
 	if e != nil {
 		return e
 	}
 
-	_buf, e := schema.DB2Struct(tables, packageName)
+	_buf, e := schema.DB2Struct(driver, tables, packageName)
 	if e != nil {
 		return e
 	}

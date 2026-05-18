@@ -96,7 +96,7 @@ func (c *conditions) Len() int {
 // buildSimpleCondition 构建简单条件（每个条件前都加操作符）
 // 用于 or 和 and 方法
 func buildSimpleCondition(fns []dialect.Condition, operator string) dialect.Condition {
-	return func() (string, any) {
+	return func(idx *uint8, d dialect.Dialect) (string, any) {
 		if len(fns) == 0 {
 			return "", nil
 		}
@@ -106,7 +106,7 @@ func buildSimpleCondition(fns []dialect.Condition, operator string) dialect.Cond
 		)
 
 		for i, fn := range fns {
-			cond, val := fn()
+			cond, val := fn(idx, d)
 
 			// 空值检查：跳过空条件
 			if cond == "" {
@@ -134,7 +134,7 @@ func buildSimpleCondition(fns []dialect.Condition, operator string) dialect.Cond
 // buildBracketsCondition 构建带括号的条件（第一个条件前不加操作符）
 // 用于 andOr 和 orAnd 方法
 func buildBracketsCondition(fns []dialect.Condition, prefix, innerOperator string) dialect.Condition {
-	return func() (string, any) {
+	return func(idx *uint8, d dialect.Dialect) (string, any) {
 		if len(fns) == 0 {
 			return "", nil
 		}
@@ -145,7 +145,7 @@ func buildBracketsCondition(fns []dialect.Condition, prefix, innerOperator strin
 
 		buf.WriteString(prefix)
 		for i, fn := range fns {
-			cond, val := fn()
+			cond, val := fn(idx, d)
 
 			// 空值检查：跳过空条件
 			if cond == "" {

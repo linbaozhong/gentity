@@ -17,14 +17,14 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/log"
 )
 
 type DeleteBuilder interface {
 	GetTableName() string
 	Wherer
-	Delete(x ...Executer) Deleter
+	// Delete 创建删除器,如果实例化时没有传入了DB，则此处必须传入DB
+	Delete(...*DB) Deleter
 	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
 	ToSql(...bool) Builder
 }
@@ -40,8 +40,10 @@ type delete struct {
 }
 
 // Delete 删除器
-func (o *orm) Delete(x ...Executer) Deleter {
-	o.connect(x...)
+func (o *orm) Delete(x ...*DB) Deleter {
+	if len(x) > 0 {
+		o.db = x[0]
+	}
 	return &delete{
 		orm: o,
 	}
@@ -54,7 +56,7 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, d.err
 	}
 
-	d.command.WriteString("DELETE FROM " + dialect.Quote_Char_Left + d.table + dialect.Quote_Char_Right)
+	d.command.WriteString("DELETE FROM " + d.db.Dialect().Quote(d.table))
 	// WHERE
 	if d.where.Len() > 0 {
 		d.command.WriteString(" WHERE " + d.where.String())

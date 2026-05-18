@@ -18,60 +18,60 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
-type Option func(builder Builder)
+type Option func(builder *orm)
 
 // WithCols 配置查询字段
 func WithCols(args ...dialect.Field) Option {
-	return func(o Builder) {
+	return func(o *orm) {
 		o.Cols(args...)
 	}
 }
 
 // WithWhere 配置where条件
 func WithWhere(args ...dialect.Condition) Option {
-	return func(o Builder) {
+	return func(o *orm) {
 		o.Where(args...)
 	}
 }
 
 // WithOrderBy 配置order by条件
 func WithOrderBy(args ...dialect.Order) Option {
-	return func(o Builder) {
+	return func(o *orm) {
 		o.OrderFunc(args...)
 	}
 }
 
 // WithGroupBy 配置group by条件
 func WithGroupBy(args ...dialect.Field) Option {
-	return func(o Builder) {
+	return func(o *orm) {
 		o.Group(args...)
 	}
 }
 
 // WithHaving 配置having条件
 func WithHaving(args ...dialect.Condition) Option {
-	return func(o Builder) {
+	return func(o *orm) {
 		o.Having(args...)
 	}
 }
 
 // WithLimit 配置limit条件
 func WithLimit(size uint, start ...uint) Option {
-	return func(o Builder) {
+	return func(o *orm) {
 		o.Limit(size, start...)
 	}
 }
 
 // WithJoin 配置join条件
 func WithJoin(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) Option {
-	return func(o Builder) {
+	return func(o *orm) {
 		o.Join(joinType, left, right, fns...)
 	}
 }
 
 // WithSet 为字段赋值
 func WithSet(args ...dialect.Setter) Option {
-	return func(o Builder) {
+	return func(o *orm) {
 		o.Set(args...)
 	}
 }
@@ -81,14 +81,14 @@ func WithSet(args ...dialect.Setter) Option {
 // WithExpr
 // 用表达式为字段赋值
 func WithSetExpr(args ...dialect.Setter) Option {
-	return func(o Builder) {
-		o.SetExpr(args...)
+	return func(o *orm) {
+		o.Set(args...)
 	}
 }
 
 // // WithDialect 设置数据库方言
 // func WithDialect(d dialect.Dialect) Option {
-// 	return func(o Builder) {
-// 		o.SetDialect(d)
+// 	return func(o *orm) {
+// 		o.dialect = d
 // 	}
 // }

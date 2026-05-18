@@ -59,5 +59,5 @@ func Set(fns ...dialect.Setter) Builder {
 // 用于设置更新语句中的表达式
 // 例如：SetExpr(dialect.Expr("age", "age + 1"))
 func SetExpr(fns ...dialect.Setter) Builder {
-	return newOrm().SetExpr(fns...)
+	return newOrm().Set(fns...)
 }

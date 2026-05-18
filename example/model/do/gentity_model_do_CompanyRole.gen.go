@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyrole"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -22,8 +23,10 @@ var (
 	})
 )
 
-func NewCompanyRole() *CompanyRole {
-	return companyrolePool.Get()
+func NewCompanyRole(db *ace.DB) *CompanyRole {
+	_obj := companyrolePool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -151,7 +154,7 @@ func (p *CompanyRole) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyRol
 	}
 
 	for rows.Next() {
-		_p := NewCompanyRole()
+		_p := NewCompanyRole(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -180,25 +183,25 @@ func (p *CompanyRole) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 // 定义字段到值检查和获取函数的映射
 var companyroleFieldToValueFunc = map[dialect.Field]func(*CompanyRole) (string, any, bool){
 	tblcompanyrole.Id: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Id.Quote(), p.Id, p.Id == 0
+		return tblcompanyrole.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
 	},
 	tblcompanyrole.Company: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Company.Quote(), p.Company, p.Company == 0
+		return tblcompanyrole.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
 	},
 	tblcompanyrole.Name: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Name.Quote(), p.Name, p.Name == ""
+		return tblcompanyrole.Name.Quote(p.GetDB().Dialect()), p.Name, p.Name == ""
 	},
 	tblcompanyrole.Descr: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Descr.Quote(), p.Descr, p.Descr == ""
+		return tblcompanyrole.Descr.Quote(p.GetDB().Dialect()), p.Descr, p.Descr == ""
 	},
 	tblcompanyrole.Rules: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Rules.Quote(), p.Rules, p.Rules == ""
+		return tblcompanyrole.Rules.Quote(p.GetDB().Dialect()), p.Rules, p.Rules == ""
 	},
 	tblcompanyrole.Type: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Type.Quote(), p.Type, p.Type == 0
+		return tblcompanyrole.Type.Quote(p.GetDB().Dialect()), p.Type, p.Type == 0
 	},
 	tblcompanyrole.State: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.State.Quote(), p.State, p.State == 0
+		return tblcompanyrole.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
 	},
 }
 

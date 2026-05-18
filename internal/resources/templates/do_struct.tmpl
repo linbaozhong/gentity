@@ -26,8 +26,10 @@ var (
 	})
 )
 
-func New{{.StructName}}() *{{.StructName}} {
-	return {{$structNameLower}}Pool.Get()
+func New{{.StructName}}(db *ace.DB) *{{.StructName}} {
+	_obj := {{$structNameLower}}Pool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -134,7 +136,7 @@ func (p *{{.StructName}}) Scan(rows *sql.Rows, args ...dialect.Field) ([]*{{.Str
 	}
 
 	for rows.Next() {
-		_p := New{{.StructName}}()
+		_p := New{{.StructName}}(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -166,7 +168,7 @@ var {{$structNameLower}}FieldToValueFunc = map[dialect.Field]func(*{{$structName
 {{- range $key, $value := .Columns}}
 	{{- if ne (getType $value) "any"}}
 	tbl{{$structNameLower}}.{{ $value.Name }}: func(p *{{$structName}}) (string, any, bool) {
-		return tbl{{$structNameLower}}.{{ $value.Name }}.Quote(), p.{{ $value.Name }}, p.{{ $value.Name }}{{getZeroValue $value}}
+		return tbl{{$structNameLower}}.{{ $value.Name }}.Quote(p.GetDB().Dialect()), p.{{ $value.Name }}, p.{{ $value.Name }}{{getZeroValue $value}}
 	},
 	{{- end}}
 {{- end}}

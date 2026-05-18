@@ -18,9 +18,11 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect/mysql"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect/postgres"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect/sqlite"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect/sqlserver"
 	"github.com/linbaozhong/gentity/pkg/app"
-	"github.com/linbaozhong/gentity/pkg/log"
-	"sync"
 )
 
 const (
@@ -47,54 +49,73 @@ type (
 var (
 	Err_ToSql = errors.New("the SQL command terminates execution after the ToSql() method")
 
-	_obj  *DB
-	_once sync.Once
+	// _obj  *DB
+	// _once sync.Once
 )
 
 // Connect
 func Connect(driverName, dns string) (*DB, error) {
-	var err error
-	_once.Do(func() {
-		dialect.Register(driverName)
-		db, e := sql.Open(driverName, dns)
-		if e != nil {
-			err = e
-			return
-		}
-		if e = db.Ping(); e != nil {
-			db.Close()
-			err = e
-			return
-		}
+	// var err error
+	// _once.Do(func() {
+	// 根据驱动自动选择方言
+	var d dialect.Dialect = Dialect(driverName)
 
-		_obj = &DB{}
-		_obj.DB = db
-		_obj.driverName = driverName
-		_obj.mapper = mapper()
-		_obj.debug = false
-
-		app.RegisterServiceCloser(_obj)
-		// // 注册事务方法
-		// Transaction = _obj.Transaction
-
-	})
-
-	return _obj, err
-}
-
-// GetDB
-// 调用该方法前，确保已经调用过 Connect 方法并确保没有 error 产生
-func GetDB() *DB {
-	if _obj == nil {
-		log.Panic("db not init")
+	db, e := sql.Open(driverName, dns)
+	if e != nil {
+		// err = e
+		return nil, e
 	}
-	return _obj
+	if e = db.Ping(); e != nil {
+		db.Close()
+		// err = e
+		return nil, e
+	}
+
+	_obj := &DB{
+		DB:         db,
+		driverName: driverName,
+		mapper:     mapper(),
+		dialect:    d,
+		debug:      false,
+		cacheType:  CacheTypeSyncMap,
+		cacheOpts:  nil,
+	}
+
+	app.RegisterServiceCloser(_obj)
+	// // 注册事务方法
+	// Transaction = _obj.Transaction
+
+	// })
+
+	return _obj, e
 }
 
-// //////////////////////////
-func GetExec(exec ...Executer) Executer {
-	if len(exec) > 0 {
-		return exec[0]
+func Dialect(driverName string) dialect.Dialect {
+	switch driverName {
+	case "postgres", "postgresql":
+		return &postgres.PostgreSQL{}
+	case "sqlite", "sqlite3":
+		return &sqlite.SQLite{}
+	case "sqlserver":
+		return &sqlserver.SQLServer{}
 	}
-	return GetDB()
+	return &mysql.MySQL{}
 }
+
+//
+// // GetDB
+// // 调用该方法前，确保已经调用过 Connect 方法并确保没有 error 产生
+// func GetDB() *DB {
+// 	if _obj == nil {
+// 		log.Panic("db not init")
+// 	}
+// 	return _obj
+// }
+
+// // //////////////////////////
+// func GetExec(exec ...Executer) Executer {
+// 	if len(exec) > 0 {
+// 		return exec[0]
+// 	}
+// 	return GetDB()
+// }

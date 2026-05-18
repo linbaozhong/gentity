@@ -7,11 +7,7 @@ import (
 	"strings"
 )
 
-// type Driverer interface {
-// 	GetTables(db *ace.DB, dbName string) ([]*sqlparser.Table, error)
-// }
-
-func GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
+func Tables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
 	// SQLite 获取所有表名（排除 sqlite_ 系统表）
 	rows, err := db.Query(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`)
 	if err != nil {
@@ -35,9 +31,9 @@ func GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
 	return ts, nil
 }
 
-func GetColumns(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, error) {
+func Columns(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, error) {
 	// 先获取所有表名
-	tables, err := GetTables(db, dbName)
+	tables, err := Tables(db, dbName)
 	if err != nil {
 		return nil, err
 	}
@@ -235,21 +231,22 @@ func parseTypeInfo(columnType string) (size, precision, scale int) {
 	return size, precision, scale
 }
 
-// func GetTables(db *ace.DB, dbName string) ([]*sqlparser.Table, error) {
-// 	// 表名,表注释
-// 	ts, err := getTables(db, dbName)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	// 表字段信息
-// 	ms, err := getColumns(db, dbName)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	for _, t := range ts {
-// 		t.ColumnsX = ms[t.Name]
-// 	}
-// 	return ts, nil
-// }
+// GetTables 获取所有表的信息
+func (s *SQLite) GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
+	// 表名,表注释
+	ts, err := Tables(db, dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	// 表字段信息
+	ms, err := Columns(db, dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, t := range ts {
+		t.ColumnsX = ms[t.Name]
+	}
+	return ts, nil
+}

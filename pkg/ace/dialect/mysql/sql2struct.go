@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
+func Tables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
 	// 表名,表注释
 	rows, err := db.Query(`SELECT table_name,table_comment FROM information_schema.tables WHERE table_schema = ? and table_type = 'BASE TABLE'`, dbName)
 	if err != nil {
@@ -30,7 +30,7 @@ func GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
 	return ts, nil
 }
 
-func GetColumns(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, error) {
+func Columns(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, error) {
 	// 表字段信息
 	rows, err := db.Query(`SELECT table_name,column_name,column_default,data_type,column_type,ifnull(character_maximum_length,0),ifnull(numeric_precision,0),ifnull(numeric_scale,0),column_key,extra,column_comment FROM information_schema.COLUMNS WHERE table_schema = ?`, dbName)
 	if err != nil {
@@ -43,7 +43,7 @@ func GetColumns(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, erro
 		var tableName string
 		col := &sqlparser.Column{}
 		err = rows.Scan(&tableName, &col.Name, &col.Default, &col.Type, &col.ColumnType, &col.Size, &col.Precision, &col.Scale, &col.Key, &col.Extra, &col.Comment)
-		if strings.ToUpper(col.Extra) == AutoInc {
+		if strings.ToUpper(col.Extra) == "AUTO_INCREMENT" {
 			col.AutoIncr = true
 		}
 		if strings.Contains(col.ColumnType, "unsigned") {
@@ -60,4 +60,24 @@ func GetColumns(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, erro
 		return nil, err
 	}
 	return ms, nil
+}
+
+// GetTables 获取数据库表信息
+func (m *MySQL) GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
+	// 表名,表注释
+	ts, err := Tables(db, dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	// 表字段信息
+	ms, err := Columns(db, dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, t := range ts {
+		t.ColumnsX = ms[t.Name]
+	}
+	return ts, nil
 }

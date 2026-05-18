@@ -27,7 +27,8 @@ type UpdateBuilder interface {
 	Set(fns ...dialect.Setter) Builder
 	SetExpr(fns ...dialect.Setter) Builder
 	Wherer
-	Update(x ...Executer) Updater
+	// Update 创建更新器,如果实例化时没有传入了DB，则此处必须传入DB
+	Update(...*DB) Updater
 	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
 	ToSql(...bool) Builder
 }
@@ -48,8 +49,10 @@ type expr struct {
 }
 
 // Update 更新器
-func (o *orm) Update(x ...Executer) Updater {
-	o.connect(x...)
+func (o *orm) Update(x ...*DB) Updater {
+	if len(x) > 0 {
+		o.db = x[0]
+	}
 	return &update{
 		orm: o,
 	}
@@ -67,10 +70,10 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	u.command.WriteString("UPDATE " + dialect.Quote_Char_Left + u.table + dialect.Quote_Char_Right + " SET ")
+	u.command.WriteString("UPDATE " + u.db.Dialect().Quote(u.table) + " SET ")
 	_cols := make([]string, 0, lens)
 	for _, col := range u.cols {
-		_cols = append(_cols, col.Quote()+" = ?")
+		_cols = append(_cols, col.Quote(u.db.Dialect())+" = ?")
 	}
 	for _, col := range u.exprCols {
 		_cols = append(_cols, col.colName)
@@ -110,7 +113,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return nil, u.err
 	}
 
-	u.command.WriteString("UPDATE " + dialect.Quote_Char_Left + u.table + dialect.Quote_Char_Right + " SET ")
+	u.command.WriteString("UPDATE " + u.db.Dialect().Quote(u.table) + " SET ")
 	cols, vals := bean.AssignValues(u.cols...)
 	for i, col := range cols {
 		if i > 0 {
@@ -159,7 +162,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	u.command.WriteString("UPDATE " + dialect.Quote_Char_Left + u.table + dialect.Quote_Char_Right + " SET ")
+	u.command.WriteString("UPDATE " + u.db.Dialect().Quote(u.table) + " SET ")
 	cols, vals := beans[0].RawAssignValues(u.cols...)
 	for i, col := range cols {
 		if i > 0 {

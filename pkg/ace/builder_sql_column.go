@@ -67,7 +67,7 @@ func (o *orm) Func(fns ...dialect.Function) Builder {
 	tmpFuncs := make([]string, len(o.funcs), len(fns)+len(o.funcs))
 	copy(tmpFuncs, o.funcs)
 	for _, fn := range fns {
-		tmpFuncs = append(tmpFuncs, fn())
+		tmpFuncs = append(tmpFuncs, fn(o.db.Dialect()))
 	}
 	o.funcs = tmpFuncs
 	return o

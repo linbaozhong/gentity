@@ -3,6 +3,7 @@ package dialect
 import (
 	"database/sql"
 	"fmt"
+	"github.com/linbaozhong/gentity/pkg/sqlparser"
 )
 
 const (
@@ -67,32 +68,32 @@ type (
 	// }
 )
 
-//
-// // todo: test
-// type Dialect interface {
-// 	// Name 返回数据库名称
-// 	Name() string
-//
-// 	// Quote 引用标识符（表名、列名）
-// 	// MySQL: `name`  PostgreSQL: "name"  SQL Server: [name]
-// 	Quote(name string) string
-//
-// 	// Placeholder 返回参数占位符
-// 	// MySQL: ?           PostgreSQL: $1, $2...
-// 	// SQL Server: @p1    Oracle: :1
-// 	Placeholder(index int) string
-//
-// 	// Limit 生成分页语句
-// 	// MySQL: LIMIT offset,limit      PostgreSQL: LIMIT limit OFFSET offset
-// 	// SQL Server: OFFSET offset ROWS FETCH NEXT limit ROWS ONLY
-// 	Limit(offset, limit uint) string
-//
-// 	// AutoIncrement 返回自增关键字
-// 	AutoIncrement() string
-//
-// 	// PrimaryKey 返回主键标识
-// 	PrimaryKey() string
-//
-// 	// UniqueKey 返回唯一键标识
-// 	UniqueKey() string
-// }
+// todo: test
+type Dialect interface {
+	// Name 返回数据库名称
+	Name() string
+
+	// Quote 引用标识符（表名、列名）
+	// MySQL: `name`  PostgreSQL: "name"  SQL Server: [name]
+	Quote(name string) string
+
+	// Placeholder 返回参数占位符
+	// MySQL: ?           PostgreSQL: $1, $2...
+	// SQL Server: @p1    Oracle: :1
+	Placeholder(index *uint8) string
+
+	// Limit 生成分页语句
+	// MySQL: LIMIT offset,limit      PostgreSQL: LIMIT limit OFFSET offset
+	// SQL Server: OFFSET offset ROWS FETCH NEXT limit ROWS ONLY
+	Limit(offset, limit uint) string
+
+	// AutoIncrement 返回自增关键字
+	AutoIncrement() string
+
+	// PrimaryKey 返回主键标识
+	PrimaryKey() string
+
+	// UniqueKey 返回唯一键标识
+	UniqueKey() string
+	GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error)
+}

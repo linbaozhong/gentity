@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tbldocumenttemplate"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -22,8 +23,10 @@ var (
 	})
 )
 
-func NewDocumentTemplate() *DocumentTemplate {
-	return documenttemplatePool.Get()
+func NewDocumentTemplate(db *ace.DB) *DocumentTemplate {
+	_obj := documenttemplatePool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -179,7 +182,7 @@ func (p *DocumentTemplate) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Docum
 	}
 
 	for rows.Next() {
-		_p := NewDocumentTemplate()
+		_p := NewDocumentTemplate(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -208,37 +211,37 @@ func (p *DocumentTemplate) RawAssignValues(args ...dialect.Field) ([]string, []a
 // 定义字段到值检查和获取函数的映射
 var documenttemplateFieldToValueFunc = map[dialect.Field]func(*DocumentTemplate) (string, any, bool){
 	tbldocumenttemplate.Id: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Id.Quote(), p.Id, p.Id == 0
+		return tbldocumenttemplate.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
 	},
 	tbldocumenttemplate.Genre: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Genre.Quote(), p.Genre, p.Genre == 0
+		return tbldocumenttemplate.Genre.Quote(p.GetDB().Dialect()), p.Genre, p.Genre == 0
 	},
 	tbldocumenttemplate.Company: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Company.Quote(), p.Company, p.Company == 0
+		return tbldocumenttemplate.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
 	},
 	tbldocumenttemplate.Way: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Way.Quote(), p.Way, p.Way == 0
+		return tbldocumenttemplate.Way.Quote(p.GetDB().Dialect()), p.Way, p.Way == 0
 	},
 	tbldocumenttemplate.AuthSign: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.AuthSign.Quote(), p.AuthSign, p.AuthSign == 0
+		return tbldocumenttemplate.AuthSign.Quote(p.GetDB().Dialect()), p.AuthSign, p.AuthSign == 0
 	},
 	tbldocumenttemplate.Title: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Title.Quote(), p.Title, p.Title == ""
+		return tbldocumenttemplate.Title.Quote(p.GetDB().Dialect()), p.Title, p.Title == ""
 	},
 	tbldocumenttemplate.Content: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Content.Quote(), p.Content, p.Content == ""
+		return tbldocumenttemplate.Content.Quote(p.GetDB().Dialect()), p.Content, p.Content == ""
 	},
 	tbldocumenttemplate.Url: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Url.Quote(), p.Url, p.Url == ""
+		return tbldocumenttemplate.Url.Quote(p.GetDB().Dialect()), p.Url, p.Url == ""
 	},
 	tbldocumenttemplate.HasForm: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.HasForm.Quote(), p.HasForm, p.HasForm == 0
+		return tbldocumenttemplate.HasForm.Quote(p.GetDB().Dialect()), p.HasForm, p.HasForm == 0
 	},
 	tbldocumenttemplate.State: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.State.Quote(), p.State, p.State == 0
+		return tbldocumenttemplate.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
 	},
 	tbldocumenttemplate.Utime: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Utime.Quote(), p.Utime, p.Utime.IsZero()
+		return tbldocumenttemplate.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
 	},
 }
 

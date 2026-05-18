@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
 )
 
@@ -30,7 +31,8 @@ type (
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 		Debug() bool
-		//Cache(string) cachego.Cache
+		Dialect() dialect.Dialect
+		// Cache(string) cachego.Cache
 		IsDB() bool
 	}
 )

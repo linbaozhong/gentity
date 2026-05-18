@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyrule"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -22,8 +23,10 @@ var (
 	})
 )
 
-func NewCompanyRule() *CompanyRule {
-	return companyrulePool.Get()
+func NewCompanyRule(db *ace.DB) *CompanyRule {
+	_obj := companyrulePool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -165,7 +168,7 @@ func (p *CompanyRule) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyRul
 	}
 
 	for rows.Next() {
-		_p := NewCompanyRule()
+		_p := NewCompanyRule(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -194,31 +197,31 @@ func (p *CompanyRule) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 // 定义字段到值检查和获取函数的映射
 var companyruleFieldToValueFunc = map[dialect.Field]func(*CompanyRule) (string, any, bool){
 	tblcompanyrule.Id: func(p *CompanyRule) (string, any, bool) {
-		return tblcompanyrule.Id.Quote(), p.Id, p.Id == 0
+		return tblcompanyrule.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
 	},
 	tblcompanyrule.Pid: func(p *CompanyRule) (string, any, bool) {
-		return tblcompanyrule.Pid.Quote(), p.Pid, p.Pid == 0
+		return tblcompanyrule.Pid.Quote(p.GetDB().Dialect()), p.Pid, p.Pid == 0
 	},
 	tblcompanyrule.Path: func(p *CompanyRule) (string, any, bool) {
-		return tblcompanyrule.Path.Quote(), p.Path, p.Path == ""
+		return tblcompanyrule.Path.Quote(p.GetDB().Dialect()), p.Path, p.Path == ""
 	},
 	tblcompanyrule.Title: func(p *CompanyRule) (string, any, bool) {
-		return tblcompanyrule.Title.Quote(), p.Title, p.Title == ""
+		return tblcompanyrule.Title.Quote(p.GetDB().Dialect()), p.Title, p.Title == ""
 	},
 	tblcompanyrule.Type: func(p *CompanyRule) (string, any, bool) {
-		return tblcompanyrule.Type.Quote(), p.Type, p.Type == 0
+		return tblcompanyrule.Type.Quote(p.GetDB().Dialect()), p.Type, p.Type == 0
 	},
 	tblcompanyrule.IsPrivate: func(p *CompanyRule) (string, any, bool) {
-		return tblcompanyrule.IsPrivate.Quote(), p.IsPrivate, p.IsPrivate == 0
+		return tblcompanyrule.IsPrivate.Quote(p.GetDB().Dialect()), p.IsPrivate, p.IsPrivate == 0
 	},
 	tblcompanyrule.State: func(p *CompanyRule) (string, any, bool) {
-		return tblcompanyrule.State.Quote(), p.State, p.State == 0
+		return tblcompanyrule.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
 	},
 	tblcompanyrule.Descr: func(p *CompanyRule) (string, any, bool) {
-		return tblcompanyrule.Descr.Quote(), p.Descr, p.Descr == ""
+		return tblcompanyrule.Descr.Quote(p.GetDB().Dialect()), p.Descr, p.Descr == ""
 	},
 	tblcompanyrule.Belong: func(p *CompanyRule) (string, any, bool) {
-		return tblcompanyrule.Belong.Quote(), p.Belong, p.Belong == 0
+		return tblcompanyrule.Belong.Quote(p.GetDB().Dialect()), p.Belong, p.Belong == 0
 	},
 }
 

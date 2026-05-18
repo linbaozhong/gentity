@@ -22,6 +22,12 @@ import (
 )
 
 type SelectBuilder interface {
+	SetDB(d *DB) Builder
+	// Table 设置 orm 对象的表名。
+	// 如果 a 是字符串，代表数据库表名
+	// 如果 a 是实现了 TableNamer 接口的结构体，可以通过 TableName()方法提取数据库表名
+	// 如果 a 是 Builder 接口的对象，表示该查询使用了子查询。
+	Table(a any, as ...string) Builder
 	Columner
 	Wherer
 	Orderer
@@ -32,8 +38,8 @@ type SelectBuilder interface {
 	Page(pageIndex, pageSize uint) Builder
 	PageByBookmark(size uint, bm dialect.Condition) Builder
 	Limit(size uint, start ...uint) Builder
-	// Select 创建查询器
-	Select(x ...Executer) Selecter
+	// Select 创建查询器,如果实例化时没有传入了DB，则此处必须传入DB
+	Select(...*DB) Selecter
 	// // Sub 子查询
 	// Sub(b Builder, as ...string) Builder
 	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
@@ -82,8 +88,10 @@ type read struct {
 }
 
 // Select 创建查询器
-func (o *orm) Select(x ...Executer) Selecter {
-	o.connect(x...)
+func (o *orm) Select(x ...*DB) Selecter {
+	if len(x) > 0 {
+		o.db = x[0]
+	}
 	return &read{
 		orm: o,
 	}
@@ -275,7 +283,7 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 	s.command.WriteString("SELECT COUNT(*)")
 
 	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
+	s.command.WriteString(" FROM " + s.db.Dialect().Quote(s.table))
 	for _, j := range s.join {
 		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	}
@@ -313,43 +321,6 @@ func (s *read) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 		s.Func(col.Sum())
 	}
 	return s.aggregateQuery(ctx, cols, cond...)
-
-	// s.Where(cond...)
-	// s.command.WriteString("SELECT ")
-	// s.command.WriteString(strings.Join(s.funcs, ","))
-	//
-	// // FROM TABLE
-	// s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
-	// for _, j := range s.join {
-	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	// }
-	//
-	// // WHERE
-	// if s.where.Len() > 0 {
-	// 	s.command.WriteString(" WHERE " + s.where.String())
-	// }
-	//
-	// // LIMIT
-	// if s.limit != "" {
-	// 	s.command.WriteString(s.limit)
-	// }
-	//
-	// row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// var sum = make([]any, len(cols))
-	// err = row.Scan(sum...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// sums := make(map[string]any, len(cols))
-	// for i := range sum {
-	// 	sums[cols[i].Name] = sum[i]
-	// }
-	// return sums, nil
 }
 
 // Avg 返回平均值
@@ -510,7 +481,7 @@ func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ..
 	s.command.WriteString(strings.Join(s.funcs, ","))
 
 	// FROM TABLE
-	s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
+	s.command.WriteString(" FROM " + s.db.Dialect().Quote(s.table))
 	for _, j := range s.join {
 		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
 	}

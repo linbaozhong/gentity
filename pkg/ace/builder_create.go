@@ -26,7 +26,8 @@ type CreateBuilder interface {
 	Columner
 	Set(fns ...dialect.Setter) Builder
 	SetExpr(fns ...dialect.Setter) Builder
-	Create(x ...Executer) Creater
+	// Create 创建插入器,如果实例化时没有传入了DB，则此处必须传入DB
+	Create(...*DB) Creater
 	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
 	ToSql(...bool) Builder
 }
@@ -42,8 +43,10 @@ type create struct {
 }
 
 // Create 创建插入器
-func (o *orm) Create(x ...Executer) Creater {
-	o.connect(x...)
+func (o *orm) Create(x ...*DB) Creater {
+	if len(x) > 0 {
+		o.db = x[0]
+	}
 	return &create{
 		orm: o,
 	}
@@ -61,12 +64,12 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + dialect.Quote_Char_Left + c.table + dialect.Quote_Char_Right + " (")
+	c.command.WriteString("INSERT INTO " + c.db.Dialect().Quote(c.table) + " (")
 	for i, col := range c.cols {
 		if i > 0 {
 			c.command.WriteString(",")
 		}
-		c.command.WriteString(col.Quote())
+		c.command.WriteString(col.Quote(c.db.Dialect()))
 	}
 	c.command.WriteString(") VALUES ")
 
@@ -100,7 +103,7 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return nil, c.err
 	}
 
-	c.command.WriteString("INSERT INTO " + dialect.Quote_Char_Left + c.table + dialect.Quote_Char_Right + " (")
+	c.command.WriteString("INSERT INTO " + c.db.Dialect().Quote(c.table) + " (")
 
 	var _cols []string
 	_cols, c.params = bean.AssignValues(c.cols...)
@@ -135,7 +138,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return nil, dialect.ErrBeanEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + dialect.Quote_Char_Left + c.table + dialect.Quote_Char_Right + " (")
+	c.command.WriteString("INSERT INTO " + c.db.Dialect().Quote(c.table) + " (")
 
 	var _cols []string
 	_cols, c.params = beans[0].RawAssignValues(c.cols...)

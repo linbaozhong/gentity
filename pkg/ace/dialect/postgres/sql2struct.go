@@ -7,11 +7,7 @@ import (
 	"strings"
 )
 
-// type Driverer interface {
-// 	GetTables(db *ace.DB, dbName string) ([]*sqlparser.Table, error)
-// }
-
-func GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
+func Tables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
 	// PostgreSQL 获取表名和注释
 	rows, err := db.Query(`
 		SELECT 
@@ -42,7 +38,7 @@ func GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
 	return ts, nil
 }
 
-func GetColumns(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, error) {
+func Columns(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, error) {
 	// PostgreSQL 获取列信息
 	rows, err := db.Query(`
 		SELECT 
@@ -195,21 +191,21 @@ func fillUniqueKeys(db *sql.DB, dbName string, ms map[string][]*sqlparser.Column
 	return rows.Err()
 }
 
-// func GetTables(db *ace.DB, dbName string) ([]*sqlparser.Table, error) {
-// 	// 表名,表注释
-// 	ts, err := getTables(db, dbName)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	// 表字段信息
-// 	ms, err := getColumns(db, dbName)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	for _, t := range ts {
-// 		t.ColumnsX = ms[t.Name]
-// 	}
-// 	return ts, nil
-// }
+func (m *PostgreSQL) GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error) {
+	// 表名,表注释
+	ts, err := Tables(db, dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	// 表字段信息
+	ms, err := Columns(db, dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, t := range ts {
+		t.ColumnsX = ms[t.Name]
+	}
+	return ts, nil
+}

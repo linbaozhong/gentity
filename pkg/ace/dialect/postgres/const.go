@@ -15,30 +15,29 @@
 package postgres
 
 import (
-	"fmt"
 	_ "github.com/jackc/pgx"
 )
 
-const (
-	Quote_Char_Left  = "\""
-	Quote_Char_Right = "\""
-	PrimaryKey       = "P"
-	AutoInc          = "SERIAL"
-	UniqueKey        = "U"
-)
-
-func Limit(offset, limit uint) string {
-	if offset > 0 {
-		return fmt.Sprintf(" LIMIT %d,%d", offset, limit)
-	}
-	return fmt.Sprintf(" LIMIT %d", limit)
-}
-
-func Placeholder(index *uint8) string {
-	*index = *index + 1
-	return fmt.Sprintf("$%d", *index)
-}
-
-func Quote(name string) string {
-	return Quote_Char_Left + name + Quote_Char_Right
-}
+// const (
+// 	Quote_Char_Left  = "\""
+// 	Quote_Char_Right = "\""
+// 	PrimaryKey       = "P"
+// 	AutoInc          = "SERIAL"
+// 	UniqueKey        = "U"
+// )
+//
+// func Limit(offset, limit uint) string {
+// 	if offset > 0 {
+// 		return fmt.Sprintf(" LIMIT %d,%d", offset, limit)
+// 	}
+// 	return fmt.Sprintf(" LIMIT %d", limit)
+// }
+//
+// func Placeholder(index *uint8) string {
+// 	*index = *index + 1
+// 	return fmt.Sprintf("$%d", *index)
+// }
+//
+// func Quote(name string) string {
+// 	return Quote_Char_Left + name + Quote_Char_Right
+// }

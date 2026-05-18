@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyfadada"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -22,8 +23,10 @@ var (
 	})
 )
 
-func NewCompanyFadada() *CompanyFadada {
-	return companyfadadaPool.Get()
+func NewCompanyFadada(db *ace.DB) *CompanyFadada {
+	_obj := companyfadadaPool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -200,7 +203,7 @@ func (p *CompanyFadada) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyF
 	}
 
 	for rows.Next() {
-		_p := NewCompanyFadada()
+		_p := NewCompanyFadada(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -229,46 +232,46 @@ func (p *CompanyFadada) RawAssignValues(args ...dialect.Field) ([]string, []any)
 // 定义字段到值检查和获取函数的映射
 var companyfadadaFieldToValueFunc = map[dialect.Field]func(*CompanyFadada) (string, any, bool){
 	tblcompanyfadada.Id: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.Id.Quote(), p.Id, p.Id == 0
+		return tblcompanyfadada.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
 	},
 	tblcompanyfadada.CompanyName: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.CompanyName.Quote(), p.CompanyName, p.CompanyName == ""
+		return tblcompanyfadada.CompanyName.Quote(p.GetDB().Dialect()), p.CompanyName, p.CompanyName == ""
 	},
 	tblcompanyfadada.CustomerId: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.CustomerId.Quote(), p.CustomerId, p.CustomerId == ""
+		return tblcompanyfadada.CustomerId.Quote(p.GetDB().Dialect()), p.CustomerId, p.CustomerId == ""
 	},
 	tblcompanyfadada.TransactionNo: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.TransactionNo.Quote(), p.TransactionNo, p.TransactionNo == ""
+		return tblcompanyfadada.TransactionNo.Quote(p.GetDB().Dialect()), p.TransactionNo, p.TransactionNo == ""
 	},
 	tblcompanyfadada.Url: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.Url.Quote(), p.Url, p.Url == ""
+		return tblcompanyfadada.Url.Quote(p.GetDB().Dialect()), p.Url, p.Url == ""
 	},
 	tblcompanyfadada.CertInfo: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.CertInfo.Quote(), p.CertInfo, p.CertInfo == ""
+		return tblcompanyfadada.CertInfo.Quote(p.GetDB().Dialect()), p.CertInfo, p.CertInfo == ""
 	},
 	tblcompanyfadada.Status: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.Status.Quote(), p.Status, p.Status == 0
+		return tblcompanyfadada.Status.Quote(p.GetDB().Dialect()), p.Status, p.Status == 0
 	},
 	tblcompanyfadada.HasCertificate: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.HasCertificate.Quote(), p.HasCertificate, p.HasCertificate == 0
+		return tblcompanyfadada.HasCertificate.Quote(p.GetDB().Dialect()), p.HasCertificate, p.HasCertificate == 0
 	},
 	tblcompanyfadada.AuthSign: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.AuthSign.Quote(), p.AuthSign, p.AuthSign == 0
+		return tblcompanyfadada.AuthSign.Quote(p.GetDB().Dialect()), p.AuthSign, p.AuthSign == 0
 	},
 	tblcompanyfadada.AuthTransactionId: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.AuthTransactionId.Quote(), p.AuthTransactionId, p.AuthTransactionId == ""
+		return tblcompanyfadada.AuthTransactionId.Quote(p.GetDB().Dialect()), p.AuthTransactionId, p.AuthTransactionId == ""
 	},
 	tblcompanyfadada.AuthContractId: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.AuthContractId.Quote(), p.AuthContractId, p.AuthContractId == ""
+		return tblcompanyfadada.AuthContractId.Quote(p.GetDB().Dialect()), p.AuthContractId, p.AuthContractId == ""
 	},
 	tblcompanyfadada.AuthResult: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.AuthResult.Quote(), p.AuthResult, p.AuthResult == ""
+		return tblcompanyfadada.AuthResult.Quote(p.GetDB().Dialect()), p.AuthResult, p.AuthResult == ""
 	},
 	tblcompanyfadada.State: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.State.Quote(), p.State, p.State == 0
+		return tblcompanyfadada.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
 	},
 	tblcompanyfadada.Ctime: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+		return tblcompanyfadada.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
 	},
 }
 

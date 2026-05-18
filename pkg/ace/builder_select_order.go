@@ -57,7 +57,7 @@ func (o *orm) Asc(cols ...dialect.Field) Builder {
 		if o.orderBy.Len() > 0 {
 			o.orderBy.WriteByte(',')
 		}
-		o.orderBy.WriteString(col.Quote())
+		o.orderBy.WriteString(col.Quote(o.db.Dialect()))
 	}
 	return o
 }
@@ -71,7 +71,7 @@ func (o *orm) Desc(cols ...dialect.Field) Builder {
 		if o.orderBy.Len() > 0 {
 			o.orderBy.WriteByte(',')
 		}
-		o.orderBy.WriteString(col.Quote() + dialect.Operator_Desc)
+		o.orderBy.WriteString(col.Quote(o.db.Dialect()) + dialect.Operator_Desc)
 	}
 	return o
 }

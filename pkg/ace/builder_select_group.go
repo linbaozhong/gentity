@@ -30,7 +30,7 @@ func (o *orm) Group(cols ...dialect.Field) Builder {
 		if o.groupBy.Len() > 0 {
 			o.groupBy.WriteByte(',')
 		}
-		o.groupBy.WriteString(col.Quote())
+		o.groupBy.WriteString(col.Quote(o.db.Dialect()))
 	}
 	return o
 }
@@ -49,7 +49,7 @@ func (o *orm) Having(fns ...dialect.Condition) Builder {
 		if i > 0 {
 			o.having.WriteString(dialect.Operator_and)
 		}
-		cond, val := fn(&o.paramIndex)
+		cond, val := fn(&o.paramIndex, o.db.Dialect())
 		o.having.WriteString(cond)
 
 		if err := parseWhereParams(val, &tmpHavingParams); err != nil {

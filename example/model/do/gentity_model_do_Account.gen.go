@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -22,8 +23,10 @@ var (
 	})
 )
 
-func NewAccount() *Account {
-	return accountPool.Get()
+func NewAccount(db *ace.DB) *Account {
+	_obj := accountPool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -144,7 +147,7 @@ func (p *Account) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Account, bool,
 	}
 
 	for rows.Next() {
-		_p := NewAccount()
+		_p := NewAccount(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -173,22 +176,22 @@ func (p *Account) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 // 定义字段到值检查和获取函数的映射
 var accountFieldToValueFunc = map[dialect.Field]func(*Account) (string, any, bool){
 	tblaccount.Id: func(p *Account) (string, any, bool) {
-		return tblaccount.Id.Quote(), p.Id, p.Id == 0
+		return tblaccount.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
 	},
 	tblaccount.LoginName: func(p *Account) (string, any, bool) {
-		return tblaccount.LoginName.Quote(), p.LoginName, p.LoginName == ""
+		return tblaccount.LoginName.Quote(p.GetDB().Dialect()), p.LoginName, p.LoginName == ""
 	},
 	tblaccount.Password: func(p *Account) (string, any, bool) {
-		return tblaccount.Password.Quote(), p.Password, p.Password == ""
+		return tblaccount.Password.Quote(p.GetDB().Dialect()), p.Password, p.Password == ""
 	},
 	tblaccount.State: func(p *Account) (string, any, bool) {
-		return tblaccount.State.Quote(), p.State, p.State == 0
+		return tblaccount.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
 	},
 	tblaccount.Ctime: func(p *Account) (string, any, bool) {
-		return tblaccount.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+		return tblaccount.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
 	},
 	tblaccount.Utime: func(p *Account) (string, any, bool) {
-		return tblaccount.Utime.Quote(), p.Utime, p.Utime.IsZero()
+		return tblaccount.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
 	},
 }
 

@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanydocument"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -22,8 +23,10 @@ var (
 	})
 )
 
-func NewCompanyDocument() *CompanyDocument {
-	return companydocumentPool.Get()
+func NewCompanyDocument(db *ace.DB) *CompanyDocument {
+	_obj := companydocumentPool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -200,7 +203,7 @@ func (p *CompanyDocument) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Compan
 	}
 
 	for rows.Next() {
-		_p := NewCompanyDocument()
+		_p := NewCompanyDocument(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -229,46 +232,46 @@ func (p *CompanyDocument) RawAssignValues(args ...dialect.Field) ([]string, []an
 // 定义字段到值检查和获取函数的映射
 var companydocumentFieldToValueFunc = map[dialect.Field]func(*CompanyDocument) (string, any, bool){
 	tblcompanydocument.Id: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Id.Quote(), p.Id, p.Id == 0
+		return tblcompanydocument.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
 	},
 	tblcompanydocument.Company: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Company.Quote(), p.Company, p.Company == 0
+		return tblcompanydocument.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
 	},
 	tblcompanydocument.TemplateId: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.TemplateId.Quote(), p.TemplateId, p.TemplateId == 0
+		return tblcompanydocument.TemplateId.Quote(p.GetDB().Dialect()), p.TemplateId, p.TemplateId == 0
 	},
 	tblcompanydocument.Title: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Title.Quote(), p.Title, p.Title == ""
+		return tblcompanydocument.Title.Quote(p.GetDB().Dialect()), p.Title, p.Title == ""
 	},
 	tblcompanydocument.Classify: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Classify.Quote(), p.Classify, p.Classify == 0
+		return tblcompanydocument.Classify.Quote(p.GetDB().Dialect()), p.Classify, p.Classify == 0
 	},
 	tblcompanydocument.Genre: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Genre.Quote(), p.Genre, p.Genre == 0
+		return tblcompanydocument.Genre.Quote(p.GetDB().Dialect()), p.Genre, p.Genre == 0
 	},
 	tblcompanydocument.HandleGenre: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.HandleGenre.Quote(), p.HandleGenre, p.HandleGenre == 0
+		return tblcompanydocument.HandleGenre.Quote(p.GetDB().Dialect()), p.HandleGenre, p.HandleGenre == 0
 	},
 	tblcompanydocument.Job: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Job.Quote(), p.Job, p.Job == ""
+		return tblcompanydocument.Job.Quote(p.GetDB().Dialect()), p.Job, p.Job == ""
 	},
 	tblcompanydocument.VariableMode: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.VariableMode.Quote(), p.VariableMode, p.VariableMode == 0
+		return tblcompanydocument.VariableMode.Quote(p.GetDB().Dialect()), p.VariableMode, p.VariableMode == 0
 	},
 	tblcompanydocument.IsDefault: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.IsDefault.Quote(), p.IsDefault, p.IsDefault == 0
+		return tblcompanydocument.IsDefault.Quote(p.GetDB().Dialect()), p.IsDefault, p.IsDefault == 0
 	},
 	tblcompanydocument.CanDefault: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.CanDefault.Quote(), p.CanDefault, p.CanDefault == 0
+		return tblcompanydocument.CanDefault.Quote(p.GetDB().Dialect()), p.CanDefault, p.CanDefault == 0
 	},
 	tblcompanydocument.Modifier: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Modifier.Quote(), p.Modifier, p.Modifier == 0
+		return tblcompanydocument.Modifier.Quote(p.GetDB().Dialect()), p.Modifier, p.Modifier == 0
 	},
 	tblcompanydocument.State: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.State.Quote(), p.State, p.State == 0
+		return tblcompanydocument.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
 	},
 	tblcompanydocument.Ctime: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+		return tblcompanydocument.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
 	},
 }
 

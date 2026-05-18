@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -22,8 +23,10 @@ var (
 	})
 )
 
-func NewCompany() *Company {
-	return companyPool.Get()
+func NewCompany(db *ace.DB) *Company {
+	_obj := companyPool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -207,7 +210,7 @@ func (p *Company) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Company, bool,
 	}
 
 	for rows.Next() {
-		_p := NewCompany()
+		_p := NewCompany(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -236,49 +239,49 @@ func (p *Company) RawAssignValues(args ...dialect.Field) ([]string, []any) {
 // 定义字段到值检查和获取函数的映射
 var companyFieldToValueFunc = map[dialect.Field]func(*Company) (string, any, bool){
 	tblcompany.Id: func(p *Company) (string, any, bool) {
-		return tblcompany.Id.Quote(), p.Id, p.Id == 0
+		return tblcompany.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
 	},
 	tblcompany.LongName: func(p *Company) (string, any, bool) {
-		return tblcompany.LongName.Quote(), p.LongName, p.LongName == ""
+		return tblcompany.LongName.Quote(p.GetDB().Dialect()), p.LongName, p.LongName == ""
 	},
 	tblcompany.ShortName: func(p *Company) (string, any, bool) {
-		return tblcompany.ShortName.Quote(), p.ShortName, p.ShortName == ""
+		return tblcompany.ShortName.Quote(p.GetDB().Dialect()), p.ShortName, p.ShortName == ""
 	},
 	tblcompany.Address: func(p *Company) (string, any, bool) {
-		return tblcompany.Address.Quote(), p.Address, p.Address == ""
+		return tblcompany.Address.Quote(p.GetDB().Dialect()), p.Address, p.Address == ""
 	},
 	tblcompany.Email: func(p *Company) (string, any, bool) {
-		return tblcompany.Email.Quote(), p.Email, p.Email == ""
+		return tblcompany.Email.Quote(p.GetDB().Dialect()), p.Email, p.Email == ""
 	},
 	tblcompany.ContactName: func(p *Company) (string, any, bool) {
-		return tblcompany.ContactName.Quote(), p.ContactName, p.ContactName == ""
+		return tblcompany.ContactName.Quote(p.GetDB().Dialect()), p.ContactName, p.ContactName == ""
 	},
 	tblcompany.ContactTelephone: func(p *Company) (string, any, bool) {
-		return tblcompany.ContactTelephone.Quote(), p.ContactTelephone, p.ContactTelephone == ""
+		return tblcompany.ContactTelephone.Quote(p.GetDB().Dialect()), p.ContactTelephone, p.ContactTelephone == ""
 	},
 	tblcompany.ContactMobile: func(p *Company) (string, any, bool) {
-		return tblcompany.ContactMobile.Quote(), p.ContactMobile, p.ContactMobile == ""
+		return tblcompany.ContactMobile.Quote(p.GetDB().Dialect()), p.ContactMobile, p.ContactMobile == ""
 	},
 	tblcompany.ContactEmail: func(p *Company) (string, any, bool) {
-		return tblcompany.ContactEmail.Quote(), p.ContactEmail, p.ContactEmail == ""
+		return tblcompany.ContactEmail.Quote(p.GetDB().Dialect()), p.ContactEmail, p.ContactEmail == ""
 	},
 	tblcompany.LegalName: func(p *Company) (string, any, bool) {
-		return tblcompany.LegalName.Quote(), p.LegalName, p.LegalName == ""
+		return tblcompany.LegalName.Quote(p.GetDB().Dialect()), p.LegalName, p.LegalName == ""
 	},
 	tblcompany.Creator: func(p *Company) (string, any, bool) {
-		return tblcompany.Creator.Quote(), p.Creator, p.Creator == 0
+		return tblcompany.Creator.Quote(p.GetDB().Dialect()), p.Creator, p.Creator == 0
 	},
 	tblcompany.State: func(p *Company) (string, any, bool) {
-		return tblcompany.State.Quote(), p.State, p.State == 0
+		return tblcompany.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
 	},
 	tblcompany.Status: func(p *Company) (string, any, bool) {
-		return tblcompany.Status.Quote(), p.Status, p.Status == 0
+		return tblcompany.Status.Quote(p.GetDB().Dialect()), p.Status, p.Status == 0
 	},
 	tblcompany.Ctime: func(p *Company) (string, any, bool) {
-		return tblcompany.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+		return tblcompany.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
 	},
 	tblcompany.Utime: func(p *Company) (string, any, bool) {
-		return tblcompany.Utime.Quote(), p.Utime, p.Utime.IsZero()
+		return tblcompany.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
 	},
 }
 

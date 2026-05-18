@@ -12,31 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mysql
+package ace
 
-import (
-	_ "github.com/go-sql-driver/mysql"
+type (
+	Base struct {
+		db *DB
+	}
 )
 
-// const (
-// 	Quote_Char_Left  = "`"
-// 	Quote_Char_Right = "`"
-// 	PrimaryKey       = "PRI"
-// 	AutoInc          = "AUTO_INCREMENT"
-// 	UniqueKey        = "UNI"
-// )
-//
-// func Limit(offset, limit uint) string {
-// 	if offset > 0 {
-// 		return fmt.Sprintf(" LIMIT %d,%d", offset, limit)
-// 	}
-// 	return fmt.Sprintf(" LIMIT %d", limit)
-// }
-//
-// func Placeholder(index *uint8) string {
-// 	return "?"
-// }
-//
-// func Quote(name string) string {
-// 	return Quote_Char_Left + name + Quote_Char_Right
-// }
+// SetDB 设置db
+func (a *Base) SetDB(d *DB) {
+	a.db = d
+}
+
+// GetDB 获取db
+func (a *Base) GetDB() *DB {
+	return a.db
+}

@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanystamp"
+	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -22,8 +23,10 @@ var (
 	})
 )
 
-func NewCompanyStamp() *CompanyStamp {
-	return companystampPool.Get()
+func NewCompanyStamp(db *ace.DB) *CompanyStamp {
+	_obj := companystampPool.Get()
+	_obj.SetDB(db)
+	return _obj
 }
 
 // MarshalJSON
@@ -179,7 +182,7 @@ func (p *CompanyStamp) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanySt
 	}
 
 	for rows.Next() {
-		_p := NewCompanyStamp()
+		_p := NewCompanyStamp(p.GetDB())
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -208,37 +211,37 @@ func (p *CompanyStamp) RawAssignValues(args ...dialect.Field) ([]string, []any) 
 // 定义字段到值检查和获取函数的映射
 var companystampFieldToValueFunc = map[dialect.Field]func(*CompanyStamp) (string, any, bool){
 	tblcompanystamp.Id: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Id.Quote(), p.Id, p.Id == 0
+		return tblcompanystamp.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
 	},
 	tblcompanystamp.Company: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Company.Quote(), p.Company, p.Company == 0
+		return tblcompanystamp.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
 	},
 	tblcompanystamp.Url: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Url.Quote(), p.Url, p.Url == ""
+		return tblcompanystamp.Url.Quote(p.GetDB().Dialect()), p.Url, p.Url == ""
 	},
 	tblcompanystamp.Genre: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Genre.Quote(), p.Genre, p.Genre == 0
+		return tblcompanystamp.Genre.Quote(p.GetDB().Dialect()), p.Genre, p.Genre == 0
 	},
 	tblcompanystamp.IsDefault: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.IsDefault.Quote(), p.IsDefault, p.IsDefault == 0
+		return tblcompanystamp.IsDefault.Quote(p.GetDB().Dialect()), p.IsDefault, p.IsDefault == 0
 	},
 	tblcompanystamp.Creator: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Creator.Quote(), p.Creator, p.Creator == 0
+		return tblcompanystamp.Creator.Quote(p.GetDB().Dialect()), p.Creator, p.Creator == 0
 	},
 	tblcompanystamp.CreatorName: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.CreatorName.Quote(), p.CreatorName, p.CreatorName == ""
+		return tblcompanystamp.CreatorName.Quote(p.GetDB().Dialect()), p.CreatorName, p.CreatorName == ""
 	},
 	tblcompanystamp.State: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.State.Quote(), p.State, p.State == 0
+		return tblcompanystamp.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
 	},
 	tblcompanystamp.Status: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Status.Quote(), p.Status, p.Status == 0
+		return tblcompanystamp.Status.Quote(p.GetDB().Dialect()), p.Status, p.Status == 0
 	},
 	tblcompanystamp.Ctime: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Ctime.Quote(), p.Ctime, p.Ctime.IsZero()
+		return tblcompanystamp.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
 	},
 	tblcompanystamp.Utime: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Utime.Quote(), p.Utime, p.Utime.IsZero()
+		return tblcompanystamp.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
 	},
 }
 

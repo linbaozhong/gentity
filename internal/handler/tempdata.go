@@ -285,11 +285,11 @@ func (d *TempData) writeToModel(fileName string) error {
 
 	return writeToFormatFile(fileName, _f, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)
-		_, e := tmpl.ParseFS(resources.TemplatesFS, "templates/struct.tmpl")
+		_, e := tmpl.ParseFS(resources.TemplatesFS, "templates/do_struct.tmpl")
 		if e != nil {
 			return e
 		}
-		return tmpl.ExecuteTemplate(ioWriter, "struct.tmpl", d)
+		return tmpl.ExecuteTemplate(ioWriter, "do_struct.tmpl", d)
 	})
 }
 

@@ -32,14 +32,15 @@ type (
 		Free()
 		String() string
 		Clone() Builder
-		// Table 设置 orm 对象的表名。
-		// 如果 a 是字符串，代表数据库表名
-		// 如果 a 是实现了 TableNamer 接口的结构体，可以通过 TableName()方法提取数据库表名
-		// 如果 a 是 Builder 接口的对象，表示该查询使用了子查询。
-		Table(a any, as ...string) Builder
 
-		Columner
-		Wherer
+		// // Table 设置 orm 对象的表名。
+		// // 如果 a 是字符串，代表数据库表名
+		// // 如果 a 是实现了 TableNamer 接口的结构体，可以通过 TableName()方法提取数据库表名
+		// // 如果 a 是 Builder 接口的对象，表示该查询使用了子查询。
+		// Table(a any, as ...string) Builder
+
+		// Columner
+		// Wherer
 
 		SelectBuilder
 		CreateBuilder
@@ -86,21 +87,16 @@ var (
 )
 
 func newOrm() *orm {
-	obj := ormPool.Get()
-	// obj.commandString.Reset()
-	return obj
+	return ormPool.Get()
 }
 
-func New(opts ...Option) Builder {
+func New(db *DB, opts ...Option) Builder {
 	obj := newOrm()
+	obj.db = db
 
 	for _, opt := range opts {
 		opt(obj)
 	}
-	// // 如果没有设置方言，默认使用 MySQL
-	// if obj.dialect == nil {
-	// 	obj.dialect = &mysql.MySQL{}
-	// }
 	return obj
 }
 
@@ -143,18 +139,14 @@ func (o *orm) Reset() {
 
 // String 返回 orm 对象的 SQL 语句和参数的字符串表示。
 func (o *orm) String() string {
-	// if o.commandString.Len() == 0 {
-	// 	o.commandString.WriteString(fmt.Sprintf("%s  %v \n", o.command.String(), o.mergeParams()))
-	// }
-	// return o.commandString.String()
 	return fmt.Sprintf("%s  %v \n", o.command.String(), o.mergeParams())
 }
 
-// // SetDialect 设置 orm 对象的数据库方言。
-// func (o *orm) SetDialect(d dialect.Dialect) Builder {
-// 	o.dialect = d
-// 	return o
-// }
+// SetDB 设置 orm 对象的数据库连接。
+func (o *orm) SetDB(d *DB) Builder {
+	o.db = d
+	return o
+}
 
 // Table 设置 orm 对象的表名。
 // 如果 a 是字符串，代表数据库表名
@@ -215,7 +207,7 @@ func (o *orm) Set(fns ...dialect.Setter) Builder {
 			tmpCols = append(tmpCols, c)
 			tmpParams = append(tmpParams, val)
 		} else {
-			ex, val, e := dialect.ParseSetter(fn, &o.paramIndex)
+			ex, val, e := dialect.ParseSetter(fn, &o.paramIndex, o.db.Dialect())
 			if e == nil {
 				tmpExprCols = append(tmpExprCols, expr{colName: ex, arg: val})
 			}
@@ -242,7 +234,7 @@ func (o *orm) SetExpr(fns ...dialect.Setter) Builder {
 	copy(tmpExprCols, o.exprCols)
 
 	for _, fn := range fns {
-		ex, val, e := dialect.ParseSetter(fn, &o.paramIndex)
+		ex, val, e := dialect.ParseSetter(fn, &o.paramIndex, o.db.Dialect())
 		if e != nil {
 			o.err = e
 			return o
@@ -346,7 +338,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 			if i > 0 {
 				o.command.WriteString(",")
 			}
-			o.command.WriteString(col.Quote())
+			o.command.WriteString(col.Quote(o.db.Dialect()))
 		}
 		if colens > 0 && funlens > 0 {
 			o.command.WriteString(",")
@@ -359,7 +351,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 		// 如果表名以(开头，则不加引号
 		o.command.WriteString(" FROM " + o.table)
 	} else {
-		o.command.WriteString(" FROM " + dialect.Quote_Char_Left + o.table + dialect.Quote_Char_Right)
+		o.command.WriteString(" FROM " + o.db.Dialect().Quote(o.table))
 	}
 	for _, j := range o.join {
 		o.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
@@ -429,12 +421,12 @@ func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, 
 	return stmt.QueryRowContext(ctx, params...), nil
 }
 
-// connect 连接数据库
-func (o *orm) connect(x ...Executer) Builder {
-	if len(x) > 0 {
-		o.db = x[0]
-	} else if o.db == nil {
-		o.db = GetDB()
-	}
-	return o
-}
+// // connect 连接数据库
+// func (o *orm) connect(x ...Executer) Builder {
+// 	if len(x) > 0 {
+// 		o.db = x[0]
+// 	} else if o.db == nil {
+// 		o.db = GetDB()
+// 	}
+// 	return o
+// }

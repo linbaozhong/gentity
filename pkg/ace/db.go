@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
 	"github.com/linbaozhong/gentity/pkg/cachego/memcached"
 	"github.com/linbaozhong/gentity/pkg/cachego/mmap"
@@ -21,12 +22,12 @@ type (
 		*sql.DB
 		driverName string
 		mapper     *reflectx.Mapper
-
-		debug     bool // 如果是调试模式，则打印sql命令及错误
-		cacheType cacheType
-		cacheOpts any
-		cacheMap  sync.Map
-		sg        singleflight.Group
+		dialect    dialect.Dialect
+		debug      bool // 如果是调试模式，则打印sql命令及错误
+		cacheType  cacheType
+		cacheOpts  any
+		cacheMap   sync.Map
+		sg         singleflight.Group
 	}
 )
 
@@ -49,6 +50,11 @@ func (s *DB) SetDebug(debug bool) *DB {
 // Debug
 func (s *DB) Debug() bool {
 	return s.debug
+}
+
+// Dialect
+func (s *DB) Dialect() dialect.Dialect {
+	return s.dialect
 }
 
 // SetCache
