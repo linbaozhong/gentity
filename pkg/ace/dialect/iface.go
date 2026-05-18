@@ -11,8 +11,9 @@ const (
 	Left_Join  JoinType = " LEFT"
 	Right_Join JoinType = " RIGHT"
 
-	Operator_and  = " AND "
-	Operator_or   = " OR "
+	Operator_and LogicalOperator = " AND "
+	Operator_or  LogicalOperator = " OR "
+
 	Operator_Asc  = " ASC"
 	Operator_Desc = " DESC"
 
@@ -31,7 +32,8 @@ var (
 )
 
 type (
-	JoinType string
+	JoinType        string
+	LogicalOperator string
 
 	TableNamer interface {
 		TableName() string

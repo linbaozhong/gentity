@@ -28,19 +28,9 @@ import (
 
 type (
 	Builder interface {
-		// SetDialect(dialect dialect.Dialect) Builder
 		Free()
 		String() string
 		Clone() Builder
-
-		// // Table 设置 orm 对象的表名。
-		// // 如果 a 是字符串，代表数据库表名
-		// // 如果 a 是实现了 TableNamer 接口的结构体，可以通过 TableName()方法提取数据库表名
-		// // 如果 a 是 Builder 接口的对象，表示该查询使用了子查询。
-		// Table(a any, as ...string) Builder
-
-		// Columner
-		// Wherer
 
 		SelectBuilder
 		CreateBuilder
@@ -49,11 +39,14 @@ type (
 
 		parse() (strings.Builder, []any)
 	}
-
+	cond struct {
+		op    dialect.LogicalOperator
+		cond  []dialect.Condition
+		child []cond
+	}
 	orm struct {
 		pool.Model
-		db Executer
-		// dialect      dialect.Dialect // 数据库方言
+		db           Executer
 		paramIndex   uint8 // 参数索引计数器
 		table        string
 		join         [][3]string
@@ -69,9 +62,11 @@ type (
 		limit        string
 		where        strings.Builder
 		whereParams  []any
-		exprCols     []expr
-		params       []any
-		command      strings.Builder
+		// 条件
+		cond     []cond
+		exprCols []expr
+		params   []any
+		command  strings.Builder
 		// commandString strings.Builder
 		// toSql 为true时，仅打印SQL语句，不执行
 		toSql bool
@@ -303,9 +298,6 @@ func (o *orm) Clone() Builder {
 
 	newOrm.command.Reset()
 	newOrm.command.WriteString(o.command.String())
-
-	// newOrm.commandString.Reset()
-	// newOrm.commandString.WriteString(o.commandString.String())
 
 	return &newOrm
 }

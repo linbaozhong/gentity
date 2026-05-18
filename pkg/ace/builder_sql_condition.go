@@ -66,19 +66,27 @@ func isValidCondition(cond string) bool {
 //   - 多个条件: "name = ? AND age > ?"
 //   - 括号组: "(name = ? OR age > ?)"
 //   - IN 子句: "status IN (?)"  (params 需传入 []any 类型)
-func (o *orm) RawWhereSafe(cond string, params ...any) Builder {
-	if o.where.Len() > 0 {
-		o.where.WriteString(dialect.Operator_and)
-	}
+func (o *orm) RawWhereSafe(cnd string, params ...any) Builder {
+	//if o.where.Len() > 0 {
+	//	o.where.WriteString(dialect.Operator_and)
+	//}
+	//
+	//// 验证条件格式
+	//if isValidCondition(cnd) {
+	//	o.err = Err_RawWhere_Invalid_Condition
+	//	return o
+	//}
+	//
+	//o.where.WriteString(cnd)
+	//o.whereParams = append(o.whereParams, params...)
 
-	// 验证条件格式
-	if isValidCondition(cond) {
-		o.err = Err_RawWhere_Invalid_Condition
-		return o
-	}
-
-	o.where.WriteString(cond)
-	o.whereParams = append(o.whereParams, params...)
+	//
+	o.cond = append(o.cond, cond{
+		op: dialect.Operator_and,
+		cond: append([]dialect.Condition{}, func(*uint8, dialect.Dialect) (string, any) {
+			return cnd, params
+		}),
+	})
 	return o
 }
 
