@@ -337,8 +337,8 @@ func (p *Company) AssignPrimaryKeyValues(result sql.Result) error {
 	return nil
 }
 
-// ToSql 仅打印SQL语句，不执行
-func (p *Company) ToSql() *Company {
+// PrintSql 仅打印SQL语句，不执行
+func (p *Company) PrintSql() *Company {
 	p.Debug(true)
 	return p
 }
