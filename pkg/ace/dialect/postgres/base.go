@@ -47,3 +47,6 @@ func (m *PostgreSQL) PrimaryKey() string { return "p" }
 
 // UniqueKey 唯一键标识
 func (m *PostgreSQL) UniqueKey() string { return "u" }
+func (m *PostgreSQL) Null(expr string) string {
+	return " COALESCE(" + expr + ")"
+}

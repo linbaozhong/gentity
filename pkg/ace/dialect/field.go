@@ -372,7 +372,7 @@ func (f *Field) Sum(as ...string) Function {
 		// sb.WriteString("),0) AS ")
 		// sb.WriteString(a)
 		// return sb.String()
-		return " IFNULL(Sum(" + f.Quote(d) + "),0) AS " + a
+		return d.Null("(Sum("+f.Quote(d)+"),0)") + " AS " + a
 	}
 }
 
@@ -391,7 +391,7 @@ func (f *Field) Avg(as ...string) Function {
 		// sb.WriteString("),0) AS ")
 		// sb.WriteString(a)
 		// return sb.String()
-		return " IFNULL(Avg(" + f.Quote(d) + "),0) AS " + a
+		return d.Null("(Avg("+f.Quote(d)+"),0)") + " AS " + a
 	}
 }
 
@@ -410,7 +410,7 @@ func (f *Field) Count(as ...string) Function {
 		// sb.WriteString("),0) AS ")
 		// sb.WriteString(a)
 		// return sb.String()
-		return " IFNULL(Count(" + f.Quote(d) + "),0) AS " + a
+		return d.Null("(Count("+f.Quote(d)+"),0)") + " AS " + a
 	}
 }
 
@@ -429,7 +429,7 @@ func (f *Field) Max(as ...string) Function {
 		// sb.WriteString("),0) AS ")
 		// sb.WriteString(a)
 		// return sb.String()
-		return " IFNULL(Max(" + f.Quote(d) + "),0) AS " + a
+		return d.Null("(Max("+f.Quote(d)+"),0)") + " AS " + a
 	}
 }
 
@@ -448,7 +448,7 @@ func (f *Field) Min(as ...string) Function {
 		// sb.WriteString("),0) AS ")
 		// sb.WriteString(a)
 		// return sb.String()
-		return " IFNULL(Min(" + f.Quote(d) + "),0) AS " + a
+		return d.Null("(Min("+f.Quote(d)+"),0)") + " AS " + a
 	}
 }
 

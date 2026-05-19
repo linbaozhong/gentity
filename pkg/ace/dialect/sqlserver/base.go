@@ -51,3 +51,6 @@ func (s *SQLServer) PrimaryKey() string { return "PRIMARY KEY" }
 
 // UniqueKey 唯一键标识
 func (s *SQLServer) UniqueKey() string { return "UNIQUE" }
+func (m *SQLServer) Null(expr string) string {
+	return " ISNULL(" + expr + ")"
+}

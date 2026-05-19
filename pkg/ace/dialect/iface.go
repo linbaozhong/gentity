@@ -99,6 +99,8 @@ type Dialect interface {
 	// UniqueKey 返回唯一键标识
 	UniqueKey() string
 	GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error)
+
+	Null(expr string) string // 返回 COALESCE/IFNULL/ISNULL 等
 }
 
 func (l LogicalOperator) String() string {

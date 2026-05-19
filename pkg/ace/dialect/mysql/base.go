@@ -39,3 +39,6 @@ func (m *MySQL) Limit(offset, limit uint) string {
 func (m *MySQL) AutoIncrement() string { return "AUTO_INCREMENT" }
 func (m *MySQL) PrimaryKey() string    { return "PRI" }
 func (m *MySQL) UniqueKey() string     { return "UNI" }
+func (m *MySQL) Null(expr string) string {
+	return " IFNULL(" + expr + ")"
+}

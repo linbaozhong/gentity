@@ -49,3 +49,6 @@ func (s *SQLite) PrimaryKey() string { return "pk" }
 
 // UniqueKey 唯一键标识：通过 PRAGMA index_list 获取 unique=1 的索引
 func (s *SQLite) UniqueKey() string { return "unique" }
+func (m *SQLite) Null(expr string) string {
+	return " IFNULL(" + expr + ")"
+}
