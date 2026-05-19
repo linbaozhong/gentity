@@ -53,35 +53,16 @@ const (
 
 // Quote 为字段添加引号
 func (f *Field) Quote(d Dialect) string {
-	// var sb strings.Builder
-	// // 预先计算并分配足够的内存空间：len(f.TableName()) + len(".") + len(f.FieldName())
-	// sb.Grow(len(f.TableName()) + 1 + len(f.FieldName()))
-	// sb.WriteString(f.TableName())
-	// sb.WriteString(".")
-	// sb.WriteString(f.FieldName())
-	// return sb.String()
 	return d.Quote(f.Table) + "." + d.Quote(f.Name)
 }
 
 // TableName 为表名添加引号
 func (f *Field) TableName(d Dialect) string {
-	// var sb strings.Builder
-	// sb.Grow(len(f.Table) + 2)
-	// sb.WriteString(Quote_Char_Left)
-	// sb.WriteString(f.Table)
-	// sb.WriteString(Quote_Char_Right)
-	// return sb.String()
 	return d.Quote(f.Table)
 }
 
 // FieldName 为字段名添加引号
 func (f *Field) FieldName(d Dialect) string {
-	// var sb strings.Builder
-	// sb.Grow(len(f.Name) + 2)
-	// sb.WriteString(Quote_Char_Left)
-	// sb.WriteString(f.Name)
-	// sb.WriteString(Quote_Char_Right)
-	// return sb.String()
 	return d.Quote(f.Name)
 }
 
@@ -154,51 +135,12 @@ func ParseSetter(set Setter, i *uint8, d Dialect) (string, any, error) {
 	}
 	switch op {
 	case Op_Increment:
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(f.Quote()) + len(" + ") + len(Placeholder)
-		// sb.Grow(len(f.Quote())*2 + 7)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" = ")
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" + ")
-		// sb.WriteString(Placeholder(i))
-		// return sb.String(), v, nil
 		return f.Quote(d) + " = " + f.Quote(d) + " + " + d.Placeholder(i), v, nil
 	case Op_Decrement:
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(f.Quote()) + len(" - ") + len(Placeholder)
-		// sb.Grow(len(f.Quote())*2 + 7)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" = ")
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" - ")
-		// sb.WriteString(Placeholder(i))
-		// return sb.String(), v, nil
 		return f.Quote(d) + " = " + f.Quote(d) + " - " + d.Placeholder(i), v, nil
 	case Op_Replace:
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = REPLACE(") + len(f.Quote()) + len(",?,?)")
-		// sb.Grow(len(f.Quote())*2 + 16)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" = REPLACE(")
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(",")
-		// sb.WriteString(Placeholder(i))
-		// sb.WriteString(",")
-		// sb.WriteString(Placeholder(i))
-		// sb.WriteString(")")
-		// return sb.String(), v, nil
 		return f.Quote(d) + " = REPLACE(" + f.Quote(d) + "," + d.Placeholder(i) + "," + d.Placeholder(i) + ")", v, nil
 	case Op_Expr:
-		// // 使用 strings.Builder 进行字符串拼接
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(Placeholder)
-		// sb.Grow(len(f.Quote()) + 4)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" = ")
-		// sb.WriteString(Placeholder(i))
-		//
-		// return sb.String(), v, nil
 		return f.Quote(d) + " = " + d.Placeholder(i), v, nil
 	default:
 		return f.Quote(d), v, Err_Expression_Empty_Param
@@ -212,16 +154,6 @@ func (f *Field) Eq(val any) Condition {
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
-
-		// // 使用 strings.Builder 进行字符串拼接
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" = ") + len(Placeholder)
-		// sb.Grow(len(f.Quote()) + 4)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" = ")
-		// sb.WriteString(Placeholder(i))
-		//
-		// return sb.String(), val
 		return f.Quote(d) + " = " + d.Placeholder(i), val
 	}
 }
@@ -233,16 +165,6 @@ func (f *Field) NotEq(val any) Condition {
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
-
-		// // 使用 strings.Builder 进行字符串拼接
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" != ") + len(Placeholder)
-		// sb.Grow(len(f.Quote()) + 5)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" != ")
-		// sb.WriteString(Placeholder(i))
-		//
-		// return sb.String(), val
 		return f.Quote(d) + " != " + d.Placeholder(i), val
 	}
 }
@@ -250,20 +172,10 @@ func (f *Field) NotEq(val any) Condition {
 // Gt 条件：大于
 func (f *Field) Gt(val any) Condition {
 	return func(i *uint8, d Dialect) (string, any) {
-		// // 空值检查，可根据实际需求决定是否保留
-		// if val == nil {
-		// 	return "1 = 0", Err_Condition_Empty_Param
-		// }
-		//
-		// // 使用 strings.Builder 进行字符串拼接
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" > ") + len(Placeholder)
-		// sb.Grow(len(f.Quote()) + 4)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" > ")
-		// sb.WriteString(Placeholder(i))
-		//
-		// return sb.String(), val
+		// 空值检查，可根据实际需求决定是否保留
+		if val == nil {
+			return "1 = 0", Err_Condition_Empty_Param
+		}
 		return f.Quote(d) + " > " + d.Placeholder(i), val
 	}
 }
@@ -275,16 +187,6 @@ func (f *Field) Gte(val any) Condition {
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
-
-		// // 使用 strings.Builder 进行字符串拼接
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" >= ") + len(Placeholder)
-		// sb.Grow(len(f.Quote()) + 5)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" >= ")
-		// sb.WriteString(Placeholder(i))
-		//
-		// return sb.String(), val
 		return f.Quote(d) + " >= " + d.Placeholder(i), val
 	}
 }
@@ -296,16 +198,6 @@ func (f *Field) Lt(val any) Condition {
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
-
-		// // 使用 strings.Builder 进行字符串拼接
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" < ") + len(Placeholder)
-		// sb.Grow(len(f.Quote()) + 4)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" < ")
-		// sb.WriteString(Placeholder(i))
-		//
-		// return sb.String(), val
 		return f.Quote(d) + " < " + d.Placeholder(i), val
 	}
 }
@@ -317,16 +209,6 @@ func (f *Field) Lte(val any) Condition {
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
-
-		// // 使用 strings.Builder 进行字符串拼接
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" <= ") + len(Placeholder)
-		// sb.Grow(len(f.Quote()) + 5)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" <= ")
-		// sb.WriteString(Placeholder(i))
-		//
-		// return sb.String(), val
 		return f.Quote(d) + " <= " + d.Placeholder(i), val
 	}
 }
@@ -346,16 +228,6 @@ func checkSlice(vals ...any) error {
 		case struct{}:
 			return errors.New("struct type is not allowed in IN clause")
 		}
-		// switch val.(type) {
-		// case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string, bool, time.Time:
-		// 	continue
-		// case types.Int, types.Int8, types.Int16, types.Int32, types.Int64, types.Uint, types.Uint8, types.Uint16,
-		// 	types.Uint32, types.Uint64, types.Float32, types.Float64, types.String, types.Bool, types.Time,
-		// 	types.BigInt, types.Money:
-		// 	continue
-		// default:
-		// 	return errors.New("Parameter type error")
-		// }
 	}
 	return nil
 }
@@ -426,15 +298,6 @@ func (f *Field) Between(vals ...any) Condition {
 		if err := checkSlice(vals...); err != nil {
 			return "1 = 0", err
 		}
-		// var sb strings.Builder
-		// // 预分配足够的内存空间：len(f.Quote()) + len(" Between ") + len(Placeholder) + len(" And ") + len(Placeholder)
-		// sb.Grow(len(f.Quote()) + 16)
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" Between ")
-		// sb.WriteString(Placeholder(i))
-		// sb.WriteString(" And ")
-		// sb.WriteString(Placeholder(i))
-		// return sb.String(), vals
 		return f.Quote(d) + " Between " + d.Placeholder(i) + " And " + d.Placeholder(i), vals
 	}
 }
@@ -446,18 +309,6 @@ func (f *Field) Like(val any) Condition {
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
-
-		// // 使用 strings.Builder 进行字符串拼接
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len("(") + len(f.Quote()) + len(" LIKE CONCAT('%',") + len(Placeholder) + len(",'%'))")
-		// sb.Grow(len(f.Quote()) + 25)
-		// sb.WriteString("(")
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" LIKE CONCAT('%',")
-		// sb.WriteString(Placeholder(i))
-		// sb.WriteString(",'%'))")
-		//
-		// return sb.String(), val
 		return f.Quote(d) + " Like CONCAT('%'," + d.Placeholder(i) + ",'%')", val
 	}
 }
@@ -469,16 +320,6 @@ func (f *Field) Llike(val any) Condition {
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len("(") + len(f.Quote()) + len(" LIKE CONCAT('%',") + len(Placeholder) + len("))")
-		// sb.Grow(len(f.Quote()) + 21)
-		// sb.WriteString("(")
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" LIKE CONCAT('%',")
-		// sb.WriteString(Placeholder(i))
-		// sb.WriteString("))")
-		//
-		// return sb.String(), val
 		return f.Quote(d) + " Like CONCAT('%'," + d.Placeholder(i) + ")", val
 	}
 }
@@ -490,15 +331,6 @@ func (f *Field) Rlike(val any) Condition {
 		if val == nil {
 			return "1 = 0", Err_Condition_Empty_Param
 		}
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len("(") + len(f.Quote()) + len(" LIKE CONCAT(") + len(Placeholder) + len(",'%'))")
-		// sb.Grow(len(f.Quote()) + 21)
-		// sb.WriteString("(")
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(" LIKE CONCAT(")
-		// sb.WriteString(Placeholder(i))
-		// sb.WriteString(",'%'))")
-		// return sb.String(), val
 		return f.Quote(d) + " Like CONCAT(" + d.Placeholder(i) + ",'%')", val
 	}
 }
@@ -506,13 +338,6 @@ func (f *Field) Rlike(val any) Condition {
 // Null 条件：为空
 func (f *Field) Null() Condition {
 	return func(i *uint8, d Dialect) (string, any) {
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(" ISNULL(") + len(f.Quote()) + len(")")
-		// sb.Grow(len(f.Quote()) + 9)
-		// sb.WriteString(" ISNULL(")
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(")")
-		// return sb.String(), nil
 		return f.Quote(d) + " IS NULL", nil
 	}
 }
@@ -520,13 +345,6 @@ func (f *Field) Null() Condition {
 // NotNull 条件：不为空
 func (f *Field) NotNull() Condition {
 	return func(i *uint8, d Dialect) (string, any) {
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(" NOT ISNULL(") + len(f.Quote()) + len(")")
-		// sb.Grow(len(f.Quote()) + 13)
-		// sb.WriteString(" NOT ISNULL(")
-		// sb.WriteString(f.Quote())
-		// sb.WriteString(")")
-		// return sb.String(), nil
 		return f.Quote(d) + " IS NOT NULL", nil
 	}
 }
@@ -536,13 +354,6 @@ func (f *Field) AsName(name string, d Dialect) string {
 	if name == "" {
 		return f.Quote(d)
 	}
-	// var sb strings.Builder
-	// // 预先计算并分配足够的内存空间：len(f.Quote()) + len(" AS ") + len(name)
-	// sb.Grow(len(f.Quote(d)) + 4 + len(name))
-	// sb.WriteString(f.Quote(d))
-	// sb.WriteString(" AS ")
-	// sb.WriteString(name)
-	// return sb.String()
 	return f.Quote(d) + " AS " + name
 }
 
@@ -553,14 +364,15 @@ func (f *Field) Sum(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		var sb strings.Builder
-		// 预先计算并分配足够的内存空间：len(" IFNULL(Sum(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		sb.Grow(len(f.Quote(d)) + 20 + len(a))
-		sb.WriteString(" IFNULL(Sum(")
-		sb.WriteString(f.Quote(d))
-		sb.WriteString("),0) AS ")
-		sb.WriteString(a)
-		return sb.String()
+		// var sb strings.Builder
+		// // 预先计算并分配足够的内存空间：len(" IFNULL(Sum(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		// sb.Grow(len(f.Quote(d)) + 20 + len(a))
+		// sb.WriteString(" IFNULL(Sum(")
+		// sb.WriteString(f.Quote(d))
+		// sb.WriteString("),0) AS ")
+		// sb.WriteString(a)
+		// return sb.String()
+		return " IFNULL(Sum(" + f.Quote(d) + "),0) AS " + a
 	}
 }
 
@@ -571,14 +383,15 @@ func (f *Field) Avg(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		var sb strings.Builder
-		// 预先计算并分配足够的内存空间：len(" IFNULL(Avg(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		sb.Grow(len(f.Quote(d)) + 20 + len(a))
-		sb.WriteString(" IFNULL(Avg(")
-		sb.WriteString(f.Quote(d))
-		sb.WriteString("),0) AS ")
-		sb.WriteString(a)
-		return sb.String()
+		// var sb strings.Builder
+		// // 预先计算并分配足够的内存空间：len(" IFNULL(Avg(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		// sb.Grow(len(f.Quote(d)) + 20 + len(a))
+		// sb.WriteString(" IFNULL(Avg(")
+		// sb.WriteString(f.Quote(d))
+		// sb.WriteString("),0) AS ")
+		// sb.WriteString(a)
+		// return sb.String()
+		return " IFNULL(Avg(" + f.Quote(d) + "),0) AS " + a
 	}
 }
 
@@ -589,14 +402,15 @@ func (f *Field) Count(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		var sb strings.Builder
-		// 预先计算并分配足够的内存空间：len(" IFNULL(Count(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		sb.Grow(len(f.Quote(d)) + 22 + len(a))
-		sb.WriteString(" IFNULL(Count(")
-		sb.WriteString(f.Quote(d))
-		sb.WriteString("),0) AS ")
-		sb.WriteString(a)
-		return sb.String()
+		// var sb strings.Builder
+		// // 预先计算并分配足够的内存空间：len(" IFNULL(Count(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		// sb.Grow(len(f.Quote(d)) + 22 + len(a))
+		// sb.WriteString(" IFNULL(Count(")
+		// sb.WriteString(f.Quote(d))
+		// sb.WriteString("),0) AS ")
+		// sb.WriteString(a)
+		// return sb.String()
+		return " IFNULL(Count(" + f.Quote(d) + "),0) AS " + a
 	}
 }
 
@@ -607,14 +421,15 @@ func (f *Field) Max(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		var sb strings.Builder
-		// 预先计算并分配足够的内存空间：len(" IFNULL(Max(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		sb.Grow(len(f.Quote(d)) + 20 + len(a))
-		sb.WriteString(" IFNULL(Max(")
-		sb.WriteString(f.Quote(d))
-		sb.WriteString("),0) AS ")
-		sb.WriteString(a)
-		return sb.String()
+		// var sb strings.Builder
+		// // 预先计算并分配足够的内存空间：len(" IFNULL(Max(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		// sb.Grow(len(f.Quote(d)) + 20 + len(a))
+		// sb.WriteString(" IFNULL(Max(")
+		// sb.WriteString(f.Quote(d))
+		// sb.WriteString("),0) AS ")
+		// sb.WriteString(a)
+		// return sb.String()
+		return " IFNULL(Max(" + f.Quote(d) + "),0) AS " + a
 	}
 }
 
@@ -625,14 +440,15 @@ func (f *Field) Min(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		var sb strings.Builder
-		// 预先计算并分配足够的内存空间：len("IFNULL(Min(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		sb.Grow(len(f.Quote(d)) + 20 + len(a))
-		sb.WriteString(" IFNULL(Min(")
-		sb.WriteString(f.Quote(d))
-		sb.WriteString("),0) AS ")
-		sb.WriteString(a)
-		return sb.String()
+		// var sb strings.Builder
+		// // 预先计算并分配足够的内存空间：len("IFNULL(Min(") + len(f.Quote()) + len("),0) AS ") + len(a)
+		// sb.Grow(len(f.Quote(d)) + 20 + len(a))
+		// sb.WriteString(" IFNULL(Min(")
+		// sb.WriteString(f.Quote(d))
+		// sb.WriteString("),0) AS ")
+		// sb.WriteString(a)
+		// return sb.String()
+		return " IFNULL(Min(" + f.Quote(d) + "),0) AS " + a
 	}
 }
 
@@ -643,14 +459,16 @@ func (f *Field) Distance(lng, lat float64, as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		var sb strings.Builder
-		sb.Grow(len(f.Quote(d)) + 80 + len(a))
-		sb.WriteString(
-			fmt.Sprintf("ST_Distance_Sphere(%s, ST_PointFromText(CONCAT('POINT(%f %f)')),4326)",
-				f.Quote(d), lat, lng))
-		sb.WriteString(" AS ")
-		sb.WriteString(a)
-		return sb.String()
+		// var sb strings.Builder
+		// sb.Grow(len(f.Quote(d)) + 80 + len(a))
+		// sb.WriteString(
+		// 	fmt.Sprintf("ST_Distance_Sphere(%s, ST_PointFromText(CONCAT('POINT(%f %f)')),4326)",
+		// 		f.Quote(d), lat, lng))
+		// sb.WriteString(" AS ")
+		// sb.WriteString(a)
+		// return sb.String()
+		return fmt.Sprintf("ST_Distance_Sphere(%s, ST_PointFromText(CONCAT('POINT(%f %f)')),4326) AS %s",
+			f.Quote(d), lat, lng, a)
 	}
 }
 
