@@ -67,24 +67,10 @@ func isValidCondition(cond string) bool {
 //   - 括号组: "(name = ? OR age > ?)"
 //   - IN 子句: "status IN (?)"  (params 需传入 []any 类型)
 func (o *orm) RawWhereSafe(cnd string, params ...any) Builder {
-	//if o.where.Len() > 0 {
-	//	o.where.WriteString(dialect.Operator_and)
-	//}
-	//
-	//// 验证条件格式
-	//if isValidCondition(cnd) {
-	//	o.err = Err_RawWhere_Invalid_Condition
-	//	return o
-	//}
-	//
-	//o.where.WriteString(cnd)
-	//o.whereParams = append(o.whereParams, params...)
-
-	//
 	o.cond = append(o.cond, cond{
 		op: dialect.Operator_and,
-		cond: append([]dialect.Condition{}, func(*uint8, dialect.Dialect) (string, any) {
-			return cnd, params
+		conditions: append([]dialect.Condition{}, func(*uint8, dialect.Dialect) (string, any) {
+			return cnd, append([]any{}, params...)
 		}),
 	})
 	return o
@@ -92,12 +78,90 @@ func (o *orm) RawWhereSafe(cnd string, params ...any) Builder {
 
 // And 添加 AND 查询条件，子条件之间为 and 关系。
 func (o *orm) And(fns ...dialect.Condition) Builder {
-	return o.buildWhereSimpleCondition(fns, dialect.Operator_and)
+	o.cond = append(o.cond, cond{
+		op:         dialect.Operator_and,
+		conditions: fns,
+	})
+	return o
 }
 
 // AndOr 添加 AND 查询条件，所有子条件之间为 or 关系。
 func (o *orm) AndOr(fns ...dialect.Condition) Builder {
-	return o.buildWhereBracketsCondition(fns, dialect.Operator_and, dialect.Operator_or)
+	o.cond = append(o.cond, cond{
+		op: dialect.Operator_and,
+		children: append([]cond{}, cond{
+			op:         dialect.Operator_or,
+			conditions: fns,
+		}),
+	})
+	return o
+}
+
+// Or 添加 OR 查询条件，子条件之间为 or 关系。
+func (o *orm) Or(fns ...dialect.Condition) Builder {
+	// return o.buildWhereSimpleCondition(fns, dialect.Operator_or)
+	o.cond = append(o.cond, cond{
+		op:         dialect.Operator_or,
+		conditions: fns,
+	})
+	return o
+}
+
+// OrAnd 添加 OR 查询条件，子条件之间为 and 关系。
+func (o *orm) OrAnd(fns ...dialect.Condition) Builder {
+	// return o.buildWhereBracketsCondition(fns, dialect.Operator_or, dialect.Operator_and)
+	o.cond = append(o.cond, cond{
+		op: dialect.Operator_or,
+		children: append([]cond{}, cond{
+			op:         dialect.Operator_and,
+			conditions: fns,
+		}),
+	})
+	return o
+}
+
+func (o *orm) parseCond(d []cond) (where strings.Builder, params []any, e error) {
+	for i, c := range d {
+		if i > 0 {
+			where.WriteString(c.op.String())
+		}
+		if len(c.conditions) > 0 {
+			where.WriteString("(")
+		}
+		for i2, cd := range c.conditions {
+			s, v := cd(&o.paramIndex, o.db.Dialect())
+			// s, v := cd(&o.paramIndex, o.db.Dialect())
+			if e = parseWhereParams(v, &params); e != nil {
+				o.err = e
+				return
+			}
+			if i2 > 0 {
+				where.WriteString(c.op.String())
+			}
+			if len(c.conditions) > 1 {
+				where.WriteString("(" + s + ")")
+			} else {
+				where.WriteString(s)
+			}
+		}
+		if len(c.conditions) > 0 {
+			where.WriteString(")")
+		}
+		if len(c.children) > 0 {
+			if s, v, er := o.parseCond(c.children); e != nil {
+				o.err = er
+				return
+			} else {
+				if e = parseWhereParams(v, &params); e != nil {
+					o.err = e
+					return
+				}
+				where.WriteString(s.String())
+			}
+		}
+	}
+
+	return
 }
 
 func parseWhereParams(val any, params *[]any) error {
@@ -114,96 +178,96 @@ func parseWhereParams(val any, params *[]any) error {
 	return nil
 }
 
-// Or 添加 OR 查询条件，子条件之间为 or 关系。
-func (o *orm) Or(fns ...dialect.Condition) Builder {
-	return o.buildWhereSimpleCondition(fns, dialect.Operator_or)
-}
-
-// OrAnd 添加 OR 查询条件，子条件之间为 and 关系。
-func (o *orm) OrAnd(fns ...dialect.Condition) Builder {
-	return o.buildWhereBracketsCondition(fns, dialect.Operator_or, dialect.Operator_and)
-}
-
-// buildWhereSimpleCondition 构建简单WHERE条件（每个条件前都加操作符）
-// 用于 Or 和 And 方法
-// fns: 条件函数数组
-// prefixOperator: 与已有条件的连接操作符
-// innerOperator: 条件之间的连接操作符
-func (o *orm) buildWhereSimpleCondition(fns []dialect.Condition, innerOperator string) Builder {
-	if len(fns) == 0 || o.err != nil {
-		return o
-	}
-
-	if o.where.Len() > 0 {
-		o.where.WriteString(innerOperator)
-	}
-
-	tmpWhereParams := make([]any, len(o.whereParams), len(o.whereParams)+len(fns))
-	copy(tmpWhereParams, o.whereParams)
-
-	for i, fn := range fns {
-		cond, val := fn(&o.paramIndex, o.db.Dialect())
-
-		// 空值检查：跳过空条件
-		if cond == "" {
-			continue
-		}
-		if i > 0 {
-			o.where.WriteString(innerOperator)
-		}
-		o.where.WriteString(cond)
-		if err := parseWhereParams(val, &tmpWhereParams); err != nil {
-			o.err = err
-			return o
-		}
-	}
-	o.whereParams = tmpWhereParams
-
-	return o
-}
-
-// buildWhereBracketsCondition 构建带括号的WHERE条件（第一个条件前不加操作符）
-// 用于 AndOr 和 OrAnd 方法
-// fns: 条件函数数组
-// prefixOperator: 与已有条件的连接操作符
-// innerOperator: 条件之间的连接操作符
-func (o *orm) buildWhereBracketsCondition(fns []dialect.Condition, prefixOperator, innerOperator string) Builder {
-	if len(fns) == 0 || o.err != nil {
-		return o
-	}
-
-	if o.where.Len() == 0 {
-		o.where.WriteString("(")
-	} else {
-		o.where.WriteString(prefixOperator + "(")
-	}
-
-	tmpWhereParams := make([]any, len(o.whereParams), len(o.whereParams)+len(fns))
-	copy(tmpWhereParams, o.whereParams)
-
-	for i, fn := range fns {
-		cond, val := fn(&o.paramIndex, o.db.Dialect())
-
-		// 空值检查：跳过空条件
-		if cond == "" {
-			continue
-		}
-
-		if i > 0 {
-			// if strings.HasPrefix(cond, dialect.Operator_or) || strings.HasPrefix(cond, dialect.Operator_and) {
-			// 	o.where.WriteString(" ")
-			// } else {
-			o.where.WriteString(innerOperator)
-			// }
-		}
-		o.where.WriteString(cond)
-		if err := parseWhereParams(val, &tmpWhereParams); err != nil {
-			o.err = err
-			return o
-		}
-	}
-	o.whereParams = tmpWhereParams
-	o.where.WriteString(")")
-
-	return o
-}
+//
+// // buildWhereSimpleCondition 构建简单WHERE条件（每个条件前都加操作符）
+// // 用于 Or 和 And 方法
+// // fns: 条件函数数组
+// // innerOperator: 条件之间的连接操作符
+// func (o *orm) buildWhereSimpleCondition(fns []dialect.Condition, innerOperator dialect.LogicalOperator) Builder {
+// 	if len(fns) == 0 || o.err != nil {
+// 		return o
+// 	}
+//
+// 	// if o.where.Len() > 0 {
+// 	// 	o.where.WriteString(string(innerOperator))
+// 	// }
+// 	//
+// 	// tmpWhereParams := make([]any, len(o.whereParams), len(o.whereParams)+len(fns))
+// 	// copy(tmpWhereParams, o.whereParams)
+// 	//
+// 	// for i, fn := range fns {
+// 	// 	conditions, val := fn(&o.paramIndex, o.db.Dialect())
+// 	//
+// 	// 	// 空值检查：跳过空条件
+// 	// 	if conditions == "" {
+// 	// 		continue
+// 	// 	}
+// 	// 	if i > 0 {
+// 	// 		o.where.WriteString(string(innerOperator))
+// 	// 	}
+// 	// 	o.where.WriteString(conditions)
+// 	// 	if err := parseWhereParams(val, &tmpWhereParams); err != nil {
+// 	// 		o.err = err
+// 	// 		return o
+// 	// 	}
+// 	// }
+// 	// o.whereParams = tmpWhereParams
+//
+// 	//
+// 	o.cond = append(o.cond, cond{
+// 		op:         innerOperator,
+// 		conditions: fns,
+// 	})
+// 	return o
+// }
+//
+// // buildWhereBracketsCondition 构建带括号的WHERE条件（第一个条件前不加操作符）
+// // 用于 AndOr 和 OrAnd 方法
+// // fns: 条件函数数组
+// // prefixOperator: 与已有条件的连接操作符
+// // innerOperator: 条件之间的连接操作符
+// func (o *orm) buildWhereBracketsCondition(fns []dialect.Condition, prefixOperator, innerOperator dialect.LogicalOperator) Builder {
+// 	if len(fns) == 0 || o.err != nil {
+// 		return o
+// 	}
+//
+// 	// if o.where.Len() == 0 {
+// 	// 	o.where.WriteString("(")
+// 	// } else {
+// 	// 	o.where.WriteString(string(prefixOperator) + "(")
+// 	// }
+// 	//
+// 	// tmpWhereParams := make([]any, len(o.whereParams), len(o.whereParams)+len(fns))
+// 	// copy(tmpWhereParams, o.whereParams)
+// 	//
+// 	// for i, fn := range fns {
+// 	// 	conditions, val := fn(&o.paramIndex, o.db.Dialect())
+// 	//
+// 	// 	// 空值检查：跳过空条件
+// 	// 	if conditions == "" {
+// 	// 		continue
+// 	// 	}
+// 	//
+// 	// 	if i > 0 {
+// 	// 		// if strings.HasPrefix(conditions, dialect.Operator_or) || strings.HasPrefix(conditions, dialect.Operator_and) {
+// 	// 		// 	o.where.WriteString(" ")
+// 	// 		// } else {
+// 	// 		o.where.WriteString(string(innerOperator))
+// 	// 		// }
+// 	// 	}
+// 	// 	o.where.WriteString(conditions)
+// 	// 	if err := parseWhereParams(val, &tmpWhereParams); err != nil {
+// 	// 		o.err = err
+// 	// 		return o
+// 	// 	}
+// 	// }
+// 	// o.whereParams = tmpWhereParams
+// 	// o.where.WriteString(")")
+//
+// 	//
+// 	o.cond = append(o.cond, cond{
+// 		op:         prefixOperator,
+// 		conditions: fns,
+// 	})
+// 	return o
+// }

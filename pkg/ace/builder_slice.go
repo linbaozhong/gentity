@@ -95,7 +95,7 @@ func (c *conditions) Len() int {
 
 // buildSimpleCondition 构建简单条件（每个条件前都加操作符）
 // 用于 or 和 and 方法
-func buildSimpleCondition(fns []dialect.Condition, operator string) dialect.Condition {
+func buildSimpleCondition(fns []dialect.Condition, operator dialect.LogicalOperator) dialect.Condition {
 	return func(idx *uint8, d dialect.Dialect) (string, any) {
 		if len(fns) == 0 {
 			return "", nil
@@ -113,7 +113,7 @@ func buildSimpleCondition(fns []dialect.Condition, operator string) dialect.Cond
 				continue
 			}
 			if i > 0 {
-				buf.WriteString(operator)
+				buf.WriteString(operator.String())
 			}
 			buf.WriteString(cond)
 
@@ -133,7 +133,7 @@ func buildSimpleCondition(fns []dialect.Condition, operator string) dialect.Cond
 
 // buildBracketsCondition 构建带括号的条件（第一个条件前不加操作符）
 // 用于 andOr 和 orAnd 方法
-func buildBracketsCondition(fns []dialect.Condition, prefix, innerOperator string) dialect.Condition {
+func buildBracketsCondition(fns []dialect.Condition, prefix, innerOperator dialect.LogicalOperator) dialect.Condition {
 	return func(idx *uint8, d dialect.Dialect) (string, any) {
 		if len(fns) == 0 {
 			return "", nil
@@ -143,7 +143,7 @@ func buildBracketsCondition(fns []dialect.Condition, prefix, innerOperator strin
 			params = make([]any, 0, len(fns))
 		)
 
-		buf.WriteString(prefix)
+		buf.WriteString(prefix.String())
 		for i, fn := range fns {
 			cond, val := fn(idx, d)
 
@@ -153,10 +153,10 @@ func buildBracketsCondition(fns []dialect.Condition, prefix, innerOperator strin
 			}
 
 			if i > 0 {
-				if strings.HasPrefix(cond, dialect.Operator_or) || strings.HasPrefix(cond, dialect.Operator_and) {
+				if strings.HasPrefix(cond, dialect.Operator_or.String()) || strings.HasPrefix(cond, dialect.Operator_and.String()) {
 					buf.WriteString(" ")
 				} else {
-					buf.WriteString(innerOperator)
+					buf.WriteString(innerOperator.String())
 				}
 			}
 			buf.WriteString(cond)

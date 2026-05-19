@@ -284,13 +284,32 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 
 	// FROM TABLE
 	s.command.WriteString(" FROM " + s.db.Dialect().Quote(s.table))
-	for _, j := range s.join {
-		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// for _, j := range s.join {
+	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// }
+	if len(s.join) > 0 {
+		joinStr, params, e := s.parseJoin(s.join)
+		if e != nil {
+			s.err = e
+		}
+		s.joinParams = params
+		if joinStr.Len() > 0 {
+			s.command.WriteString(joinStr.String())
+		}
 	}
-
 	// WHERE
-	if s.where.Len() > 0 {
-		s.command.WriteString(" WHERE " + s.where.String())
+	// if s.where.Len() > 0 {
+	// 	s.command.WriteString(" WHERE " + s.where.String())
+	// }
+	if len(s.cond) > 0 {
+		where, params, e := s.parseCond(s.cond)
+		if e != nil {
+			s.err = e
+		}
+		s.whereParams = params
+		if where.Len() > 0 {
+			s.command.WriteString(" WHERE " + where.String())
+		}
 	}
 
 	// LIMIT
@@ -335,7 +354,7 @@ func (s *read) Avg(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	}
 	return s.aggregateQuery(ctx, cols, cond...)
 
-	// s.Where(cond...)
+	// s.Where(conditions...)
 	// s.command.WriteString("SELECT ")
 	// s.command.WriteString(strings.Join(s.funcs, ","))
 	//
@@ -385,7 +404,7 @@ func (s *read) Max(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	}
 	return s.aggregateQuery(ctx, cols, cond...)
 
-	// s.Where(cond...)
+	// s.Where(conditions...)
 	// s.command.WriteString("SELECT ")
 	// s.command.WriteString(strings.Join(s.funcs, ","))
 	//
@@ -435,7 +454,7 @@ func (s *read) Min(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 	}
 	return s.aggregateQuery(ctx, cols, cond...)
 
-	// s.Where(cond...)
+	// s.Where(conditions...)
 	// s.command.WriteString("SELECT ")
 	// s.command.WriteString(strings.Join(s.funcs, ","))
 	//
@@ -482,13 +501,33 @@ func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ..
 
 	// FROM TABLE
 	s.command.WriteString(" FROM " + s.db.Dialect().Quote(s.table))
-	for _, j := range s.join {
-		s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// for _, j := range s.join {
+	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// }
+
+	if len(s.join) > 0 {
+		joinStr, params, e := s.parseJoin(s.join)
+		if e != nil {
+			s.err = e
+		}
+		s.joinParams = params
+		if joinStr.Len() > 0 {
+			s.command.WriteString(joinStr.String())
+		}
 	}
 
 	// WHERE
-	if s.where.Len() > 0 {
-		s.command.WriteString(" WHERE " + s.where.String())
+	// if s.where.Len() > 0 {
+	// 	s.command.WriteString(" WHERE " + s.where.String())
+	// }
+
+	where, params, e := s.parseCond(s.cond)
+	if e != nil {
+		s.err = e
+	}
+	s.whereParams = params
+	if where.Len() > 0 {
+		s.command.WriteString(" WHERE " + where.String())
 	}
 
 	// LIMIT

@@ -41,26 +41,30 @@ func (o *orm) Having(fns ...dialect.Condition) Builder {
 		return o
 	}
 
-	tmpHavingParams := make([]any, len(o.havingParams), len(o.havingParams)+len(fns))
-	copy(tmpHavingParams, o.havingParams)
-
-	o.having.WriteString("(")
-	for i, fn := range fns {
-		if i > 0 {
-			o.having.WriteString(dialect.Operator_and)
-		}
-		cond, val := fn(&o.paramIndex, o.db.Dialect())
-		o.having.WriteString(cond)
-
-		if err := parseWhereParams(val, &tmpHavingParams); err != nil {
-			o.err = err
-			return o
-		}
-		// if vals, ok := val.([]any); ok {
-		// 	o.havingParams = append(o.havingParams, vals...)
-		// }
-	}
-	o.havingParams = tmpHavingParams
-	o.having.WriteString(")")
+	// tmpHavingParams := make([]any, len(o.havingParams), len(o.havingParams)+len(fns))
+	// copy(tmpHavingParams, o.havingParams)
+	//
+	// o.having.WriteString("(")
+	// for i, fn := range fns {
+	// 	if i > 0 {
+	// 		o.having.WriteString(dialect.Operator_and.String())
+	// 	}
+	// 	cond, val := fn(&o.paramIndex, o.db.Dialect())
+	// 	o.having.WriteString(cond)
+	//
+	// 	if err := parseWhereParams(val, &tmpHavingParams); err != nil {
+	// 		o.err = err
+	// 		return o
+	// 	}
+	// 	// if vals, ok := val.([]any); ok {
+	// 	// 	o.havingParams = append(o.havingParams, vals...)
+	// 	// }
+	// }
+	// o.havingParams = tmpHavingParams
+	// o.having.WriteString(")")
+	o.having = append(o.having, cond{
+		op:         dialect.Operator_and,
+		conditions: fns,
+	})
 	return o
 }

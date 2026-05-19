@@ -13,6 +13,7 @@ const (
 
 	Operator_and LogicalOperator = " AND "
 	Operator_or  LogicalOperator = " OR "
+	Operator_not LogicalOperator = " NOT "
 
 	Operator_Asc  = " ASC"
 	Operator_Desc = " DESC"
@@ -70,7 +71,6 @@ type (
 	// }
 )
 
-// todo: test
 type Dialect interface {
 	// Name 返回数据库名称
 	Name() string
@@ -98,4 +98,8 @@ type Dialect interface {
 	// UniqueKey 返回唯一键标识
 	UniqueKey() string
 	GetTables(db *sql.DB, dbName string) ([]*sqlparser.Table, error)
+}
+
+func (l LogicalOperator) String() string {
+	return string(l)
 }

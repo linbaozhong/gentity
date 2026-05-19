@@ -15,40 +15,22 @@
 package ace
 
 import (
+	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
 )
 
 // Join 添加连接查询条件
 func (o *orm) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) Builder {
-	var on strings.Builder
-
-	if len(fns) > 0 {
-		tmpJoinParams := make([]any, len(o.joinParams), len(o.joinParams)+len(fns))
-		copy(tmpJoinParams, o.joinParams)
-
-		for _, fn := range fns {
-			on.WriteString(dialect.Operator_and)
-			cond, val := fn(&o.paramIndex, o.db.Dialect())
-
-			on.WriteString(cond)
-			if err := parseWhereParams(val, &tmpJoinParams); err != nil {
-				o.err = err
-				return o
-			}
-			// if vals, ok := val.([]any); ok {
-			// 	o.joinParams = append(o.joinParams, vals...)
-			// } else {
-			// 	o.joinParams = append(o.joinParams, val)
-			// }
-		}
-		o.joinParams = tmpJoinParams
+	if o.err != nil {
+		return o
 	}
-
-	o.join = append(o.join, [3]string{
-		string(joinType),
-		right.TableName(o.db.Dialect()),
-		left.Quote(o.db.Dialect()) + "=" + right.Quote(o.db.Dialect()) + on.String(),
+	o.join = append(o.join, join{
+		joinType:   joinType,
+		table:      right,
+		left:       left,
+		right:      right,
+		conditions: fns,
 	})
 	return o
 }
@@ -61,4 +43,25 @@ func (o *orm) LeftJoin(left, right dialect.Field, fns ...dialect.Condition) Buil
 // RightJoin 添加右连接查询条件。
 func (o *orm) RightJoin(left, right dialect.Field, fns ...dialect.Condition) Builder {
 	return o.Join(dialect.Right_Join, left, right, fns...)
+}
+
+func (o *orm) parseJoin(d []join) (joinStr strings.Builder, params []any, e error) {
+	for _, j := range d {
+		joinStr.WriteString(fmt.Sprintf(" %s JOIN %s ON (%s = %s",
+			j.joinType,
+			j.table.TableName(o.db.Dialect()),
+			j.left.Quote(o.db.Dialect()),
+			j.right.Quote(o.db.Dialect())))
+		for _, condition := range j.conditions {
+			joinStr.WriteString(dialect.Operator_and.String())
+			str, val := condition(&o.paramIndex, o.db.Dialect())
+			joinStr.WriteString(str)
+			if err := parseWhereParams(val, &params); err != nil {
+				e = err
+				return
+			}
+		}
+		joinStr.WriteString(")")
+	}
+	return
 }

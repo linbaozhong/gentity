@@ -40,33 +40,41 @@ type (
 		parse() (strings.Builder, []any)
 	}
 	cond struct {
-		op    dialect.LogicalOperator
-		cond  []dialect.Condition
-		child []cond
+		op         dialect.LogicalOperator
+		conditions []dialect.Condition
+		children   []cond
+	}
+	join struct {
+		joinType   dialect.JoinType
+		table      dialect.Field
+		left       dialect.Field
+		right      dialect.Field
+		conditions []dialect.Condition
 	}
 	orm struct {
 		pool.Model
-		db           Executer
-		paramIndex   uint8 // 参数索引计数器
-		table        string
-		join         [][3]string
-		joinParams   []any
-		distinct     bool
-		cols         []dialect.Field
-		funcs        []string
-		omits        []dialect.Field
-		groupBy      strings.Builder
-		having       strings.Builder
-		havingParams []any
-		orderBy      strings.Builder
-		limit        string
-		where        strings.Builder
-		whereParams  []any
+		db         Executer
+		paramIndex uint8 // 参数索引计数器
+		table      string
+		// join         [][3]string
+		join       []join
+		joinParams []any
+		distinct   bool
+		cols       []dialect.Field
+		funcs      []string
+		omits      []dialect.Field
+		groupBy    strings.Builder
+		having     []cond
+		// havingParams []any
+		orderBy strings.Builder
+		limit   string
+		// where        strings.Builder
 		// 条件
-		cond     []cond
-		exprCols []expr
-		params   []any
-		command  strings.Builder
+		cond        []cond
+		whereParams []any
+		exprCols    []expr
+		params      []any
+		command     strings.Builder
 		// commandString strings.Builder
 		// toSql 为true时，仅打印SQL语句，不执行
 		toSql bool
@@ -118,11 +126,11 @@ func (o *orm) Reset() {
 	o.join = o.join[:0]             // [][3]string{}      // o.join[:0]
 	o.joinParams = o.joinParams[:0] // []any{}      // o.joinParams[:0]
 	o.omits = o.omits[:0]           // []dialect.Field{} // o.omits[:0]
-	o.where.Reset()
+	o.cond = o.cond[:0]
 	o.whereParams = o.whereParams[:0] // []any{} // o.whereParams[:0]
 	o.groupBy.Reset()
-	o.having.Reset()
-	o.havingParams = o.havingParams[:0] // []any{} // o.havingParams[:0]
+	o.having = o.having[:0]
+	// o.havingParams = o.havingParams[:0] // []any{} // o.havingParams[:0]
 	o.orderBy.Reset()
 	o.limit = ""
 	o.exprCols = o.exprCols[:0] // []expr{} // o.exprCols[:0]
@@ -262,7 +270,8 @@ func (o *orm) Clone() Builder {
 	newOrm.funcs = make([]string, len(o.funcs))
 	copy(newOrm.funcs, o.funcs)
 
-	newOrm.join = make([][3]string, len(o.join))
+	// newOrm.join = make([][3]string, len(o.join))
+	newOrm.join = make([]join, len(o.join))
 	copy(newOrm.join, o.join)
 
 	newOrm.joinParams = make([]any, len(o.joinParams))
@@ -274,8 +283,8 @@ func (o *orm) Clone() Builder {
 	newOrm.whereParams = make([]any, len(o.whereParams))
 	copy(newOrm.whereParams, o.whereParams)
 
-	newOrm.havingParams = make([]any, len(o.havingParams))
-	copy(newOrm.havingParams, o.havingParams)
+	// newOrm.havingParams = make([]any, len(o.havingParams))
+	// copy(newOrm.havingParams, o.havingParams)
 
 	newOrm.exprCols = make([]expr, len(o.exprCols))
 	copy(newOrm.exprCols, o.exprCols)
@@ -287,14 +296,14 @@ func (o *orm) Clone() Builder {
 	newOrm.groupBy.Reset()
 	newOrm.groupBy.WriteString(o.groupBy.String())
 
-	newOrm.having.Reset()
-	newOrm.having.WriteString(o.having.String())
+	newOrm.having = make([]cond, len(o.cond))
+	copy(newOrm.having, o.having)
 
 	newOrm.orderBy.Reset()
 	newOrm.orderBy.WriteString(o.orderBy.String())
 
-	newOrm.where.Reset()
-	newOrm.where.WriteString(o.where.String())
+	newOrm.cond = make([]cond, len(o.cond))
+	copy(newOrm.cond, o.cond)
 
 	newOrm.command.Reset()
 	newOrm.command.WriteString(o.command.String())
@@ -345,21 +354,47 @@ func (o *orm) parse() (strings.Builder, []any) {
 	} else {
 		o.command.WriteString(" FROM " + o.db.Dialect().Quote(o.table))
 	}
-	for _, j := range o.join {
-		o.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// for _, j := range o.join {
+	// 	o.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// }
+	if len(o.join) > 0 {
+		joinStr, params, e := o.parseJoin(o.join)
+		if e != nil {
+			o.err = e
+		}
+		o.joinParams = params
+		if joinStr.Len() > 0 {
+			o.command.WriteString(joinStr.String())
+		}
 	}
 
 	// WHERE
-	if o.where.Len() > 0 {
-		o.command.WriteString(" WHERE " + o.where.String())
+	// if o.where.Len() > 0 {
+	// 	o.command.WriteString(" WHERE " + o.where.String())
+	// }
+	if len(o.cond) > 0 {
+		where, params, e := o.parseCond(o.cond)
+		if e != nil {
+			o.err = e
+		}
+		if where.Len() > 0 {
+			o.command.WriteString(" WHERE " + where.String())
+			o.whereParams = params
+		}
 	}
 	// GROUP BY
 	if o.groupBy.Len() > 0 {
 		o.command.WriteString(" GROUP BY " + o.groupBy.String())
 		// HAVING
-		if o.having.Len() > 0 {
-			o.command.WriteString(" HAVING " + o.having.String())
-			o.whereParams = append(o.whereParams, o.havingParams...)
+		if len(o.having) > 0 {
+			where, params, e := o.parseCond(o.having)
+			if e != nil {
+				o.err = e
+			}
+			if where.Len() > 0 {
+				o.command.WriteString(" HAVING " + where.String())
+				o.whereParams = append(o.whereParams, params...)
+			}
 		}
 	}
 	// ORDER BY
