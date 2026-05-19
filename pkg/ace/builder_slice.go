@@ -299,7 +299,7 @@ func (o *orders) Len() int {
 // 该函数可用于指定查询结果按指定字段进行升序排序。
 func asc(fs ...dialect.Field) dialect.Order {
 	// 返回一个匿名函数，该函数实现了 dialect.Order 接口，返回排序操作符 "ASC" 和字段列表
-	return func() (string, []dialect.Field) {
+	return func() (dialect.OrderType, []dialect.Field) {
 		// 返回升序操作符
 		return dialect.Operator_Asc, fs
 	}
@@ -310,7 +310,7 @@ func asc(fs ...dialect.Field) dialect.Order {
 // 该函数可用于指定查询结果按指定字段进行降序排序。
 func desc(fs ...dialect.Field) dialect.Order {
 	// 返回一个匿名函数，该函数实现了 dialect.Order 接口，返回排序操作符 "DESC" 和字段列表
-	return func() (string, []dialect.Field) {
+	return func() (dialect.OrderType, []dialect.Field) {
 		// 返回降序操作符
 		return dialect.Operator_Desc, fs
 	}

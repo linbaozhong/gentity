@@ -31,6 +31,8 @@ type (
 		Free()
 		String() string
 		Clone() Builder
+		// Debug 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
+		Debug(...bool) Builder
 
 		SelectBuilder
 		CreateBuilder
@@ -51,6 +53,10 @@ type (
 		right      dialect.Field
 		conditions []dialect.Condition
 	}
+	order struct {
+		col   dialect.Field
+		order dialect.OrderType
+	}
 	orm struct {
 		pool.Model
 		db         Executer
@@ -61,12 +67,12 @@ type (
 		joinParams []any
 		distinct   bool
 		cols       []dialect.Field
-		funcs      []string
+		funcs      []dialect.Function
 		omits      []dialect.Field
-		groupBy    strings.Builder
+		groupBy    []dialect.Field
 		having     []cond
 		// havingParams []any
-		orderBy strings.Builder
+		orderBy []order
 		limit   string
 		// where        strings.Builder
 		// 条件
@@ -75,9 +81,8 @@ type (
 		exprCols    []expr
 		params      []any
 		command     strings.Builder
-		// commandString strings.Builder
-		// toSql 为true时，仅打印SQL语句，不执行
-		toSql bool
+		// debug 为true时，仅打印SQL语句，不执行
+		debug bool
 		err   error
 	}
 )
@@ -109,7 +114,7 @@ func (o *orm) Free() {
 		return
 	}
 
-	if o.db.Debug() {
+	if o.debug || o.db.Debug() {
 		log.Info(o.String())
 	}
 
@@ -128,15 +133,15 @@ func (o *orm) Reset() {
 	o.omits = o.omits[:0]           // []dialect.Field{} // o.omits[:0]
 	o.cond = o.cond[:0]
 	o.whereParams = o.whereParams[:0] // []any{} // o.whereParams[:0]
-	o.groupBy.Reset()
+	o.groupBy = o.groupBy[:0]
 	o.having = o.having[:0]
 	// o.havingParams = o.havingParams[:0] // []any{} // o.havingParams[:0]
-	o.orderBy.Reset()
+	o.orderBy = o.orderBy[:0]
 	o.limit = ""
 	o.exprCols = o.exprCols[:0] // []expr{} // o.exprCols[:0]
 	o.params = o.params[:0]     // []any{} // o.params[:0]
 	o.command.Reset()
-	o.toSql = false
+	o.debug = false
 	o.err = nil
 }
 
@@ -248,12 +253,12 @@ func (o *orm) SetExpr(fns ...dialect.Setter) Builder {
 	return o
 }
 
-// ToSql 不传参数或者参数为true时，仅打印SQL语句，不执行
-func (o *orm) ToSql(b ...bool) Builder {
+// Debug 不传参数或者参数为true时，仅打印SQL语句，不执行
+func (o *orm) Debug(b ...bool) Builder {
 	if len(b) > 0 {
-		o.toSql = b[0]
+		o.debug = b[0]
 	} else {
-		o.toSql = true
+		o.debug = true
 	}
 	return o
 }
@@ -267,7 +272,7 @@ func (o *orm) Clone() Builder {
 	newOrm.cols = make([]dialect.Field, len(o.cols))
 	copy(newOrm.cols, o.cols)
 
-	newOrm.funcs = make([]string, len(o.funcs))
+	newOrm.funcs = make([]dialect.Function, len(o.funcs))
 	copy(newOrm.funcs, o.funcs)
 
 	// newOrm.join = make([][3]string, len(o.join))
@@ -293,14 +298,14 @@ func (o *orm) Clone() Builder {
 	copy(newOrm.params, o.params)
 
 	// 复制 strings.Builder 类型的字段
-	newOrm.groupBy.Reset()
-	newOrm.groupBy.WriteString(o.groupBy.String())
+	newOrm.groupBy = make([]dialect.Field, len(o.groupBy))
+	copy(newOrm.groupBy, o.groupBy)
 
 	newOrm.having = make([]cond, len(o.cond))
 	copy(newOrm.having, o.having)
 
-	newOrm.orderBy.Reset()
-	newOrm.orderBy.WriteString(o.orderBy.String())
+	newOrm.orderBy = make([]order, len(o.orderBy))
+	copy(newOrm.orderBy, o.orderBy)
 
 	newOrm.cond = make([]cond, len(o.cond))
 	copy(newOrm.cond, o.cond)
@@ -344,7 +349,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 		if colens > 0 && funlens > 0 {
 			o.command.WriteString(",")
 		}
-		o.command.WriteString(strings.Join(o.funcs, ","))
+		o.command.WriteString(strings.Join(o.parseFunc(o.funcs), ","))
 	}
 
 	// FROM TABLE
@@ -383,8 +388,15 @@ func (o *orm) parse() (strings.Builder, []any) {
 		}
 	}
 	// GROUP BY
-	if o.groupBy.Len() > 0 {
-		o.command.WriteString(" GROUP BY " + o.groupBy.String())
+	if len(o.groupBy) > 0 {
+		o.command.WriteString(" GROUP BY ")
+		for i, col := range o.groupBy {
+			if i > 0 {
+				o.command.WriteByte(',')
+			}
+			o.command.WriteString(col.Quote(o.db.Dialect()))
+		}
+
 		// HAVING
 		if len(o.having) > 0 {
 			where, params, e := o.parseCond(o.having)
@@ -398,8 +410,14 @@ func (o *orm) parse() (strings.Builder, []any) {
 		}
 	}
 	// ORDER BY
-	if o.orderBy.Len() > 0 {
-		o.command.WriteString(" ORDER BY " + o.orderBy.String())
+	if len(o.orderBy) > 0 {
+		o.command.WriteString(" ORDER BY ")
+		for i, ord := range o.orderBy {
+			if i > 0 {
+				o.command.WriteByte(',')
+			}
+			o.command.WriteString(ord.col.Quote(o.db.Dialect()) + " " + ord.order.String())
+		}
 	}
 
 	// LIMIT
@@ -417,7 +435,7 @@ func (o *orm) query(ctx context.Context) (*sql.Rows, error) {
 }
 
 func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows, error) {
-	if o.toSql {
+	if o.debug {
 		log.Info(o.String())
 		return &sql.Rows{}, Err_ToSql
 	}
@@ -433,7 +451,7 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 }
 
 func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, error) {
-	if o.toSql {
+	if o.debug {
 		log.Info(o.String())
 		return &sql.Row{}, Err_ToSql
 	}

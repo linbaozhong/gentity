@@ -35,7 +35,7 @@ func TestOrmCond(t *testing.T) {
 	o.AndOr(data.Id.Eq(1), data.Id.Eq(2))
 	o.OrAnd(data.Id.Eq(3), data.Id.Eq(4))
 	o.RawWhere("id=?", 5)
-	o.ToSql(true).Select(db).QueryRow(context.Background())
+	o.Debug(true).Select(db).QueryRow(context.Background())
 
 	// where,params,e:=o.parseCond(o.cond)
 	t.Log(o.String())

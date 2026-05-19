@@ -39,7 +39,7 @@ func init() {
 	}
 	dbx.SetMaxOpenConns(50)
 	dbx.SetMaxIdleConns(25)
-	dbx.SetDebug(true)
+	dbx.Debug(true)
 }
 
 // TestCreateSet 测试函数，用于测试不同方式插入数据的功能。

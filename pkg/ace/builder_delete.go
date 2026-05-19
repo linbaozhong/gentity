@@ -25,8 +25,8 @@ type DeleteBuilder interface {
 	Wherer
 	// Delete 创建删除器,如果实例化时没有传入了DB，则此处必须传入DB
 	Delete(...*DB) Deleter
-	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
-	ToSql(...bool) Builder
+	// // ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
+	// ToSql(...bool) Builder
 }
 
 // Deleter 删除器
@@ -73,7 +73,7 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	// 只返回SQL语句，不执行
-	if d.toSql {
+	if d.debug {
 		log.Info(d.String())
 		return &noRows{}, Err_ToSql
 	}

@@ -54,10 +54,14 @@ func (o *orm) Asc(cols ...dialect.Field) Builder {
 		return o
 	}
 	for _, col := range cols {
-		if o.orderBy.Len() > 0 {
-			o.orderBy.WriteByte(',')
-		}
-		o.orderBy.WriteString(col.Quote(o.db.Dialect()))
+		// if o.orderBy.Len() > 0 {
+		// 	o.orderBy.WriteByte(',')
+		// }
+		// o.orderBy.WriteString(col.Quote(o.db.Dialect()))
+		o.orderBy = append(o.orderBy, order{
+			col:   col,
+			order: dialect.Operator_Asc,
+		})
 	}
 	return o
 }
@@ -68,10 +72,14 @@ func (o *orm) Desc(cols ...dialect.Field) Builder {
 		return o
 	}
 	for _, col := range cols {
-		if o.orderBy.Len() > 0 {
-			o.orderBy.WriteByte(',')
-		}
-		o.orderBy.WriteString(col.Quote(o.db.Dialect()) + dialect.Operator_Desc)
+		// if o.orderBy.Len() > 0 {
+		// 	o.orderBy.WriteByte(',')
+		// }
+		// o.orderBy.WriteString(col.Quote(o.db.Dialect()) + dialect.Operator_Desc)
+		o.orderBy = append(o.orderBy, order{
+			col:   col,
+			order: dialect.Operator_Desc,
+		})
 	}
 	return o
 }

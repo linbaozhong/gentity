@@ -114,7 +114,7 @@ var (
 	dbx.SetMaxIdleConns(25)
 	// 开启调试模式，打印sql语句
 	// 注意：开启调试模式会影响性能，建议在开发环境开启，生产环境关闭
-	// 如果关闭调试模式，也可以在dao方法中链式调用 ToSql()方法，打印单行sql语句
+	// 如果关闭调试模式，也可以在dao方法中链式调用 Debug()方法，打印单行sql语句
 	dbx.SetDebug(true)
 ```
 
@@ -133,7 +133,7 @@ func TestCreateSet(t *testing.T) {
 	//  2. 插入数据时，需要传入dialect.Setter类型的参数
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Insert 方法插入数据
 	// id 为插入数据的主键值，err 为可能出现的错误
-	// 这里的 .ToSql()方法是为了不执行sql命令只打印sql语句，在需要检查sql语句是否正确时使用
+	// 这里的 .Debug()方法是为了不执行sql命令只打印sql语句，在需要检查sql语句是否正确时使用
 	id, err := dao.Company(dbx).ToSql().Insert(context.Background(),
 		// 设置公司的长名称为 "aaaaaa"
 		tblcompany.LongName.Set("aaaaaa"),

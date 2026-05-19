@@ -29,8 +29,8 @@ type UpdateBuilder interface {
 	Wherer
 	// Update 创建更新器,如果实例化时没有传入了DB，则此处必须传入DB
 	Update(...*DB) Updater
-	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
-	ToSql(...bool) Builder
+	// Debug 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
+	Debug(...bool) Builder
 }
 
 type Updater interface {
@@ -97,7 +97,7 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	// 只返回SQL语句，不执行
-	if u.toSql {
+	if u.debug {
 		log.Info(u.String())
 		return &noRows{}, Err_ToSql
 	}
@@ -150,7 +150,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	}
 
 	// 只返回SQL语句，不执行
-	if u.toSql {
+	if u.debug {
 		log.Info(u.String())
 		return &noRows{}, Err_ToSql
 	}
@@ -208,7 +208,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	}
 
 	// 只返回SQL语句，不执行
-	if u.toSql {
+	if u.debug {
 		log.Info(u.String())
 		return &noRows{}, Err_ToSql
 	}

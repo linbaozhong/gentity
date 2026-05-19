@@ -47,7 +47,7 @@ type (
 )
 
 var (
-	Err_ToSql = errors.New("the SQL command terminates execution after the ToSql() method")
+	Err_ToSql = errors.New("the SQL command terminates execution after the Debug() method")
 
 	// _obj  *DB
 	// _once sync.Once

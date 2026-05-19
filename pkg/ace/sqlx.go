@@ -15,10 +15,10 @@ import (
 // that uses sqlx, you should be aware that the name mappings you expect
 // can be overridden by your user's application.
 
-// NameMapper is used to map column names to struct field names.  By default,
-// it uses strings.ToLower to lowercase struct field names.  It can be set
+// NameMapper is used to map column names to struct col names.  By default,
+// it uses strings.ToLower to lowercase struct col names.  It can be set
 // to whatever you want, but it is encouraged to be set before sqlx is used
-// as name-to-field mappings are cached after first use on a type.
+// as name-to-col mappings are cached after first use on a type.
 var NameMapper = strings.ToLower
 var origMapper = reflect.ValueOf(NameMapper)
 
@@ -627,7 +627,7 @@ func (r *Rows) StructScan(dest any) error {
 	if err != nil {
 		return err
 	}
-	// scan into the struct field pointers and append to our results
+	// scan into the struct col pointers and append to our results
 	err = r.Scan(r.values...)
 	if err != nil {
 		return err
@@ -765,7 +765,7 @@ func (r *Row) scanAny(dest any, structOnly bool) error {
 	if err != nil {
 		return err
 	}
-	// scan into the struct field pointers and append to our results
+	// scan into the struct col pointers and append to our results
 	return r.Scan(values...)
 }
 
@@ -939,7 +939,7 @@ func scanAll(rows rowsi, dest any, structOnly bool) error {
 				return err
 			}
 
-			// scan into the struct field pointers and append to our results
+			// scan into the struct col pointers and append to our results
 			err = rows.Scan(values...)
 			if err != nil {
 				return err
@@ -1024,7 +1024,7 @@ func fieldsByTraversal(v reflect.Value, traversals [][]int, values []any, ptrs b
 func missingFields(transversals [][]int) (field int, err error) {
 	for i, t := range transversals {
 		if len(t) == 0 {
-			return i, errors.New("missing field")
+			return i, errors.New("missing col")
 		}
 	}
 	return 0, nil

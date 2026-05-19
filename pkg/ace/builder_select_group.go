@@ -26,12 +26,8 @@ func (o *orm) Group(cols ...dialect.Field) Builder {
 	if len(cols) == 0 || o.err != nil {
 		return o
 	}
-	for _, col := range cols {
-		if o.groupBy.Len() > 0 {
-			o.groupBy.WriteByte(',')
-		}
-		o.groupBy.WriteString(col.Quote(o.db.Dialect()))
-	}
+
+	o.groupBy = append(o.groupBy, cols...)
 	return o
 }
 
@@ -41,27 +37,6 @@ func (o *orm) Having(fns ...dialect.Condition) Builder {
 		return o
 	}
 
-	// tmpHavingParams := make([]any, len(o.havingParams), len(o.havingParams)+len(fns))
-	// copy(tmpHavingParams, o.havingParams)
-	//
-	// o.having.WriteString("(")
-	// for i, fn := range fns {
-	// 	if i > 0 {
-	// 		o.having.WriteString(dialect.Operator_and.String())
-	// 	}
-	// 	cond, val := fn(&o.paramIndex, o.db.Dialect())
-	// 	o.having.WriteString(cond)
-	//
-	// 	if err := parseWhereParams(val, &tmpHavingParams); err != nil {
-	// 		o.err = err
-	// 		return o
-	// 	}
-	// 	// if vals, ok := val.([]any); ok {
-	// 	// 	o.havingParams = append(o.havingParams, vals...)
-	// 	// }
-	// }
-	// o.havingParams = tmpHavingParams
-	// o.having.WriteString(")")
 	o.having = append(o.having, cond{
 		op:         dialect.Operator_and,
 		conditions: fns,

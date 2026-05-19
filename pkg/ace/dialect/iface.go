@@ -15,8 +15,8 @@ const (
 	Operator_or  LogicalOperator = " OR "
 	Operator_not LogicalOperator = " NOT "
 
-	Operator_Asc  = " ASC"
-	Operator_Desc = " DESC"
+	Operator_Asc  OrderType = " ASC"
+	Operator_Desc OrderType = " DESC"
 
 	MaxLimit uint = 1000
 	PageSize uint = 20
@@ -34,6 +34,7 @@ var (
 
 type (
 	JoinType        string
+	OrderType       string
 	LogicalOperator string
 
 	TableNamer interface {
@@ -102,4 +103,8 @@ type Dialect interface {
 
 func (l LogicalOperator) String() string {
 	return string(l)
+}
+
+func (o OrderType) String() string {
+	return string(o)
 }

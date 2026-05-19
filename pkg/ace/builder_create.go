@@ -28,8 +28,6 @@ type CreateBuilder interface {
 	SetExpr(fns ...dialect.Setter) Builder
 	// Create 创建插入器,如果实例化时没有传入了DB，则此处必须传入DB
 	Create(...*DB) Creater
-	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
-	ToSql(...bool) Builder
 }
 
 type Creater interface {
@@ -79,7 +77,7 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	}
 	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
-	if c.toSql {
+	if c.debug {
 		log.Info(c.String())
 		return &noRows{}, Err_ToSql
 	}
@@ -112,7 +110,7 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	c.command.WriteString(") VALUES ")
 	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 	// 只返回SQL语句，不执行
-	if c.toSql {
+	if c.debug {
 		log.Info(c.String())
 		return &noRows{}, Err_ToSql
 	}
@@ -147,7 +145,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	c.command.WriteString(") VALUES ")
 	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
 	// 只返回SQL语句，不执行
-	if c.toSql {
+	if c.debug {
 		log.Info(c.String())
 		return &noRows{}, Err_ToSql
 	}

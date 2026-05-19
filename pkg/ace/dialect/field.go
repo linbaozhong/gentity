@@ -39,7 +39,7 @@ type (
 
 	Function  func(Dialect) string
 	Condition func(*uint8, Dialect) (string, any)
-	Order     func() (string, []Field)
+	Order     func() (OrderType, []Field)
 	Setter    func() (Field, any, SetOp)
 )
 

@@ -198,7 +198,7 @@ func TestUpdateSet(t *testing.T) {
 		).
 		Where(tblcompany.Id.Eq(1)).Clone()
 
-	result, err := sss.ToSql().Update(dbx).
+	result, err := sss.Debug().Update(dbx).
 		Exec(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -255,7 +255,7 @@ func TestSelect(t *testing.T) {
 	// 调用 daocompany 包的 New 函数创建一个新的 DAO 实例，并调用其 Get 方法进行查询
 	// obj 为查询结果对象，has 表示是否查询到数据，err 为可能出现的错误
 	// 这里指定查询 tblcompany 表的 Id 和 LongName 列，查询条件为 Id 等于 1
-	obj, has, err := dao.Company(dbx). //ToSql().
+	obj, has, err := dao.Company(dbx). //Debug().
 						Get(context.Background(),
 			ace.Cols(tblcompany.Id, tblcompany.LongName).
 				Where(tblcompany.Id.In(1, 2, 3, 4, 5, 6, 7, 8, 9)),
@@ -283,7 +283,7 @@ func TestSelect(t *testing.T) {
 	// 调用 daocompany 包的 Builder 函数创建一个构建器实例，设置查询条件为 Id 等于 1
 	// 然后调用 Select 方法指定数据库连接，再调用 Get 方法将查询结果填充到 obj 中
 	// err 为可能出现的错误
-	err = ace.Table(do.CompanyTableName). // ToSql().
+	err = ace.Table(do.CompanyTableName). // Debug().
 						Cols(tblcompany.Id, tblcompany.State, tblcompany.Address).
 						Where(tblcompany.Id.Eq(2)).
 						Select(dbx).
@@ -310,7 +310,7 @@ func TestSelect(t *testing.T) {
 	// 调用 ace 包的 Table 函数指定要操作的表，设置查询条件为 Id 等于 1
 	// 然后调用 Select 方法指定数据库连接，再调用 Get 方法将查询结果填充到 obj 中
 	// err 为可能出现的错误
-	err = ace.Table(do.CompanyTableName). // ToSql().
+	err = ace.Table(do.CompanyTableName). // Debug().
 						Where(tblcompany.Id.Eq(3)).
 						Select(dbx).
 						Get(context.Background(), obj)

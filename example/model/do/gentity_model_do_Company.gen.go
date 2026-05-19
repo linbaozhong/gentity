@@ -351,7 +351,7 @@ func (p *Company) Insert(ctx context.Context, sets ...dialect.Setter) (int64, er
 	}
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Set(sets...).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Create().
 		Exec(ctx)
 	if e != nil {
@@ -366,7 +366,7 @@ func (p *Company) InsertOne(ctx context.Context, cols ...dialect.Field) (bool, e
 	defer p.Free()
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Cols(cols...).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Create().
 		Struct(ctx, p)
 	if e != nil {
@@ -393,7 +393,7 @@ func (p *Company) InsertBatch(ctx context.Context, beans []*Company, cols ...dia
 	}
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Cols(cols...).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Create().
 		BatchStruct(ctx, _args...)
 	if e != nil {
@@ -412,7 +412,7 @@ func (p *Company) Update(ctx context.Context, sets []dialect.Setter, cond ...dia
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Where(cond...).
 		Set(sets...).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Update().
 		Exec(ctx)
 	if e != nil {
@@ -436,7 +436,7 @@ func (p *Company) UpdateOne(ctx context.Context, cols ...dialect.Field) (bool, e
 	defer p.Free()
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Cols(cols...).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Update().
 		Struct(ctx, p)
 	if e != nil {
@@ -461,7 +461,7 @@ func (p *Company) UpdateBatch(ctx context.Context, beans []*Company, cols ...dia
 	}
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Cols(cols...).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Update().
 		BatchStruct(ctx, _args...)
 	if e != nil {
@@ -476,7 +476,7 @@ func (p *Company) Delete(ctx context.Context, cond ...dialect.Condition) (bool, 
 	defer p.Free()
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Where(cond...).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Delete().
 		Exec(ctx)
 	if e != nil {
@@ -504,7 +504,7 @@ func (p *Company) DeleteByIds(ctx context.Context, ids []any) (int64, error) {
 
 	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
 		Where(tblcompany.PrimaryKey.In(ids...)).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Delete().
 		Exec(ctx)
 	if e != nil {
@@ -542,7 +542,7 @@ func (p *Company) Get(ctx context.Context, s ace.SelectBuilder) (*Company, bool,
 		s.Cols(_cols...)
 	}
 	_row, e := s.SetDB(p.GetDB()).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Select().
 		QueryRow(ctx)
 	if e != nil {
@@ -583,7 +583,7 @@ func (p *Company) GetByIds(ctx context.Context, ids []any, cols ...dialect.Field
 	}
 
 	_rows, e := s.
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Select().
 		Query(ctx)
 	if e != nil {
@@ -618,7 +618,7 @@ func (p *Company) Cell(ctx context.Context, s ace.SelectBuilder) (any, bool, err
 		s.Cols(tblcompany.PrimaryKey)
 	}
 	_row, e := s.SetDB(p.GetDB()).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Select().
 		QueryRow(ctx)
 	if e != nil {
@@ -650,7 +650,7 @@ func (p *Company) List(ctx context.Context, s ace.SelectBuilder) ([]*Company, bo
 	}
 
 	_rows, e := s.SetDB(p.GetDB()).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Select().
 		Query(ctx)
 	if e != nil {
@@ -685,7 +685,7 @@ func (p *Company) Column(ctx context.Context, s ace.SelectBuilder) ([]any, error
 	}
 
 	_rows, e := s.SetDB(p.GetDB()).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Select().
 		Query(ctx)
 	if e != nil {
@@ -709,7 +709,7 @@ func (p *Company) Column(ctx context.Context, s ace.SelectBuilder) ([]any, error
 func (p *Company) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer p.Free()
 	return ace.New(p.GetDB()).Table(CompanyTableName).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Select().
 		Count(ctx, cond...)
 }
@@ -718,7 +718,7 @@ func (p *Company) Count(ctx context.Context, cond ...dialect.Condition) (int64, 
 func (p *Company) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer p.Free()
 	return ace.New(p.GetDB()).Table(CompanyTableName).
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Select().
 		Sum(ctx, cols, cond...)
 }
@@ -728,7 +728,7 @@ func (p *Company) Exists(ctx context.Context, cond ...dialect.Condition) (bool, 
 	defer p.Free()
 	_c := ace.New(p.GetDB()).Table(CompanyTableName).Cols(tblcompany.PrimaryKey).Where(cond...)
 	_row, e := _c.
-		ToSql(p.Debug()).
+		Debug(p.Debug()).
 		Select().
 		QueryRow(ctx)
 	if e != nil {

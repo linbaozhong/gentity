@@ -64,11 +64,20 @@ func (o *orm) PureCols(cols ...dialect.Field) Builder {
 
 // Func 添加聚合函数到查询中
 func (o *orm) Func(fns ...dialect.Function) Builder {
-	tmpFuncs := make([]string, len(o.funcs), len(fns)+len(o.funcs))
-	copy(tmpFuncs, o.funcs)
+	// tmpFuncs := make([]string, len(o.funcs), len(fns)+len(o.funcs))
+	// copy(tmpFuncs, o.funcs)
+	// for _, fn := range fns {
+	// 	tmpFuncs = append(tmpFuncs, fn(o.db.Dialect()))
+	// }
+	// o.funcs = tmpFuncs
+	o.funcs = append(o.funcs, fns...)
+	return o
+}
+
+func (o *orm) parseFunc(fns []dialect.Function) []string {
+	tmpFuncs := make([]string, 0, len(o.funcs))
 	for _, fn := range fns {
 		tmpFuncs = append(tmpFuncs, fn(o.db.Dialect()))
 	}
-	o.funcs = tmpFuncs
-	return o
+	return tmpFuncs
 }

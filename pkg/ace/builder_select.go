@@ -42,8 +42,8 @@ type SelectBuilder interface {
 	Select(...*DB) Selecter
 	// // Sub 子查询
 	// Sub(b Builder, as ...string) Builder
-	// ToSql 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
-	ToSql(...bool) Builder
+	// Debug 不传参数或者参数为 true 时，仅打印SQL语句，不执行。
+	Debug(...bool) Builder
 }
 
 type Selecter interface {
@@ -353,43 +353,6 @@ func (s *read) Avg(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 		s.Func(col.Avg())
 	}
 	return s.aggregateQuery(ctx, cols, cond...)
-
-	// s.Where(conditions...)
-	// s.command.WriteString("SELECT ")
-	// s.command.WriteString(strings.Join(s.funcs, ","))
-	//
-	// // FROM TABLE
-	// s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
-	// for _, j := range s.join {
-	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	// }
-	//
-	// // WHERE
-	// if s.where.Len() > 0 {
-	// 	s.command.WriteString(" WHERE " + s.where.String())
-	// }
-	//
-	// // LIMIT
-	// if s.limit != "" {
-	// 	s.command.WriteString(s.limit)
-	// }
-	//
-	// row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// var avg = make([]any, len(cols))
-	// err = row.Scan(avg...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// avgs := make(map[string]any, len(cols))
-	// for i := range avg {
-	// 	avgs[cols[i].Name] = avg[i]
-	// }
-	// return avgs, nil
 }
 
 // Max 返回最大值
@@ -403,43 +366,6 @@ func (s *read) Max(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 		s.Func(col.Max())
 	}
 	return s.aggregateQuery(ctx, cols, cond...)
-
-	// s.Where(conditions...)
-	// s.command.WriteString("SELECT ")
-	// s.command.WriteString(strings.Join(s.funcs, ","))
-	//
-	// // FROM TABLE
-	// s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
-	// for _, j := range s.join {
-	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	// }
-	//
-	// // WHERE
-	// if s.where.Len() > 0 {
-	// 	s.command.WriteString(" WHERE " + s.where.String())
-	// }
-	//
-	// // LIMIT
-	// if s.limit != "" {
-	// 	s.command.WriteString(s.limit)
-	// }
-	//
-	// row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// var max = make([]any, len(cols))
-	// err = row.Scan(max...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// maxs := make(map[string]any, len(cols))
-	// for i := range max {
-	// 	maxs[cols[i].Name] = max[i]
-	// }
-	// return maxs, nil
 }
 
 // Min 返回最小值
@@ -453,43 +379,6 @@ func (s *read) Min(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 		s.Func(col.Min())
 	}
 	return s.aggregateQuery(ctx, cols, cond...)
-
-	// s.Where(conditions...)
-	// s.command.WriteString("SELECT ")
-	// s.command.WriteString(strings.Join(s.funcs, ","))
-	//
-	// // FROM TABLE
-	// s.command.WriteString(" FROM " + dialect.Quote_Char_Left + s.table + dialect.Quote_Char_Right)
-	// for _, j := range s.join {
-	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	// }
-	//
-	// // WHERE
-	// if s.where.Len() > 0 {
-	// 	s.command.WriteString(" WHERE " + s.where.String())
-	// }
-	//
-	// // LIMIT
-	// if s.limit != "" {
-	// 	s.command.WriteString(s.limit)
-	// }
-	//
-	// row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// var min = make([]any, len(cols))
-	// err = row.Scan(min...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// mins := make(map[string]any, len(cols))
-	// for i := range min {
-	// 	mins[cols[i].Name] = min[i]
-	// }
-	// return mins, nil
 }
 
 // aggregateQuery 聚合查询的公共部分：构建SQL、执行查询、扫描结果
@@ -497,7 +386,7 @@ func (s *read) Min(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	s.Where(cond...)
 	s.command.WriteString("SELECT ")
-	s.command.WriteString(strings.Join(s.funcs, ","))
+	s.command.WriteString(strings.Join(s.parseFunc(s.funcs), ","))
 
 	// FROM TABLE
 	s.command.WriteString(" FROM " + s.db.Dialect().Quote(s.table))
@@ -521,13 +410,15 @@ func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ..
 	// 	s.command.WriteString(" WHERE " + s.where.String())
 	// }
 
-	where, params, e := s.parseCond(s.cond)
-	if e != nil {
-		s.err = e
-	}
-	s.whereParams = params
-	if where.Len() > 0 {
-		s.command.WriteString(" WHERE " + where.String())
+	if len(s.cond) > 0 {
+		where, params, e := s.parseCond(s.cond)
+		if e != nil {
+			s.err = e
+		}
+		s.whereParams = params
+		if where.Len() > 0 {
+			s.command.WriteString(" WHERE " + where.String())
+		}
 	}
 
 	// LIMIT

@@ -11,6 +11,6 @@ import (
 func TestName(t *testing.T) {
 	_, e := ace.Table(do.AccountTableName).
 		Where(tblaccount.Id.MBRContains(116.461, 39.908, 5000)).
-		ToSql(true).Select().QueryRow(context.Background())
+		Debug(true).Select().QueryRow(context.Background())
 	t.Log(e)
 }

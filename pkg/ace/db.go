@@ -41,14 +41,11 @@ func (s *DB) Mapper() *reflectx.Mapper {
 	return s.mapper
 }
 
-// SetDebug
-func (s *DB) SetDebug(debug bool) *DB {
-	s.debug = debug
-	return s
-}
-
 // Debug
-func (s *DB) Debug() bool {
+func (s *DB) Debug(debug ...bool) bool {
+	if len(debug) > 0 {
+		s.debug = debug[0]
+	}
 	return s.debug
 }
 
