@@ -381,6 +381,9 @@ func (s *read) Min(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 // aggregateQuery 聚合查询的公共部分：构建SQL、执行查询、扫描结果
 // 调用前需要先设置 s.funcs 和 s.where
 func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
+	//
+	s.command.Reset()
+
 	s.Where(cond...)
 	s.command.WriteString("SELECT ")
 	s.command.WriteString(strings.Join(s.parseFunc(s.funcs), ","))

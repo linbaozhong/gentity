@@ -71,11 +71,12 @@ type (
 		limit   string
 		// where        strings.Builder
 		// 条件
-		cond        []dialect.Condition
-		whereParams []any
-		exprCols    []expr
-		params      []any
-		command     strings.Builder
+		cond           []dialect.Condition
+		whereParams    []any
+		subQueryParams []any // 子查询参数
+		exprCols       []expr
+		params         []any
+		command        strings.Builder
 		// debug 为true时，仅打印SQL语句，不执行
 		debug bool
 		err   error
@@ -128,6 +129,7 @@ func (o *orm) Reset() {
 	o.omits = o.omits[:0]           // []dialect.Field{} // o.omits[:0]
 	o.cond = o.cond[:0]
 	o.whereParams = o.whereParams[:0] // []any{} // o.whereParams[:0]
+	o.subQueryParams = o.subQueryParams[:0]
 	o.groupBy = o.groupBy[:0]
 	o.having = o.having[:0]
 	// o.havingParams = o.havingParams[:0] // []any{} // o.havingParams[:0]
@@ -164,7 +166,7 @@ func (o *orm) Table(a any, as ...string) Builder {
 	case Builder:
 		cmd, params := v.parse()
 		o.table = "(" + cmd.String() + ")"
-		o.whereParams = append(o.whereParams, params...)
+		o.subQueryParams = append(o.subQueryParams, params...)
 		if len(as) > 0 {
 			o.table = fmt.Sprintf("%s AS %s", o.table, as[0])
 		}
@@ -211,9 +213,11 @@ func (o *orm) Set(fns ...dialect.Setter) Builder {
 			tmpParams = append(tmpParams, val)
 		} else {
 			ex, val, e := dialect.ParseSetter(fn, &o.paramIndex, o.db.Dialect())
-			if e == nil {
-				tmpExprCols = append(tmpExprCols, expr{colName: ex, arg: val})
+			if e != nil {
+				o.err = e
+				return o
 			}
+			tmpExprCols = append(tmpExprCols, expr{colName: ex, arg: val})
 		}
 	}
 	o.cols = tmpCols
@@ -283,6 +287,9 @@ func (o *orm) Clone() Builder {
 	newOrm.whereParams = make([]any, len(o.whereParams))
 	copy(newOrm.whereParams, o.whereParams)
 
+	newOrm.subQueryParams = make([]any, len(o.subQueryParams))
+	copy(newOrm.subQueryParams, o.subQueryParams)
+
 	// newOrm.havingParams = make([]any, len(o.havingParams))
 	// copy(newOrm.havingParams, o.havingParams)
 
@@ -296,7 +303,7 @@ func (o *orm) Clone() Builder {
 	newOrm.groupBy = make([]dialect.Field, len(o.groupBy))
 	copy(newOrm.groupBy, o.groupBy)
 
-	newOrm.having = make([]dialect.Condition, len(o.cond))
+	newOrm.having = make([]dialect.Condition, len(o.having))
 	copy(newOrm.having, o.having)
 
 	newOrm.orderBy = make([]order, len(o.orderBy))
@@ -313,10 +320,10 @@ func (o *orm) Clone() Builder {
 
 // 合并参数
 func (o *orm) mergeParams() []any {
-	params := make([]any, len(o.joinParams)+len(o.params)+len(o.whereParams))
+	params := make([]any, len(o.joinParams)+len(o.subQueryParams)+len(o.params)+len(o.whereParams))
 
-	// 复制各部分参数到新切片
 	idx := copy(params, o.joinParams)
+	idx += copy(params[idx:], o.subQueryParams)
 	idx += copy(params[idx:], o.params)
 	copy(params[idx:], o.whereParams)
 	return params
@@ -433,9 +440,10 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 	if err != nil {
 		return nil, err
 	}
-	if o.db.IsDB() {
-		defer stmt.Close()
-	}
+
+	// if o.db.IsDB() {
+	defer stmt.Close()
+	// }
 
 	return stmt.QueryContext(ctx, params...)
 }
@@ -449,9 +457,10 @@ func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, 
 	if err != nil {
 		return nil, err
 	}
-	if o.db.IsDB() {
-		defer stmt.Close()
-	}
+
+	// if o.db.IsDB() {
+	defer stmt.Close()
+	// }
 
 	return stmt.QueryRowContext(ctx, params...), nil
 }
