@@ -30,7 +30,7 @@ func (s *SQLServer) Quote(name string) string {
 // Placeholder 参数占位符：
 // SQL Server go-mssqldb 驱动支持 ?（自动转换）
 // 原生格式为 @p1, @p2...
-func (s *SQLServer) Placeholder(index *uint8) string {
+func (s *SQLServer) Placeholder(index *uint16) string {
 	*index = *index + 1
 	// 使用 ? 兼容 go-mssqldb 驱动
 	// 如需原生 @p1 格式可改为: fmt.Sprintf("@p%d", *index)

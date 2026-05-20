@@ -39,7 +39,7 @@ type (
 		Condition CondFunc
 		Children  []Condition
 	}
-	CondFunc func(*uint8, Dialect) (string, any)
+	CondFunc func(*uint16, Dialect) (string, any)
 	// Order 排序
 	Order func() (OrderType, []Field)
 	// Setter 赋值

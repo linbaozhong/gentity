@@ -73,7 +73,7 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	u.command.WriteString("UPDATE " + u.db.Dialect().Quote(u.table) + " SET ")
 	_cols := make([]string, 0, lens)
 	for _, col := range u.cols {
-		_cols = append(_cols, col.Quote(u.db.Dialect())+" = ?")
+		_cols = append(_cols, col.Quote(u.db.Dialect())+" = "+u.db.Dialect().Placeholder(&u.paramIndex))
 	}
 	for _, col := range u.exprCols {
 		_cols = append(_cols, col.colName)
@@ -128,7 +128,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		if i > 0 {
 			u.command.WriteString(",")
 		}
-		u.command.WriteString(col + " = ?")
+		u.command.WriteString(col + " = " + u.db.Dialect().Placeholder(&u.paramIndex))
 	}
 	u.params = append(u.params, vals...)
 	//
@@ -186,7 +186,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		if i > 0 {
 			u.command.WriteString(",")
 		}
-		u.command.WriteString(col + " = ?")
+		u.command.WriteString(col + " = " + u.db.Dialect().Placeholder(&u.paramIndex))
 	}
 	u.params = append(u.params, vals...)
 	//

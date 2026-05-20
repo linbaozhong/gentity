@@ -73,7 +73,7 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 
 	values := make([]string, lens)
 	for i := range values {
-		values[i] = "?"
+		values[i] = c.db.Dialect().Placeholder(&c.paramIndex)
 	}
 	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
@@ -108,7 +108,12 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
-	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
+	//
+	values := make([]string, _colLens)
+	for i := range values {
+		values[i] = c.db.Dialect().Placeholder(&c.paramIndex)
+	}
+	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
 	if c.debug || c.db.Debug() {
 		log.Info(c.String())
@@ -119,6 +124,10 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	stmt, err := c.db.PrepareContext(ctx, c.command.String())
 	if err != nil {
 		return nil, err
+	}
+
+	if c.db.IsDB() {
+		defer stmt.Close()
 	}
 
 	return stmt.ExecContext(ctx, c.params...)
@@ -143,7 +152,11 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
-	c.command.WriteString("(" + strings.Repeat("?,", _colLens)[:_colLens*2-1] + ")")
+	values := make([]string, _colLens)
+	for i := range values {
+		values[i] = c.db.Dialect().Placeholder(&c.paramIndex)
+	}
+	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
 	if c.debug || c.db.Debug() {
 		log.Info(c.String())

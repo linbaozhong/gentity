@@ -98,7 +98,7 @@ func (f *Field) Expr(expr string) Setter {
 	}
 }
 
-func ParseSetter(set Setter, i *uint8, d Dialect) (string, any, error) {
+func ParseSetter(set Setter, i *uint16, d Dialect) (string, any, error) {
 	f, v, op := set()
 	if e, ok := v.(error); ok {
 		return "", nil, e
@@ -120,7 +120,7 @@ func ParseSetter(set Setter, i *uint8, d Dialect) (string, any, error) {
 // Eq 条件：等于
 func (f *Field) Eq(val any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			// 空值检查，可根据实际需求决定是否保留
 			if val == nil {
 				return "1 = 0", Err_Condition_Empty_Param
@@ -133,7 +133,7 @@ func (f *Field) Eq(val any) Condition {
 // NotEq 条件：不等于
 func (f *Field) NotEq(val any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			// 空值检查，可根据实际需求决定是否保留
 			if val == nil {
 				return "1 = 0", Err_Condition_Empty_Param
@@ -146,7 +146,7 @@ func (f *Field) NotEq(val any) Condition {
 // Gt 条件：大于
 func (f *Field) Gt(val any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			// 空值检查，可根据实际需求决定是否保留
 			if val == nil {
 				return "1 = 0", Err_Condition_Empty_Param
@@ -159,7 +159,7 @@ func (f *Field) Gt(val any) Condition {
 // Gte 条件：大于或等于
 func (f *Field) Gte(val any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			// 空值检查，可根据实际需求决定是否保留
 			if val == nil {
 				return "1 = 0", Err_Condition_Empty_Param
@@ -173,7 +173,7 @@ func (f *Field) Gte(val any) Condition {
 // Lt 条件：小于
 func (f *Field) Lt(val any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			// 空值检查，可根据实际需求决定是否保留
 			if val == nil {
 				return "1 = 0", Err_Condition_Empty_Param
@@ -186,7 +186,7 @@ func (f *Field) Lt(val any) Condition {
 // Lte 条件：小于或等于
 func (f *Field) Lte(val any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			// 空值检查，可根据实际需求决定是否保留
 			if val == nil {
 				return "1 = 0", Err_Condition_Empty_Param
@@ -218,7 +218,7 @@ func checkSlice(vals ...any) error {
 // In 条件：包含
 func (f *Field) In(vals ...any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			l := len(vals)
 			if l == 0 {
 				return "1 = 0", Err_Condition_Empty_Param
@@ -249,7 +249,7 @@ func (f *Field) In(vals ...any) Condition {
 // NotIn 条件：不包含
 func (f *Field) NotIn(vals ...any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			l := len(vals)
 			if l == 0 {
 				return "1 = 0", Err_Condition_Empty_Param
@@ -279,14 +279,14 @@ func (f *Field) NotIn(vals ...any) Condition {
 // Between 条件：在区间
 func (f *Field) Between(vals ...any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			if len(vals) != 2 {
 				return "1 = 0", errors.New("Between Condition must have two value")
 			}
 			if err := checkSlice(vals...); err != nil {
 				return "1 = 0", err
 			}
-			return f.Quote(d) + " Between " + d.Placeholder(i) + " And " + d.Placeholder(i), vals
+			return f.Quote(d) + " Between " + d.Placeholder(i) + " AND " + d.Placeholder(i), vals
 		},
 	}
 }
@@ -294,12 +294,11 @@ func (f *Field) Between(vals ...any) Condition {
 // Like 条件：匹配
 func (f *Field) Like(val any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
-			// 检查 val 是否为空
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			if val == nil {
 				return "1 = 0", Err_Condition_Empty_Param
 			}
-			return f.Quote(d) + " Like CONCAT('%'," + d.Placeholder(i) + ",'%')", val
+			return f.Quote(d) + " Like '%' || " + d.Placeholder(i) + " || '%'", val
 		},
 	}
 }
@@ -307,12 +306,11 @@ func (f *Field) Like(val any) Condition {
 // Llike 条件：左匹配
 func (f *Field) Llike(val any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
-			// 检查 val 是否为空
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			if val == nil {
 				return "1 = 0", Err_Condition_Empty_Param
 			}
-			return f.Quote(d) + " Like CONCAT('%'," + d.Placeholder(i) + ")", val
+			return f.Quote(d) + " Like '%' || " + d.Placeholder(i), val
 		},
 	}
 }
@@ -320,12 +318,11 @@ func (f *Field) Llike(val any) Condition {
 // Rlike 条件：右匹配
 func (f *Field) Rlike(val any) Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
-			// 检查 val 是否为空
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			if val == nil {
 				return "1 = 0", Err_Condition_Empty_Param
 			}
-			return f.Quote(d) + " Like CONCAT(" + d.Placeholder(i) + ",'%')", val
+			return f.Quote(d) + " Like " + d.Placeholder(i) + " || '%'", val
 		},
 	}
 }
@@ -333,7 +330,7 @@ func (f *Field) Rlike(val any) Condition {
 // Null 条件：为空
 func (f *Field) Null() Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			return f.Quote(d) + " IS NULL", nil
 		},
 	}
@@ -342,7 +339,7 @@ func (f *Field) Null() Condition {
 // NotNull 条件：不为空
 func (f *Field) NotNull() Condition {
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			return f.Quote(d) + " IS NOT NULL", nil
 		},
 	}
@@ -482,7 +479,7 @@ func (f *Field) MBRContains(lng, lat, radius float64) Condition {
 	lng_offset := radius / (111320 * math.Cos(lat*math.Pi/180))
 	lng1, lng2 := lng+lng_offset, lng-lng_offset
 	return Condition{
-		Condition: func(i *uint8, d Dialect) (string, any) {
+		Condition: func(i *uint16, d Dialect) (string, any) {
 			return fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
 				lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote(d)), nil
 		},

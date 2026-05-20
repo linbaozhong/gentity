@@ -26,7 +26,7 @@ func (m *PostgreSQL) Quote(name string) string {
 }
 
 // Placeholder 参数占位符：PostgreSQL 使用 $1, $2, $3...
-func (m *PostgreSQL) Placeholder(index *uint8) string {
+func (m *PostgreSQL) Placeholder(index *uint16) string {
 	*index = *index + 1
 	return fmt.Sprintf("$%d", *index)
 }

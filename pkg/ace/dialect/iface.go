@@ -83,7 +83,7 @@ type Dialect interface {
 	// Placeholder 返回参数占位符
 	// MySQL: ?           PostgreSQL: $1, $2...
 	// SQL Server: @p1    Oracle: :1
-	Placeholder(index *uint8) string
+	Placeholder(index *uint16) string
 
 	// Limit 生成分页语句
 	// MySQL: LIMIT offset,limit      PostgreSQL: LIMIT limit OFFSET offset

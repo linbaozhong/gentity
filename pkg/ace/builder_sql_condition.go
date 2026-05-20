@@ -74,7 +74,7 @@ func (o *orm) RawWhereSafe(cnd string, params ...any) Builder {
 	}
 	o.cond = append(o.cond, dialect.Condition{
 		Op: dialect.Operator_and,
-		Condition: func(*uint8, dialect.Dialect) (string, any) {
+		Condition: func(*uint16, dialect.Dialect) (string, any) {
 			return cnd, append([]any{}, params...)
 
 		},

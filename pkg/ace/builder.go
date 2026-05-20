@@ -55,7 +55,7 @@ type (
 	orm struct {
 		pool.Model
 		db         Executer
-		paramIndex uint8 // 参数索引计数器
+		paramIndex uint16 // 参数索引计数器
 		table      string
 		// join         [][3]string
 		join       []join

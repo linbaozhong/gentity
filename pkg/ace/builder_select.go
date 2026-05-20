@@ -278,6 +278,8 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 	if s.err != nil {
 		return 0, s.err
 	}
+	//
+	s.command.Reset()
 
 	s.Where(cond...)
 	s.command.WriteString("SELECT COUNT(*)")

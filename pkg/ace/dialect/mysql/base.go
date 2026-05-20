@@ -24,7 +24,7 @@ func (m *MySQL) Quote(name string) string {
 	return "`" + name + "`"
 }
 
-func (m *MySQL) Placeholder(index *uint8) string {
+func (m *MySQL) Placeholder(index *uint16) string {
 	*index = *index + 1
 	return "?"
 }

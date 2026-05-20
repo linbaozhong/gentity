@@ -28,7 +28,7 @@ func (s *SQLite) Quote(name string) string {
 }
 
 // Placeholder 参数占位符：SQLite 使用 ?（与 MySQL 相同）
-func (s *SQLite) Placeholder(index *uint8) string {
+func (s *SQLite) Placeholder(index *uint16) string {
 	*index = *index + 1
 	return "?"
 }

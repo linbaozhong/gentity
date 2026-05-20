@@ -32,8 +32,12 @@ func (o *orm) Limit(size uint, start ...uint) Builder {
 	// } else {
 	// 	o.limit = " LIMIT " + strconv.Itoa(int(size))
 	// }
+	var s uint = 0
+	if len(start) > 0 {
+		s = start[0]
+	}
 
-	o.limit = o.db.Dialect().Limit(start[0], size)
+	o.limit = o.db.Dialect().Limit(s, size)
 
 	return o
 }
