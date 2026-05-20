@@ -32,7 +32,7 @@ func TestOrmCond(t *testing.T) {
 	// 	Join(dialect.Left_Join, data.Id, data.Id, data.Status.Eq(9), data.State.Gte(99))
 	// o.Join(dialect.Right_Join, data.Id, data.Id, data.Status.Eq(8), data.State.Gte(88))
 	o.Where(data.LongName.Eq("test")).And(data.Id.Eq(1))
-	o.AndOr(data.Id.Eq(1), data.Id.Eq(2))
+	o.AndOr(data.Id.Eq(99), data.Id.Eq(98))
 	o.OrAnd(data.Id.Eq(3), data.Id.Eq(4))
 	o.RawWhere("id=?", 5)
 	o.Debug(true).Select(db).QueryRow(context.Background())

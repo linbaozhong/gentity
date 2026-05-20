@@ -84,15 +84,17 @@ func (o *orm) RawWhereSafe(cnd string, params ...any) Builder {
 
 // And 添加 AND 查询条件，子条件之间为 and 关系。
 func (o *orm) And(fns ...dialect.Condition) Builder {
-	if len(fns) == 0 || o.err != nil {
+	var l = len(fns)
+
+	if l == 0 || o.err != nil {
 		return o
 	}
 
-	if len(fns) == 1 {
+	if l == 1 {
 		fns[0].Op = dialect.Operator_and
 		o.cond = append(o.cond, fns[0])
 	} else {
-		for i := 0; i < len(fns); i++ {
+		for i := 0; i < l; i++ {
 			fns[i].Op = dialect.Operator_and
 		}
 		o.cond = append(o.cond, dialect.Condition{
@@ -105,15 +107,17 @@ func (o *orm) And(fns ...dialect.Condition) Builder {
 
 // AndOr 添加 AND 查询条件，所有子条件之间为 or 关系。
 func (o *orm) AndOr(fns ...dialect.Condition) Builder {
-	if len(fns) == 0 || o.err != nil {
+	var l = len(fns)
+
+	if l == 0 || o.err != nil {
 		return o
 	}
 
-	if len(fns) == 1 {
+	if l == 1 {
 		fns[0].Op = dialect.Operator_and
 		o.cond = append(o.cond, fns[0])
 	} else {
-		for i := 0; i < len(fns); i++ {
+		for i := 0; i < l; i++ {
 			fns[i].Op = dialect.Operator_or
 		}
 		o.cond = append(o.cond, dialect.Condition{
@@ -126,15 +130,17 @@ func (o *orm) AndOr(fns ...dialect.Condition) Builder {
 
 // Or 添加 OR 查询条件，子条件之间为 or 关系。
 func (o *orm) Or(fns ...dialect.Condition) Builder {
-	if len(fns) == 0 || o.err != nil {
+	var l = len(fns)
+
+	if l == 0 || o.err != nil {
 		return o
 	}
 
-	if len(fns) == 1 {
+	if l == 1 {
 		fns[0].Op = dialect.Operator_or
 		o.cond = append(o.cond, fns[0])
 	} else {
-		for i := 0; i < len(fns); i++ {
+		for i := 0; i < l; i++ {
 			fns[i].Op = dialect.Operator_or
 		}
 		o.cond = append(o.cond, dialect.Condition{
@@ -147,15 +153,17 @@ func (o *orm) Or(fns ...dialect.Condition) Builder {
 
 // OrAnd 添加 OR 查询条件，子条件之间为 and 关系。
 func (o *orm) OrAnd(fns ...dialect.Condition) Builder {
-	if len(fns) == 0 || o.err != nil {
+	var l = len(fns)
+
+	if l == 0 || o.err != nil {
 		return o
 	}
 
-	if len(fns) == 1 {
+	if l == 1 {
 		fns[0].Op = dialect.Operator_or
 		o.cond = append(o.cond, fns[0])
 	} else {
-		for i := 0; i < len(fns); i++ {
+		for i := 0; i < l; i++ {
 			fns[i].Op = dialect.Operator_and
 		}
 		o.cond = append(o.cond, dialect.Condition{

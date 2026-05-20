@@ -33,15 +33,17 @@ func (o *orm) Group(cols ...dialect.Field) Builder {
 
 // Having 指定查询结果的分组条件
 func (o *orm) Having(fns ...dialect.Condition) Builder {
-	if len(fns) == 0 || o.err != nil {
+	var l = len(fns)
+
+	if l == 0 || o.err != nil {
 		return o
 	}
 
-	if len(fns) == 1 {
+	if l == 1 {
 		fns[0].Op = dialect.Operator_and
 		o.having = append(o.having, fns[0])
 	} else {
-		for i := 0; i < len(fns); i++ {
+		for i := 0; i < l; i++ {
 			fns[i].Op = dialect.Operator_and
 		}
 		o.having = append(o.having, dialect.Condition{
