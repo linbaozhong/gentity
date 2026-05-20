@@ -171,27 +171,6 @@ func (o *orm) parseCond(d []dialect.Condition) (where strings.Builder, params []
 		if i > 0 {
 			where.WriteString(c.Op.String())
 		}
-		// if len(c.Condition) > 0 {
-		// 	where.WriteString("(")
-		// }
-		// for i2, cd := range c.Condition {
-		// 	s, v := cd(&o.paramIndex, o.db.Dialect())
-		// 	if e = parseWhereParams(v, &params); e != nil {
-		// 		o.err = e
-		// 		return
-		// 	}
-		// 	if i2 > 0 {
-		// 		where.WriteString(c.Op.String())
-		// 	}
-		// 	if len(c.Condition) > 1 {
-		// 		where.WriteString("(" + s + ")")
-		// 	} else {
-		// 		where.WriteString(s)
-		// 	}
-		// }
-		// if len(c.Condition) > 0 {
-		// 	where.WriteString(")")
-		// }
 		if len(c.Children) > 0 {
 			if s, v, er := o.parseCond(c.Children); e != nil {
 				o.err = er

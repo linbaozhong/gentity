@@ -37,9 +37,17 @@ func (o *orm) Having(fns ...dialect.Condition) Builder {
 		return o
 	}
 
-	o.having = append(o.having, dialect.Condition{
-		Op:       dialect.Operator_and,
-		Children: fns,
-	})
+	if len(fns) == 1 {
+		fns[0].Op = dialect.Operator_and
+		o.having = append(o.having, fns[0])
+	} else {
+		for i := 0; i < len(fns); i++ {
+			fns[i].Op = dialect.Operator_and
+		}
+		o.having = append(o.having, dialect.Condition{
+			Op:       dialect.Operator_and,
+			Children: fns,
+		})
+	}
 	return o
 }
