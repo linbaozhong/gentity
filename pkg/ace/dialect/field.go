@@ -21,36 +21,6 @@ import (
 	"strings"
 )
 
-var (
-	Err_Expression_Empty_Param = errors.New("Expression parameter must have one value")
-	Err_Condition_Empty_Param  = errors.New("Condition parameter must have one value")
-)
-
-type (
-	SetOp int8 // 赋值运算符
-
-	Field struct {
-		Name      string
-		Json      string
-		OmitEmpty bool
-		Table     string
-		Type      string
-	}
-
-	Function  func(Dialect) string
-	Condition func(*uint8, Dialect) (string, any)
-	Order     func() (OrderType, []Field)
-	Setter    func() (Field, any, SetOp)
-)
-
-const (
-	Op_Normal    SetOp = iota // insert 赋值
-	Op_Increment              // update 自增
-	Op_Decrement              // update 自减
-	Op_Replace                // update 替换
-	Op_Expr                   // update 其它表达式
-)
-
 // Quote 为字段添加引号
 func (f *Field) Quote(d Dialect) string {
 	return d.Quote(f.Table) + "." + d.Quote(f.Name)
@@ -149,67 +119,80 @@ func ParseSetter(set Setter, i *uint8, d Dialect) (string, any, error) {
 
 // Eq 条件：等于
 func (f *Field) Eq(val any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		// 空值检查，可根据实际需求决定是否保留
-		if val == nil {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		return f.Quote(d) + " = " + d.Placeholder(i), val
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			// 空值检查，可根据实际需求决定是否保留
+			if val == nil {
+				return "1 = 0", Err_Condition_Empty_Param
+			}
+			return f.Quote(d) + " = " + d.Placeholder(i), val
+		},
 	}
 }
 
 // NotEq 条件：不等于
 func (f *Field) NotEq(val any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		// 空值检查，可根据实际需求决定是否保留
-		if val == nil {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		return f.Quote(d) + " != " + d.Placeholder(i), val
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			// 空值检查，可根据实际需求决定是否保留
+			if val == nil {
+				return "1 = 0", Err_Condition_Empty_Param
+			}
+			return f.Quote(d) + " != " + d.Placeholder(i), val
+		},
 	}
 }
 
 // Gt 条件：大于
 func (f *Field) Gt(val any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		// 空值检查，可根据实际需求决定是否保留
-		if val == nil {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		return f.Quote(d) + " > " + d.Placeholder(i), val
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			// 空值检查，可根据实际需求决定是否保留
+			if val == nil {
+				return "1 = 0", Err_Condition_Empty_Param
+			}
+			return f.Quote(d) + " > " + d.Placeholder(i), val
+		},
 	}
 }
 
 // Gte 条件：大于或等于
 func (f *Field) Gte(val any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		// 空值检查，可根据实际需求决定是否保留
-		if val == nil {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		return f.Quote(d) + " >= " + d.Placeholder(i), val
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			// 空值检查，可根据实际需求决定是否保留
+			if val == nil {
+				return "1 = 0", Err_Condition_Empty_Param
+			}
+			return f.Quote(d) + " >= " + d.Placeholder(i), val
+		},
 	}
+
 }
 
 // Lt 条件：小于
 func (f *Field) Lt(val any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		// 空值检查，可根据实际需求决定是否保留
-		if val == nil {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		return f.Quote(d) + " < " + d.Placeholder(i), val
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			// 空值检查，可根据实际需求决定是否保留
+			if val == nil {
+				return "1 = 0", Err_Condition_Empty_Param
+			}
+			return f.Quote(d) + " < " + d.Placeholder(i), val
+		},
 	}
 }
 
 // Lte 条件：小于或等于
 func (f *Field) Lte(val any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		// 空值检查，可根据实际需求决定是否保留
-		if val == nil {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		return f.Quote(d) + " <= " + d.Placeholder(i), val
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			// 空值检查，可根据实际需求决定是否保留
+			if val == nil {
+				return "1 = 0", Err_Condition_Empty_Param
+			}
+			return f.Quote(d) + " <= " + d.Placeholder(i), val
+		},
 	}
 }
 
@@ -234,118 +217,134 @@ func checkSlice(vals ...any) error {
 
 // In 条件：包含
 func (f *Field) In(vals ...any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		l := len(vals)
-		if l == 0 {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		if err := checkSlice(vals...); err != nil {
-			return "1 = 0", err
-		}
-
-		var sb strings.Builder
-		// 预分配足够的内存空间：len(f.Quote()) + len(" In (") + (len(Placeholder)+1)*l
-		sb.Grow(2*l + len(f.Quote(d)) + 5)
-		sb.WriteString(f.Quote(d))
-		sb.WriteString(" In (")
-		// 循环生成不同的占位符
-		for j := 0; j < l; j++ {
-			if j > 0 {
-				sb.WriteString(",")
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			l := len(vals)
+			if l == 0 {
+				return "1 = 0", Err_Condition_Empty_Param
 			}
-			sb.WriteString(d.Placeholder(i))
-		}
-		sb.WriteString(")")
+			if err := checkSlice(vals...); err != nil {
+				return "1 = 0", err
+			}
 
-		return sb.String(), vals
+			var sb strings.Builder
+			// 预分配足够的内存空间：len(f.Quote()) + len(" In (") + (len(Placeholder)+1)*l
+			sb.Grow(2*l + len(f.Quote(d)) + 5)
+			sb.WriteString(f.Quote(d))
+			sb.WriteString(" In (")
+			// 循环生成不同的占位符
+			for j := 0; j < l; j++ {
+				if j > 0 {
+					sb.WriteString(",")
+				}
+				sb.WriteString(d.Placeholder(i))
+			}
+			sb.WriteString(")")
+
+			return sb.String(), vals
+		},
 	}
 }
 
 // NotIn 条件：不包含
 func (f *Field) NotIn(vals ...any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		l := len(vals)
-		if l == 0 {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		if err := checkSlice(vals...); err != nil {
-			return "1 = 0", err
-		}
-
-		var sb strings.Builder
-		// 预分配足够的内存空间：len(f.Quote()) + len(" Not In (") + (len(Placeholder)+1)*l
-		sb.Grow(2*l + len(f.Quote(d)) + 9)
-		sb.WriteString(f.Quote(d))
-		sb.WriteString(" Not In (")
-		// 循环生成不同的占位符
-		for j := 0; j < l; j++ {
-			if j > 0 {
-				sb.WriteString(",")
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			l := len(vals)
+			if l == 0 {
+				return "1 = 0", Err_Condition_Empty_Param
 			}
-			sb.WriteString(d.Placeholder(i))
-		}
-		sb.WriteString(")")
-		return sb.String(), vals
+			if err := checkSlice(vals...); err != nil {
+				return "1 = 0", err
+			}
+
+			var sb strings.Builder
+			// 预分配足够的内存空间：len(f.Quote()) + len(" Not In (") + (len(Placeholder)+1)*l
+			sb.Grow(2*l + len(f.Quote(d)) + 9)
+			sb.WriteString(f.Quote(d))
+			sb.WriteString(" Not In (")
+			// 循环生成不同的占位符
+			for j := 0; j < l; j++ {
+				if j > 0 {
+					sb.WriteString(",")
+				}
+				sb.WriteString(d.Placeholder(i))
+			}
+			sb.WriteString(")")
+			return sb.String(), vals
+		},
 	}
 }
 
 // Between 条件：在区间
 func (f *Field) Between(vals ...any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		if len(vals) != 2 {
-			return "1 = 0", errors.New("Between condition must have two value")
-		}
-		if err := checkSlice(vals...); err != nil {
-			return "1 = 0", err
-		}
-		return f.Quote(d) + " Between " + d.Placeholder(i) + " And " + d.Placeholder(i), vals
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			if len(vals) != 2 {
+				return "1 = 0", errors.New("Between Condition must have two value")
+			}
+			if err := checkSlice(vals...); err != nil {
+				return "1 = 0", err
+			}
+			return f.Quote(d) + " Between " + d.Placeholder(i) + " And " + d.Placeholder(i), vals
+		},
 	}
 }
 
 // Like 条件：匹配
 func (f *Field) Like(val any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		// 检查 val 是否为空
-		if val == nil {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		return f.Quote(d) + " Like CONCAT('%'," + d.Placeholder(i) + ",'%')", val
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			// 检查 val 是否为空
+			if val == nil {
+				return "1 = 0", Err_Condition_Empty_Param
+			}
+			return f.Quote(d) + " Like CONCAT('%'," + d.Placeholder(i) + ",'%')", val
+		},
 	}
 }
 
 // Llike 条件：左匹配
 func (f *Field) Llike(val any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		// 检查 val 是否为空
-		if val == nil {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		return f.Quote(d) + " Like CONCAT('%'," + d.Placeholder(i) + ")", val
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			// 检查 val 是否为空
+			if val == nil {
+				return "1 = 0", Err_Condition_Empty_Param
+			}
+			return f.Quote(d) + " Like CONCAT('%'," + d.Placeholder(i) + ")", val
+		},
 	}
 }
 
 // Rlike 条件：右匹配
 func (f *Field) Rlike(val any) Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		// 检查 val 是否为空
-		if val == nil {
-			return "1 = 0", Err_Condition_Empty_Param
-		}
-		return f.Quote(d) + " Like CONCAT(" + d.Placeholder(i) + ",'%')", val
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			// 检查 val 是否为空
+			if val == nil {
+				return "1 = 0", Err_Condition_Empty_Param
+			}
+			return f.Quote(d) + " Like CONCAT(" + d.Placeholder(i) + ",'%')", val
+		},
 	}
 }
 
 // Null 条件：为空
 func (f *Field) Null() Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		return f.Quote(d) + " IS NULL", nil
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			return f.Quote(d) + " IS NULL", nil
+		},
 	}
 }
 
 // NotNull 条件：不为空
 func (f *Field) NotNull() Condition {
-	return func(i *uint8, d Dialect) (string, any) {
-		return f.Quote(d) + " IS NOT NULL", nil
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			return f.Quote(d) + " IS NOT NULL", nil
+		},
 	}
 }
 
@@ -482,8 +481,10 @@ func (f *Field) MBRContains(lng, lat, radius float64) Condition {
 
 	lng_offset := radius / (111320 * math.Cos(lat*math.Pi/180))
 	lng1, lng2 := lng+lng_offset, lng-lng_offset
-	return func(i *uint8, d Dialect) (string, any) {
-		return fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
-			lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote(d)), nil
+	return Condition{
+		Condition: func(i *uint8, d Dialect) (string, any) {
+			return fmt.Sprintf("MBRContains(ST_GeomFromText(CONCAT('POLYGON((',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,', ',%f,' ',%f,'))'),4326),%s)",
+				lat2, lng2, lat1, lng2, lat1, lng1, lat2, lng1, lat2, lng2, f.Quote(d)), nil
+		},
 	}
 }

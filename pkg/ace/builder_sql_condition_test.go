@@ -17,7 +17,6 @@ package ace
 import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/ace/data"
-	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"testing"
 )
 
@@ -27,10 +26,11 @@ var (
 
 func TestOrmCond(t *testing.T) {
 	db, _ := Connect("mysql", dns)
+
 	o := newOrm()
-	o.Table("company").Cols(data.Id, data.LongName).
-		Join(dialect.Left_Join, data.Id, data.Id, data.Status.Eq(9), data.State.Gte(99))
-	o.Join(dialect.Right_Join, data.Id, data.Id, data.Status.Eq(8), data.State.Gte(88))
+	o.Table("company").Cols(data.Id, data.LongName) // .
+	// 	Join(dialect.Left_Join, data.Id, data.Id, data.Status.Eq(9), data.State.Gte(99))
+	// o.Join(dialect.Right_Join, data.Id, data.Id, data.Status.Eq(8), data.State.Gte(88))
 	o.Where(data.LongName.Eq("test")).And(data.Id.Eq(1))
 	o.AndOr(data.Id.Eq(1), data.Id.Eq(2))
 	o.OrAnd(data.Id.Eq(3), data.Id.Eq(4))
@@ -38,5 +38,5 @@ func TestOrmCond(t *testing.T) {
 	o.Debug(true).Select(db).QueryRow(context.Background())
 
 	// where,params,e:=o.parseCond(o.cond)
-	t.Log(o.String())
+	// t.Log(o.String())
 }

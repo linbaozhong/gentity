@@ -73,7 +73,7 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	// 只返回SQL语句，不执行
-	if d.debug {
+	if d.debug || d.db.Debug() {
 		log.Info(d.String())
 		return &noRows{}, Err_ToSql
 	}

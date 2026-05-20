@@ -284,9 +284,7 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 
 	// FROM TABLE
 	s.command.WriteString(" FROM " + s.db.Dialect().Quote(s.table))
-	// for _, j := range s.join {
-	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	// }
+
 	if len(s.join) > 0 {
 		joinStr, params, e := s.parseJoin(s.join)
 		if e != nil {
@@ -298,9 +296,6 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 		}
 	}
 	// WHERE
-	// if s.where.Len() > 0 {
-	// 	s.command.WriteString(" WHERE " + s.where.String())
-	// }
 	if len(s.cond) > 0 {
 		where, params, e := s.parseCond(s.cond)
 		if e != nil {

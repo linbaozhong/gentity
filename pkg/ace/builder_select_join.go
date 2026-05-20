@@ -54,7 +54,7 @@ func (o *orm) parseJoin(d []join) (joinStr strings.Builder, params []any, e erro
 			j.right.Quote(o.db.Dialect())))
 		for _, condition := range j.conditions {
 			joinStr.WriteString(dialect.Operator_and.String())
-			str, val := condition(&o.paramIndex, o.db.Dialect())
+			str, val := condition.Condition(&o.paramIndex, o.db.Dialect())
 			joinStr.WriteString(str)
 			if err := parseWhereParams(val, &params); err != nil {
 				e = err

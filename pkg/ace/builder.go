@@ -41,11 +41,11 @@ type (
 
 		parse() (strings.Builder, []any)
 	}
-	cond struct {
-		op         dialect.LogicalOperator
-		conditions []dialect.Condition
-		children   []cond
-	}
+	// cond struct {
+	// 	op         dialect.LogicalOperator
+	// 	conditions []dialect.Condition
+	// 	children   []cond
+	// }
 	join struct {
 		joinType   dialect.JoinType
 		table      dialect.Field
@@ -70,13 +70,13 @@ type (
 		funcs      []dialect.Function
 		omits      []dialect.Field
 		groupBy    []dialect.Field
-		having     []cond
+		having     []dialect.Condition
 		// havingParams []any
 		orderBy []order
 		limit   string
 		// where        strings.Builder
 		// 条件
-		cond        []cond
+		cond        []dialect.Condition
 		whereParams []any
 		exprCols    []expr
 		params      []any
@@ -301,13 +301,13 @@ func (o *orm) Clone() Builder {
 	newOrm.groupBy = make([]dialect.Field, len(o.groupBy))
 	copy(newOrm.groupBy, o.groupBy)
 
-	newOrm.having = make([]cond, len(o.cond))
+	newOrm.having = make([]dialect.Condition, len(o.cond))
 	copy(newOrm.having, o.having)
 
 	newOrm.orderBy = make([]order, len(o.orderBy))
 	copy(newOrm.orderBy, o.orderBy)
 
-	newOrm.cond = make([]cond, len(o.cond))
+	newOrm.cond = make([]dialect.Condition, len(o.cond))
 	copy(newOrm.cond, o.cond)
 
 	newOrm.command.Reset()
@@ -359,9 +359,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 	} else {
 		o.command.WriteString(" FROM " + o.db.Dialect().Quote(o.table))
 	}
-	// for _, j := range o.join {
-	// 	o.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
-	// }
+
 	if len(o.join) > 0 {
 		joinStr, params, e := o.parseJoin(o.join)
 		if e != nil {
@@ -374,9 +372,6 @@ func (o *orm) parse() (strings.Builder, []any) {
 	}
 
 	// WHERE
-	// if o.where.Len() > 0 {
-	// 	o.command.WriteString(" WHERE " + o.where.String())
-	// }
 	if len(o.cond) > 0 {
 		where, params, e := o.parseCond(o.cond)
 		if e != nil {
@@ -435,7 +430,7 @@ func (o *orm) query(ctx context.Context) (*sql.Rows, error) {
 }
 
 func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows, error) {
-	if o.debug {
+	if o.debug || o.db.Debug() {
 		log.Info(o.String())
 		return &sql.Rows{}, Err_ToSql
 	}
@@ -451,7 +446,7 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 }
 
 func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, error) {
-	if o.debug {
+	if o.debug || o.db.Debug() {
 		log.Info(o.String())
 		return &sql.Row{}, Err_ToSql
 	}

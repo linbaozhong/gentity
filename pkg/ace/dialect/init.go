@@ -14,74 +14,42 @@
 
 package dialect
 
-//
-// type (
-// 	limit       func(offset, limit uint) string
-// 	placeholder func(index *uint8) string
-// 	getTables   func(db *sql.DB, dbName string) ([]*sqlparser.Table, error)
-// 	getColumns  func(db *sql.DB, dbName string) (map[string][]*sqlparser.Column, error)
-// 	quote       func(name string) string
-// )
-//
-// var (
-// 	Placeholder      placeholder
-// 	Quote_Char_Left  = "`"
-// 	Quote_Char_Right = "`"
-// 	PrimaryKey       = ""
-// 	// AutoInc     = ""
-// 	// UniqueKey   = ""
-// 	Limit   limit
-// 	Tables  getTables
-// 	Columns getColumns
-// 	Quote   quote
-// )
-//
-// // Register 注册数据库方言
-// func Register(driverName string) {
-// 	switch driverName {
-// 	case "mysql":
-// 		Placeholder = mysql.Placeholder
-// 		Quote_Char_Left = mysql.Quote_Char_Left
-// 		Quote_Char_Right = mysql.Quote_Char_Right
-// 		PrimaryKey = mysql.PrimaryKey
-// 		// AutoInc = mysql.AutoInc
-// 		// UniqueKey = mysql.UniqueKey
-// 		Limit = mysql.Limit
-// 		Tables = mysql.GetTables
-// 		Columns = mysql.GetColumns
-// 		Quote = mysql.Quote
-// 	case "sqlite":
-// 		Placeholder = sqlite.Placeholder
-// 		Quote_Char_Left = sqlite.Quote_Char_Left
-// 		Quote_Char_Right = sqlite.Quote_Char_Right
-// 		PrimaryKey = sqlite.PrimaryKey
-// 		// AutoInc = sqlite.AutoInc
-// 		// UniqueKey = sqlite.UniqueKey
-// 		Limit = sqlite.Limit
-// 		Tables = sqlite.GetTables
-// 		Columns = sqlite.GetColumns
-// 		Quote = sqlite.Quote
-// 	case "postgres":
-// 		Placeholder = postgres.Placeholder
-// 		Quote_Char_Left = postgres.Quote_Char_Left
-// 		Quote_Char_Right = postgres.Quote_Char_Right
-// 		PrimaryKey = postgres.PrimaryKey
-// 		// AutoInc = postgres.AutoInc
-// 		// UniqueKey = postgres.UniqueKey
-// 		Limit = postgres.Limit
-// 		Tables = postgres.GetTables
-// 		Columns = postgres.GetColumns
-// 		Quote = postgres.Quote
-// 	case "sqlserver":
-// 		Placeholder = sqlserver.Placeholder
-// 		Quote_Char_Left = sqlserver.Quote_Char_Left
-// 		Quote_Char_Right = sqlserver.Quote_Char_Right
-// 		PrimaryKey = sqlserver.PrimaryKey
-// 		// AutoInc = sqlserver.AutoInc
-// 		// UniqueKey = sqlserver.UniqueKey
-// 		Limit = sqlserver.Limit
-// 		Tables = sqlserver.GetTables
-// 		Columns = sqlserver.GetColumns
-// 		Quote = sqlserver.Quote
-// 	}
-// }
+import "errors"
+
+var (
+	Err_Expression_Empty_Param = errors.New("Expression parameter must have one value")
+	Err_Condition_Empty_Param  = errors.New("Condition parameter must have one value")
+)
+
+type (
+	SetOp int8 // 赋值运算符
+	// Field 字段
+	Field struct {
+		Name      string
+		Json      string
+		OmitEmpty bool
+		Table     string
+		Type      string
+	}
+	// Function 聚合函数
+	Function func(Dialect) string
+	// Condition 条件
+	Condition struct {
+		Op        LogicalOperator
+		Condition CondFunc
+		Children  []Condition
+	}
+	CondFunc func(*uint8, Dialect) (string, any)
+	// Order 排序
+	Order func() (OrderType, []Field)
+	// Setter 赋值
+	Setter func() (Field, any, SetOp)
+)
+
+const (
+	Op_Normal    SetOp = iota // insert 赋值
+	Op_Increment              // update 自增
+	Op_Decrement              // update 自减
+	Op_Replace                // update 替换
+	Op_Expr                   // update 其它表达式
+)
