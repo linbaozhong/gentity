@@ -46,21 +46,30 @@ func (o *orm) RightJoin(left, right dialect.Field, fns ...dialect.Condition) Bui
 }
 
 func (o *orm) parseJoin(d []join) (joinStr strings.Builder, params []any, e error) {
+	var (
+		where strings.Builder
+		val   []any
+	)
 	for _, j := range d {
+		where, val, e = o.parseCond(j.conditions)
+		if e != nil {
+			o.err = e
+			return
+		}
 		joinStr.WriteString(fmt.Sprintf(" %s JOIN %s ON (%s = %s",
 			j.joinType,
 			j.table.TableName(o.db.Dialect()),
 			j.left.Quote(o.db.Dialect()),
 			j.right.Quote(o.db.Dialect())))
-		for _, condition := range j.conditions {
+		if where.Len() > 0 {
 			joinStr.WriteString(dialect.Operator_and.String())
-			str, val := condition.Condition(&o.paramIndex, o.db.Dialect())
-			joinStr.WriteString(str)
-			if err := parseWhereParams(val, &params); err != nil {
-				e = err
+			joinStr.WriteString(where.String())
+			if e = parseWhereParams(val, &params); e != nil {
+				o.err = e
 				return
 			}
 		}
+
 		joinStr.WriteString(")")
 	}
 	return

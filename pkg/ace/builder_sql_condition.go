@@ -180,8 +180,12 @@ func (o *orm) parseCond(d []dialect.Condition) (where strings.Builder, params []
 			where.WriteString(c.Op.String())
 		}
 		if len(c.Children) > 0 {
-			if s, v, er := o.parseCond(c.Children); e != nil {
-				o.err = er
+			var (
+				s strings.Builder
+				v []any
+			)
+			if s, v, e = o.parseCond(c.Children); e != nil {
+				o.err = e
 				return
 			} else {
 				if e = parseWhereParams(v, &params); e != nil {

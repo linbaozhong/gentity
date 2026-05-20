@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	dns = "ssld_dev:Cu83&sr66@tcp(123.56.5.53:13306)/dispatch?charset=utf8mb4&parseTime=True&loc=Local"
+	dns = ""
 )
 
 func TestOrmCond(t *testing.T) {
