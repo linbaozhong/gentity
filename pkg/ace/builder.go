@@ -441,9 +441,7 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 		return nil, err
 	}
 
-	// if o.db.IsDB() {
 	defer stmt.Close()
-	// }
 
 	return stmt.QueryContext(ctx, params...)
 }
@@ -458,9 +456,7 @@ func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, 
 		return nil, err
 	}
 
-	// if o.db.IsDB() {
 	defer stmt.Close()
-	// }
 
 	return stmt.QueryRowContext(ctx, params...), nil
 }
