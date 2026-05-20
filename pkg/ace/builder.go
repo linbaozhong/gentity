@@ -41,11 +41,6 @@ type (
 
 		parse() (strings.Builder, []any)
 	}
-	// cond struct {
-	// 	op         dialect.LogicalOperator
-	// 	conditions []dialect.Condition
-	// 	children   []cond
-	// }
 	join struct {
 		joinType   dialect.JoinType
 		table      dialect.Field
