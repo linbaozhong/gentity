@@ -44,16 +44,18 @@ var Err_RawWhere_Invalid_Condition = errors.New("RawWhere: invalid condition for
 
 // isValidCondition 验证条件格式
 func isValidCondition(cond string) bool {
-	// 允许：字母、数字、下划线、空格、常见操作符、括号
-	// 禁止：引号、分号、注释符号等可能导致注入的字符
 	if cond == "" {
 		return false
 	}
-	// 检查是否包含危险字符
-	dangerous := []string{"'", "\"", ";", "--", "/*", "*/", "xp_", "EXEC", "UNION"}
-	lower := strings.ToLower(cond)
-	for _, d := range dangerous {
-		if strings.Contains(lower, d) {
+	// 白名单模式：仅允许 字母、数字、下划线、空格、括号、常见操作符、? 占位符、. 和 ,
+	for _, r := range cond {
+		isAlphaNum := (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') ||
+			(r >= '0' && r <= '9')
+		isSafeChar := r == '_' || r == ' ' || r == '(' || r == ')' || r == '?' ||
+			r == '.' || r == ',' || r == '=' || r == '>' || r == '<' ||
+			r == '!' || r == '+' || r == '-' || r == '*' || r == '/' ||
+			r == '|' || r == '&'
+		if !isAlphaNum && !isSafeChar {
 			return false
 		}
 	}

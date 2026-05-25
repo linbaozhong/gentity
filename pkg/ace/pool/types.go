@@ -14,18 +14,17 @@
 
 package pool
 
-import (
-	"sync"
-)
+import "sync/atomic"
 
 type (
 	// 定义一个私有类型，用于禁止拷贝
 	noCopy struct{}
 
 	Model struct {
-		_       noCopy
-		mu      sync.Mutex
-		ace_put bool // 内部留用，禁止外部赋值
+		_ noCopy
+		// mu      sync.Mutex
+		// ace_put bool // 内部留用，禁止外部赋值
+		ace_put atomic.Bool
 	}
 
 	PoolModeler interface {
@@ -44,24 +43,23 @@ type (
 // 如果已经放入池中，返回 true，否则返回 false
 // 并将 ace_put 设置为 true，防止重复放入池中
 func (a *Model) put2Pool() bool {
-	if a.ace_put {
+	if a.ace_put.Load() {
 		return true
 	}
-	a.mu.Lock()
-	a.ace_put = true
-	a.mu.Unlock()
+
+	a.ace_put.Store(true)
+
 	return false
 }
 
 // Get4Pool 方法，用于从池中取出对象时
 // 将 ace_put 设置为 false，防止重复放入池中
 func (a *Model) get4Pool() {
-	if !a.ace_put {
+	if !a.ace_put.Load() {
 		return
 	}
-	a.mu.Lock()
-	a.ace_put = false
-	a.mu.Unlock()
+
+	a.ace_put.Store(false)
 }
 
 // 实现一个 Lock 方法，让 noCopy 实现 sync.Locker 接口

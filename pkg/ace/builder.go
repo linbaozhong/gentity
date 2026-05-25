@@ -202,6 +202,7 @@ func (o *orm) Set(fns ...dialect.Setter) Builder {
 	tmpExprCols := make([]expr, len(o.exprCols), len(o.exprCols)+l)
 	copy(tmpExprCols, o.exprCols)
 
+	d := o.db.Dialect()
 	for _, fn := range fns {
 		c, val, op := fn()
 		if e, ok := val.(error); ok {
@@ -212,7 +213,7 @@ func (o *orm) Set(fns ...dialect.Setter) Builder {
 			tmpCols = append(tmpCols, c)
 			tmpParams = append(tmpParams, val)
 		} else {
-			ex, val, e := dialect.ParseSetter(fn, &o.paramIndex, o.db.Dialect())
+			ex, val, e := dialect.ParseSetter(fn, &o.paramIndex, d)
 			if e != nil {
 				o.err = e
 				return o
@@ -240,8 +241,9 @@ func (o *orm) SetExpr(fns ...dialect.Setter) Builder {
 	tmpExprCols := make([]expr, len(o.exprCols), len(o.exprCols)+l)
 	copy(tmpExprCols, o.exprCols)
 
+	d := o.db.Dialect()
 	for _, fn := range fns {
-		ex, val, e := dialect.ParseSetter(fn, &o.paramIndex, o.db.Dialect())
+		ex, val, e := dialect.ParseSetter(fn, &o.paramIndex, d)
 		if e != nil {
 			o.err = e
 			return o
@@ -320,17 +322,20 @@ func (o *orm) Clone() Builder {
 
 // 合并参数
 func (o *orm) mergeParams() []any {
-	params := make([]any, len(o.joinParams)+len(o.subQueryParams)+len(o.params)+len(o.whereParams))
+	params := make([]any, 0, len(o.joinParams)+len(o.subQueryParams)+len(o.params)+len(o.whereParams))
 
-	idx := copy(params, o.joinParams)
-	idx += copy(params[idx:], o.subQueryParams)
-	idx += copy(params[idx:], o.params)
-	copy(params[idx:], o.whereParams)
+	params = append(params, o.joinParams...)
+	params = append(params, o.subQueryParams...)
+	params = append(params, o.params...)
+	params = append(params, o.whereParams...)
+
 	return params
 }
 
 // parse
 func (o *orm) parse() (strings.Builder, []any) {
+	d := o.db.Dialect()
+	o.command.Reset()
 	o.command.WriteString("SELECT ")
 
 	var cols = util.SliceDiff(o.cols, o.omits)
@@ -346,7 +351,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 			if i > 0 {
 				o.command.WriteString(",")
 			}
-			o.command.WriteString(col.Quote(o.db.Dialect()))
+			o.command.WriteString(col.Quote(d))
 		}
 		if colens > 0 && funlens > 0 {
 			o.command.WriteString(",")
@@ -359,7 +364,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 		// 如果表名以(开头，则不加引号
 		o.command.WriteString(" FROM " + o.table)
 	} else {
-		o.command.WriteString(" FROM " + o.db.Dialect().Quote(o.table))
+		o.command.WriteString(" FROM " + d.Quote(o.table))
 	}
 
 	if len(o.join) > 0 {
@@ -391,7 +396,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 			if i > 0 {
 				o.command.WriteByte(',')
 			}
-			o.command.WriteString(col.Quote(o.db.Dialect()))
+			o.command.WriteString(col.Quote(d))
 		}
 
 		// HAVING
@@ -413,7 +418,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 			if i > 0 {
 				o.command.WriteByte(',')
 			}
-			o.command.WriteString(ord.col.Quote(o.db.Dialect()) + " " + ord.order.String())
+			o.command.WriteString(ord.col.Quote(d) + " " + ord.order.String())
 		}
 	}
 
@@ -427,8 +432,8 @@ func (o *orm) parse() (strings.Builder, []any) {
 
 // query
 func (o *orm) query(ctx context.Context) (*sql.Rows, error) {
-	_, _ = o.parse()
-	return o.rows(ctx, o.command.String(), o.mergeParams()...)
+	cmd, params := o.parse()
+	return o.rows(ctx, cmd.String(), params...)
 }
 
 func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows, error) {

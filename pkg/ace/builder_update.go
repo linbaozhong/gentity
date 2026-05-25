@@ -70,10 +70,11 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	u.command.WriteString("UPDATE " + u.db.Dialect().Quote(u.table) + " SET ")
+	d := u.db.Dialect()
+	u.command.WriteString("UPDATE " + d.Quote(u.table) + " SET ")
 	_cols := make([]string, 0, lens)
 	for _, col := range u.cols {
-		_cols = append(_cols, col.Quote(u.db.Dialect())+" = "+u.db.Dialect().Placeholder(&u.paramIndex))
+		_cols = append(_cols, col.Quote(d)+" = "+d.Placeholder(&u.paramIndex))
 	}
 	for _, col := range u.exprCols {
 		_cols = append(_cols, col.colName)
@@ -122,13 +123,14 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return nil, u.err
 	}
 
-	u.command.WriteString("UPDATE " + u.db.Dialect().Quote(u.table) + " SET ")
-	cols, vals := bean.AssignValues(u.db.Dialect(), u.cols...)
+	d := u.db.Dialect()
+	u.command.WriteString("UPDATE " + d.Quote(u.table) + " SET ")
+	cols, vals := bean.AssignValues(d, u.cols...)
 	for i, col := range cols {
 		if i > 0 {
 			u.command.WriteString(",")
 		}
-		u.command.WriteString(col + " = " + u.db.Dialect().Placeholder(&u.paramIndex))
+		u.command.WriteString(col + " = " + d.Placeholder(&u.paramIndex))
 	}
 	u.params = append(u.params, vals...)
 	//
@@ -180,13 +182,14 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	u.command.WriteString("UPDATE " + u.db.Dialect().Quote(u.table) + " SET ")
-	cols, vals := beans[0].RawAssignValues(u.db.Dialect(), u.cols...)
+	d := u.db.Dialect()
+	u.command.WriteString("UPDATE " + d.Quote(u.table) + " SET ")
+	cols, vals := beans[0].RawAssignValues(d, u.cols...)
 	for i, col := range cols {
 		if i > 0 {
 			u.command.WriteString(",")
 		}
-		u.command.WriteString(col + " = " + u.db.Dialect().Placeholder(&u.paramIndex))
+		u.command.WriteString(col + " = " + d.Placeholder(&u.paramIndex))
 	}
 	u.params = append(u.params, vals...)
 	//
@@ -234,7 +237,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 			if bean == nil {
 				return nil, dialect.ErrBeanEmpty
 			}
-			_, vals = bean.RawAssignValues(u.db.Dialect(), u.cols...)
+			_, vals = bean.RawAssignValues(d, u.cols...)
 			u.params = u.params[:0]
 			u.params = append(u.params, vals...)
 			//

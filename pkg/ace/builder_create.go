@@ -62,18 +62,19 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + c.db.Dialect().Quote(c.table) + " (")
+	d := c.db.Dialect()
+	c.command.WriteString("INSERT INTO " + d.Quote(c.table) + " (")
 	for i, col := range c.cols {
 		if i > 0 {
 			c.command.WriteString(",")
 		}
-		c.command.WriteString(col.Quote(c.db.Dialect()))
+		c.command.WriteString(col.Quote(d))
 	}
 	c.command.WriteString(") VALUES ")
 
 	values := make([]string, lens)
 	for i := range values {
-		values[i] = c.db.Dialect().Placeholder(&c.paramIndex)
+		values[i] = d.Placeholder(&c.paramIndex)
 	}
 	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
@@ -101,17 +102,18 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return nil, c.err
 	}
 
-	c.command.WriteString("INSERT INTO " + c.db.Dialect().Quote(c.table) + " (")
+	d := c.db.Dialect()
+	c.command.WriteString("INSERT INTO " + d.Quote(c.table) + " (")
 
 	var _cols []string
-	_cols, c.params = bean.AssignValues(c.db.Dialect(), c.cols...)
+	_cols, c.params = bean.AssignValues(d, c.cols...)
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
 	//
 	values := make([]string, _colLens)
 	for i := range values {
-		values[i] = c.db.Dialect().Placeholder(&c.paramIndex)
+		values[i] = d.Placeholder(&c.paramIndex)
 	}
 	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
@@ -145,16 +147,17 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return nil, dialect.ErrBeanEmpty
 	}
 
-	c.command.WriteString("INSERT INTO " + c.db.Dialect().Quote(c.table) + " (")
+	d := c.db.Dialect()
+	c.command.WriteString("INSERT INTO " + d.Quote(c.table) + " (")
 
 	var _cols []string
-	_cols, c.params = beans[0].RawAssignValues(c.db.Dialect(), c.cols...)
+	_cols, c.params = beans[0].RawAssignValues(d, c.cols...)
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
 	values := make([]string, _colLens)
 	for i := range values {
-		values[i] = c.db.Dialect().Placeholder(&c.paramIndex)
+		values[i] = d.Placeholder(&c.paramIndex)
 	}
 	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
@@ -177,13 +180,14 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		if err != nil {
 			return nil, err
 		}
+		beans[0].AssignPrimaryKeyValues(result)
 
 		for i := 1; i < lens; i++ {
 			bean := beans[i]
 			if bean == nil {
 				return nil, dialect.ErrBeanEmpty
 			}
-			_, c.params = bean.RawAssignValues(c.db.Dialect(), c.cols...)
+			_, c.params = bean.RawAssignValues(d, c.cols...)
 			result, err = stmt.ExecContext(ctx, c.params...)
 			if err != nil {
 				return nil, err

@@ -125,9 +125,9 @@ func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 		return nil, s.err
 	}
 
-	_, _ = s.parse()
+	cmd, params := s.parse()
 
-	return s.row(ctx, s.command.String(), s.mergeParams()...)
+	return s.row(ctx, cmd.String(), params...)
 }
 
 // Get 返回单个数据，dest 必须是指针
@@ -279,45 +279,54 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 		return 0, s.err
 	}
 	//
+	// 保存原始 limit 和 command，Count 不应受分页限制
+	savedLimit := s.limit
+	s.limit = "" // Count 忽略 LIMIT/PAGE
+
 	s.command.Reset()
 
 	s.Where(cond...)
+
 	s.command.WriteString("SELECT COUNT(*)")
+	// // FROM TABLE
+	// s.command.WriteString(" FROM " + d.Quote(s.table))
+	//
+	// if len(s.join) > 0 {
+	// 	joinStr, params, e := s.parseJoin(s.join)
+	// 	if e != nil {
+	// 		s.err = e
+	// 		return 0, e
+	// 	}
+	// 	s.joinParams = params
+	// 	if joinStr.Len() > 0 {
+	// 		s.command.WriteString(joinStr.String())
+	// 	}
+	// }
+	// // WHERE
+	// if len(s.cond) > 0 {
+	// 	where, params, e := s.parseCond(s.cond)
+	// 	if e != nil {
+	// 		s.err = e
+	// 		return 0, e
+	// 	}
+	// 	s.whereParams = params
+	// 	if where.Len() > 0 {
+	// 		s.command.WriteString(" WHERE " + where.String())
+	// 	}
+	// }
 
-	// FROM TABLE
-	s.command.WriteString(" FROM " + s.db.Dialect().Quote(s.table))
-
-	if len(s.join) > 0 {
-		joinStr, params, e := s.parseJoin(s.join)
-		if e != nil {
-			s.err = e
-		}
-		s.joinParams = params
-		if joinStr.Len() > 0 {
-			s.command.WriteString(joinStr.String())
-		}
-	}
-	// WHERE
-	if len(s.cond) > 0 {
-		where, params, e := s.parseCond(s.cond)
-		if e != nil {
-			s.err = e
-		}
-		s.whereParams = params
-		if where.Len() > 0 {
-			s.command.WriteString(" WHERE " + where.String())
-		}
-	}
-
-	// LIMIT
-	if s.limit != "" {
-		s.command.WriteString(s.limit)
+	if e := s.buildFromClause(cond); e != nil {
+		return 0, e
 	}
 
 	row, err := s.row(ctx, s.command.String(), s.mergeParams()...)
 	if err != nil {
 		return 0, err
 	}
+
+	// 恢复原始 limit（虽然 Free 后无意义，保持语义完整）
+	s.limit = savedLimit
+
 	var count int64
 	err = row.Scan(&count)
 	if err != nil {
@@ -388,37 +397,33 @@ func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ..
 	s.command.WriteString("SELECT ")
 	s.command.WriteString(strings.Join(s.parseFunc(s.funcs), ","))
 
-	// FROM TABLE
-	s.command.WriteString(" FROM " + s.db.Dialect().Quote(s.table))
-	// for _, j := range s.join {
-	// 	s.command.WriteString(j[0] + " JOIN " + j[1] + " ON " + j[2] + " ")
+	// // FROM TABLE
+	// s.command.WriteString(" FROM " + d.Quote(s.table))
+	//
+	// if len(s.join) > 0 {
+	// 	joinStr, params, e := s.parseJoin(s.join)
+	// 	if e != nil {
+	// 		s.err = e
+	// 	}
+	// 	s.joinParams = params
+	// 	if joinStr.Len() > 0 {
+	// 		s.command.WriteString(joinStr.String())
+	// 	}
+	// }
+	//
+	// if len(s.cond) > 0 {
+	// 	where, params, e := s.parseCond(s.cond)
+	// 	if e != nil {
+	// 		s.err = e
+	// 	}
+	// 	s.whereParams = params
+	// 	if where.Len() > 0 {
+	// 		s.command.WriteString(" WHERE " + where.String())
+	// 	}
 	// }
 
-	if len(s.join) > 0 {
-		joinStr, params, e := s.parseJoin(s.join)
-		if e != nil {
-			s.err = e
-		}
-		s.joinParams = params
-		if joinStr.Len() > 0 {
-			s.command.WriteString(joinStr.String())
-		}
-	}
-
-	// WHERE
-	// if s.where.Len() > 0 {
-	// 	s.command.WriteString(" WHERE " + s.where.String())
-	// }
-
-	if len(s.cond) > 0 {
-		where, params, e := s.parseCond(s.cond)
-		if e != nil {
-			s.err = e
-		}
-		s.whereParams = params
-		if where.Len() > 0 {
-			s.command.WriteString(" WHERE " + where.String())
-		}
+	if e := s.buildFromClause(cond); e != nil {
+		return nil, e
 	}
 
 	// LIMIT
@@ -442,6 +447,36 @@ func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ..
 		resultMap[cols[i].Name] = results[i]
 	}
 	return resultMap, nil
+}
+
+// buildFromClause 构建公共的 FROM + JOIN + WHERE 子句
+// 用于 Count / Sum / Avg / Max / Min 等聚合查询
+func (s *read) buildFromClause(cond []dialect.Condition) error {
+	d := s.db.Dialect()
+	s.command.WriteString(" FROM " + d.Quote(s.table))
+
+	if len(s.join) > 0 {
+		joinStr, params, e := s.parseJoin(s.join)
+		if e != nil {
+			return e
+		}
+		s.joinParams = params
+		if joinStr.Len() > 0 {
+			s.command.WriteString(joinStr.String())
+		}
+	}
+
+	if len(s.cond) > 0 {
+		where, params, e := s.parseCond(s.cond)
+		if e != nil {
+			return e
+		}
+		s.whereParams = params
+		if where.Len() > 0 {
+			s.command.WriteString(" WHERE " + where.String())
+		}
+	}
+	return nil
 }
 
 // Select 执行原生的 SQL 查询
