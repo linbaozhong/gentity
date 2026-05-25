@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanystamp"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -23,9 +22,8 @@ var (
 	})
 )
 
-func NewCompanyStamp(db *ace.DB) *CompanyStamp {
+func NewCompanyStamp() *CompanyStamp {
 	_obj := companystampPool.Get()
-	_obj.SetDB(db)
 	return _obj
 }
 
@@ -182,7 +180,7 @@ func (p *CompanyStamp) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanySt
 	}
 
 	for rows.Next() {
-		_p := NewCompanyStamp(p.GetDB())
+		_p := NewCompanyStamp()
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -201,86 +199,75 @@ func (p *CompanyStamp) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanySt
 // RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
 // 如果 args 为空，则赋值所有可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyStamp) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *CompanyStamp) RawAssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
 	if len(args) == 0 {
 		args = tblcompanystamp.WritableFields
 	}
-	return p.AssignValues(args...)
+	return p.AssignValues(d, args...)
 }
 
 // 定义字段到值检查和获取函数的映射
-var companystampFieldToValueFunc = map[dialect.Field]func(*CompanyStamp) (string, any, bool){
-	tblcompanystamp.Id: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
+var companystampFieldToValueFunc = map[dialect.Field]func(*CompanyStamp) (any, bool){
+	tblcompanystamp.Id: func(p *CompanyStamp) (any, bool) {
+		return p.Id, p.Id == 0
 	},
-	tblcompanystamp.Company: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
+	tblcompanystamp.Company: func(p *CompanyStamp) (any, bool) {
+		return p.Company, p.Company == 0
 	},
-	tblcompanystamp.Url: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Url.Quote(p.GetDB().Dialect()), p.Url, p.Url == ""
+	tblcompanystamp.Url: func(p *CompanyStamp) (any, bool) {
+		return p.Url, p.Url == ""
 	},
-	tblcompanystamp.Genre: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Genre.Quote(p.GetDB().Dialect()), p.Genre, p.Genre == 0
+	tblcompanystamp.Genre: func(p *CompanyStamp) (any, bool) {
+		return p.Genre, p.Genre == 0
 	},
-	tblcompanystamp.IsDefault: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.IsDefault.Quote(p.GetDB().Dialect()), p.IsDefault, p.IsDefault == 0
+	tblcompanystamp.IsDefault: func(p *CompanyStamp) (any, bool) {
+		return p.IsDefault, p.IsDefault == 0
 	},
-	tblcompanystamp.Creator: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Creator.Quote(p.GetDB().Dialect()), p.Creator, p.Creator == 0
+	tblcompanystamp.Creator: func(p *CompanyStamp) (any, bool) {
+		return p.Creator, p.Creator == 0
 	},
-	tblcompanystamp.CreatorName: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.CreatorName.Quote(p.GetDB().Dialect()), p.CreatorName, p.CreatorName == ""
+	tblcompanystamp.CreatorName: func(p *CompanyStamp) (any, bool) {
+		return p.CreatorName, p.CreatorName == ""
 	},
-	tblcompanystamp.State: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
+	tblcompanystamp.State: func(p *CompanyStamp) (any, bool) {
+		return p.State, p.State == 0
 	},
-	tblcompanystamp.Status: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Status.Quote(p.GetDB().Dialect()), p.Status, p.Status == 0
+	tblcompanystamp.Status: func(p *CompanyStamp) (any, bool) {
+		return p.Status, p.Status == 0
 	},
-	tblcompanystamp.Ctime: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
+	tblcompanystamp.Ctime: func(p *CompanyStamp) (any, bool) {
+		return p.Ctime, p.Ctime.IsZero()
 	},
-	tblcompanystamp.Utime: func(p *CompanyStamp) (string, any, bool) {
-		return tblcompanystamp.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
+	tblcompanystamp.Utime: func(p *CompanyStamp) (any, bool) {
+		return p.Utime, p.Utime.IsZero()
 	},
 }
 
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyStamp) AssignValues(args ...dialect.Field) ([]string, []any) {
-	var (
-		_lens = len(args)
-		_cols []string
-		_vals []any
-	)
-	if _lens > 0 {
-		_cols = make([]string, 0, _lens)
-		_vals = make([]any, 0, _lens)
-		for _, arg := range args {
-			if valueFunc, exists := companystampFieldToValueFunc[arg]; exists {
-				colName, value, _ := valueFunc(p)
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
-			}
-		}
-		return _cols, _vals
+func (p *CompanyStamp) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
+	// 未传参时使用全部可写字段，并跳过零值
+	skipZero := len(args) == 0
+	if skipZero {
+		args = tblcompanystamp.WritableFields
 	}
 
-	args = tblcompanystamp.WritableFields
-	_lens = len(args)
-	_cols = make([]string, 0, _lens)
-	_vals = make([]any, 0, _lens)
+	cols := make([]string, 0, len(args))
+	vals := make([]any, 0, len(args))
+
 	for _, arg := range args {
 		if valueFunc, exists := companystampFieldToValueFunc[arg]; exists {
-			colName, value, valid := valueFunc(p)
-			if !valid {
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
+			value, isZero := valueFunc(p)
+			// 显式指定字段时全量包含；默认模式跳过零值字段
+			if skipZero && isZero {
+				continue
 			}
+			cols = append(cols, arg.Quote(d))
+			vals = append(vals, value)
 		}
 	}
-	return _cols, _vals
+	return cols, vals
 }
 
 func (p *CompanyStamp) AssignKeys() (dialect.Field, any) {

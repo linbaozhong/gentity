@@ -66,7 +66,7 @@ func reader2Struct(driver string, r io.Reader, packageName string) ([]byte, erro
 		// buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + ParseField(table.Name) + " struct {\n")
 		buf.WriteString("\tpool.Model\n")
-		buf.WriteString("\tace.Base\n")
+		// buf.WriteString("\tace.Base\n")
 		//
 		parseColumnType(table.ColumnsX)
 		//
@@ -110,7 +110,7 @@ func DB2Struct(driver string, tables []*sqlparser.Table, packageName string) ([]
 		// buf.WriteString("// cache time.Minute time.Minute 1000 \n")
 		buf.WriteString("type " + ParseField(table.Name) + " struct {\n")
 		buf.WriteString("\tpool.Model\n")
-		buf.WriteString("\tace.Base\n")
+		// buf.WriteString("\tace.Base\n")
 
 		parseColumnType(table.ColumnsX)
 		//

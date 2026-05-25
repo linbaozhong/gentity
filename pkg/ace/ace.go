@@ -48,15 +48,10 @@ type (
 
 var (
 	Err_ToSql = errors.New("the SQL command terminates execution after the Debug() method")
-
-	// _obj  *DB
-	// _once sync.Once
 )
 
 // Connect
 func Connect(driverName, dns string) (*DB, error) {
-	// var err error
-	// _once.Do(func() {
 	// 根据驱动自动选择方言
 	var d dialect.Dialect = Dialect(driverName)
 
@@ -82,10 +77,6 @@ func Connect(driverName, dns string) (*DB, error) {
 	}
 
 	app.RegisterServiceCloser(_obj)
-	// // 注册事务方法
-	// Transaction = _obj.Transaction
-
-	// })
 
 	return _obj, e
 }
@@ -101,21 +92,3 @@ func Dialect(driverName string) dialect.Dialect {
 	}
 	return &mysql.MySQL{}
 }
-
-//
-// // GetDB
-// // 调用该方法前，确保已经调用过 Connect 方法并确保没有 error 产生
-// func GetDB() *DB {
-// 	if _obj == nil {
-// 		log.Panic("db not init")
-// 	}
-// 	return _obj
-// }
-
-// // //////////////////////////
-// func GetExec(exec ...Executer) Executer {
-// 	if len(exec) > 0 {
-// 		return exec[0]
-// 	}
-// 	return GetDB()
-// }

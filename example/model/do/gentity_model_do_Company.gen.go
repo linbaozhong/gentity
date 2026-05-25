@@ -3,11 +3,9 @@
 package do
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompany"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -24,9 +22,8 @@ var (
 	})
 )
 
-func NewCompany(db *ace.DB) *Company {
+func NewCompany() *Company {
 	_obj := companyPool.Get()
-	_obj.SetDB(db)
 	return _obj
 }
 
@@ -211,7 +208,7 @@ func (p *Company) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Company, bool,
 	}
 
 	for rows.Next() {
-		_p := NewCompany(p.GetDB())
+		_p := NewCompany()
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -230,98 +227,87 @@ func (p *Company) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Company, bool,
 // RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
 // 如果 args 为空，则赋值所有可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *Company) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *Company) RawAssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
 	if len(args) == 0 {
 		args = tblcompany.WritableFields
 	}
-	return p.AssignValues(args...)
+	return p.AssignValues(d, args...)
 }
 
 // 定义字段到值检查和获取函数的映射
-var companyFieldToValueFunc = map[dialect.Field]func(*Company) (string, any, bool){
-	tblcompany.Id: func(p *Company) (string, any, bool) {
-		return tblcompany.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
+var companyFieldToValueFunc = map[dialect.Field]func(*Company) (any, bool){
+	tblcompany.Id: func(p *Company) (any, bool) {
+		return p.Id, p.Id == 0
 	},
-	tblcompany.LongName: func(p *Company) (string, any, bool) {
-		return tblcompany.LongName.Quote(p.GetDB().Dialect()), p.LongName, p.LongName == ""
+	tblcompany.LongName: func(p *Company) (any, bool) {
+		return p.LongName, p.LongName == ""
 	},
-	tblcompany.ShortName: func(p *Company) (string, any, bool) {
-		return tblcompany.ShortName.Quote(p.GetDB().Dialect()), p.ShortName, p.ShortName == ""
+	tblcompany.ShortName: func(p *Company) (any, bool) {
+		return p.ShortName, p.ShortName == ""
 	},
-	tblcompany.Address: func(p *Company) (string, any, bool) {
-		return tblcompany.Address.Quote(p.GetDB().Dialect()), p.Address, p.Address == ""
+	tblcompany.Address: func(p *Company) (any, bool) {
+		return p.Address, p.Address == ""
 	},
-	tblcompany.Email: func(p *Company) (string, any, bool) {
-		return tblcompany.Email.Quote(p.GetDB().Dialect()), p.Email, p.Email == ""
+	tblcompany.Email: func(p *Company) (any, bool) {
+		return p.Email, p.Email == ""
 	},
-	tblcompany.ContactName: func(p *Company) (string, any, bool) {
-		return tblcompany.ContactName.Quote(p.GetDB().Dialect()), p.ContactName, p.ContactName == ""
+	tblcompany.ContactName: func(p *Company) (any, bool) {
+		return p.ContactName, p.ContactName == ""
 	},
-	tblcompany.ContactTelephone: func(p *Company) (string, any, bool) {
-		return tblcompany.ContactTelephone.Quote(p.GetDB().Dialect()), p.ContactTelephone, p.ContactTelephone == ""
+	tblcompany.ContactTelephone: func(p *Company) (any, bool) {
+		return p.ContactTelephone, p.ContactTelephone == ""
 	},
-	tblcompany.ContactMobile: func(p *Company) (string, any, bool) {
-		return tblcompany.ContactMobile.Quote(p.GetDB().Dialect()), p.ContactMobile, p.ContactMobile == ""
+	tblcompany.ContactMobile: func(p *Company) (any, bool) {
+		return p.ContactMobile, p.ContactMobile == ""
 	},
-	tblcompany.ContactEmail: func(p *Company) (string, any, bool) {
-		return tblcompany.ContactEmail.Quote(p.GetDB().Dialect()), p.ContactEmail, p.ContactEmail == ""
+	tblcompany.ContactEmail: func(p *Company) (any, bool) {
+		return p.ContactEmail, p.ContactEmail == ""
 	},
-	tblcompany.LegalName: func(p *Company) (string, any, bool) {
-		return tblcompany.LegalName.Quote(p.GetDB().Dialect()), p.LegalName, p.LegalName == ""
+	tblcompany.LegalName: func(p *Company) (any, bool) {
+		return p.LegalName, p.LegalName == ""
 	},
-	tblcompany.Creator: func(p *Company) (string, any, bool) {
-		return tblcompany.Creator.Quote(p.GetDB().Dialect()), p.Creator, p.Creator == 0
+	tblcompany.Creator: func(p *Company) (any, bool) {
+		return p.Creator, p.Creator == 0
 	},
-	tblcompany.State: func(p *Company) (string, any, bool) {
-		return tblcompany.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
+	tblcompany.State: func(p *Company) (any, bool) {
+		return p.State, p.State == 0
 	},
-	tblcompany.Status: func(p *Company) (string, any, bool) {
-		return tblcompany.Status.Quote(p.GetDB().Dialect()), p.Status, p.Status == 0
+	tblcompany.Status: func(p *Company) (any, bool) {
+		return p.Status, p.Status == 0
 	},
-	tblcompany.Ctime: func(p *Company) (string, any, bool) {
-		return tblcompany.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
+	tblcompany.Ctime: func(p *Company) (any, bool) {
+		return p.Ctime, p.Ctime.IsZero()
 	},
-	tblcompany.Utime: func(p *Company) (string, any, bool) {
-		return tblcompany.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
+	tblcompany.Utime: func(p *Company) (any, bool) {
+		return p.Utime, p.Utime.IsZero()
 	},
 }
 
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *Company) AssignValues(args ...dialect.Field) ([]string, []any) {
-	var (
-		_lens = len(args)
-		_cols []string
-		_vals []any
-	)
-	if _lens > 0 {
-		_cols = make([]string, 0, _lens)
-		_vals = make([]any, 0, _lens)
-		for _, arg := range args {
-			if valueFunc, exists := companyFieldToValueFunc[arg]; exists {
-				colName, value, _ := valueFunc(p)
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
-			}
-		}
-		return _cols, _vals
+func (p *Company) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
+	// 未传参时使用全部可写字段，并跳过零值
+	skipZero := len(args) == 0
+	if skipZero {
+		args = tblcompany.WritableFields
 	}
 
-	args = tblcompany.WritableFields
-	_lens = len(args)
-	_cols = make([]string, 0, _lens)
-	_vals = make([]any, 0, _lens)
+	cols := make([]string, 0, len(args))
+	vals := make([]any, 0, len(args))
+
 	for _, arg := range args {
 		if valueFunc, exists := companyFieldToValueFunc[arg]; exists {
-			colName, value, valid := valueFunc(p)
-			if !valid {
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
+			value, isZero := valueFunc(p)
+			// 显式指定字段时全量包含；默认模式跳过零值字段
+			if skipZero && isZero {
+				continue
 			}
+			cols = append(cols, arg.Quote(d))
+			vals = append(vals, value)
 		}
 	}
-	return _cols, _vals
+	return cols, vals
 }
 
 func (p *Company) AssignKeys() (dialect.Field, any) {
@@ -335,414 +321,4 @@ func (p *Company) AssignPrimaryKeyValues(result sql.Result) error {
 	}
 	p.Id = types.BigInt(_id)
 	return nil
-}
-
-// PrintSql 仅打印SQL语句，不执行
-func (p *Company) PrintSql() *Company {
-	p.Debug(true)
-	return p
-}
-
-// Insert 返回 LastInsertId
-func (p *Company) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
-	defer p.Free()
-	if len(sets) == 0 {
-		return 0, dialect.ErrSetterEmpty
-	}
-	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
-		Set(sets...).
-		Debug(p.Debug()).
-		Create().
-		Exec(ctx)
-	if e != nil {
-		return 0, e
-	}
-	return _result.LastInsertId()
-}
-
-// InsertOne
-// cols: 要插入的列名
-func (p *Company) InsertOne(ctx context.Context, cols ...dialect.Field) (bool, error) {
-	defer p.Free()
-	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
-		Cols(cols...).
-		Debug(p.Debug()).
-		Create().
-		Struct(ctx, p)
-	if e != nil {
-		return false, e
-	}
-
-	p.AssignPrimaryKeyValues(_result)
-
-	_n, e := _result.RowsAffected()
-	return _n > 0, e
-}
-
-// InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
-// cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
-func (p *Company) InsertBatch(ctx context.Context, beans []*Company, cols ...dialect.Field) (int64, error) {
-	defer p.Free()
-	_lens := len(beans)
-	if _lens == 0 {
-		return 0, dialect.ErrBeanEmpty
-	}
-	_args := make([]dialect.Modeler, 0, _lens)
-	for _, _bean := range beans {
-		_args = append(_args, _bean)
-	}
-	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
-		Cols(cols...).
-		Debug(p.Debug()).
-		Create().
-		BatchStruct(ctx, _args...)
-	if e != nil {
-		return 0, e
-	}
-
-	return _result.RowsAffected()
-}
-
-// Update
-func (p *Company) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
-	defer p.Free()
-	if len(sets) == 0 {
-		return false, dialect.ErrSetterEmpty
-	}
-	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
-		Where(cond...).
-		Set(sets...).
-		Debug(p.Debug()).
-		Update().
-		Exec(ctx)
-	if e != nil {
-		return false, e
-	}
-	_n, e := _result.RowsAffected()
-	return _n >= 0, e
-}
-
-// UpdateById
-func (p *Company) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.Setter) (bool, error) {
-	return p.Update(ctx,
-		sets,
-		tblcompany.PrimaryKey.Eq(id),
-	)
-}
-
-// UpdateOne
-// cols: 要插入的列名
-func (p *Company) UpdateOne(ctx context.Context, cols ...dialect.Field) (bool, error) {
-	defer p.Free()
-	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
-		Cols(cols...).
-		Debug(p.Debug()).
-		Update().
-		Struct(ctx, p)
-	if e != nil {
-		return false, e
-	}
-
-	_n, e := _result.RowsAffected()
-	return _n >= 0, e
-}
-
-// UpdateBatch 批量更新,禁止在事务中使用
-// cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
-func (p *Company) UpdateBatch(ctx context.Context, beans []*Company, cols ...dialect.Field) (bool, error) {
-	defer p.Free()
-	_lens := len(beans)
-	if _lens == 0 {
-		return false, dialect.ErrBeanEmpty
-	}
-	_args := make([]dialect.Modeler, 0, _lens)
-	for _, _bean := range beans {
-		_args = append(_args, _bean)
-	}
-	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
-		Cols(cols...).
-		Debug(p.Debug()).
-		Update().
-		BatchStruct(ctx, _args...)
-	if e != nil {
-		return false, e
-	}
-	_n, e := _result.RowsAffected()
-	return _n >= 0, e
-}
-
-// Delete
-func (p *Company) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	defer p.Free()
-	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
-		Where(cond...).
-		Debug(p.Debug()).
-		Delete().
-		Exec(ctx)
-	if e != nil {
-		return false, e
-	}
-	_n, e := _result.RowsAffected()
-	return _n >= 0, e
-}
-
-// DeleteById
-func (p *Company) DeleteById(ctx context.Context, id types.BigInt) (bool, error) {
-	return p.Delete(ctx,
-		tblcompany.PrimaryKey.Eq(id),
-	)
-}
-
-// DeleteByIds 按主键列表批量删除
-// ids: 主键列表
-// 返回值: 影响的行数，错误信息
-func (p *Company) DeleteByIds(ctx context.Context, ids []any) (int64, error) {
-	defer p.Free()
-	if len(ids) == 0 {
-		return 0, nil
-	}
-
-	_result, e := ace.New(p.GetDB()).Table(CompanyTableName).
-		Where(tblcompany.PrimaryKey.In(ids...)).
-		Debug(p.Debug()).
-		Delete().
-		Exec(ctx)
-	if e != nil {
-		return 0, e
-	}
-	return _result.RowsAffected()
-}
-
-// Get 查询第一个符合条件的记录
-//
-//	s: 选择器，用于构建sql语句
-//
-// 返回值:
-//  1. *Company: 第一个符合条件的记录
-//  2. bool: 是否存在记录
-//  3. error: 错误信息
-//
-// 注意:
-//  1. 如果没有指定表名，则默认使用CompanyTableName
-//  2. 如果没有指定查询列，则默认使用tblcompany.ReadableFields
-//  3. 如果没有指定排序方式，则默认使用dialect.OrderAsc
-//  4. 如果没有指定条件，则默认查询所有记录
-//  5. 如果查询出错，则返回nil, false, error
-//  6. 如果没有查询到记录，则返回nil, false, nil
-//  7. 如果查询到记录，则返回记录, true, nil
-//  8. 如果查询到多条记录，则返回第一条记录, true, nil
-func (p *Company) Get(ctx context.Context, s ace.SelectBuilder) (*Company, bool, error) {
-	defer p.Free()
-	if len(s.GetTableName()) == 0 {
-		s.Table(CompanyTableName)
-	}
-	_cols := s.GetCols()
-	if len(_cols) == 0 {
-		_cols = tblcompany.ReadableFields
-		s.Cols(_cols...)
-	}
-	_row, e := s.SetDB(p.GetDB()).
-		Debug(p.Debug()).
-		Select().
-		QueryRow(ctx)
-	if e != nil {
-		return nil, false, e
-	}
-	_obj := NewCompany(p.GetDB())
-	e = _row.Scan(_obj.AssignPtr(_cols...)...)
-	switch e {
-	case nil:
-		return _obj, true, nil
-	case sql.ErrNoRows:
-		return _obj, false, nil
-	default:
-		return _obj, false, e
-	}
-}
-
-// GetByID 按主键读取一个company对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
-func (p *Company) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*Company, bool, error) {
-	defer p.Free()
-	return p.Get(ctx, ace.New(p.GetDB()).Table(CompanyTableName).Where(tblcompany.PrimaryKey.Eq(id)).Cols(cols...))
-}
-
-// GetByIds 按主键列表批量查询
-// ids: 主键列表
-// cols: 要查询的列名，如果为空，则查询所有可读列
-func (p *Company) GetByIds(ctx context.Context, ids []any, cols ...dialect.Field) ([]*Company, error) {
-	defer p.Free()
-	if len(ids) == 0 {
-		return []*Company{}, nil
-	}
-
-	s := ace.New(p.GetDB()).Table(CompanyTableName).
-		Where(tblcompany.PrimaryKey.In(ids...))
-	if len(cols) == 0 {
-		cols = tblcompany.ReadableFields
-		s.Cols(cols...)
-	}
-
-	_rows, e := s.
-		Debug(p.Debug()).
-		Select().
-		Query(ctx)
-	if e != nil {
-		return nil, e
-	}
-	defer _rows.Close()
-
-	_obj := NewCompany(p.GetDB())
-	_objs, _, e := _obj.Scan(_rows, cols...)
-	return _objs, e
-}
-
-// Cell 查询第一个符合条件的记录的第一个列
-//
-//	s: 选择器，用于构建sql语句
-//
-// 返回值:
-//  1. any: 第一个符合条件的记录的第一个列
-//  2. bool: 是否存在记录
-//  3. error: 错误信息
-//
-// 注意:
-//  1. 如果没有指定表名，则默认使用CompanyTableName
-//  2. 如果没有指定查询列，则默认使用tblcompany.PrimaryKey
-func (p *Company) Cell(ctx context.Context, s ace.SelectBuilder) (any, bool, error) {
-	defer p.Free()
-	if len(s.GetTableName()) == 0 {
-		s.Table(CompanyTableName)
-	}
-
-	if len(s.GetCols()) == 0 {
-		s.Cols(tblcompany.PrimaryKey)
-	}
-	_row, e := s.SetDB(p.GetDB()).
-		Debug(p.Debug()).
-		Select().
-		QueryRow(ctx)
-	if e != nil {
-		return nil, false, e
-	}
-	var _v any
-	e = _row.Scan(&_v)
-	switch e {
-	case nil:
-		return _v, true, nil
-	case sql.ErrNoRows:
-		return _v, false, nil
-	default:
-		return _v, false, e
-	}
-}
-
-// List 查询所有符合条件的记录
-func (p *Company) List(ctx context.Context, s ace.SelectBuilder) ([]*Company, bool, error) {
-	defer p.Free()
-	if len(s.GetTableName()) == 0 {
-		s.Table(CompanyTableName)
-	}
-
-	_cols := s.GetCols()
-	if len(_cols) == 0 {
-		_cols = tblcompany.ReadableFields
-		s.Cols(_cols...)
-	}
-
-	_rows, e := s.SetDB(p.GetDB()).
-		Debug(p.Debug()).
-		Select().
-		Query(ctx)
-	if e != nil {
-		return nil, false, e
-	}
-	defer _rows.Close()
-
-	_obj := NewCompany(p.GetDB())
-	_objs, has, e := _obj.Scan(_rows, _cols...)
-	if has {
-		return _objs, true, nil
-	}
-	if e == nil || e == sql.ErrNoRows {
-		return _objs, false, nil
-	}
-
-	return _objs, false, e
-}
-
-// Column 查询所有符合条件的记录的指定列
-func (p *Company) Column(ctx context.Context, s ace.SelectBuilder) ([]any, error) {
-	defer p.Free()
-	if len(s.GetTableName()) == 0 {
-		s.Table(CompanyTableName)
-	}
-
-	_cols := s.GetCols()
-	if len(_cols) == 0 {
-		s.PureCols(tblcompany.PrimaryKey)
-	} else {
-		s.PureCols(_cols[0])
-	}
-
-	_rows, e := s.SetDB(p.GetDB()).
-		Debug(p.Debug()).
-		Select().
-		Query(ctx)
-	if e != nil {
-		return nil, e
-	}
-	defer _rows.Close()
-
-	_objs := []any{}
-	for _rows.Next() {
-		var _v any
-		e := _rows.Scan(&_v)
-		if e != nil {
-			return nil, e
-		}
-		_objs = append(_objs, _v)
-	}
-	return _objs, nil
-}
-
-// Count
-func (p *Company) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-	defer p.Free()
-	return ace.New(p.GetDB()).Table(CompanyTableName).
-		Debug(p.Debug()).
-		Select().
-		Count(ctx, cond...)
-}
-
-// Sum
-func (p *Company) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-	defer p.Free()
-	return ace.New(p.GetDB()).Table(CompanyTableName).
-		Debug(p.Debug()).
-		Select().
-		Sum(ctx, cols, cond...)
-}
-
-// Exists
-func (p *Company) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-	defer p.Free()
-	_c := ace.New(p.GetDB()).Table(CompanyTableName).Cols(tblcompany.PrimaryKey).Where(cond...)
-	_row, e := _c.
-		Debug(p.Debug()).
-		Select().
-		QueryRow(ctx)
-	if e != nil {
-		return false, e
-	}
-
-	var id types.BigInt
-	e = _row.Scan(&id)
-	switch e {
-	case nil:
-		return true, nil
-	case sql.ErrNoRows:
-		return false, nil
-	default:
-		return false, e
-	}
 }

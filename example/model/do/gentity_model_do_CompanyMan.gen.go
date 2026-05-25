@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyman"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -23,9 +22,8 @@ var (
 	})
 )
 
-func NewCompanyMan(db *ace.DB) *CompanyMan {
+func NewCompanyMan() *CompanyMan {
 	_obj := companymanPool.Get()
-	_obj.SetDB(db)
 	return _obj
 }
 
@@ -196,7 +194,7 @@ func (p *CompanyMan) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyMan,
 	}
 
 	for rows.Next() {
-		_p := NewCompanyMan(p.GetDB())
+		_p := NewCompanyMan()
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -215,92 +213,81 @@ func (p *CompanyMan) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyMan,
 // RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
 // 如果 args 为空，则赋值所有可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyMan) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *CompanyMan) RawAssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
 	if len(args) == 0 {
 		args = tblcompanyman.WritableFields
 	}
-	return p.AssignValues(args...)
+	return p.AssignValues(d, args...)
 }
 
 // 定义字段到值检查和获取函数的映射
-var companymanFieldToValueFunc = map[dialect.Field]func(*CompanyMan) (string, any, bool){
-	tblcompanyman.Id: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
+var companymanFieldToValueFunc = map[dialect.Field]func(*CompanyMan) (any, bool){
+	tblcompanyman.Id: func(p *CompanyMan) (any, bool) {
+		return p.Id, p.Id == 0
 	},
-	tblcompanyman.AccountId: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.AccountId.Quote(p.GetDB().Dialect()), p.AccountId, p.AccountId == 0
+	tblcompanyman.AccountId: func(p *CompanyMan) (any, bool) {
+		return p.AccountId, p.AccountId == 0
 	},
-	tblcompanyman.Company: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
+	tblcompanyman.Company: func(p *CompanyMan) (any, bool) {
+		return p.Company, p.Company == 0
 	},
-	tblcompanyman.RealName: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.RealName.Quote(p.GetDB().Dialect()), p.RealName, p.RealName == ""
+	tblcompanyman.RealName: func(p *CompanyMan) (any, bool) {
+		return p.RealName, p.RealName == ""
 	},
-	tblcompanyman.Email: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Email.Quote(p.GetDB().Dialect()), p.Email, p.Email == ""
+	tblcompanyman.Email: func(p *CompanyMan) (any, bool) {
+		return p.Email, p.Email == ""
 	},
-	tblcompanyman.Roles: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Roles.Quote(p.GetDB().Dialect()), p.Roles, p.Roles == ""
+	tblcompanyman.Roles: func(p *CompanyMan) (any, bool) {
+		return p.Roles, p.Roles == ""
 	},
-	tblcompanyman.Gender: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Gender.Quote(p.GetDB().Dialect()), p.Gender, p.Gender == ""
+	tblcompanyman.Gender: func(p *CompanyMan) (any, bool) {
+		return p.Gender, p.Gender == ""
 	},
-	tblcompanyman.Genre: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Genre.Quote(p.GetDB().Dialect()), p.Genre, p.Genre == 0
+	tblcompanyman.Genre: func(p *CompanyMan) (any, bool) {
+		return p.Genre, p.Genre == 0
 	},
-	tblcompanyman.IsActivate: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.IsActivate.Quote(p.GetDB().Dialect()), p.IsActivate, p.IsActivate == 0
+	tblcompanyman.IsActivate: func(p *CompanyMan) (any, bool) {
+		return p.IsActivate, p.IsActivate == 0
 	},
-	tblcompanyman.LoginTime: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.LoginTime.Quote(p.GetDB().Dialect()), p.LoginTime, p.LoginTime.IsZero()
+	tblcompanyman.LoginTime: func(p *CompanyMan) (any, bool) {
+		return p.LoginTime, p.LoginTime.IsZero()
 	},
-	tblcompanyman.State: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
+	tblcompanyman.State: func(p *CompanyMan) (any, bool) {
+		return p.State, p.State == 0
 	},
-	tblcompanyman.Ctime: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
+	tblcompanyman.Ctime: func(p *CompanyMan) (any, bool) {
+		return p.Ctime, p.Ctime.IsZero()
 	},
-	tblcompanyman.Utime: func(p *CompanyMan) (string, any, bool) {
-		return tblcompanyman.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
+	tblcompanyman.Utime: func(p *CompanyMan) (any, bool) {
+		return p.Utime, p.Utime.IsZero()
 	},
 }
 
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyMan) AssignValues(args ...dialect.Field) ([]string, []any) {
-	var (
-		_lens = len(args)
-		_cols []string
-		_vals []any
-	)
-	if _lens > 0 {
-		_cols = make([]string, 0, _lens)
-		_vals = make([]any, 0, _lens)
-		for _, arg := range args {
-			if valueFunc, exists := companymanFieldToValueFunc[arg]; exists {
-				colName, value, _ := valueFunc(p)
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
-			}
-		}
-		return _cols, _vals
+func (p *CompanyMan) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
+	// 未传参时使用全部可写字段，并跳过零值
+	skipZero := len(args) == 0
+	if skipZero {
+		args = tblcompanyman.WritableFields
 	}
 
-	args = tblcompanyman.WritableFields
-	_lens = len(args)
-	_cols = make([]string, 0, _lens)
-	_vals = make([]any, 0, _lens)
+	cols := make([]string, 0, len(args))
+	vals := make([]any, 0, len(args))
+
 	for _, arg := range args {
 		if valueFunc, exists := companymanFieldToValueFunc[arg]; exists {
-			colName, value, valid := valueFunc(p)
-			if !valid {
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
+			value, isZero := valueFunc(p)
+			// 显式指定字段时全量包含；默认模式跳过零值字段
+			if skipZero && isZero {
+				continue
 			}
+			cols = append(cols, arg.Quote(d))
+			vals = append(vals, value)
 		}
 	}
-	return _cols, _vals
+	return cols, vals
 }
 
 func (p *CompanyMan) AssignKeys() (dialect.Field, any) {

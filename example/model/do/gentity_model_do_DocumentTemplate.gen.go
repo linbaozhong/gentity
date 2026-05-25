@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tbldocumenttemplate"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -23,9 +22,8 @@ var (
 	})
 )
 
-func NewDocumentTemplate(db *ace.DB) *DocumentTemplate {
+func NewDocumentTemplate() *DocumentTemplate {
 	_obj := documenttemplatePool.Get()
-	_obj.SetDB(db)
 	return _obj
 }
 
@@ -182,7 +180,7 @@ func (p *DocumentTemplate) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Docum
 	}
 
 	for rows.Next() {
-		_p := NewDocumentTemplate(p.GetDB())
+		_p := NewDocumentTemplate()
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -201,86 +199,75 @@ func (p *DocumentTemplate) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Docum
 // RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
 // 如果 args 为空，则赋值所有可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *DocumentTemplate) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *DocumentTemplate) RawAssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
 	if len(args) == 0 {
 		args = tbldocumenttemplate.WritableFields
 	}
-	return p.AssignValues(args...)
+	return p.AssignValues(d, args...)
 }
 
 // 定义字段到值检查和获取函数的映射
-var documenttemplateFieldToValueFunc = map[dialect.Field]func(*DocumentTemplate) (string, any, bool){
-	tbldocumenttemplate.Id: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
+var documenttemplateFieldToValueFunc = map[dialect.Field]func(*DocumentTemplate) (any, bool){
+	tbldocumenttemplate.Id: func(p *DocumentTemplate) (any, bool) {
+		return p.Id, p.Id == 0
 	},
-	tbldocumenttemplate.Genre: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Genre.Quote(p.GetDB().Dialect()), p.Genre, p.Genre == 0
+	tbldocumenttemplate.Genre: func(p *DocumentTemplate) (any, bool) {
+		return p.Genre, p.Genre == 0
 	},
-	tbldocumenttemplate.Company: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
+	tbldocumenttemplate.Company: func(p *DocumentTemplate) (any, bool) {
+		return p.Company, p.Company == 0
 	},
-	tbldocumenttemplate.Way: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Way.Quote(p.GetDB().Dialect()), p.Way, p.Way == 0
+	tbldocumenttemplate.Way: func(p *DocumentTemplate) (any, bool) {
+		return p.Way, p.Way == 0
 	},
-	tbldocumenttemplate.AuthSign: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.AuthSign.Quote(p.GetDB().Dialect()), p.AuthSign, p.AuthSign == 0
+	tbldocumenttemplate.AuthSign: func(p *DocumentTemplate) (any, bool) {
+		return p.AuthSign, p.AuthSign == 0
 	},
-	tbldocumenttemplate.Title: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Title.Quote(p.GetDB().Dialect()), p.Title, p.Title == ""
+	tbldocumenttemplate.Title: func(p *DocumentTemplate) (any, bool) {
+		return p.Title, p.Title == ""
 	},
-	tbldocumenttemplate.Content: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Content.Quote(p.GetDB().Dialect()), p.Content, p.Content == ""
+	tbldocumenttemplate.Content: func(p *DocumentTemplate) (any, bool) {
+		return p.Content, p.Content == ""
 	},
-	tbldocumenttemplate.Url: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Url.Quote(p.GetDB().Dialect()), p.Url, p.Url == ""
+	tbldocumenttemplate.Url: func(p *DocumentTemplate) (any, bool) {
+		return p.Url, p.Url == ""
 	},
-	tbldocumenttemplate.HasForm: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.HasForm.Quote(p.GetDB().Dialect()), p.HasForm, p.HasForm == 0
+	tbldocumenttemplate.HasForm: func(p *DocumentTemplate) (any, bool) {
+		return p.HasForm, p.HasForm == 0
 	},
-	tbldocumenttemplate.State: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
+	tbldocumenttemplate.State: func(p *DocumentTemplate) (any, bool) {
+		return p.State, p.State == 0
 	},
-	tbldocumenttemplate.Utime: func(p *DocumentTemplate) (string, any, bool) {
-		return tbldocumenttemplate.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
+	tbldocumenttemplate.Utime: func(p *DocumentTemplate) (any, bool) {
+		return p.Utime, p.Utime.IsZero()
 	},
 }
 
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *DocumentTemplate) AssignValues(args ...dialect.Field) ([]string, []any) {
-	var (
-		_lens = len(args)
-		_cols []string
-		_vals []any
-	)
-	if _lens > 0 {
-		_cols = make([]string, 0, _lens)
-		_vals = make([]any, 0, _lens)
-		for _, arg := range args {
-			if valueFunc, exists := documenttemplateFieldToValueFunc[arg]; exists {
-				colName, value, _ := valueFunc(p)
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
-			}
-		}
-		return _cols, _vals
+func (p *DocumentTemplate) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
+	// 未传参时使用全部可写字段，并跳过零值
+	skipZero := len(args) == 0
+	if skipZero {
+		args = tbldocumenttemplate.WritableFields
 	}
 
-	args = tbldocumenttemplate.WritableFields
-	_lens = len(args)
-	_cols = make([]string, 0, _lens)
-	_vals = make([]any, 0, _lens)
+	cols := make([]string, 0, len(args))
+	vals := make([]any, 0, len(args))
+
 	for _, arg := range args {
 		if valueFunc, exists := documenttemplateFieldToValueFunc[arg]; exists {
-			colName, value, valid := valueFunc(p)
-			if !valid {
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
+			value, isZero := valueFunc(p)
+			// 显式指定字段时全量包含；默认模式跳过零值字段
+			if skipZero && isZero {
+				continue
 			}
+			cols = append(cols, arg.Quote(d))
+			vals = append(vals, value)
 		}
 	}
-	return _cols, _vals
+	return cols, vals
 }
 
 func (p *DocumentTemplate) AssignKeys() (dialect.Field, any) {

@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblaccount"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -23,9 +22,8 @@ var (
 	})
 )
 
-func NewAccount(db *ace.DB) *Account {
+func NewAccount() *Account {
 	_obj := accountPool.Get()
-	_obj.SetDB(db)
 	return _obj
 }
 
@@ -147,7 +145,7 @@ func (p *Account) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Account, bool,
 	}
 
 	for rows.Next() {
-		_p := NewAccount(p.GetDB())
+		_p := NewAccount()
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -166,71 +164,60 @@ func (p *Account) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Account, bool,
 // RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
 // 如果 args 为空，则赋值所有可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *Account) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *Account) RawAssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
 	if len(args) == 0 {
 		args = tblaccount.WritableFields
 	}
-	return p.AssignValues(args...)
+	return p.AssignValues(d, args...)
 }
 
 // 定义字段到值检查和获取函数的映射
-var accountFieldToValueFunc = map[dialect.Field]func(*Account) (string, any, bool){
-	tblaccount.Id: func(p *Account) (string, any, bool) {
-		return tblaccount.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
+var accountFieldToValueFunc = map[dialect.Field]func(*Account) (any, bool){
+	tblaccount.Id: func(p *Account) (any, bool) {
+		return p.Id, p.Id == 0
 	},
-	tblaccount.LoginName: func(p *Account) (string, any, bool) {
-		return tblaccount.LoginName.Quote(p.GetDB().Dialect()), p.LoginName, p.LoginName == ""
+	tblaccount.LoginName: func(p *Account) (any, bool) {
+		return p.LoginName, p.LoginName == ""
 	},
-	tblaccount.Password: func(p *Account) (string, any, bool) {
-		return tblaccount.Password.Quote(p.GetDB().Dialect()), p.Password, p.Password == ""
+	tblaccount.Password: func(p *Account) (any, bool) {
+		return p.Password, p.Password == ""
 	},
-	tblaccount.State: func(p *Account) (string, any, bool) {
-		return tblaccount.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
+	tblaccount.State: func(p *Account) (any, bool) {
+		return p.State, p.State == 0
 	},
-	tblaccount.Ctime: func(p *Account) (string, any, bool) {
-		return tblaccount.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
+	tblaccount.Ctime: func(p *Account) (any, bool) {
+		return p.Ctime, p.Ctime.IsZero()
 	},
-	tblaccount.Utime: func(p *Account) (string, any, bool) {
-		return tblaccount.Utime.Quote(p.GetDB().Dialect()), p.Utime, p.Utime.IsZero()
+	tblaccount.Utime: func(p *Account) (any, bool) {
+		return p.Utime, p.Utime.IsZero()
 	},
 }
 
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *Account) AssignValues(args ...dialect.Field) ([]string, []any) {
-	var (
-		_lens = len(args)
-		_cols []string
-		_vals []any
-	)
-	if _lens > 0 {
-		_cols = make([]string, 0, _lens)
-		_vals = make([]any, 0, _lens)
-		for _, arg := range args {
-			if valueFunc, exists := accountFieldToValueFunc[arg]; exists {
-				colName, value, _ := valueFunc(p)
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
-			}
-		}
-		return _cols, _vals
+func (p *Account) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
+	// 未传参时使用全部可写字段，并跳过零值
+	skipZero := len(args) == 0
+	if skipZero {
+		args = tblaccount.WritableFields
 	}
 
-	args = tblaccount.WritableFields
-	_lens = len(args)
-	_cols = make([]string, 0, _lens)
-	_vals = make([]any, 0, _lens)
+	cols := make([]string, 0, len(args))
+	vals := make([]any, 0, len(args))
+
 	for _, arg := range args {
 		if valueFunc, exists := accountFieldToValueFunc[arg]; exists {
-			colName, value, valid := valueFunc(p)
-			if !valid {
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
+			value, isZero := valueFunc(p)
+			// 显式指定字段时全量包含；默认模式跳过零值字段
+			if skipZero && isZero {
+				continue
 			}
+			cols = append(cols, arg.Quote(d))
+			vals = append(vals, value)
 		}
 	}
-	return _cols, _vals
+	return cols, vals
 }
 
 func (p *Account) AssignKeys() (dialect.Field, any) {

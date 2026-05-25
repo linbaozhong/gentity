@@ -33,7 +33,7 @@ var (
 func init() {
 	var err error
 	dbx, err = ace.Connect("mysql",
-		"ssld_dev:Cu83&sr66@tcp(123.56.5.53:13306)/dispatch?charset=utf8mb4&parseTime=True&loc=Local")
+		"root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -225,7 +225,7 @@ func TestSelect(t *testing.T) {
 	t.Log(obj)
 
 	// 创建一个新的 Company 实例
-	obj = do.NewCompany(dbx)
+	obj = do.NewCompany()
 
 	// 使用 ace 包的通用方法查询数据
 	// 调用 ace 包的 Table 函数指定要操作的表，设置查询条件为 Id 等于 1

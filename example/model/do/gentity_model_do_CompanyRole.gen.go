@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyrole"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -23,9 +22,8 @@ var (
 	})
 )
 
-func NewCompanyRole(db *ace.DB) *CompanyRole {
+func NewCompanyRole() *CompanyRole {
 	_obj := companyrolePool.Get()
-	_obj.SetDB(db)
 	return _obj
 }
 
@@ -154,7 +152,7 @@ func (p *CompanyRole) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyRol
 	}
 
 	for rows.Next() {
-		_p := NewCompanyRole(p.GetDB())
+		_p := NewCompanyRole()
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -173,74 +171,63 @@ func (p *CompanyRole) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyRol
 // RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
 // 如果 args 为空，则赋值所有可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyRole) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *CompanyRole) RawAssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
 	if len(args) == 0 {
 		args = tblcompanyrole.WritableFields
 	}
-	return p.AssignValues(args...)
+	return p.AssignValues(d, args...)
 }
 
 // 定义字段到值检查和获取函数的映射
-var companyroleFieldToValueFunc = map[dialect.Field]func(*CompanyRole) (string, any, bool){
-	tblcompanyrole.Id: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
+var companyroleFieldToValueFunc = map[dialect.Field]func(*CompanyRole) (any, bool){
+	tblcompanyrole.Id: func(p *CompanyRole) (any, bool) {
+		return p.Id, p.Id == 0
 	},
-	tblcompanyrole.Company: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
+	tblcompanyrole.Company: func(p *CompanyRole) (any, bool) {
+		return p.Company, p.Company == 0
 	},
-	tblcompanyrole.Name: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Name.Quote(p.GetDB().Dialect()), p.Name, p.Name == ""
+	tblcompanyrole.Name: func(p *CompanyRole) (any, bool) {
+		return p.Name, p.Name == ""
 	},
-	tblcompanyrole.Descr: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Descr.Quote(p.GetDB().Dialect()), p.Descr, p.Descr == ""
+	tblcompanyrole.Descr: func(p *CompanyRole) (any, bool) {
+		return p.Descr, p.Descr == ""
 	},
-	tblcompanyrole.Rules: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Rules.Quote(p.GetDB().Dialect()), p.Rules, p.Rules == ""
+	tblcompanyrole.Rules: func(p *CompanyRole) (any, bool) {
+		return p.Rules, p.Rules == ""
 	},
-	tblcompanyrole.Type: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.Type.Quote(p.GetDB().Dialect()), p.Type, p.Type == 0
+	tblcompanyrole.Type: func(p *CompanyRole) (any, bool) {
+		return p.Type, p.Type == 0
 	},
-	tblcompanyrole.State: func(p *CompanyRole) (string, any, bool) {
-		return tblcompanyrole.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
+	tblcompanyrole.State: func(p *CompanyRole) (any, bool) {
+		return p.State, p.State == 0
 	},
 }
 
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyRole) AssignValues(args ...dialect.Field) ([]string, []any) {
-	var (
-		_lens = len(args)
-		_cols []string
-		_vals []any
-	)
-	if _lens > 0 {
-		_cols = make([]string, 0, _lens)
-		_vals = make([]any, 0, _lens)
-		for _, arg := range args {
-			if valueFunc, exists := companyroleFieldToValueFunc[arg]; exists {
-				colName, value, _ := valueFunc(p)
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
-			}
-		}
-		return _cols, _vals
+func (p *CompanyRole) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
+	// 未传参时使用全部可写字段，并跳过零值
+	skipZero := len(args) == 0
+	if skipZero {
+		args = tblcompanyrole.WritableFields
 	}
 
-	args = tblcompanyrole.WritableFields
-	_lens = len(args)
-	_cols = make([]string, 0, _lens)
-	_vals = make([]any, 0, _lens)
+	cols := make([]string, 0, len(args))
+	vals := make([]any, 0, len(args))
+
 	for _, arg := range args {
 		if valueFunc, exists := companyroleFieldToValueFunc[arg]; exists {
-			colName, value, valid := valueFunc(p)
-			if !valid {
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
+			value, isZero := valueFunc(p)
+			// 显式指定字段时全量包含；默认模式跳过零值字段
+			if skipZero && isZero {
+				continue
 			}
+			cols = append(cols, arg.Quote(d))
+			vals = append(vals, value)
 		}
 	}
-	return _cols, _vals
+	return cols, vals
 }
 
 func (p *CompanyRole) AssignKeys() (dialect.Field, any) {

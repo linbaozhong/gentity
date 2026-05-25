@@ -123,7 +123,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	}
 
 	u.command.WriteString("UPDATE " + u.db.Dialect().Quote(u.table) + " SET ")
-	cols, vals := bean.AssignValues(u.cols...)
+	cols, vals := bean.AssignValues(u.db.Dialect(), u.cols...)
 	for i, col := range cols {
 		if i > 0 {
 			u.command.WriteString(",")
@@ -181,7 +181,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	}
 
 	u.command.WriteString("UPDATE " + u.db.Dialect().Quote(u.table) + " SET ")
-	cols, vals := beans[0].RawAssignValues(u.cols...)
+	cols, vals := beans[0].RawAssignValues(u.db.Dialect(), u.cols...)
 	for i, col := range cols {
 		if i > 0 {
 			u.command.WriteString(",")
@@ -234,7 +234,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 			if bean == nil {
 				return nil, dialect.ErrBeanEmpty
 			}
-			_, vals = bean.RawAssignValues(u.cols...)
+			_, vals = bean.RawAssignValues(u.db.Dialect(), u.cols...)
 			u.params = u.params[:0]
 			u.params = append(u.params, vals...)
 			//

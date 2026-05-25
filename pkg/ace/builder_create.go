@@ -104,7 +104,7 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	c.command.WriteString("INSERT INTO " + c.db.Dialect().Quote(c.table) + " (")
 
 	var _cols []string
-	_cols, c.params = bean.AssignValues(c.cols...)
+	_cols, c.params = bean.AssignValues(c.db.Dialect(), c.cols...)
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
@@ -148,7 +148,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	c.command.WriteString("INSERT INTO " + c.db.Dialect().Quote(c.table) + " (")
 
 	var _cols []string
-	_cols, c.params = beans[0].RawAssignValues(c.cols...)
+	_cols, c.params = beans[0].RawAssignValues(c.db.Dialect(), c.cols...)
 	_colLens := len(_cols)
 	c.command.WriteString(strings.Join(_cols, ","))
 	c.command.WriteString(") VALUES ")
@@ -183,7 +183,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 			if bean == nil {
 				return nil, dialect.ErrBeanEmpty
 			}
-			_, c.params = bean.RawAssignValues(c.cols...)
+			_, c.params = bean.RawAssignValues(c.db.Dialect(), c.cols...)
 			result, err = stmt.ExecContext(ctx, c.params...)
 			if err != nil {
 				return nil, err

@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanydocument"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -23,9 +22,8 @@ var (
 	})
 )
 
-func NewCompanyDocument(db *ace.DB) *CompanyDocument {
+func NewCompanyDocument() *CompanyDocument {
 	_obj := companydocumentPool.Get()
-	_obj.SetDB(db)
 	return _obj
 }
 
@@ -203,7 +201,7 @@ func (p *CompanyDocument) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Compan
 	}
 
 	for rows.Next() {
-		_p := NewCompanyDocument(p.GetDB())
+		_p := NewCompanyDocument()
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -222,95 +220,84 @@ func (p *CompanyDocument) Scan(rows *sql.Rows, args ...dialect.Field) ([]*Compan
 // RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
 // 如果 args 为空，则赋值所有可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyDocument) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *CompanyDocument) RawAssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
 	if len(args) == 0 {
 		args = tblcompanydocument.WritableFields
 	}
-	return p.AssignValues(args...)
+	return p.AssignValues(d, args...)
 }
 
 // 定义字段到值检查和获取函数的映射
-var companydocumentFieldToValueFunc = map[dialect.Field]func(*CompanyDocument) (string, any, bool){
-	tblcompanydocument.Id: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
+var companydocumentFieldToValueFunc = map[dialect.Field]func(*CompanyDocument) (any, bool){
+	tblcompanydocument.Id: func(p *CompanyDocument) (any, bool) {
+		return p.Id, p.Id == 0
 	},
-	tblcompanydocument.Company: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Company.Quote(p.GetDB().Dialect()), p.Company, p.Company == 0
+	tblcompanydocument.Company: func(p *CompanyDocument) (any, bool) {
+		return p.Company, p.Company == 0
 	},
-	tblcompanydocument.TemplateId: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.TemplateId.Quote(p.GetDB().Dialect()), p.TemplateId, p.TemplateId == 0
+	tblcompanydocument.TemplateId: func(p *CompanyDocument) (any, bool) {
+		return p.TemplateId, p.TemplateId == 0
 	},
-	tblcompanydocument.Title: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Title.Quote(p.GetDB().Dialect()), p.Title, p.Title == ""
+	tblcompanydocument.Title: func(p *CompanyDocument) (any, bool) {
+		return p.Title, p.Title == ""
 	},
-	tblcompanydocument.Classify: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Classify.Quote(p.GetDB().Dialect()), p.Classify, p.Classify == 0
+	tblcompanydocument.Classify: func(p *CompanyDocument) (any, bool) {
+		return p.Classify, p.Classify == 0
 	},
-	tblcompanydocument.Genre: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Genre.Quote(p.GetDB().Dialect()), p.Genre, p.Genre == 0
+	tblcompanydocument.Genre: func(p *CompanyDocument) (any, bool) {
+		return p.Genre, p.Genre == 0
 	},
-	tblcompanydocument.HandleGenre: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.HandleGenre.Quote(p.GetDB().Dialect()), p.HandleGenre, p.HandleGenre == 0
+	tblcompanydocument.HandleGenre: func(p *CompanyDocument) (any, bool) {
+		return p.HandleGenre, p.HandleGenre == 0
 	},
-	tblcompanydocument.Job: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Job.Quote(p.GetDB().Dialect()), p.Job, p.Job == ""
+	tblcompanydocument.Job: func(p *CompanyDocument) (any, bool) {
+		return p.Job, p.Job == ""
 	},
-	tblcompanydocument.VariableMode: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.VariableMode.Quote(p.GetDB().Dialect()), p.VariableMode, p.VariableMode == 0
+	tblcompanydocument.VariableMode: func(p *CompanyDocument) (any, bool) {
+		return p.VariableMode, p.VariableMode == 0
 	},
-	tblcompanydocument.IsDefault: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.IsDefault.Quote(p.GetDB().Dialect()), p.IsDefault, p.IsDefault == 0
+	tblcompanydocument.IsDefault: func(p *CompanyDocument) (any, bool) {
+		return p.IsDefault, p.IsDefault == 0
 	},
-	tblcompanydocument.CanDefault: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.CanDefault.Quote(p.GetDB().Dialect()), p.CanDefault, p.CanDefault == 0
+	tblcompanydocument.CanDefault: func(p *CompanyDocument) (any, bool) {
+		return p.CanDefault, p.CanDefault == 0
 	},
-	tblcompanydocument.Modifier: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Modifier.Quote(p.GetDB().Dialect()), p.Modifier, p.Modifier == 0
+	tblcompanydocument.Modifier: func(p *CompanyDocument) (any, bool) {
+		return p.Modifier, p.Modifier == 0
 	},
-	tblcompanydocument.State: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
+	tblcompanydocument.State: func(p *CompanyDocument) (any, bool) {
+		return p.State, p.State == 0
 	},
-	tblcompanydocument.Ctime: func(p *CompanyDocument) (string, any, bool) {
-		return tblcompanydocument.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
+	tblcompanydocument.Ctime: func(p *CompanyDocument) (any, bool) {
+		return p.Ctime, p.Ctime.IsZero()
 	},
 }
 
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyDocument) AssignValues(args ...dialect.Field) ([]string, []any) {
-	var (
-		_lens = len(args)
-		_cols []string
-		_vals []any
-	)
-	if _lens > 0 {
-		_cols = make([]string, 0, _lens)
-		_vals = make([]any, 0, _lens)
-		for _, arg := range args {
-			if valueFunc, exists := companydocumentFieldToValueFunc[arg]; exists {
-				colName, value, _ := valueFunc(p)
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
-			}
-		}
-		return _cols, _vals
+func (p *CompanyDocument) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
+	// 未传参时使用全部可写字段，并跳过零值
+	skipZero := len(args) == 0
+	if skipZero {
+		args = tblcompanydocument.WritableFields
 	}
 
-	args = tblcompanydocument.WritableFields
-	_lens = len(args)
-	_cols = make([]string, 0, _lens)
-	_vals = make([]any, 0, _lens)
+	cols := make([]string, 0, len(args))
+	vals := make([]any, 0, len(args))
+
 	for _, arg := range args {
 		if valueFunc, exists := companydocumentFieldToValueFunc[arg]; exists {
-			colName, value, valid := valueFunc(p)
-			if !valid {
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
+			value, isZero := valueFunc(p)
+			// 显式指定字段时全量包含；默认模式跳过零值字段
+			if skipZero && isZero {
+				continue
 			}
+			cols = append(cols, arg.Quote(d))
+			vals = append(vals, value)
 		}
 	}
-	return _cols, _vals
+	return cols, vals
 }
 
 func (p *CompanyDocument) AssignKeys() (dialect.Field, any) {

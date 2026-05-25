@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/linbaozhong/gentity/example/model/define/table/tblcompanyfadada"
-	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/gjson"
@@ -23,9 +22,8 @@ var (
 	})
 )
 
-func NewCompanyFadada(db *ace.DB) *CompanyFadada {
+func NewCompanyFadada() *CompanyFadada {
 	_obj := companyfadadaPool.Get()
-	_obj.SetDB(db)
 	return _obj
 }
 
@@ -203,7 +201,7 @@ func (p *CompanyFadada) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyF
 	}
 
 	for rows.Next() {
-		_p := NewCompanyFadada(p.GetDB())
+		_p := NewCompanyFadada()
 		_vals := _p.AssignPtr(args...)
 		e := rows.Scan(_vals...)
 		if e != nil {
@@ -222,95 +220,84 @@ func (p *CompanyFadada) Scan(rows *sql.Rows, args ...dialect.Field) ([]*CompanyF
 // RawAssignValues 向数据库写入数据前，为表列赋值。多用于批量插入和更新
 // 如果 args 为空，则赋值所有可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyFadada) RawAssignValues(args ...dialect.Field) ([]string, []any) {
+func (p *CompanyFadada) RawAssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
 	if len(args) == 0 {
 		args = tblcompanyfadada.WritableFields
 	}
-	return p.AssignValues(args...)
+	return p.AssignValues(d, args...)
 }
 
 // 定义字段到值检查和获取函数的映射
-var companyfadadaFieldToValueFunc = map[dialect.Field]func(*CompanyFadada) (string, any, bool){
-	tblcompanyfadada.Id: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.Id.Quote(p.GetDB().Dialect()), p.Id, p.Id == 0
+var companyfadadaFieldToValueFunc = map[dialect.Field]func(*CompanyFadada) (any, bool){
+	tblcompanyfadada.Id: func(p *CompanyFadada) (any, bool) {
+		return p.Id, p.Id == 0
 	},
-	tblcompanyfadada.CompanyName: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.CompanyName.Quote(p.GetDB().Dialect()), p.CompanyName, p.CompanyName == ""
+	tblcompanyfadada.CompanyName: func(p *CompanyFadada) (any, bool) {
+		return p.CompanyName, p.CompanyName == ""
 	},
-	tblcompanyfadada.CustomerId: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.CustomerId.Quote(p.GetDB().Dialect()), p.CustomerId, p.CustomerId == ""
+	tblcompanyfadada.CustomerId: func(p *CompanyFadada) (any, bool) {
+		return p.CustomerId, p.CustomerId == ""
 	},
-	tblcompanyfadada.TransactionNo: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.TransactionNo.Quote(p.GetDB().Dialect()), p.TransactionNo, p.TransactionNo == ""
+	tblcompanyfadada.TransactionNo: func(p *CompanyFadada) (any, bool) {
+		return p.TransactionNo, p.TransactionNo == ""
 	},
-	tblcompanyfadada.Url: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.Url.Quote(p.GetDB().Dialect()), p.Url, p.Url == ""
+	tblcompanyfadada.Url: func(p *CompanyFadada) (any, bool) {
+		return p.Url, p.Url == ""
 	},
-	tblcompanyfadada.CertInfo: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.CertInfo.Quote(p.GetDB().Dialect()), p.CertInfo, p.CertInfo == ""
+	tblcompanyfadada.CertInfo: func(p *CompanyFadada) (any, bool) {
+		return p.CertInfo, p.CertInfo == ""
 	},
-	tblcompanyfadada.Status: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.Status.Quote(p.GetDB().Dialect()), p.Status, p.Status == 0
+	tblcompanyfadada.Status: func(p *CompanyFadada) (any, bool) {
+		return p.Status, p.Status == 0
 	},
-	tblcompanyfadada.HasCertificate: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.HasCertificate.Quote(p.GetDB().Dialect()), p.HasCertificate, p.HasCertificate == 0
+	tblcompanyfadada.HasCertificate: func(p *CompanyFadada) (any, bool) {
+		return p.HasCertificate, p.HasCertificate == 0
 	},
-	tblcompanyfadada.AuthSign: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.AuthSign.Quote(p.GetDB().Dialect()), p.AuthSign, p.AuthSign == 0
+	tblcompanyfadada.AuthSign: func(p *CompanyFadada) (any, bool) {
+		return p.AuthSign, p.AuthSign == 0
 	},
-	tblcompanyfadada.AuthTransactionId: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.AuthTransactionId.Quote(p.GetDB().Dialect()), p.AuthTransactionId, p.AuthTransactionId == ""
+	tblcompanyfadada.AuthTransactionId: func(p *CompanyFadada) (any, bool) {
+		return p.AuthTransactionId, p.AuthTransactionId == ""
 	},
-	tblcompanyfadada.AuthContractId: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.AuthContractId.Quote(p.GetDB().Dialect()), p.AuthContractId, p.AuthContractId == ""
+	tblcompanyfadada.AuthContractId: func(p *CompanyFadada) (any, bool) {
+		return p.AuthContractId, p.AuthContractId == ""
 	},
-	tblcompanyfadada.AuthResult: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.AuthResult.Quote(p.GetDB().Dialect()), p.AuthResult, p.AuthResult == ""
+	tblcompanyfadada.AuthResult: func(p *CompanyFadada) (any, bool) {
+		return p.AuthResult, p.AuthResult == ""
 	},
-	tblcompanyfadada.State: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.State.Quote(p.GetDB().Dialect()), p.State, p.State == 0
+	tblcompanyfadada.State: func(p *CompanyFadada) (any, bool) {
+		return p.State, p.State == 0
 	},
-	tblcompanyfadada.Ctime: func(p *CompanyFadada) (string, any, bool) {
-		return tblcompanyfadada.Ctime.Quote(p.GetDB().Dialect()), p.Ctime, p.Ctime.IsZero()
+	tblcompanyfadada.Ctime: func(p *CompanyFadada) (any, bool) {
+		return p.Ctime, p.Ctime.IsZero()
 	},
 }
 
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
 // 如果 args 不为空，则只赋值 args 中的字段
-func (p *CompanyFadada) AssignValues(args ...dialect.Field) ([]string, []any) {
-	var (
-		_lens = len(args)
-		_cols []string
-		_vals []any
-	)
-	if _lens > 0 {
-		_cols = make([]string, 0, _lens)
-		_vals = make([]any, 0, _lens)
-		for _, arg := range args {
-			if valueFunc, exists := companyfadadaFieldToValueFunc[arg]; exists {
-				colName, value, _ := valueFunc(p)
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
-			}
-		}
-		return _cols, _vals
+func (p *CompanyFadada) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string, []any) {
+	// 未传参时使用全部可写字段，并跳过零值
+	skipZero := len(args) == 0
+	if skipZero {
+		args = tblcompanyfadada.WritableFields
 	}
 
-	args = tblcompanyfadada.WritableFields
-	_lens = len(args)
-	_cols = make([]string, 0, _lens)
-	_vals = make([]any, 0, _lens)
+	cols := make([]string, 0, len(args))
+	vals := make([]any, 0, len(args))
+
 	for _, arg := range args {
 		if valueFunc, exists := companyfadadaFieldToValueFunc[arg]; exists {
-			colName, value, valid := valueFunc(p)
-			if !valid {
-				_cols = append(_cols, colName)
-				_vals = append(_vals, value)
+			value, isZero := valueFunc(p)
+			// 显式指定字段时全量包含；默认模式跳过零值字段
+			if skipZero && isZero {
+				continue
 			}
+			cols = append(cols, arg.Quote(d))
+			vals = append(vals, value)
 		}
 	}
-	return _cols, _vals
+	return cols, vals
 }
 
 func (p *CompanyFadada) AssignKeys() (dialect.Field, any) {
