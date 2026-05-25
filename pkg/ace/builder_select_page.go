@@ -27,11 +27,7 @@ func (o *orm) Limit(size uint, start ...uint) Builder {
 		o.limit = ""
 		return o
 	}
-	// if len(start) > 0 {
-	// 	o.limit = " LIMIT " + strconv.Itoa(int(size)) + " OFFSET " + strconv.Itoa(int(start[0]))
-	// } else {
-	// 	o.limit = " LIMIT " + strconv.Itoa(int(size))
-	// }
+
 	var s uint = 0
 	if len(start) > 0 {
 		s = start[0]

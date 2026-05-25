@@ -58,14 +58,10 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 
 	d.command.WriteString("DELETE FROM " + d.db.Dialect().Quote(d.table))
 
-	// WHERE
-	// if d.where.Len() > 0 {
-	// 	d.command.WriteString(" WHERE " + d.where.String())
-	// }
-
 	where, params, e := d.parseCond(d.cond)
 	if e != nil {
 		d.err = e
+		return nil, e
 	}
 	d.whereParams = params
 	if where.Len() > 0 {

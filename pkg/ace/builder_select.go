@@ -288,32 +288,6 @@ func (s *read) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 	s.Where(cond...)
 
 	s.command.WriteString("SELECT COUNT(*)")
-	// // FROM TABLE
-	// s.command.WriteString(" FROM " + d.Quote(s.table))
-	//
-	// if len(s.join) > 0 {
-	// 	joinStr, params, e := s.parseJoin(s.join)
-	// 	if e != nil {
-	// 		s.err = e
-	// 		return 0, e
-	// 	}
-	// 	s.joinParams = params
-	// 	if joinStr.Len() > 0 {
-	// 		s.command.WriteString(joinStr.String())
-	// 	}
-	// }
-	// // WHERE
-	// if len(s.cond) > 0 {
-	// 	where, params, e := s.parseCond(s.cond)
-	// 	if e != nil {
-	// 		s.err = e
-	// 		return 0, e
-	// 	}
-	// 	s.whereParams = params
-	// 	if where.Len() > 0 {
-	// 		s.command.WriteString(" WHERE " + where.String())
-	// 	}
-	// }
 
 	if e := s.buildFromClause(cond); e != nil {
 		return 0, e
@@ -396,31 +370,6 @@ func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ..
 	s.Where(cond...)
 	s.command.WriteString("SELECT ")
 	s.command.WriteString(strings.Join(s.parseFunc(s.funcs), ","))
-
-	// // FROM TABLE
-	// s.command.WriteString(" FROM " + d.Quote(s.table))
-	//
-	// if len(s.join) > 0 {
-	// 	joinStr, params, e := s.parseJoin(s.join)
-	// 	if e != nil {
-	// 		s.err = e
-	// 	}
-	// 	s.joinParams = params
-	// 	if joinStr.Len() > 0 {
-	// 		s.command.WriteString(joinStr.String())
-	// 	}
-	// }
-	//
-	// if len(s.cond) > 0 {
-	// 	where, params, e := s.parseCond(s.cond)
-	// 	if e != nil {
-	// 		s.err = e
-	// 	}
-	// 	s.whereParams = params
-	// 	if where.Len() > 0 {
-	// 		s.command.WriteString(" WHERE " + where.String())
-	// 	}
-	// }
 
 	if e := s.buildFromClause(cond); e != nil {
 		return nil, e

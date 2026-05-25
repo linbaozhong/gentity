@@ -83,14 +83,11 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 		}
 	}
 	u.command.WriteString(strings.Join(_cols, ","))
-	// WHERE
-	// if u.where.Len() > 0 {
-	// 	u.command.WriteString(" WHERE " + u.where.String())
-	// }
 
 	where, params, e := u.parseCond(u.cond)
 	if e != nil {
 		u.err = e
+		return nil, e
 	}
 	u.whereParams = params
 	if where.Len() > 0 {
@@ -136,11 +133,6 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	//
 	keys, values := bean.AssignKeys()
 	u.Where(keys.Eq(values))
-
-	// WHERE
-	// if u.where.Len() > 0 {
-	// 	u.command.WriteString(" WHERE " + u.where.String())
-	// }
 
 	where, params, e := u.parseCond(u.cond)
 	if e != nil {
@@ -196,14 +188,10 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	keys, values := beans[0].AssignKeys()
 	u.Where(keys.Eq(values))
 
-	// WHERE
-	// if u.where.Len() > 0 {
-	// 	u.command.WriteString(" WHERE " + u.where.String())
-	// }
-
 	where, params, e := u.parseCond(u.cond)
 	if e != nil {
 		u.err = e
+		return nil, e
 	}
 	u.whereParams = params
 	if where.Len() > 0 {

@@ -110,7 +110,7 @@ func (o *orm) Free() {
 		return
 	}
 
-	if o.debug || o.db.Debug() {
+	if o.debug || (o.db != nil && o.db.Debug()) {
 		log.Info(o.String())
 	}
 
@@ -292,9 +292,6 @@ func (o *orm) Clone() Builder {
 	newOrm.subQueryParams = make([]any, len(o.subQueryParams))
 	copy(newOrm.subQueryParams, o.subQueryParams)
 
-	// newOrm.havingParams = make([]any, len(o.havingParams))
-	// copy(newOrm.havingParams, o.havingParams)
-
 	newOrm.exprCols = make([]expr, len(o.exprCols))
 	copy(newOrm.exprCols, o.exprCols)
 
@@ -401,13 +398,13 @@ func (o *orm) parse() (strings.Builder, []any) {
 
 		// HAVING
 		if len(o.having) > 0 {
-			where, params, e := o.parseCond(o.having)
+			where, havingParams, e := o.parseCond(o.having)
 			if e != nil {
 				o.err = e
 			}
 			if where.Len() > 0 {
 				o.command.WriteString(" HAVING " + where.String())
-				o.whereParams = append(o.whereParams, params...)
+				o.subQueryParams = append(o.subQueryParams, havingParams...)
 			}
 		}
 	}
@@ -437,7 +434,7 @@ func (o *orm) query(ctx context.Context) (*sql.Rows, error) {
 }
 
 func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows, error) {
-	if o.debug || o.db.Debug() {
+	if o.debug || (o.db != nil && o.db.Debug()) {
 		log.Info(o.String())
 		return &sql.Rows{}, Err_ToSql
 	}
@@ -452,7 +449,7 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 }
 
 func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, error) {
-	if o.debug || o.db.Debug() {
+	if o.debug || (o.db != nil && o.db.Debug()) {
 		log.Info(o.String())
 		return &sql.Row{}, Err_ToSql
 	}
@@ -465,13 +462,3 @@ func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, 
 
 	return stmt.QueryRowContext(ctx, params...), nil
 }
-
-// // connect 连接数据库
-// func (o *orm) connect(x ...Executer) Builder {
-// 	if len(x) > 0 {
-// 		o.db = x[0]
-// 	} else if o.db == nil {
-// 		o.db = GetDB()
-// 	}
-// 	return o
-// }

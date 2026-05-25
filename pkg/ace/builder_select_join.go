@@ -21,6 +21,8 @@ import (
 )
 
 // Join 添加连接查询条件
+// left: 当前表的字段（ON 左侧）
+// right: 目标表的字段（ON 右侧），同时决定 JOIN 的目标表名
 func (o *orm) Join(joinType dialect.JoinType, left, right dialect.Field, fns ...dialect.Condition) Builder {
 	if o.err != nil {
 		return o
@@ -45,12 +47,13 @@ func (o *orm) RightJoin(left, right dialect.Field, fns ...dialect.Condition) Bui
 	return o.Join(dialect.Right_Join, left, right, fns...)
 }
 
-func (o *orm) parseJoin(d []join) (joinStr strings.Builder, params []any, e error) {
+func (o *orm) parseJoin(js []join) (joinStr strings.Builder, params []any, e error) {
 	var (
 		where strings.Builder
 		val   []any
+		d     = o.db.Dialect()
 	)
-	for _, j := range d {
+	for _, j := range js {
 		where, val, e = o.parseCond(j.conditions)
 		if e != nil {
 			o.err = e
@@ -58,9 +61,9 @@ func (o *orm) parseJoin(d []join) (joinStr strings.Builder, params []any, e erro
 		}
 		joinStr.WriteString(fmt.Sprintf(" %s JOIN %s ON (%s = %s",
 			j.joinType,
-			j.table.TableName(o.db.Dialect()),
-			j.left.Quote(o.db.Dialect()),
-			j.right.Quote(o.db.Dialect())))
+			j.table.TableName(d),
+			j.left.Quote(d),
+			j.right.Quote(d)))
 		if where.Len() > 0 {
 			joinStr.WriteString(dialect.Operator_and.String())
 			joinStr.WriteString(where.String())

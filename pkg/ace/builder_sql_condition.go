@@ -74,10 +74,14 @@ func (o *orm) RawWhereSafe(cnd string, params ...any) Builder {
 		o.err = Err_RawWhere_Invalid_Condition
 		return o
 	}
+	// 在闭包外一次性拷贝，避免每次 Condition 求值时重复分配
+	capturedParams := make([]any, len(params))
+	copy(capturedParams, params)
+
 	o.cond = append(o.cond, dialect.Condition{
 		Op: dialect.Operator_and,
 		Condition: func(*uint16, dialect.Dialect) (string, any) {
-			return cnd, append([]any{}, params...)
+			return cnd, capturedParams
 
 		},
 	})

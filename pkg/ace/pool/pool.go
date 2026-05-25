@@ -2,6 +2,7 @@
 package pool
 
 import (
+	"reflect"
 	"sync"
 )
 
@@ -49,8 +50,9 @@ func (p *objPool[T]) Put(obj T) {
 		return
 	}
 
-	// 额外检查零值（如果 T 不是指针）
-	if _obj == any(*new(T)) {
+	// 使用 reflect.IsNil 判断零值，避免 *new(T) 堆分配
+	// 对于指针类型 T（如 *orm），nil 即为零值；对于值类型需用 reflect
+	if reflect.ValueOf(_obj).IsZero() {
 		return
 	}
 
