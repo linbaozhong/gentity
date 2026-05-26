@@ -54,6 +54,10 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, d.err
 	}
 
+	// FROM TABLE
+	if d.table == "" {
+		return nil, Err_TableName
+	}
 	d.command.WriteString("DELETE FROM " + d.db.Dialect().Quote(d.table))
 
 	where, params, e := d.parseCond(d.cond)
@@ -69,7 +73,7 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	// 只返回SQL语句，不执行
 	if d.debug || d.db.Debug() {
 		log.Info(d.String())
-		return &noRows{}, Err_ToSql
+		return nil, Err_ToSql
 	}
 
 	stmt, err := d.db.PrepareContext(ctx, d.command.String())

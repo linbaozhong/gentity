@@ -73,7 +73,7 @@ type (
 		UpdateBuilder
 		DeleteBuilder
 
-		parse() (strings.Builder, []any)
+		parse() (strings.Builder, []any, error)
 	}
 	join struct {
 		joinType   dialect.JoinType
@@ -202,7 +202,11 @@ func (o *orm) Table(a any, as ...string) Builder {
 	case dialect.TableNamer:
 		o.table = v.TableName()
 	case Builder:
-		cmd, params := v.parse()
+		cmd, params, e := v.parse()
+		if e != nil {
+			o.err = e
+			return o
+		}
 		o.table = "(" + cmd.String() + ")"
 		o.subQueryParams = append(o.subQueryParams, params...)
 		if len(as) > 0 {
@@ -368,7 +372,7 @@ func (o *orm) mergeParams() []any {
 }
 
 // parse
-func (o *orm) parse() (strings.Builder, []any) {
+func (o *orm) parse() (strings.Builder, []any, error) {
 	d := o.db.Dialect()
 	o.command.Reset()
 	o.command.WriteString("SELECT ")
@@ -395,6 +399,14 @@ func (o *orm) parse() (strings.Builder, []any) {
 	}
 
 	// FROM TABLE
+	if o.table == "" {
+		if colens > 0 {
+			o.table = cols[0].Table
+		} else {
+			o.err = Err_TableName
+			return o.command, nil, o.err
+		}
+	}
 	if strings.HasPrefix(o.table, "(") {
 		// 如果表名以(开头，则不加引号
 		o.command.WriteString(" FROM " + o.table)
@@ -406,6 +418,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 		joinStr, params, e := o.parseJoin(o.join)
 		if e != nil {
 			o.err = e
+			return o.command, nil, o.err
 		}
 		o.joinParams = params
 		if joinStr.Len() > 0 {
@@ -418,6 +431,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 		where, params, e := o.parseCond(o.cond)
 		if e != nil {
 			o.err = e
+			return o.command, nil, o.err
 		}
 		if where.Len() > 0 {
 			o.command.WriteString(" WHERE " + where.String())
@@ -439,6 +453,7 @@ func (o *orm) parse() (strings.Builder, []any) {
 			where, havingParams, e := o.parseCond(o.having)
 			if e != nil {
 				o.err = e
+				return o.command, nil, o.err
 			}
 			if where.Len() > 0 {
 				o.command.WriteString(" HAVING " + where.String())
@@ -462,12 +477,15 @@ func (o *orm) parse() (strings.Builder, []any) {
 		o.command.WriteString(o.limit)
 	}
 
-	return o.command, o.mergeParams()
+	return o.command, o.mergeParams(), nil
 }
 
 // query
 func (o *orm) query(ctx context.Context) (*sql.Rows, error) {
-	cmd, params := o.parse()
+	cmd, params, e := o.parse()
+	if e != nil {
+		return nil, e
+	}
 	return o.rows(ctx, cmd.String(), params...)
 }
 

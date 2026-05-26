@@ -427,6 +427,10 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	d := u.db.Dialect()
+	// FROM TABLE
+	if u.table == "" {
+		return nil, Err_TableName
+	}
 	u.command.WriteString("UPDATE " + d.Quote(u.table) + " SET ")
 	_cols := make([]string, 0, lens)
 	for _, col := range u.cols {
@@ -500,6 +504,10 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	}
 
 	d := u.db.Dialect()
+	// FROM TABLE
+	if u.table == "" {
+		u.table = bean.TableName()
+	}
 	u.command.WriteString("UPDATE " + d.Quote(u.table) + " SET ")
 	cols, vals := bean.AssignValues(d, u.cols...)
 	for i, col := range cols {
@@ -579,6 +587,10 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	}
 
 	d := u.db.Dialect()
+	// FROM TABLE
+	if u.table == "" {
+		u.table = beans[0].TableName()
+	}
 	u.command.WriteString("UPDATE " + d.Quote(u.table) + " SET ")
 	cols, vals := beans[0].RawAssignValues(d, u.cols...)
 	for i, col := range cols {

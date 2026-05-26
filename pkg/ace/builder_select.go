@@ -712,7 +712,10 @@ func (s *read) QueryRow(ctx context.Context) (*sql.Row, error) {
 		return nil, s.err
 	}
 
-	cmd, params := s.parse()
+	cmd, params, e := s.parse()
+	if e != nil {
+		return nil, e
+	}
 
 	return s.row(ctx, cmd.String(), params...)
 }
@@ -989,6 +992,10 @@ func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ..
 // 用于 Count / Sum / Avg / Max / Min 等聚合查询
 func (s *read) buildFromClause(cond []dialect.Condition) error {
 	d := s.db.Dialect()
+	// FROM TABLE
+	if s.table == "" {
+		return Err_TableName
+	}
 	s.command.WriteString(" FROM " + d.Quote(s.table))
 
 	if len(s.join) > 0 {

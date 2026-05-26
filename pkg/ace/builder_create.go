@@ -185,6 +185,11 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	d := c.db.Dialect()
+	// FROM TABLE
+	if c.table == "" {
+		return nil, Err_TableName
+	}
+
 	c.command.WriteString("INSERT INTO " + d.Quote(c.table) + " (")
 	for i, col := range c.cols {
 		if i > 0 {
@@ -202,7 +207,7 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	// 只返回SQL语句，不执行
 	if c.debug || c.db.Debug() {
 		log.Info(c.String())
-		return &noRows{}, Err_ToSql
+		return nil, Err_ToSql
 	}
 
 	// 执行SQL语句
@@ -248,6 +253,11 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	}
 
 	d := c.db.Dialect()
+
+	// FROM TABLE
+	if c.table == "" {
+		c.table = bean.TableName()
+	}
 	c.command.WriteString("INSERT INTO " + d.Quote(c.table) + " (")
 
 	var _cols []string
@@ -316,6 +326,10 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	}
 
 	d := c.db.Dialect()
+	// FROM TABLE
+	if c.table == "" {
+		c.table = beans[0].TableName()
+	}
 	c.command.WriteString("INSERT INTO " + d.Quote(c.table) + " (")
 
 	var _cols []string
@@ -331,7 +345,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	// 只返回SQL语句，不执行
 	if c.debug || c.db.Debug() {
 		log.Info(c.String())
-		return &noRows{}, Err_ToSql
+		return nil, Err_ToSql
 	}
 
 	// 启动事务批量执行Create

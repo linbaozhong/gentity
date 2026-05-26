@@ -47,7 +47,8 @@ type (
 )
 
 var (
-	Err_ToSql = errors.New("the SQL command terminates execution after the Debug() method")
+	Err_ToSql     = errors.New("the SQL command terminates execution after the Debug() method")
+	Err_TableName = errors.New("table name is empty")
 )
 
 // Connect
