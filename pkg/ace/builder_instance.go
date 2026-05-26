@@ -21,14 +21,19 @@ func Table(t any, as ...string) Builder {
 	return newOrm().Table(t, as...)
 }
 
-// // Distinct 设置去重字段
-// func Distinct(cols ...dialect.Field) Builder {
-// 	return newOrm().Distinct(cols...)
-// }
+// Distinct 设置去重字段
+func Distinct(cols ...dialect.Field) Builder {
+	return newOrm().Distinct(cols...)
+}
 
 // Cols 设置查询字段,聚合函数使用 Func 方法
 func Cols(cols ...dialect.Field) Builder {
 	return newOrm().Cols(cols...)
+}
+
+// PureCols 只包含指定的列，会覆盖其他方法（如：Cols方法）指定的列
+func PureCols(cols ...dialect.Field) Builder {
+	return newOrm().PureCols(cols...)
 }
 
 // Omits 设置忽略字段

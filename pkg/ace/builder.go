@@ -124,19 +124,23 @@ var (
 	})
 )
 
-func newOrm() *orm {
-	return ormPool.Get()
-}
-
-func New(db *DB, opts ...Option) Builder {
-	obj := newOrm()
-	obj.db = db
-
-	for _, opt := range opts {
-		opt(obj)
+func newOrm(dbs ...*DB) *orm {
+	obj := ormPool.Get()
+	if len(dbs) > 0 {
+		obj.db = dbs[0]
 	}
 	return obj
 }
+
+// func New(db *DB, opts ...Option) Builder {
+// 	obj := newOrm()
+// 	obj.db = db
+//
+// 	for _, opt := range opts {
+// 		opt(obj)
+// 	}
+// 	return obj
+// }
 
 // Free 释放 orm 对象，将其重置并放回对象池。
 func (o *orm) Free() {
