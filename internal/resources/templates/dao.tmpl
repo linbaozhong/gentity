@@ -71,8 +71,8 @@ func (p *{{$structNameLower}}) Reset() {
 	p.toSql = false
 }
 
-// ToSql 仅打印SQL语句，不执行
-func (p *{{$structNameLower}}) ToSql() *{{$structNameLower}} {
+// Debug 仅打印SQL语句，不执行
+func (p *{{$structNameLower}}) Debug() *{{$structNameLower}} {
 	p.toSql = true
 	return p
 }
@@ -85,7 +85,7 @@ func (p *{{$structNameLower}}) Insert(ctx context.Context, sets ...dialect.Sette
 	}
 	_result, e := ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
 		Set(sets...).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Create().
 		Exec(ctx)
 	if e != nil {
@@ -100,7 +100,7 @@ func (p *{{$structNameLower}}) InsertOne(ctx context.Context, bean *{{$package}}
 	defer p.Free()
 	_result, e := ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
 		Cols(cols...).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Create().
 		Struct(ctx, bean)
 	if e != nil {
@@ -127,7 +127,7 @@ func (p *{{$structNameLower}}) InsertBatch(ctx context.Context, beans []*{{$pack
 	}
 	_result, e := ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
 		Cols(cols...).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Create().
 		BatchStruct(ctx, _args...)
 	if e != nil {
@@ -146,7 +146,7 @@ func (p *{{$structNameLower}}) Update(ctx context.Context, sets []dialect.Setter
 	_result, e := ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
 		Where(cond...).
 		Set(sets...).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Update().
 		Exec(ctx)
 	if e != nil {
@@ -170,7 +170,7 @@ func (p *{{$structNameLower}}) UpdateOne(ctx context.Context, bean *{{$package}}
 	defer p.Free()
 	_result, e := ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
 		Cols(cols...).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Update().
 		Struct(ctx, bean)
 	if e != nil {
@@ -195,7 +195,7 @@ func (p *{{$structNameLower}}) UpdateBatch(ctx context.Context, beans []*{{$pack
 	}
 	_result, e := ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
 		Cols(cols...).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Update().
 		BatchStruct(ctx, _args...)
 	if e != nil {
@@ -210,7 +210,7 @@ func (p *{{$structNameLower}}) Delete(ctx context.Context, cond ...dialect.Condi
 	defer p.Free()
 	_result, e := ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
 		Where(cond...).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Delete().
 		Exec(ctx)
 	if e != nil {
@@ -239,7 +239,7 @@ func (p *{{$structNameLower}}) DeleteByIds(ctx context.Context, ids []any) (int6
 
 	_result, e := ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
 		Where(tbl{{$structNameLower}}.PrimaryKey.In(ids...)).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Delete().
 		Exec(ctx)
 	if e != nil {
@@ -275,13 +275,13 @@ func (p *{{$structNameLower}}) Get(ctx context.Context, s ace.SelectBuilder) (*{
 		s.Cols(_cols...)
 	}
 	_row, e := s.SetDB(p.db).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		QueryRow(ctx)
 	if e!= nil {
 		return nil, false, e
 	}
-	_obj := {{$package}}.New{{$structName}}(p.db)
+	_obj := {{$package}}.New{{$structName}}()
 	e = _row.Scan(_obj.AssignPtr(_cols...)...)
 	switch e {
 	case nil:
@@ -338,7 +338,7 @@ func (p *{{$structNameLower}}) GetByIds(ctx context.Context, ids []any, cols ...
 	}
 
 	_rows, e := s.
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		Query(ctx)
 	if e != nil {
@@ -346,7 +346,7 @@ func (p *{{$structNameLower}}) GetByIds(ctx context.Context, ids []any, cols ...
 	}
 	defer _rows.Close()
 
-	_obj := {{$package}}.New{{$structName}}(p.db)
+	_obj := {{$package}}.New{{$structName}}()
 	_objs, _, e := _obj.Scan(_rows, cols...)
 	return _objs, e
 }
@@ -371,7 +371,7 @@ func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (an
 		s.Cols(tbl{{$structNameLower}}.PrimaryKey)
 	}
 	_row, e := s.SetDB(p.db).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		QueryRow(ctx)
 	if e!= nil {
@@ -403,7 +403,7 @@ func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([
 	}
 
 	_rows, e := s.SetDB(p.db).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		Query(ctx)
 	if e != nil {
@@ -411,7 +411,7 @@ func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([
 	}
 	defer _rows.Close()
 
-	_obj := {{$package}}.New{{$structName}}(p.db)
+	_obj := {{$package}}.New{{$structName}}()
 	_objs, has, e := _obj.Scan(_rows,_cols...)
 	if has {
 		return _objs, true, nil
@@ -438,7 +438,7 @@ func (p *{{$structNameLower}}) Column(ctx context.Context, s ace.SelectBuilder) 
 	}
 
 	_rows, e := s.SetDB(p.db).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		Query(ctx)
 	if e != nil {
@@ -462,7 +462,7 @@ func (p *{{$structNameLower}}) Column(ctx context.Context, s ace.SelectBuilder) 
 func (p *{{$structNameLower}}) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer p.Free()
 	return ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		Count(ctx, cond...)
 }
@@ -471,7 +471,7 @@ func (p *{{$structNameLower}}) Count(ctx context.Context, cond ...dialect.Condit
 func (p *{{$structNameLower}}) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer p.Free()
 	return ace.New(p.db).Table({{$package}}.{{$structName}}TableName).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		Sum(ctx, cols, cond...)
 }
@@ -481,7 +481,7 @@ func (p *{{$structNameLower}}) Exists(ctx context.Context, cond ...dialect.Condi
 	defer p.Free()
 	_c := ace.New(p.db).Table({{$package}}.{{$structName}}TableName).Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
 	_row, e := _c.
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		QueryRow(ctx)
 	if e != nil {
@@ -522,7 +522,7 @@ func (p *{{$structNameLower}}) getCache(ctx context.Context, {{.PrimaryKey.Col}}
 	if len(_s)==0 {
 		return nil, false, nil
 	}
-	_obj := {{$package}}.New{{$structName}}(p.db)
+	_obj := {{$package}}.New{{$structName}}()
 	e = json.Unmarshal(_s, _obj)
 	if e != nil {
 		return nil, false, e
@@ -574,14 +574,14 @@ func (p *{{$structNameLower}}) GetX(ctx context.Context, s ace.SelectBuilder) (*
 		s.Cols(_cols...)
 	}
 	_row, e := s.SetDB(p.db).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		QueryRow(ctx)
 	if e != nil {
 		return nil, false, e
 	}
 
-	_obj := {{$package}}.New{{$structName}}(p.db)
+	_obj := {{$package}}.New{{$structName}}()
 
 	e = _row.Scan(_obj.AssignPtr(cols...)...)
 	switch e {
@@ -633,7 +633,7 @@ func (p *{{$structNameLower}}) ListX(ctx context.Context, s ace.SelectBuilder) (
 	}
 
 	_rows, e := s.SetDB(p.db).
-		ToSql(p.toSql).
+		Debug(p.toSql).
 		Select().
 		Query(ctx)
 	if e != nil {
@@ -641,7 +641,7 @@ func (p *{{$structNameLower}}) ListX(ctx context.Context, s ace.SelectBuilder) (
 	}
 	defer rows.Close()
 
-	obj := {{$package}}.New{{$structName}}(p.db)
+	obj := {{$package}}.New{{$structName}}()
 
 	_objs, has, e := obj.Scan(rows, cols...)
 	if has {
