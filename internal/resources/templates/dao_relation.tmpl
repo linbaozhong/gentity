@@ -1,0 +1,117 @@
+{{- $tablename := .TableName}}
+{{- $structName := .StructName}}
+{{- $package := .PackageName}}
+{{- $structNameLower := lower .StructName}}
+
+{{- if gt (len .Relations) 0}}
+
+// ============================================
+// {{.StructName}} 关联查询方法
+// ============================================
+
+{{- range $relationIdx, $relation := .Relations}}
+
+// Get{{$structName}}With{{$relation.Name}} 查询单个{{$structName}}并关联{{$relation.Name}}
+func (p *{{$structNameLower}}) Get{{$structName}}With{{$relation.Name}}(ctx context.Context, {{$.PrimaryKey.Col}} {{$.PrimaryKey.Type}}) (*dto.{{$structName}}WithRelationsDTO, bool, error) {
+	defer p.Free()
+
+	s := p.db.Table({{$package}}.{{$structName}}TableName).
+{{- if eq $relation.JoinType "LEFT"}}
+		LeftJoin(tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
+{{- else if eq $relation.JoinType "RIGHT"}}
+		RightJoin(tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
+{{- else}}
+		Join(dialect.Inner_Join, tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
+{{- end}}
+		Cols(
+{{- range $key, $value := $.Columns}}
+			tbl{{$structNameLower}}.{{$value.Name}},
+{{- end}}
+		).
+		Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{$.PrimaryKey.Col}}))
+
+	rows, e := s.Debug(p.toSql).Select().Query(ctx)
+	if e != nil {
+		return nil, false, e
+	}
+	defer rows.Close()
+
+	result := &dto.{{$structName}}WithRelationsDTO{}
+	hasResult := false
+
+	if rows.Next() {
+		hasResult = true
+
+		e = rows.Scan(
+{{- range $idx, $value := $.Columns}}
+			&result.{{$value.Name}}{{if lt $idx (sub (len $.Columns) 1)}},{{end}}
+{{- end}}
+		)
+		if e != nil {
+			return nil, false, e
+		}
+	}
+
+	if e = rows.Err(); e != nil {
+		return nil, false, e
+	}
+
+	return result, hasResult, nil
+}
+
+// List{{$structName}}sWith{{$relation.Name}} 查询{{$structName}}列表并关联{{$relation.Name}}
+func (p *{{$structNameLower}}) List{{$structName}}sWith{{$relation.Name}}(ctx context.Context, page, pageSize uint) ([]*dto.{{$structName}}WithRelationsDTO, int64, error) {
+	defer p.Free()
+
+	count, e := p.Count(ctx)
+	if e != nil {
+		return nil, 0, e
+	}
+
+	s := p.db.Table({{$package}}.{{$structName}}TableName).
+{{- if eq $relation.JoinType "LEFT"}}
+		LeftJoin(tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
+{{- else if eq $relation.JoinType "RIGHT"}}
+		RightJoin(tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
+{{- else}}
+		Join(dialect.Inner_Join, tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
+{{- end}}
+		Cols(
+{{- range $key, $value := $.Columns}}
+			tbl{{$structNameLower}}.{{$value.Name}},
+{{- end}}
+		).
+		Page(page, pageSize)
+
+	rows, e := s.Debug(p.toSql).Select().Query(ctx)
+	if e != nil {
+		return nil, 0, e
+	}
+	defer rows.Close()
+
+	results := make([]*dto.{{$structName}}WithRelationsDTO, 0)
+
+	for rows.Next() {
+		item := &dto.{{$structName}}WithRelationsDTO{}
+
+		e = rows.Scan(
+{{- range $idx, $value := $.Columns}}
+			&item.{{$value.Name}}{{if lt $idx (sub (len $.Columns) 1)}},{{end}}
+{{- end}}
+		)
+		if e != nil {
+			return nil, 0, e
+		}
+
+		results = append(results, item)
+	}
+
+	if e = rows.Err(); e != nil {
+		return nil, 0, e
+	}
+
+	return results, count, nil
+}
+
+{{- end}}
+{{- end}}

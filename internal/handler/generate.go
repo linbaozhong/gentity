@@ -100,6 +100,16 @@ func generateDao(tds []TempData, prefix string) error {
 			showError(e.Error())
 			return e
 		}
+		// // ↓↓↓ 新增以下代码块 ↓↓↓
+		// if len(td.Relations) > 0 {
+		// 	dtoRelationPath := filepath.Join(fullpath, "..", "dto")
+		// 	e = td.writeDTO(dtoRelationPath)
+		// 	if e != nil {
+		// 		showError(e.Error())
+		// 		return e
+		// 	}
+		// }
+		// // ↑↑↑ 新增结束 ↑↑↑
 	}
 	return nil
 }

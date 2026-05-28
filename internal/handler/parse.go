@@ -84,6 +84,7 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			FileName:    structFullName,
 			PrimaryKey:  Field{},
 			RelationX:   Relation{},
+			Relations:   make([]Relation, 0), // ← 新增这一行
 			Columns:     make([]Field, 0, 20),
 			VisitorName: "",
 		}
@@ -113,18 +114,40 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 					_namejson.Json = parseJson(v) // json_name
 					_parsedJson = true
 				case dbTag:
-					_namejson.Col, pk, rw, ref = parseTagsForDB(v) // column_name
-					if len(ref) == 0 {
-						continue
+					_namejson.Col, pk, rw, ref = parseTagsForDB(v)
+					if len(ref) > 0 {
+						_ref := strings.Split(ref, "|")
+						if len(_ref) >= 2 {
+							kind, typeName := parseType(field.Type.String())
+
+							rel := Relation{
+								Name:     field.Name,
+								Type:     typeName,
+								Field:    _ref[0],
+								Foreign:  _ref[1],
+								Kind:     kind,
+								JoinType: "LEFT",
+								Alias:    "",
+							}
+
+							if len(_ref) > 2 {
+								extraOpts := strings.Split(_ref[2], ",")
+								for _, opt := range extraOpts {
+									opt = strings.TrimSpace(opt)
+									if strings.HasPrefix(opt, "join:") {
+										rel.JoinType = strings.ToUpper(opt[5:])
+									} else if strings.HasPrefix(opt, "as:") {
+										rel.Alias = opt[3:]
+									}
+								}
+							}
+
+							if _tempData.RelationX.Name == "" {
+								_tempData.RelationX = rel
+							}
+							_tempData.Relations = append(_tempData.Relations, rel)
+						}
 					}
-					_ref := strings.Split(ref, "|")
-					if len(_ref) != 2 {
-						continue
-					}
-					_tempData.RelationX.Kind, _tempData.RelationX.Type = parseType(field.Type.String())
-					_tempData.RelationX.Name = field.Name
-					_tempData.RelationX.Field = _ref[0]
-					_tempData.RelationX.Foreign = _ref[1]
 				case validTag:
 					_namejson.Valids = moveToFront(v, "required")
 				}

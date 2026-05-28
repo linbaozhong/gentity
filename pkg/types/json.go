@@ -126,6 +126,17 @@ func (w *write) WriteKV(k, v string) {
 	w.comma = true
 }
 
+func (w *write) WriteRaw(k string, v []byte) {
+	if w.comma {
+		w.buf.WriteByte(',')
+	}
+	w.buf.WriteByte('"')
+	w.buf.WriteString(k)
+	w.buf.WriteString(`":`)
+	w.buf.Write(v)
+	w.comma = true
+}
+
 func (w *write) String() string {
 	w.buf.WriteByte('}')
 	return w.buf.String()

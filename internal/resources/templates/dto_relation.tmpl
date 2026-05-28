@@ -1,0 +1,56 @@
+{{- $tablename := .TableName}}
+{{- $structName := .StructName}}
+{{- $package := .PackageName}}
+{{- $structNameLower := lower .StructName}}
+
+// ============================================
+// {{.StructName}} 关联查询 DTO
+// ============================================
+
+// {{.StructName}}WithRelationsDTO {{.StructName}}关联查询结果
+type {{$structName}}WithRelationsDTO struct {
+{{- range $key, $value := .Columns}}
+    {{$value.Name}} {{$value.Type}} `json:"{{$value.Json.Name}}"`
+{{- end}}
+{{- range $key, $relation := .Relations}}
+    {{if eq $relation.Kind "ptr"}}
+        {{$relation.Name}} *{{$relation.Type}} `json:"{{lower $relation.Name}}"`
+    {{else if eq $relation.Kind "slice"}}
+        {{$relation.Name}} []*{{$relation.Type}} `json:"{{lower $relation.Name}}"`
+    {{end}}
+{{- end}}
+}
+
+// MarshalJSON
+func (p *{{$structName}}WithRelationsDTO) MarshalJSON() ([]byte, error) {
+write := types.NewJsonWriter({{len .Columns}} * 50)
+{{- range $key, $value := .Columns}}
+    {{- if ne $value.Json.Name "-" }}
+        {{- if $value.Json.OmitEmpty}}
+			if {{getNotZeroValue $value}} {
+			write.WriteKV("{{$value.Json.Name}}", types.Marshal(p.{{$value.Name}}))
+			}
+        {{- else}}
+			write.WriteKV("{{$value.Json.Name}}", types.Marshal(p.{{$value.Name}}))
+        {{- end}}
+    {{- end}}
+{{- end}}
+{{- range $key, $relation := .Relations}}
+    {{if eq $relation.Kind "ptr"}}
+		if p.{{$relation.Name}} != nil {
+		data, e := json.Marshal(p.{{$relation.Name}})
+		if e == nil {
+		write.WriteRaw("{{lower $relation.Name}}", data)
+		}
+		}
+    {{else if eq $relation.Kind "slice"}}
+		if len(p.{{$relation.Name}}) > 0 {
+		data, e := json.Marshal(p.{{$relation.Name}})
+		if e == nil {
+		write.WriteRaw("{{lower $relation.Name}}", data)
+		}
+		}
+    {{end}}
+{{- end}}
+return write.Bytes(), nil
+}

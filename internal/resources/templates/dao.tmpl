@@ -583,7 +583,7 @@ func (p *{{$structNameLower}}) GetX(ctx context.Context, s ace.SelectBuilder) (*
 
 	_obj := {{$package}}.New{{$structName}}()
 
-	e = _row.Scan(_obj.AssignPtr(cols...)...)
+	e = _row.Scan(_obj.AssignPtr(_cols...)...)
 	switch e {
 	case nil:
 		rs := p.edges(ctx,[]any{_obj.{{.RelationX.Field}}})
@@ -609,12 +609,12 @@ func (p *{{$structNameLower}}) GetX(ctx context.Context, s ace.SelectBuilder) (*
 func (p *{{$structNameLower}}) edges(ctx context.Context,ids []any) map[any][]{{$package}}.{{.RelationX.Type}} {
 	defer p.Free()
 	rsMap := make(map[any][]{{$package}}.{{.RelationX.Type}}, len(ids))
-	rs, has, _ := {{.RelationX.Type}}().List(ctx, p.dbWhere(tbl{{lower (.RelationX.Type)}}.{{.RelationX.Foreign}}.In(ids...)))
+	rs, has, _ := {{.RelationX.Type}}(p.db).List(ctx, p.db.Where(tbl{{lower (.RelationX.Type)}}.{{.RelationX.Foreign}}.In(ids...)))
 	if !has {
 		return rsMap
 	}
 	for _, r := range rs {
-		rsMap[r.{{.RelationX.Foreign}}] = append(rsMap[r.{{.RelationX.Foreign}}], r)
+		rsMap[r.{{.RelationX.Foreign}}] = append(rsMap[r.{{.RelationX.Foreign}}], *r)
 	}
 	return rsMap
 }
@@ -639,11 +639,11 @@ func (p *{{$structNameLower}}) ListX(ctx context.Context, s ace.SelectBuilder) (
 	if e != nil {
 		return nil, false, e
 	}
-	defer rows.Close()
+	defer _rows.Close()
 
 	obj := {{$package}}.New{{$structName}}()
 
-	_objs, has, e := obj.Scan(rows, cols...)
+	_objs, has, e := obj.Scan(_rows, _cols...)
 	if has {
 		l := len(_objs)
 		idsMap := make(map[any]struct{}, l)
