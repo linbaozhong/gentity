@@ -100,16 +100,16 @@ func generateDao(tds []TempData, prefix string) error {
 			showError(e.Error())
 			return e
 		}
-		// // ↓↓↓ 新增以下代码块 ↓↓↓
-		// if len(td.Relations) > 0 {
-		// 	dtoRelationPath := filepath.Join(fullpath, "..", "dto")
-		// 	e = td.writeDTO(dtoRelationPath)
-		// 	if e != nil {
-		// 		showError(e.Error())
-		// 		return e
-		// 	}
-		// }
-		// // ↑↑↑ 新增结束 ↑↑↑
+		//// ↓↓↓ 新增以下代码块 ↓↓↓
+		//if len(td.Relations) > 0 {
+		//	dtoRelationPath := filepath.Join(fullpath, "..", "dto")
+		//	e = td.writeDTO(dtoRelationPath)
+		//	if e != nil {
+		//		showError(e.Error())
+		//		return e
+		//	}
+		//}
+		//// ↑↑↑ 新增结束 ↑↑↑
 	}
 	return nil
 }
@@ -246,9 +246,9 @@ func getFieldString(t Field) string {
 		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
 		"types.BigInt", "types.Money", "types.Float32", "types.Float64", "types.Time",
 		"types.Bool", "types.String":
-		return `p.` + t.Name + ".String()"
+		return `conv.String2Ptr(p.` + t.Name + ".String())"
 	default:
-		return `conv.Any2String(p.` + t.Name + `)`
+		return `conv.String2Ptr(conv.Any2String(p.` + t.Name + `))`
 	}
 }
 

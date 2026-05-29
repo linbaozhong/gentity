@@ -21,7 +21,7 @@ type UserRegisterReq struct {
 
 // @response
 type UserRegisterResp struct {
-	UserID   uint64 `json:"user_id"`
-	UserName string `json:"user_name"`
-	Email    string `json:"email,omitempty"`
+	UserID   *uint64 `json:"user_id"`
+	UserName *string `json:"user_name"`
+	Email    *string `json:"email,omitempty"`
 }

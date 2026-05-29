@@ -29,7 +29,7 @@ func NewAccount() *Account {
 
 // MarshalJSON
 func (p *Account) MarshalJSON() ([]byte, error) {
-	write := types.NewJsonWriter(6 * 50)
+	write := types.NewJsonWriter(7 * 50)
 	if p.Id != 0 {
 		write.WriteKV("id", types.Marshal(p.Id))
 	}
@@ -48,11 +48,20 @@ func (p *Account) MarshalJSON() ([]byte, error) {
 	if !p.Utime.IsZero() {
 		write.WriteKV("utime", types.Marshal(p.Utime))
 	}
+	if p.Man != nil {
+		write.WriteKV("man", types.Marshal(p.Man))
+	}
 	return write.Bytes(), nil
 }
 
 // UnmarshalJSON
 func (p *Account) UnmarshalJSON(data []byte) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error(r)
+			return
+		}
+	}()
 
 	if !gjson.ValidBytes(data) {
 		return errors.New("invalid json")
@@ -73,6 +82,15 @@ func (p *Account) UnmarshalJSON(data []byte) error {
 			p.Ctime = types.Time{Time: value.Time()}
 		case "utime":
 			p.Utime = types.Time{Time: value.Time()}
+		case "man":
+			e = types.Unmarshal(value, &p.Man, func(value gjson.Result) []CompanyMan {
+				var obj []CompanyMan
+				e := types.Unmarshal(value, &obj)
+				if e != nil {
+					panic(e)
+				}
+				return obj
+			}(value))
 		}
 		if e != nil {
 			log.Error(e)
@@ -100,6 +118,7 @@ func (p *Account) Reset() {
 	p.State = 0
 	p.Ctime = types.Time{}
 	p.Utime = types.Time{}
+	p.Man = p.Man[:0]
 
 }
 
@@ -115,6 +134,7 @@ var accountFieldToPtrFunc = map[dialect.Field]func(*Account) any{
 	tblaccount.State:     func(p *Account) any { return &p.State },
 	tblaccount.Ctime:     func(p *Account) any { return &p.Ctime },
 	tblaccount.Utime:     func(p *Account) any { return &p.Utime },
+	tblaccount.Man:       func(p *Account) any { return &p.Man },
 }
 
 // AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
@@ -220,10 +240,12 @@ func (p *Account) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]stri
 	return cols, vals
 }
 
+//
 func (p *Account) AssignKeys() (dialect.Field, any) {
 	return tblaccount.PrimaryKey, p.Id
 }
 
+//
 func (p *Account) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {

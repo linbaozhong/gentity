@@ -27,21 +27,21 @@ import (
 
 // TempData 表示生成template所需要的数据结构
 type TempData struct {
-	ParseTag      []string
-	Module        string
-	ModulePath    string
-	FileName      string
-	PackageName   string
-	Imports       []string
-	StructName    string
-	TableName     string
-	CacheData     string // 数据缓存时长
-	CacheList     string // list缓存时长
-	CacheLimit    string // list缓存长度
-	Columns       []Field
-	PrimaryKey    Field
-	RelationX     Relation   // 关系键
-	Relations     []Relation // ← 新增这一行
+	ParseTag    []string
+	Module      string
+	ModulePath  string
+	FileName    string
+	PackageName string
+	Imports     []string
+	StructName  string
+	TableName   string
+	CacheData   string // 数据缓存时长
+	CacheList   string // list缓存时长
+	CacheLimit  string // list缓存长度
+	Columns     []Field
+	PrimaryKey  Field
+	RelationX   Relation // 关系键
+	//Relations     []Relation // ← 新增这一行
 	HasPrimaryKey bool
 	HasRef        bool // 有引用类型
 	HasCache      bool
@@ -336,6 +336,23 @@ func (d *TempData) writeBuild(parent string) error {
 		"getReturnValue": func(p, t string) string {
 			return "[]" + p + "." + t
 		},
+		"upperFirst": func(s string) string {
+			if len(s) == 0 {
+				return s
+			}
+			return strings.ToUpper(s[:1]) + s[1:]
+		},
+		"toFieldName": func(colName string) string {
+			parts := strings.Split(colName, "_")
+			var result strings.Builder
+			for _, part := range parts {
+				if len(part) > 0 {
+					result.WriteString(strings.ToUpper(part[:1]))
+					result.WriteString(part[1:])
+				}
+			}
+			return result.String()
+		},
 	}
 	return writeToFormatFile(_fileName, _f, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)
@@ -345,55 +362,55 @@ func (d *TempData) writeBuild(parent string) error {
 			return e
 		}
 
-		// // ↓↓↓ 新增：解析关联查询模板 ↓↓↓
-		// _, e = tmpl.ParseFS(resources.TemplatesFS, "templates/dao_relation.tmpl")
-		// if e != nil {
-		// 	return e
-		// }
-		// // ↑↑↑ 新增结束 ↑↑↑
+		//// ↓↓↓ 新增：解析关联查询模板 ↓↓↓
+		//_, e = tmpl.ParseFS(resources.TemplatesFS, "templates/dao_relation.tmpl")
+		//if e != nil {
+		//	return e
+		//}
+		//// ↑↑↑ 新增结束 ↑↑↑
 
 		e = tmpl.ExecuteTemplate(ioWriter, "dao.tmpl", d)
 		if e != nil {
 			return e
 		}
 
-		// // ↓↓↓ 新增：执行关联查询模板 ↓↓↓
-		// if len(d.Relations) > 0 {
-		// 	e = tmpl.ExecuteTemplate(ioWriter, "dao_relation.tmpl", d)
-		// }
-		// // ↑↑↑ 新增结束 ↑↑↑
+		//// ↓↓↓ 新增：执行关联查询模板 ↓↓↓
+		//if len(d.Relations) > 0 {
+		//	e = tmpl.ExecuteTemplate(ioWriter, "dao_relation.tmpl", d)
+		//}
+		//// ↑↑↑ 新增结束 ↑↑↑
 
 		return e
 	})
 }
 
 //
-// func (d *TempData) writeDTO(parent string) error {
-// 	e := os.MkdirAll(parent, os.ModePerm)
-// 	if e != nil {
-// 		return e
-// 	}
+//func (d *TempData) writeDTO(parent string) error {
+//	e := os.MkdirAll(parent, os.ModePerm)
+//	if e != nil {
+//		return e
+//	}
 //
-// 	if len(d.Relations) == 0 {
-// 		return nil
-// 	}
+//	if len(d.Relations) == 0 {
+//		return nil
+//	}
 //
-// 	_fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_dto_"+d.StructName+"_relation.gen.go")
+//	_fileName := filepath.Join(parent, getBaseFilename(d.FileName)+"_dto_"+d.StructName+"_relation.gen.go")
 //
-// 	_f := template.FuncMap{
-// 		"lower":           strings.ToLower,
-// 		"getNotZeroValue": getNotZeroValue,
-// 	}
+//	_f := template.FuncMap{
+//		"lower":           strings.ToLower,
+//		"getNotZeroValue": getNotZeroValue,
+//	}
 //
-// 	return writeToFormatFile(_fileName, _f, func(ioWriter io.Writer, funcMap template.FuncMap) error {
-// 		tmpl := template.New("").Funcs(funcMap)
-// 		_, e := tmpl.ParseFS(resources.TemplatesFS, "templates/dto_relation.tmpl")
-// 		if e != nil {
-// 			return e
-// 		}
-// 		return tmpl.ExecuteTemplate(ioWriter, "dto_relation.tmpl", d)
-// 	})
-// }
+//	return writeToFormatFile(_fileName, _f, func(ioWriter io.Writer, funcMap template.FuncMap) error {
+//		tmpl := template.New("").Funcs(funcMap)
+//		_, e := tmpl.ParseFS(resources.TemplatesFS, "templates/dto_relation.tmpl")
+//		if e != nil {
+//			return e
+//		}
+//		return tmpl.ExecuteTemplate(ioWriter, "dto_relation.tmpl", d)
+//	})
+//}
 
 func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(ioWriter io.Writer, funcMap template.FuncMap) error) error {
 	if fi, e := os.Stat(fullFilename); e == nil {

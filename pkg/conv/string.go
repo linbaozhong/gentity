@@ -204,3 +204,7 @@ func String2Time(s string, def ...time.Time) time.Time {
 	}
 	return time.Time{}
 }
+
+func String2Ptr(s string) *string {
+	return &s
+}

@@ -8,43 +8,44 @@
 // ============================================
 // {{.StructName}} 关联查询方法
 // ============================================
+// 注意: 以下方法采用分步查询方式,先查主表再查关联表
+// 这种方式比 JOIN 更清晰,且能正确处理一对多关系
 
 {{- range $relationIdx, $relation := .Relations}}
 
 // Get{{$structName}}With{{$relation.Name}} 查询单个{{$structName}}并关联{{$relation.Name}}
-func (p *{{$structNameLower}}) Get{{$structName}}With{{$relation.Name}}(ctx context.Context, {{$.PrimaryKey.Col}} {{$.PrimaryKey.Type}}) (*dto.{{$structName}}WithRelationsDTO, bool, error) {
+func (p *{{$structNameLower}}) Get{{$structName}}With{{$relation.Name}}(ctx context.Context, {{$.PrimaryKey.Col}} {{$.PrimaryKey.Type}}) (*do.{{$structName}}, bool, error) {
 	defer p.Free()
 
-	s := p.db.Table({{$package}}.{{$structName}}TableName).
-{{- if eq $relation.JoinType "LEFT"}}
-		LeftJoin(tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
-{{- else if eq $relation.JoinType "RIGHT"}}
-		RightJoin(tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
-{{- else}}
-		Join(dialect.Inner_Join, tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
-{{- end}}
-		Cols(
-{{- range $key, $value := $.Columns}}
-			tbl{{$structNameLower}}.{{$value.Name}},
-{{- end}}
-		).
-		Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{$.PrimaryKey.Col}}))
+	s := p.db.Table({{$package}}.{{$structName}}TableName)
+	_cols := s.GetCols()
+	if len(_cols) == 0 {
+		_cols = tbl{{$structNameLower}}.ReadableFields
+		s.Cols(_cols...)
+	}
+	// 第一步: 查询主表数据
+	mainRow, e := s.
+		Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{$.PrimaryKey.Col}})).
+		Debug(p.toSql).
+		Select().
+		QueryRow(ctx)
 
-	rows, e := s.Debug(p.toSql).Select().Query(ctx)
 	if e != nil {
 		return nil, false, e
 	}
-	defer rows.Close()
 
-	result := &dto.{{$structName}}WithRelationsDTO{}
+	result := &do.{{$structName}}{}
+
+	e = mainRow.Scan(result.AssignPtr(_cols...)...)
 	hasResult := false
 
-	if rows.Next() {
+	if mainRow.Next() {
 		hasResult = true
-
-		e = rows.Scan(
+		e = mainRow.Scan(
 {{- range $idx, $value := $.Columns}}
-			&result.{{$value.Name}}{{if lt $idx (sub (len $.Columns) 1)}},{{end}}
+	{{- if or (eq $value.Rw "") (eq $value.Rw "<-")}}
+			&result.{{$value.Name}},
+	{{- end}}
 {{- end}}
 		)
 		if e != nil {
@@ -52,9 +53,66 @@ func (p *{{$structNameLower}}) Get{{$structName}}With{{$relation.Name}}(ctx cont
 		}
 	}
 
-	if e = rows.Err(); e != nil {
+	if e = mainRow.Err(); e != nil {
 		return nil, false, e
 	}
+
+	if !hasResult {
+		return nil, false, nil
+	}
+
+	// 第二步: 查询关联数据
+{{- if eq $relation.Kind "slice"}}
+	// 一对多: 查询所有关联记录
+	relRows, e := p.db.Table("{{lower $relation.Type}}").
+		Where(tbl{{lower $relation.Type}}.{{$relation.Foreign}}.Eq(result.Id)).
+		Debug(p.toSql).
+		Select().
+		Query(ctx)
+
+	if e != nil {
+		return nil, false, e
+	}
+	defer relRows.Close()
+
+	result.{{$relation.Name}} = make([]*{{$relation.Type}}, 0)
+	for relRows.Next() {
+		relItem := new({{$relation.Type}})
+		e = relItem.ScanFromRows(relRows)
+		if e != nil {
+			return nil, false, e
+		}
+		result.{{$relation.Name}} = append(result.{{$relation.Name}}, relItem)
+	}
+
+	if e = relRows.Err(); e != nil {
+		return nil, false, e
+	}
+{{- else if eq $relation.Kind "ptr"}}
+	// 一对一: 查询单条关联记录
+	relRow, e := p.db.Table("{{lower $relation.Type}}").
+		Where(tbl{{lower $relation.Type}}.{{$relation.Foreign}}.Eq(result.Id)).
+		Debug(p.toSql).
+		Select().
+		QueryRow(ctx)
+
+	if e != nil {
+		return nil, false, e
+	}
+	defer relRow.Close()
+
+	if relRow.Next() {
+		result.{{$relation.Name}} = new({{$relation.Type}})
+		e = result.{{$relation.Name}}.ScanFromRows(relRow)
+		if e != nil {
+			return nil, false, e
+		}
+	}
+
+	if e = relRow.Err(); e != nil {
+		return nil, false, e
+	}
+{{- end}}
 
 	return result, hasResult, nil
 }
@@ -68,46 +126,120 @@ func (p *{{$structNameLower}}) List{{$structName}}sWith{{$relation.Name}}(ctx co
 		return nil, 0, e
 	}
 
-	s := p.db.Table({{$package}}.{{$structName}}TableName).
-{{- if eq $relation.JoinType "LEFT"}}
-		LeftJoin(tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
-{{- else if eq $relation.JoinType "RIGHT"}}
-		RightJoin(tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
-{{- else}}
-		Join(dialect.Inner_Join, tbl{{$structNameLower}}.{{$relation.Field}}, tbl{{lower $relation.Type}}.{{$relation.Foreign}}).
-{{- end}}
+	// 第一步: 查询主表数据列表
+	mainRows, e := p.db.Table({{$package}}.{{$structName}}TableName).
 		Cols(
 {{- range $key, $value := $.Columns}}
+			{{- if or (eq $value.Rw "") (eq $value.Rw "<-")}}
 			tbl{{$structNameLower}}.{{$value.Name}},
+			{{- end}}
 {{- end}}
 		).
-		Page(page, pageSize)
+		Page(page, pageSize).
+		Debug(p.toSql).
+		Select().
+		Query(ctx)
 
-	rows, e := s.Debug(p.toSql).Select().Query(ctx)
 	if e != nil {
 		return nil, 0, e
 	}
-	defer rows.Close()
+	defer mainRows.Close()
 
 	results := make([]*dto.{{$structName}}WithRelationsDTO, 0)
+	ids := make([]{{$.PrimaryKey.Type}}, 0)
 
-	for rows.Next() {
-		item := &dto.{{$structName}}WithRelationsDTO{}
-
-		e = rows.Scan(
-{{- range $idx, $value := $.Columns}}
-			&item.{{$value.Name}}{{if lt $idx (sub (len $.Columns) 1)}},{{end}}
-{{- end}}
-		)
+	for mainRows.Next() {
+		item := new(dto.{{$structName}}WithRelationsDTO)
+		e = item.ScanFromRows(mainRows)
 		if e != nil {
 			return nil, 0, e
 		}
 
+		ids = append(ids, item.Id)
 		results = append(results, item)
 	}
 
-	if e = rows.Err(); e != nil {
+	if e = mainRows.Err(); e != nil {
 		return nil, 0, e
+	}
+
+	// 第二步: 批量查询关联数据 (避免 N+1 问题)
+	if len(ids) > 0 {
+{{- if eq $relation.Kind "slice"}}
+		relRows, e := p.db.Table("{{lower $relation.Type}}").
+			Where(tbl{{lower $relation.Type}}.{{$relation.Foreign}}.In(ids...)).
+			Debug(p.toSql).
+			Select().
+			Query(ctx)
+
+		if e != nil {
+			return nil, 0, e
+		}
+		defer relRows.Close()
+
+		// 按主表ID分组关联数据
+		relMap := make(map[{{$.PrimaryKey.Type}}][]*{{$relation.Type}})
+		for relRows.Next() {
+			relItem := new({{$relation.Type}})
+			e = relItem.ScanFromRows(relRows)
+			if e != nil {
+				return nil, 0, e
+			}
+
+			// 根据外键字段值进行分组
+			foreignKey := relItem.{{toFieldName $relation.Foreign}}
+			relMap[foreignKey] = append(relMap[foreignKey], relItem)
+		}
+
+		if e = relRows.Err(); e != nil {
+			return nil, 0, e
+		}
+
+		// 将关联数据填充到结果中
+		for _, item := range results {
+			if relItems, ok := relMap[item.Id]; ok {
+				item.{{$relation.Name}} = relItems
+			} else {
+				item.{{$relation.Name}} = make([]*{{$relation.Type}}, 0)
+			}
+		}
+{{- else if eq $relation.Kind "ptr"}}
+		relRows, e := p.db.Table("{{lower $relation.Type}}").
+			Where(tbl{{lower $relation.Type}}.{{$relation.Foreign}}.In(ids...)).
+			Debug(p.toSql).
+			Select().
+			Query(ctx)
+
+		if e != nil {
+			return nil, 0, e
+		}
+		defer relRows.Close()
+
+		// 按主表ID映射关联数据
+		relMap := make(map[{{$.PrimaryKey.Type}}]*{{$relation.Type}})
+		for relRows.Next() {
+			relItem := new({{$relation.Type}})
+			e = relItem.ScanFromRows(relRows)
+			if e != nil {
+				return nil, 0, e
+			}
+
+			// 根据外键字段值进行映射
+			foreignKey := relItem.{{toFieldName $relation.Foreign}}
+			relMap[foreignKey] = relItem
+		}
+
+		if e = relRows.Err(); e != nil {
+			return nil, 0, e
+		}
+
+		// 将关联数据填充到结果中
+		for _, item := range results {
+			if relItem, ok := relMap[item.Id]; ok {
+				item.{{$relation.Name}} = relItem
+			}
+		}
+{{- end}}
 	}
 
 	return results, count, nil
@@ -115,3 +247,4 @@ func (p *{{$structNameLower}}) List{{$structName}}sWith{{$relation.Name}}(ctx co
 
 {{- end}}
 {{- end}}
+

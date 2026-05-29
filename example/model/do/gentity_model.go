@@ -15,6 +15,8 @@ type Account struct {
 	State     types.Int8   `json:"state,omitempty" db:"'state' size:3"`             // 管理状态：-1=已删除，0=禁用，1=启用
 	Ctime     types.Time   `json:"ctime,omitempty" db:"'ctime' <-"`                 //
 	Utime     types.Time   `json:"utime,omitempty" db:"'utime' <-"`                 //
+
+	Man []CompanyMan `json:"man,omitempty" db:"- ref:Id|AccountId"`
 }
 
 // Communication 通讯表

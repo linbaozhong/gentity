@@ -13,6 +13,7 @@ var (
 	State     = dialect.Field{Name: "state", Json: "state", Table: "account", Type: "types.Int8"}
 	Ctime     = dialect.Field{Name: "ctime", Json: "ctime", Table: "account", Type: "types.Time"}
 	Utime     = dialect.Field{Name: "utime", Json: "utime", Table: "account", Type: "types.Time"}
+	Man       = dialect.Field{Name: "man", Json: "man", Table: "account", Type: "[]CompanyMan"}
 	// 主键
 	PrimaryKey = Id
 
