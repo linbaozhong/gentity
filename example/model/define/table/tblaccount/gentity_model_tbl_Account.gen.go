@@ -7,13 +7,13 @@ import (
 )
 
 var (
-	Id        = dialect.Field{Name: "id", Json: "id", Table: "account", Type: "types.BigInt"}
-	LoginName = dialect.Field{Name: "login_name", Json: "login_name", Table: "account", Type: "types.String"}
-	Password  = dialect.Field{Name: "password", Json: "password", Table: "account", Type: "types.String"}
-	State     = dialect.Field{Name: "state", Json: "state", Table: "account", Type: "types.Int8"}
-	Ctime     = dialect.Field{Name: "ctime", Json: "ctime", Table: "account", Type: "types.Time"}
-	Utime     = dialect.Field{Name: "utime", Json: "utime", Table: "account", Type: "types.Time"}
-	Man       = dialect.Field{Name: "man", Json: "man", Table: "account", Type: "[]CompanyMan"}
+	Id        = dialect.Field{Name: "id", Json: "id", Table: "account", Type: "types.BigInt", IsRelation: false}
+	LoginName = dialect.Field{Name: "login_name", Json: "login_name", Table: "account", Type: "types.String", IsRelation: false}
+	Password  = dialect.Field{Name: "password", Json: "password", Table: "account", Type: "types.String", IsRelation: false}
+	State     = dialect.Field{Name: "state", Json: "state", Table: "account", Type: "types.Int8", IsRelation: false}
+	Ctime     = dialect.Field{Name: "ctime", Json: "ctime", Table: "account", Type: "types.Time", IsRelation: false}
+	Utime     = dialect.Field{Name: "utime", Json: "utime", Table: "account", Type: "types.Time", IsRelation: false}
+	Man       = dialect.Field{Name: "man", Json: "man", Table: "account", Type: "[]CompanyMan", IsRelation: true}
 	// 主键
 	PrimaryKey = Id
 
@@ -31,5 +31,6 @@ var (
 		State,
 		Ctime,
 		Utime,
+		Man,
 	}
 )

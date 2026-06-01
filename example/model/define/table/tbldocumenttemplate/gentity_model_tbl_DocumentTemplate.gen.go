@@ -7,17 +7,17 @@ import (
 )
 
 var (
-	Id       = dialect.Field{Name: "id", Json: "id", Table: "document_template", Type: "types.BigInt"}
-	Genre    = dialect.Field{Name: "genre", Json: "genre", Table: "document_template", Type: "types.Int8"}
-	Company  = dialect.Field{Name: "company", Json: "company", Table: "document_template", Type: "types.BigInt"}
-	Way      = dialect.Field{Name: "way", Json: "way", Table: "document_template", Type: "types.Int8"}
-	AuthSign = dialect.Field{Name: "auth_sign", Json: "auth_sign", Table: "document_template", Type: "types.Int8"}
-	Title    = dialect.Field{Name: "title", Json: "title", Table: "document_template", Type: "types.String"}
-	Content  = dialect.Field{Name: "content", Json: "content", Table: "document_template", Type: "types.String"}
-	Url      = dialect.Field{Name: "url", Json: "url", Table: "document_template", Type: "types.String"}
-	HasForm  = dialect.Field{Name: "has_form", Json: "has_form", Table: "document_template", Type: "types.Int8"}
-	State    = dialect.Field{Name: "state", Json: "state", Table: "document_template", Type: "types.Int8"}
-	Utime    = dialect.Field{Name: "utime", Json: "utime", Table: "document_template", Type: "types.Time"}
+	Id       = dialect.Field{Name: "id", Json: "id", Table: "document_template", Type: "types.BigInt", IsRelation: false}
+	Genre    = dialect.Field{Name: "genre", Json: "genre", Table: "document_template", Type: "types.Int8", IsRelation: false}
+	Company  = dialect.Field{Name: "company", Json: "company", Table: "document_template", Type: "types.BigInt", IsRelation: false}
+	Way      = dialect.Field{Name: "way", Json: "way", Table: "document_template", Type: "types.Int8", IsRelation: false}
+	AuthSign = dialect.Field{Name: "auth_sign", Json: "auth_sign", Table: "document_template", Type: "types.Int8", IsRelation: false}
+	Title    = dialect.Field{Name: "title", Json: "title", Table: "document_template", Type: "types.String", IsRelation: false}
+	Content  = dialect.Field{Name: "content", Json: "content", Table: "document_template", Type: "types.String", IsRelation: false}
+	Url      = dialect.Field{Name: "url", Json: "url", Table: "document_template", Type: "types.String", IsRelation: false}
+	HasForm  = dialect.Field{Name: "has_form", Json: "has_form", Table: "document_template", Type: "types.Int8", IsRelation: false}
+	State    = dialect.Field{Name: "state", Json: "state", Table: "document_template", Type: "types.Int8", IsRelation: false}
+	Utime    = dialect.Field{Name: "utime", Json: "utime", Table: "document_template", Type: "types.Time", IsRelation: false}
 	// 主键
 	PrimaryKey = Id
 

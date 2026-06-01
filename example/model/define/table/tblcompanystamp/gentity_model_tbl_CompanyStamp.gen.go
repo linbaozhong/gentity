@@ -7,17 +7,17 @@ import (
 )
 
 var (
-	Id          = dialect.Field{Name: "id", Json: "id", Table: "company_stamp", Type: "types.BigInt"}
-	Company     = dialect.Field{Name: "company", Json: "company", Table: "company_stamp", Type: "types.BigInt"}
-	Url         = dialect.Field{Name: "url", Json: "url", Table: "company_stamp", Type: "types.String"}
-	Genre       = dialect.Field{Name: "genre", Json: "genre", Table: "company_stamp", Type: "types.Int8"}
-	IsDefault   = dialect.Field{Name: "is_default", Json: "is_default", Table: "company_stamp", Type: "types.Int8"}
-	Creator     = dialect.Field{Name: "creator", Json: "creator", Table: "company_stamp", Type: "types.BigInt"}
-	CreatorName = dialect.Field{Name: "creator_name", Json: "creator_name", Table: "company_stamp", Type: "types.String"}
-	State       = dialect.Field{Name: "state", Json: "state", Table: "company_stamp", Type: "types.Int8"}
-	Status      = dialect.Field{Name: "status", Json: "status", Table: "company_stamp", Type: "types.Int8"}
-	Ctime       = dialect.Field{Name: "ctime", Json: "ctime", Table: "company_stamp", Type: "types.Time"}
-	Utime       = dialect.Field{Name: "utime", Json: "utime", Table: "company_stamp", Type: "types.Time"}
+	Id          = dialect.Field{Name: "id", Json: "id", Table: "company_stamp", Type: "types.BigInt", IsRelation: false}
+	Company     = dialect.Field{Name: "company", Json: "company", Table: "company_stamp", Type: "types.BigInt", IsRelation: false}
+	Url         = dialect.Field{Name: "url", Json: "url", Table: "company_stamp", Type: "types.String", IsRelation: false}
+	Genre       = dialect.Field{Name: "genre", Json: "genre", Table: "company_stamp", Type: "types.Int8", IsRelation: false}
+	IsDefault   = dialect.Field{Name: "is_default", Json: "is_default", Table: "company_stamp", Type: "types.Int8", IsRelation: false}
+	Creator     = dialect.Field{Name: "creator", Json: "creator", Table: "company_stamp", Type: "types.BigInt", IsRelation: false}
+	CreatorName = dialect.Field{Name: "creator_name", Json: "creator_name", Table: "company_stamp", Type: "types.String", IsRelation: false}
+	State       = dialect.Field{Name: "state", Json: "state", Table: "company_stamp", Type: "types.Int8", IsRelation: false}
+	Status      = dialect.Field{Name: "status", Json: "status", Table: "company_stamp", Type: "types.Int8", IsRelation: false}
+	Ctime       = dialect.Field{Name: "ctime", Json: "ctime", Table: "company_stamp", Type: "types.Time", IsRelation: false}
+	Utime       = dialect.Field{Name: "utime", Json: "utime", Table: "company_stamp", Type: "types.Time", IsRelation: false}
 	// 主键
 	PrimaryKey = Id
 

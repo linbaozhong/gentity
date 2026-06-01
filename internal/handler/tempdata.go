@@ -40,8 +40,8 @@ type TempData struct {
 	CacheLimit  string // list缓存长度
 	Columns     []Field
 	PrimaryKey  Field
-	RelationX   Relation // 关系键
-	//Relations     []Relation // ← 新增这一行
+	Relation    Relation // 关系键
+	// Relations     []Relation // ← 新增这一行
 	HasPrimaryKey bool
 	HasRef        bool // 有引用类型
 	HasCache      bool
@@ -362,30 +362,30 @@ func (d *TempData) writeBuild(parent string) error {
 			return e
 		}
 
-		//// ↓↓↓ 新增：解析关联查询模板 ↓↓↓
-		//_, e = tmpl.ParseFS(resources.TemplatesFS, "templates/dao_relation.tmpl")
-		//if e != nil {
+		// // ↓↓↓ 新增：解析关联查询模板 ↓↓↓
+		// _, e = tmpl.ParseFS(resources.TemplatesFS, "templates/dao_relation.tmpl")
+		// if e != nil {
 		//	return e
-		//}
-		//// ↑↑↑ 新增结束 ↑↑↑
+		// }
+		// // ↑↑↑ 新增结束 ↑↑↑
 
 		e = tmpl.ExecuteTemplate(ioWriter, "dao.tmpl", d)
 		if e != nil {
 			return e
 		}
 
-		//// ↓↓↓ 新增：执行关联查询模板 ↓↓↓
-		//if len(d.Relations) > 0 {
+		// // ↓↓↓ 新增：执行关联查询模板 ↓↓↓
+		// if len(d.Relations) > 0 {
 		//	e = tmpl.ExecuteTemplate(ioWriter, "dao_relation.tmpl", d)
-		//}
-		//// ↑↑↑ 新增结束 ↑↑↑
+		// }
+		// // ↑↑↑ 新增结束 ↑↑↑
 
 		return e
 	})
 }
 
 //
-//func (d *TempData) writeDTO(parent string) error {
+// func (d *TempData) writeDTO(parent string) error {
 //	e := os.MkdirAll(parent, os.ModePerm)
 //	if e != nil {
 //		return e
@@ -410,7 +410,7 @@ func (d *TempData) writeBuild(parent string) error {
 //		}
 //		return tmpl.ExecuteTemplate(ioWriter, "dto_relation.tmpl", d)
 //	})
-//}
+// }
 
 func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(ioWriter io.Writer, funcMap template.FuncMap) error) error {
 	if fi, e := os.Stat(fullFilename); e == nil {

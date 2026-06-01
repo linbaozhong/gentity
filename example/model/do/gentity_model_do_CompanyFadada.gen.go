@@ -300,12 +300,10 @@ func (p *CompanyFadada) AssignValues(d dialect.Dialect, args ...dialect.Field) (
 	return cols, vals
 }
 
-//
 func (p *CompanyFadada) AssignKeys() (dialect.Field, any) {
 	return tblcompanyfadada.PrimaryKey, p.Id
 }
 
-//
 func (p *CompanyFadada) AssignPrimaryKeyValues(result sql.Result) error {
 	return nil
 }

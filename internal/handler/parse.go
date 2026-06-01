@@ -83,8 +83,8 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			CacheLimit:  "1000",
 			FileName:    structFullName,
 			PrimaryKey:  Field{},
-			RelationX:   Relation{},
-			//Relations:   make([]Relation, 0), // ← 新增这一行
+			Relation:    Relation{},
+			// Relations:   make([]Relation, 0), // ← 新增这一行
 			Columns:     make([]Field, 0, 20),
 			VisitorName: "",
 		}
@@ -142,10 +142,9 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 								}
 							}
 
-							if _tempData.RelationX.Name == "" {
-								_tempData.RelationX = rel
+							if _tempData.Relation.Name == "" {
+								_tempData.Relation = rel
 							}
-							//_tempData.Relations = append(_tempData.Relations, rel)
 						}
 					}
 				case validTag:

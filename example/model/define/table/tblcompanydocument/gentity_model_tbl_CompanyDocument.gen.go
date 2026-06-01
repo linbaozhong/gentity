@@ -7,20 +7,20 @@ import (
 )
 
 var (
-	Id           = dialect.Field{Name: "id", Json: "id", Table: "company_document", Type: "types.BigInt"}
-	Company      = dialect.Field{Name: "company", Json: "company", Table: "company_document", Type: "types.BigInt"}
-	TemplateId   = dialect.Field{Name: "template_id", Json: "template_id", Table: "company_document", Type: "types.BigInt"}
-	Title        = dialect.Field{Name: "title", Json: "title", Table: "company_document", Type: "types.String"}
-	Classify     = dialect.Field{Name: "classify", Json: "classify", Table: "company_document", Type: "types.Int8"}
-	Genre        = dialect.Field{Name: "genre", Json: "genre", Table: "company_document", Type: "types.Int8"}
-	HandleGenre  = dialect.Field{Name: "handle_genre", Json: "handle_genre", Table: "company_document", Type: "types.Int8"}
-	Job          = dialect.Field{Name: "job", Json: "job", Table: "company_document", Type: "types.String"}
-	VariableMode = dialect.Field{Name: "variable_mode", Json: "variable_mode", Table: "company_document", Type: "types.Int32"}
-	IsDefault    = dialect.Field{Name: "is_default", Json: "is_default", Table: "company_document", Type: "types.Int8"}
-	CanDefault   = dialect.Field{Name: "can_default", Json: "can_default", Table: "company_document", Type: "types.Int8"}
-	Modifier     = dialect.Field{Name: "modifier", Json: "modifier", Table: "company_document", Type: "types.BigInt"}
-	State        = dialect.Field{Name: "state", Json: "state", Table: "company_document", Type: "types.Int8"}
-	Ctime        = dialect.Field{Name: "ctime", Json: "ctime", Table: "company_document", Type: "types.Time"}
+	Id           = dialect.Field{Name: "id", Json: "id", Table: "company_document", Type: "types.BigInt", IsRelation: false}
+	Company      = dialect.Field{Name: "company", Json: "company", Table: "company_document", Type: "types.BigInt", IsRelation: false}
+	TemplateId   = dialect.Field{Name: "template_id", Json: "template_id", Table: "company_document", Type: "types.BigInt", IsRelation: false}
+	Title        = dialect.Field{Name: "title", Json: "title", Table: "company_document", Type: "types.String", IsRelation: false}
+	Classify     = dialect.Field{Name: "classify", Json: "classify", Table: "company_document", Type: "types.Int8", IsRelation: false}
+	Genre        = dialect.Field{Name: "genre", Json: "genre", Table: "company_document", Type: "types.Int8", IsRelation: false}
+	HandleGenre  = dialect.Field{Name: "handle_genre", Json: "handle_genre", Table: "company_document", Type: "types.Int8", IsRelation: false}
+	Job          = dialect.Field{Name: "job", Json: "job", Table: "company_document", Type: "types.String", IsRelation: false}
+	VariableMode = dialect.Field{Name: "variable_mode", Json: "variable_mode", Table: "company_document", Type: "types.Int32", IsRelation: false}
+	IsDefault    = dialect.Field{Name: "is_default", Json: "is_default", Table: "company_document", Type: "types.Int8", IsRelation: false}
+	CanDefault   = dialect.Field{Name: "can_default", Json: "can_default", Table: "company_document", Type: "types.Int8", IsRelation: false}
+	Modifier     = dialect.Field{Name: "modifier", Json: "modifier", Table: "company_document", Type: "types.BigInt", IsRelation: false}
+	State        = dialect.Field{Name: "state", Json: "state", Table: "company_document", Type: "types.Int8", IsRelation: false}
+	Ctime        = dialect.Field{Name: "ctime", Json: "ctime", Table: "company_document", Type: "types.Time", IsRelation: false}
 	// 主键
 	PrimaryKey = Id
 

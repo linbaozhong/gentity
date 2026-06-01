@@ -114,6 +114,8 @@ type (
 		// debug 为true时，仅打印SQL语句，不执行
 		debug bool
 		err   error
+		// // hasRelation 是否有关联查询
+		// hasRelation bool
 	}
 )
 
@@ -391,6 +393,10 @@ func (o *orm) parse() (strings.Builder, []any, error) {
 				o.command.WriteString(",")
 			}
 			o.command.WriteString(col.Quote(d))
+			// // 判断字段是否是关联字段
+			// if col.IsRelation {
+			// 	o.hasRelation = true
+			// }
 		}
 		if colens > 0 && funlens > 0 {
 			o.command.WriteString(",")

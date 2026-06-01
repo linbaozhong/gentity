@@ -16,7 +16,7 @@ type Account struct {
 	Ctime     types.Time   `json:"ctime,omitempty" db:"'ctime' <-"`                 //
 	Utime     types.Time   `json:"utime,omitempty" db:"'utime' <-"`                 //
 
-	Man []CompanyMan `json:"man,omitempty" db:"- ref:Id|AccountId"`
+	Man []CompanyMan `json:"man,omitempty" db:"<- ref:Id|AccountId"`
 }
 
 // Communication 通讯表

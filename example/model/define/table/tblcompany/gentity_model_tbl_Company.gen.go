@@ -7,21 +7,21 @@ import (
 )
 
 var (
-	Id               = dialect.Field{Name: "id", Json: "id", Table: "company", Type: "types.BigInt"}
-	LongName         = dialect.Field{Name: "long_name", Json: "long_name", Table: "company", Type: "types.String"}
-	ShortName        = dialect.Field{Name: "short_name", Json: "short_name", Table: "company", Type: "types.String"}
-	Address          = dialect.Field{Name: "address", Json: "address", Table: "company", Type: "types.String"}
-	Email            = dialect.Field{Name: "email", Json: "email", Table: "company", Type: "types.String"}
-	ContactName      = dialect.Field{Name: "contact_name", Json: "contact_name", Table: "company", Type: "types.String"}
-	ContactTelephone = dialect.Field{Name: "contact_telephone", Json: "contact_telephone", Table: "company", Type: "types.String"}
-	ContactMobile    = dialect.Field{Name: "contact_mobile", Json: "contact_mobile", Table: "company", Type: "types.String"}
-	ContactEmail     = dialect.Field{Name: "contact_email", Json: "contact_email", Table: "company", Type: "types.String"}
-	LegalName        = dialect.Field{Name: "legal_name", Json: "legal_name", Table: "company", Type: "types.String"}
-	Creator          = dialect.Field{Name: "creator", Json: "creator", Table: "company", Type: "types.BigInt"}
-	State            = dialect.Field{Name: "state", Json: "state", Table: "company", Type: "types.Int8"}
-	Status           = dialect.Field{Name: "status", Json: "status", Table: "company", Type: "types.Int8"}
-	Ctime            = dialect.Field{Name: "ctime", Json: "ctime", Table: "company", Type: "types.Time"}
-	Utime            = dialect.Field{Name: "utime", Json: "utime", Table: "company", Type: "types.Time"}
+	Id               = dialect.Field{Name: "id", Json: "id", Table: "company", Type: "types.BigInt", IsRelation: false}
+	LongName         = dialect.Field{Name: "long_name", Json: "long_name", Table: "company", Type: "types.String", IsRelation: false}
+	ShortName        = dialect.Field{Name: "short_name", Json: "short_name", Table: "company", Type: "types.String", IsRelation: false}
+	Address          = dialect.Field{Name: "address", Json: "address", Table: "company", Type: "types.String", IsRelation: false}
+	Email            = dialect.Field{Name: "email", Json: "email", Table: "company", Type: "types.String", IsRelation: false}
+	ContactName      = dialect.Field{Name: "contact_name", Json: "contact_name", Table: "company", Type: "types.String", IsRelation: false}
+	ContactTelephone = dialect.Field{Name: "contact_telephone", Json: "contact_telephone", Table: "company", Type: "types.String", IsRelation: false}
+	ContactMobile    = dialect.Field{Name: "contact_mobile", Json: "contact_mobile", Table: "company", Type: "types.String", IsRelation: false}
+	ContactEmail     = dialect.Field{Name: "contact_email", Json: "contact_email", Table: "company", Type: "types.String", IsRelation: false}
+	LegalName        = dialect.Field{Name: "legal_name", Json: "legal_name", Table: "company", Type: "types.String", IsRelation: false}
+	Creator          = dialect.Field{Name: "creator", Json: "creator", Table: "company", Type: "types.BigInt", IsRelation: false}
+	State            = dialect.Field{Name: "state", Json: "state", Table: "company", Type: "types.Int8", IsRelation: false}
+	Status           = dialect.Field{Name: "status", Json: "status", Table: "company", Type: "types.Int8", IsRelation: false}
+	Ctime            = dialect.Field{Name: "ctime", Json: "ctime", Table: "company", Type: "types.Time", IsRelation: false}
+	Utime            = dialect.Field{Name: "utime", Json: "utime", Table: "company", Type: "types.Time", IsRelation: false}
 	// 主键
 	PrimaryKey = Id
 

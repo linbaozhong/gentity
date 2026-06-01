@@ -7,13 +7,13 @@ import (
 )
 
 var (
-	Id      = dialect.Field{Name: "id", Json: "id", Table: "company_role", Type: "types.BigInt"}
-	Company = dialect.Field{Name: "company", Json: "company", Table: "company_role", Type: "types.BigInt"}
-	Name    = dialect.Field{Name: "name", Json: "name", Table: "company_role", Type: "types.String"}
-	Descr   = dialect.Field{Name: "descr", Json: "descr", Table: "company_role", Type: "types.String"}
-	Rules   = dialect.Field{Name: "rules", Json: "rules", Table: "company_role", Type: "types.String"}
-	Type    = dialect.Field{Name: "type", Json: "type", Table: "company_role", Type: "types.Int8"}
-	State   = dialect.Field{Name: "state", Json: "state", Table: "company_role", Type: "types.Int8"}
+	Id      = dialect.Field{Name: "id", Json: "id", Table: "company_role", Type: "types.BigInt", IsRelation: false}
+	Company = dialect.Field{Name: "company", Json: "company", Table: "company_role", Type: "types.BigInt", IsRelation: false}
+	Name    = dialect.Field{Name: "name", Json: "name", Table: "company_role", Type: "types.String", IsRelation: false}
+	Descr   = dialect.Field{Name: "descr", Json: "descr", Table: "company_role", Type: "types.String", IsRelation: false}
+	Rules   = dialect.Field{Name: "rules", Json: "rules", Table: "company_role", Type: "types.String", IsRelation: false}
+	Type    = dialect.Field{Name: "type", Json: "type", Table: "company_role", Type: "types.Int8", IsRelation: false}
+	State   = dialect.Field{Name: "state", Json: "state", Table: "company_role", Type: "types.Int8", IsRelation: false}
 	// 主键
 	PrimaryKey = Id
 

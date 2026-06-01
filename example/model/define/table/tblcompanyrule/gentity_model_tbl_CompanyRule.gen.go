@@ -7,15 +7,15 @@ import (
 )
 
 var (
-	Id        = dialect.Field{Name: "id", Json: "id", Table: "company_rule", Type: "types.BigInt"}
-	Pid       = dialect.Field{Name: "pid", Json: "pid", Table: "company_rule", Type: "types.BigInt"}
-	Path      = dialect.Field{Name: "path", Json: "path", Table: "company_rule", Type: "types.String"}
-	Title     = dialect.Field{Name: "title", Json: "title", Table: "company_rule", Type: "types.String"}
-	Type      = dialect.Field{Name: "type", Json: "type", Table: "company_rule", Type: "types.Uint8"}
-	IsPrivate = dialect.Field{Name: "is_private", Json: "is_private", Table: "company_rule", Type: "types.Uint8"}
-	State     = dialect.Field{Name: "state", Json: "state", Table: "company_rule", Type: "types.Int8"}
-	Descr     = dialect.Field{Name: "descr", Json: "descr", Table: "company_rule", Type: "types.String"}
-	Belong    = dialect.Field{Name: "belong", Json: "belong", Table: "company_rule", Type: "types.Int8"}
+	Id        = dialect.Field{Name: "id", Json: "id", Table: "company_rule", Type: "types.BigInt", IsRelation: false}
+	Pid       = dialect.Field{Name: "pid", Json: "pid", Table: "company_rule", Type: "types.BigInt", IsRelation: false}
+	Path      = dialect.Field{Name: "path", Json: "path", Table: "company_rule", Type: "types.String", IsRelation: false}
+	Title     = dialect.Field{Name: "title", Json: "title", Table: "company_rule", Type: "types.String", IsRelation: false}
+	Type      = dialect.Field{Name: "type", Json: "type", Table: "company_rule", Type: "types.Uint8", IsRelation: false}
+	IsPrivate = dialect.Field{Name: "is_private", Json: "is_private", Table: "company_rule", Type: "types.Uint8", IsRelation: false}
+	State     = dialect.Field{Name: "state", Json: "state", Table: "company_rule", Type: "types.Int8", IsRelation: false}
+	Descr     = dialect.Field{Name: "descr", Json: "descr", Table: "company_rule", Type: "types.String", IsRelation: false}
+	Belong    = dialect.Field{Name: "belong", Json: "belong", Table: "company_rule", Type: "types.Int8", IsRelation: false}
 	// 主键
 	PrimaryKey = Id
 

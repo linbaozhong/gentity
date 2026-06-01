@@ -7,19 +7,19 @@ import (
 )
 
 var (
-	Id         = dialect.Field{Name: "id", Json: "id", Table: "company_man", Type: "types.BigInt"}
-	AccountId  = dialect.Field{Name: "account_id", Json: "account_id", Table: "company_man", Type: "types.BigInt"}
-	Company    = dialect.Field{Name: "company", Json: "company", Table: "company_man", Type: "types.BigInt"}
-	RealName   = dialect.Field{Name: "real_name", Json: "real_name", Table: "company_man", Type: "types.String"}
-	Email      = dialect.Field{Name: "email", Json: "email", Table: "company_man", Type: "types.String"}
-	Roles      = dialect.Field{Name: "roles", Json: "roles", Table: "company_man", Type: "types.String"}
-	Gender     = dialect.Field{Name: "gender", Json: "gender", Table: "company_man", Type: "types.String"}
-	Genre      = dialect.Field{Name: "genre", Json: "genre", Table: "company_man", Type: "types.Int8"}
-	IsActivate = dialect.Field{Name: "is_activate", Json: "is_activate", Table: "company_man", Type: "types.Int8"}
-	LoginTime  = dialect.Field{Name: "login_time", Json: "login_time", Table: "company_man", Type: "types.Time"}
-	State      = dialect.Field{Name: "state", Json: "state", Table: "company_man", Type: "types.Int8"}
-	Ctime      = dialect.Field{Name: "ctime", Json: "ctime", Table: "company_man", Type: "types.Time"}
-	Utime      = dialect.Field{Name: "utime", Json: "utime", Table: "company_man", Type: "types.Time"}
+	Id         = dialect.Field{Name: "id", Json: "id", Table: "company_man", Type: "types.BigInt", IsRelation: false}
+	AccountId  = dialect.Field{Name: "account_id", Json: "account_id", Table: "company_man", Type: "types.BigInt", IsRelation: false}
+	Company    = dialect.Field{Name: "company", Json: "company", Table: "company_man", Type: "types.BigInt", IsRelation: false}
+	RealName   = dialect.Field{Name: "real_name", Json: "real_name", Table: "company_man", Type: "types.String", IsRelation: false}
+	Email      = dialect.Field{Name: "email", Json: "email", Table: "company_man", Type: "types.String", IsRelation: false}
+	Roles      = dialect.Field{Name: "roles", Json: "roles", Table: "company_man", Type: "types.String", IsRelation: false}
+	Gender     = dialect.Field{Name: "gender", Json: "gender", Table: "company_man", Type: "types.String", IsRelation: false}
+	Genre      = dialect.Field{Name: "genre", Json: "genre", Table: "company_man", Type: "types.Int8", IsRelation: false}
+	IsActivate = dialect.Field{Name: "is_activate", Json: "is_activate", Table: "company_man", Type: "types.Int8", IsRelation: false}
+	LoginTime  = dialect.Field{Name: "login_time", Json: "login_time", Table: "company_man", Type: "types.Time", IsRelation: false}
+	State      = dialect.Field{Name: "state", Json: "state", Table: "company_man", Type: "types.Int8", IsRelation: false}
+	Ctime      = dialect.Field{Name: "ctime", Json: "ctime", Table: "company_man", Type: "types.Time", IsRelation: false}
+	Utime      = dialect.Field{Name: "utime", Json: "utime", Table: "company_man", Type: "types.Time", IsRelation: false}
 	// 主键
 	PrimaryKey = Id
 
