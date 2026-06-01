@@ -25,12 +25,12 @@ type (
 	SetOp int8 // 赋值运算符
 	// Field 字段
 	Field struct {
-		Name       string
-		Json       string
-		OmitEmpty  bool
-		Table      string
-		Type       string
-		IsRelation bool
+		Name       string // 字段名
+		Json       string // json字段名
+		OmitEmpty  bool   // 是否忽略空值
+		Table      string // 表名
+		Type       string // 字段类型
+		IsRelation bool   // 是否关联字段
 	}
 	// Function 聚合函数
 	Function func(Dialect) string
