@@ -272,9 +272,12 @@ func (p *{{$structNameLower}}) Get(ctx context.Context, s ace.SelectBuilder) (*{
 
 	_cols := s.GetCols()
 	l := len(_cols)
+	{{- if ne .Relation.Name ""}}
 	hasRelation := false
+	{{- end}}
 	if l == 0 {
 		_cols = tbl{{$structNameLower}}.ReadableFields
+		{{- if ne .Relation.Name ""}}
 		for i := 0; i < l; i++ {
 			if _cols[i].IsRelation{
 				hasRelation = true
@@ -282,6 +285,7 @@ func (p *{{$structNameLower}}) Get(ctx context.Context, s ace.SelectBuilder) (*{
 				break
 			}
 		}
+		{{- end}}
 		s.Cols(_cols...)
 	}
 	_row, e := s.SetDB(p.db).
@@ -371,9 +375,13 @@ func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (an
 		s.Table({{$package}}.{{$structName}}TableName)
 	}
 
-	if len(s.GetCols()) == 0 {
+	_cols := s.GetCols()
+	if len(_cols) == 0 {
 		s.Cols(tbl{{$structNameLower}}.PrimaryKey)
+	} else {
+		s.PureCols(_cols[0])
 	}
+
 	_row, e := s.SetDB(p.db).
 		Debug(p.toSql).
 		Select().
@@ -403,9 +411,12 @@ func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([
 	_cols := s.GetCols()
 
 	l := len(_cols)
+	{{- if ne .Relation.Name ""}}
 	hasRelation := false
+	{{- end}}
 	if l == 0 {
 		_cols = tbl{{$structNameLower}}.ReadableFields
+		{{- if ne .Relation.Name ""}}
 		for i := 0; i < l; i++ {
 			if _cols[i].IsRelation{
 				hasRelation = true
@@ -413,6 +424,7 @@ func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([
 				break
 			}
 		}
+		{{- end}}
 		s.Cols(_cols...)
 	}
 
