@@ -47,7 +47,8 @@ type SelectBuilder interface {
 	//   - 确保传入的 DB 对象是有效的、已连接的实例
 	//   - 该方法主要用于灵活的场景，通常建议在 ace.New() 时直接传入 DB
 	SetDB(d *DB) Builder
-
+	// GetDB 获取当前数据库连接对象
+	GetDB() Executer
 	// Table 设置查询的表名或数据源
 	//
 	// 该方法是构建 SQL 查询的起点，用于指定要查询的数据来源。
@@ -84,6 +85,41 @@ type SelectBuilder interface {
 	//   - 推荐使用自动生成的 DO 对象（如 tblUsers），具有类型安全性
 	//   - 表名和别名会被自动添加引号（根据数据库方言）
 	Table(a any, as ...string) Builder
+	// Debug 设置调试模式
+	//
+	// 启用调试模式后，SQL 语句将被打印到日志中，但不会实际执行数据库操作。
+	// 这对于调试和查看生成的 SQL 语句非常有用。
+	//
+	// 参数说明:
+	//   - b: 可变参数，用于控制调试模式的开关
+	//        * 不传参数：启用调试模式（等同于传 true）
+	//        * 传 true：启用调试模式
+	//        * 传 false：禁用调试模式
+	//
+	// 返回值说明:
+	//   - Builder: 返回构建器实例，支持链式调用
+	//
+	// 使用示例:
+	//   // 示例1: 启用调试模式（不传参数）
+	//   db.Table("users").
+	//     Where(tblUsers.Id.Eq(1)).
+	//     Set(tblUsers.Name.Set("张三")).
+	//     Update().
+	//     Debug().  // 仅打印 SQL，不执行
+	//     Exec(ctx)
+	//
+	//   // 示例2: 明确启用调试模式
+	//   db.Table("users").
+	//     Debug(true).
+	//     Where(tblUsers.Id.Eq(1)).
+	//     Update().
+	//     Exec(ctx)
+	//
+	// 注意:
+	//   - 调试模式下，Exec/Struct/BatchStruct 等方法会返回 Err_ToSql 错误
+	//   - 可以通过 DB.Debug() 方法全局设置调试模式
+	//   - 调试模式下的 SQL 语句会记录到日志系统（log.Info）
+	Debug(...bool) Builder
 
 	Columner
 	Wherer

@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	version = "0.9"
+	version = "0.10"
 )
 
 var (
@@ -43,7 +43,8 @@ var (
 	launch = &cobra.Command{
 		Use:   `gentity command [Struct路径] ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
 		Short: "ORM 代码生成工具. ver." + version,
-		Example: `	gentity api project_name
+		Example: `	gentity [api|new] project_name	创建新项目
+	gentity init [folder]	在文件夹中按通用模板初始化项目
 	gentity dao
 	gentity dao .\do
 	gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
@@ -71,12 +72,15 @@ var (
 			_packageName := fullpath[pos+1:]
 			//
 			switch command {
-			case "api": // 如果command="api"，则初始化api模板
+			case "api", "new": // 如果command="api"或"new"，则按照api模板创建新项目
 				if len(args) > 1 {
 					generateApi(path)
 				} else {
 					showError("The project name is not entered")
 				}
+				return
+			case "init":
+				initApi(".")
 				return
 			case "sql", "db": // 如果command="db"或"sql"，则根据数据表信息生成结构体
 				if len(driver) == 0 || len(dns) == 0 {

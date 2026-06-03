@@ -288,8 +288,10 @@ func (p *{{$structNameLower}}) Get(ctx context.Context, s ace.SelectBuilder) (*{
 		{{- end}}
 		s.Cols(_cols...)
 	}
-	_row, e := s.SetDB(p.db).
-		Debug(p.toSql).
+	if s.GetDB() == nil{
+		s.SetDB(p.db)
+	}
+	_row, e := s.Debug(p.toSql).
 		Select().
 		QueryRow(ctx)
 	if e!= nil {
@@ -382,8 +384,10 @@ func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (an
 		s.PureCols(_cols[0])
 	}
 
-	_row, e := s.SetDB(p.db).
-		Debug(p.toSql).
+	if s.GetDB() == nil{
+		s.SetDB(p.db)
+	}
+	_row, e := s.Debug(p.toSql).
 		Select().
 		QueryRow(ctx)
 	if e!= nil {
@@ -428,8 +432,10 @@ func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([
 		s.Cols(_cols...)
 	}
 
-	_rows, e := s.SetDB(p.db).
-		Debug(p.toSql).
+	if s.GetDB() == nil{
+		s.SetDB(p.db)
+	}
+	_rows, e := s.Debug(p.toSql).
 		Select().
 		Query(ctx)
 	if e != nil {
@@ -493,8 +499,10 @@ func (p *{{$structNameLower}}) Column(ctx context.Context, s ace.SelectBuilder) 
 		s.PureCols(_cols[0])
 	}
 
-	_rows, e := s.SetDB(p.db).
-		Debug(p.toSql).
+	if s.GetDB() == nil{
+		s.SetDB(p.db)
+	}
+	_rows, e := s.Debug(p.toSql).
 		Select().
 		Query(ctx)
 	if e != nil {
@@ -536,8 +544,7 @@ func (p *{{$structNameLower}}) Sum(ctx context.Context, cols []dialect.Field, co
 func (p *{{$structNameLower}}) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	defer p.Free()
 	_c := p.db.Table({{$package}}.{{$structName}}TableName).Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
-	_row, e := _c.
-		Debug(p.toSql).
+	_row, e := _c.Debug(p.toSql).
 		Select().
 		QueryRow(ctx)
 	if e != nil {

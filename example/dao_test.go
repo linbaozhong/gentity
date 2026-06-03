@@ -73,7 +73,7 @@ func TestCreateSet(t *testing.T) {
 	// 调用 ace 包的 Table 函数指定要操作的表，设置插入的数据
 	// 然后调用 Create 方法创建执行器并执行插入操作
 	// result 为执行结果，包含插入的 ID 等信息，err 为可能出现的错误
-	result, err := ace.New(dbx).
+	result, err := dbx.
 		Table(do.CompanyTableName).
 		Set(
 			// 设置公司的长名称为 "aaaaaa"
@@ -128,7 +128,7 @@ func TestCreateStruct(t *testing.T) {
 
 	// 使用 ace 包的通用方法，通过单个结构体插入数据
 	// result 为执行结果，包含插入的 ID 等信息，err 为可能出现的错误
-	result, err := ace.New(dbx).
+	result, err := dbx.
 		Table(do.CompanyTableName).
 		Cols(
 			tblcompany.LongName,

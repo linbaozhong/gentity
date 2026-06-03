@@ -10,9 +10,9 @@ import "{{.ModulePath}}/internal/constant"
 // param：用于url动态路径参数解析
 // valid：用于数据校验
 type UserRegisterReq struct {
-	UserName string `json:"user_name" url:"user_name" form:"user_name" param:"user_name" valid:"required"`
-	Password string `json:"password" url:"password" form:"password" param:"password" valid:"required"`
-	Email    string `json:"email" url:"email" form:"email" param:"email" valid:"email~邮箱格式错误"`
+	UserName string `json:"user_name" valid:"required"`
+	Password string `json:"password" valid:"required"`
+	Email    string `json:"email" valid:"email~邮箱格式错误"`
 }
 
 func (u *UserRegisterReq) Check() error {
@@ -33,7 +33,7 @@ type UserRegisterResp struct {
 
 //
 type GetUserReq struct{
-	UserID uint64 `json:"user_id" url:"user_id" form:"user_id"`
+	UserID uint64 `json:"user_id"`
 }
 
 func (u *GetUserReq) Check() error{

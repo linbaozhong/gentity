@@ -15,7 +15,7 @@ func Connected() error {
 	}
 	db.SetMaxOpenConns(50)
 	db.SetMaxIdleConns(25)
-	db.SetDebug(true)
+	db.Debug(true)
 
 	return nil
 }

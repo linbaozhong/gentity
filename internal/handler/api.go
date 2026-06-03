@@ -23,12 +23,19 @@ import (
 	"text/template"
 )
 
-func generateApi(name string) error {
+func parseFolder(name string) (string, error) {
 	_dir, e := os.Getwd()
+	if e != nil {
+		return "", e
+	}
+	return filepath.Join(_dir, name), nil
+}
+
+func generateApi(name string) error {
+	_dir, e := parseFolder(name)
 	if e != nil {
 		return e
 	}
-	_dir = filepath.Join(_dir, name)
 	_, e = os.Stat(_dir)
 	if e != nil {
 		if os.IsNotExist(e) {
@@ -52,12 +59,24 @@ func generateApi(name string) error {
 		return e
 	}
 
-	// 初始化模块
-	e = apiInitModule(name)
+	return generate(name)
+}
+
+func initApi(dir string) error {
+	name, e := parseFolder(dir)
 	if e != nil {
-		showError(e)
 		return e
 	}
+	return generate(filepath.Base(name))
+}
+
+func generate(name string) error {
+	// 初始化模块
+	e := apiInitModule(name)
+	// if e != nil {
+	// 	showError(e)
+	// 	return e
+	// }
 
 	// 生成其他文件
 	e = apiCmd(name)
