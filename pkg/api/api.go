@@ -15,6 +15,9 @@
 package api
 
 import (
+	"encoding/json"
+	"github.com/linbaozhong/gentity/pkg/types"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -47,8 +50,13 @@ func Initiate(ctx Context, arg any) {
 		ier.Init()
 	}
 	// 读取动态路径参数
-	if ctx.Params().Len() > 0 {
-		ctx.ReadParams(arg)
+	params := ctx.Params()
+	if params.Len() > 0 {
+		e := json.Unmarshal(params.Serialize(), arg)
+		if e != nil {
+			Fail(ctx, types.NewError(http.StatusBadRequest, "反序列化参数错误", "Initiate.json.Unmarshal").Join(e))
+			return
+		}
 	}
 }
 
