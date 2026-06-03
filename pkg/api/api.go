@@ -46,7 +46,7 @@ func Initiate(ctx Context, arg any) {
 	if ier, ok := arg.(Initializer); ok {
 		ier.Init()
 	}
-	//
+	// 读取动态路径参数
 	if ctx.Params().Len() > 0 {
 		ctx.ReadParams(arg)
 	}
