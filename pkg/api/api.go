@@ -46,6 +46,10 @@ func Initiate(ctx Context, arg any) {
 	if ier, ok := arg.(Initializer); ok {
 		ier.Init()
 	}
+	//
+	if ctx.Params().Len() > 0 {
+		ctx.ReadParams(arg)
+	}
 }
 
 // Validate 校验参数
