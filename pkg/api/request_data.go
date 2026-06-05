@@ -65,9 +65,7 @@ func ReadForm(ctx Context, ptr any) error {
 func ReadQuery(ctx Context, ptr any) error {
 	if x, ok := ptr.(UnmarshalValueser); ok {
 		values := ctx.Request().URL.Query()
-		ctx.Params().Visit(func(key string, value string) {
-			values.Add(key, value)
-		})
+
 		if len(values) == 0 {
 			return nil
 		}
