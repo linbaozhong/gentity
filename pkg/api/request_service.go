@@ -123,9 +123,8 @@ func readGetRequest[A any](ctx Context, req *A) error {
 	Initiate(ctx, req)
 	if ctx.Request().URL.RawQuery == "" {
 		return ReadForm(ctx, req)
-	} else {
-		return ReadQuery(ctx, req)
 	}
+	return ReadQuery(ctx, req)
 }
 
 // readPostRequest 读取post请求
@@ -139,8 +138,7 @@ func readPostRequest[A any](ctx Context, req *A) error {
 	default:
 		if ctx.Request().URL.RawQuery == "" {
 			return ReadForm(ctx, req)
-		} else {
-			return ReadQuery(ctx, req)
 		}
+		return ReadQuery(ctx, req)
 	}
 }

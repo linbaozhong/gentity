@@ -140,8 +140,3 @@ func (s *DB) Limit(size uint, start ...uint) Builder {
 func (s *DB) Set(fns ...dialect.Setter) Builder {
 	return newOrm(s).Set(fns...)
 }
-
-// // SetExpr 设置更新表达式
-// func (s *DB) SetExpr(fns ...dialect.Setter) Builder {
-// 	return newOrm(s).SetExpr(fns...)
-// }
