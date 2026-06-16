@@ -54,7 +54,7 @@ var (
 // Connect
 func Connect(driverName, dns string) (*DB, error) {
 	// 根据驱动自动选择方言
-	var d dialect.Dialect = Dialect(driverName)
+	var d = Dialect(driverName)
 
 	db, e := sql.Open(driverName, dns)
 	if e != nil {

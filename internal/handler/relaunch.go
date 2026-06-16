@@ -43,8 +43,8 @@ var (
 	launch = &cobra.Command{
 		Use:   `gentity command [Struct路径] ["SQL文件路径" | "数据库驱动" "数据库连接字符串"]`,
 		Short: "ORM 代码生成工具. ver." + version,
-		Example: `	gentity [api|new] project_name	创建新项目
-	gentity init [folder]	在文件夹中按通用模板初始化项目
+		Example: `	gentity [api|new] PROJECT_NAME	创建新项目
+	gentity init [FOLDER]	在文件夹中按通用模板初始化项目
 	gentity dao
 	gentity dao .\do
 	gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"

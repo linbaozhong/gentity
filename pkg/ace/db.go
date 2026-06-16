@@ -41,7 +41,7 @@ func (s *DB) Mapper() *reflectx.Mapper {
 	return s.mapper
 }
 
-// Debug
+// Debug 设置调试模式，只打印sql命令，不不执行DAL操作
 func (s *DB) Debug(debug ...bool) bool {
 	if len(debug) > 0 {
 		s.debug = debug[0]

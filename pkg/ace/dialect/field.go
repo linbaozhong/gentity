@@ -360,14 +360,6 @@ func (f *Field) Sum(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(" IFNULL(Sum(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		// sb.Grow(len(f.Quote(d)) + 20 + len(a))
-		// sb.WriteString(" IFNULL(Sum(")
-		// sb.WriteString(f.Quote(d))
-		// sb.WriteString("),0) AS ")
-		// sb.WriteString(a)
-		// return sb.String()
 		return d.Null("Sum("+f.Quote(d)+"),0") + " AS " + a
 	}
 }
@@ -379,14 +371,6 @@ func (f *Field) Avg(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(" IFNULL(Avg(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		// sb.Grow(len(f.Quote(d)) + 20 + len(a))
-		// sb.WriteString(" IFNULL(Avg(")
-		// sb.WriteString(f.Quote(d))
-		// sb.WriteString("),0) AS ")
-		// sb.WriteString(a)
-		// return sb.String()
 		return d.Null("Avg("+f.Quote(d)+"),0") + " AS " + a
 	}
 }
@@ -398,14 +382,6 @@ func (f *Field) Count(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(" IFNULL(Count(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		// sb.Grow(len(f.Quote(d)) + 22 + len(a))
-		// sb.WriteString(" IFNULL(Count(")
-		// sb.WriteString(f.Quote(d))
-		// sb.WriteString("),0) AS ")
-		// sb.WriteString(a)
-		// return sb.String()
 		return d.Null("Count("+f.Quote(d)+"),0") + " AS " + a
 	}
 }
@@ -417,14 +393,6 @@ func (f *Field) Max(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len(" IFNULL(Max(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		// sb.Grow(len(f.Quote(d)) + 20 + len(a))
-		// sb.WriteString(" IFNULL(Max(")
-		// sb.WriteString(f.Quote(d))
-		// sb.WriteString("),0) AS ")
-		// sb.WriteString(a)
-		// return sb.String()
 		return d.Null("Max("+f.Quote(d)+"),0") + " AS " + a
 	}
 }
@@ -436,14 +404,6 @@ func (f *Field) Min(as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		// var sb strings.Builder
-		// // 预先计算并分配足够的内存空间：len("IFNULL(Min(") + len(f.Quote()) + len("),0) AS ") + len(a)
-		// sb.Grow(len(f.Quote(d)) + 20 + len(a))
-		// sb.WriteString(" IFNULL(Min(")
-		// sb.WriteString(f.Quote(d))
-		// sb.WriteString("),0) AS ")
-		// sb.WriteString(a)
-		// return sb.String()
 		return d.Null("Min("+f.Quote(d)+"),0") + " AS " + a
 	}
 }
@@ -455,14 +415,6 @@ func (f *Field) Distance(lng, lat float64, as ...string) Function {
 		a = as[0]
 	}
 	return func(d Dialect) string {
-		// var sb strings.Builder
-		// sb.Grow(len(f.Quote(d)) + 80 + len(a))
-		// sb.WriteString(
-		// 	fmt.Sprintf("ST_Distance_Sphere(%s, ST_PointFromText(CONCAT('POINT(%f %f)')),4326)",
-		// 		f.Quote(d), lat, lng))
-		// sb.WriteString(" AS ")
-		// sb.WriteString(a)
-		// return sb.String()
 		return fmt.Sprintf("ST_Distance_Sphere(%s, ST_PointFromText(CONCAT('POINT(%f %f)')),4326) AS %s",
 			f.Quote(d), lat, lng, a)
 	}
