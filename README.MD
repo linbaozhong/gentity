@@ -3,8 +3,8 @@
 ### 1. 生成api框架
 ### 2. 生成 ORM 代码
 * 根据结构体(struct)文件，生成相应的ORM代码
-* 数据库表结构文件(.sql)，生成相应的ORM代码
-* 数据库连接字符串(dns)，生成相应的ORM代码
+* 数据库表结构文件(.sql)，生成相应的struct和dao层，并以内存友好对齐struct字段
+* 数据库连接字符串(dns)，生成相应的struct和dao层，并以内存友好对齐struct字段
 ### 3. 根据前端传入的request对象，生成相应的validator代码
 
 # 使用方法
@@ -58,7 +58,7 @@ gentity dao
 // 指定 struct 路径，生成相应的dao层
 gentity dao .\do
 
-// 根据指定的数据库引擎名称以及连接字符串在指定目录，生成相应的struct和dao层，并以内存优化对齐struct字段
+// 根据指定的数据库引擎名称以及连接字符串在指定目录，生成相应的struct和dao层，并以内存友好对齐struct字段
 gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 
 // 根据指定的数据库引擎名称以及数据库建表sql文件在 .\do 路径，生成相应的struct和dao层，并以内存优化对齐struct字段
@@ -345,7 +345,6 @@ func TestSelect(t *testing.T) {
 
 * 结构体嵌套在生成dao代码时，会自动生成关联查询。
 * 关联查询的标签为：db:"ref:关联字段|关联表对应字段"
-* dao相应查询方法为：FindX、GetX ......
 
 例如：
 ```go
