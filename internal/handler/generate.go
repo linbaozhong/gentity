@@ -100,16 +100,16 @@ func generateDao(tds []TempData, prefix string) error {
 			showError(e.Error())
 			return e
 		}
-		//// ↓↓↓ 新增以下代码块 ↓↓↓
-		//if len(td.Relations) > 0 {
+		// // ↓↓↓ 新增以下代码块 ↓↓↓
+		// if len(td.Relations) > 0 {
 		//	dtoRelationPath := filepath.Join(fullpath, "..", "dto")
 		//	e = td.writeDTO(dtoRelationPath)
 		//	if e != nil {
 		//		showError(e.Error())
 		//		return e
 		//	}
-		//}
-		//// ↑↑↑ 新增结束 ↑↑↑
+		// }
+		// // ↑↑↑ 新增结束 ↑↑↑
 	}
 	return nil
 }
@@ -187,48 +187,48 @@ func writeToDTO(d TempData) error {
 // 转换类型
 func getTypeNil(t Field) any {
 	switch t.Type {
-	case "string", "types.String":
-		return "types.NilString"
-	case "int", "types.Int":
-		return "types.NilInt"
-	case "int8", "types.Int8":
-		return "types.NilInt8"
-	case "int16", "types.Int16":
-		return "types.NilInt16"
-	case "int32", "types.Int32":
-		return "types.NilInt32"
-	case "int64", "types.Int64", "types.Money":
-		return "types.NilInt64"
-	case "uint", "types.Uint":
-		return "types.NilUint"
-	case "uint8", "types.Uint8":
-		return "types.NilUint8"
-	case "uint16", "types.Uint16":
-		return "types.NilUint16"
-	case "uint32", "types.Uint32":
-		return "types.NilUint32"
-	case "uint64", "types.Uint64", "types.BigInt":
-		return "types.NilUint64"
-	case "float32", "types.Float32":
-		return "types.NilFloat32"
-	case "float64", "types.Float64":
-		return "types.NilFloat64"
-	case "time.Time":
-		return "types.NilTime"
-	case "types.Time":
-		return "types.Time{}"
-	case "types.Bool":
-		return "types.NilBool"
-	case "bool":
-		return "false"
-	case "Visitor": // 特定访问者类型
-		return "Visitor{}"
+	// case "string", "types.String":
+	// 	return `""`
+	// case "int", "types.Int":
+	// 	return "0"
+	// case "int8", "types.Int8":
+	// 	return "0"
+	// case "int16", "types.Int16":
+	// 	return "0"
+	// case "int32", "types.Int32":
+	// 	return "0"
+	// case "int64", "types.Int64", "types.Money":
+	// 	return "0"
+	// case "uint", "types.Uint":
+	// 	return "0"
+	// case "uint8", "types.Uint8":
+	// 	return "0"
+	// case "uint16", "types.Uint16":
+	// 	return "0"
+	// case "uint32", "types.Uint32":
+	// 	return "0"
+	// case "uint64", "types.Uint64", "types.BigInt":
+	// 	return "0"
+	// case "float32", "types.Float32":
+	// 	return "0"
+	// case "float64", "types.Float64":
+	// 	return "0"
+	// case "time.Time":
+	// 	return "time.Time{}"
+	// case "types.Time":
+	// 	return "types.Time{}"
+	// case "types.Bool":
+	// 	return "false"
+	// case "bool":
+	// 	return "false"
+	case "*Visitor": // 特定访问者类型
+		return "&Visitor{}"
 	default:
 		switch t.Type[0] {
 		case '*', '[', 'm':
 			return "nil"
 		default:
-			return `"请将字段类型改为指针/切片/映射等引用类型"`
+			return `"请将字段类型改为引用类型"`
 		}
 	}
 }

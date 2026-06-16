@@ -1,14 +1,21 @@
 # gentity
 
+  gentity 是一个基于 Go 语言的 ORM 框架，用于生成 DAO 代码。它还支持生成 API 项目框架，并生成数据传输对象的相应的 validator 方法。
+
 ### 1. 生成api框架
-### 2. 生成 ORM 代码
-* 根据结构体(struct)文件，生成相应的ORM代码
-* 数据库表结构文件(.sql)，生成相应的struct和dao层，并以内存友好对齐struct字段
-* 数据库连接字符串(dns)，生成相应的struct和dao层，并以内存友好对齐struct字段
-### 3. 根据前端传入的request对象，生成相应的validator代码
+### 2. 生成 DAO 代码
+* 根据结构体(struct)文件，生成相应的 DAO 代码
+* 数据库表结构文件(.sql)，生成相应的 struct 和 dao 层，并以内存友好对齐 struct 字段
+* 数据库连接字符串(dns)，生成相应的 struct 和 dao 层，并以内存友好对齐 struct 字段
+### 3. 根据前端传入的 request 对象，生成相应的 validator 代码
+
+# 特点：
+  * **内存友好：** 对齐 struct 字段，减少内存占用。
+  * **性能优化：** 生成结构体的序列化和反序列化方法，拒绝反射带来的性能损失。
+  * **GC 友 好：** 生成的 struct 的实例化方法均已池化，降低 GC 消耗。
 
 # 使用方法
-### 将项目git到本地
+### 将项目 git 到本地
 ```
 go get -u github.com/linbaozhong/gentity@latest
 ```
@@ -25,7 +32,7 @@ gentity api [项目名称]
 ```
 gentity init [项目名称]
 ```
-### 生成ORM代码
+### 生成 DAO 代码
 #### 定义一个struct，添加注释 tablename 数据库表名
 ```go
 // @tablename user
@@ -38,11 +45,11 @@ type User struct {
 }
 ```
 注释：
-- `db:"'id' pk auto"` 表示数据库字段名，主键，自增
-- `db:"created_time <-"` 表示数据库字段名，只读。 `<-`: 只读;`->`: 只写;`-`:不可读写
+- `db:"'id' pk auto"` 表示数据库字段名为 id，主键，自增
+- `db:"created_time <-"` 表示数据库字段名为 created_time，是只读字段。 `<-`: 只读;`->`: 只写;`-`:不可读写
 #### 用法：
 ```
-gentity command [model路径] [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "数据库连接字符串"] [flags]
+gentity COMMAND [model路径] [ "数据库驱动" "SQL文件路径" |  "数据库驱动" "数据库连接字符串"] [flags]
 ```
 #### 示例
 ```
@@ -69,30 +76,30 @@ gentity check .\dto
 或者
 gentity dto .\dto
 ```
-###### 1. 进入model目录
+###### 1. 进入 model 目录
 ```
 cd model
 gentity dao
 ```
-###### 2. 或者指定model目录
+###### 2. 或者指定 model 目录
 ```
 gentity dao ./model
 ```
-###### 3. 指定数据库驱动、包含 Create Table 的 SQL文件，先在当前目录生成struct文件，再生成相应的ORM文件
+###### 3. 指定数据库驱动、包含 Create Table 的 SQL文件，先在当前目录生成 struct 文件，再生成相应的 DAO 文件
 ```
 gentity sql . mysql ./database.sql
 ```
-###### 4. 指定数据库驱动、连接字符串，先在当前目录生成struct文件，再生成相应的ORM文件
+###### 4. 指定数据库驱动、连接字符串，先在当前目录生成 struct 文件，再生成相应的 DAO 文件
 ```
 gentity db . mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 ```
-###### 5. 检查 .\dto 目录下所有request对象，生成相应的 validator 方法
+###### 5. 检查 .\dto 目录下所有 request 对象，生成相应的 validator 方法
 ```
 gentity check .\dto
 ```
-###### 6. 生成api框架
+###### 6. 生成 api 框架
 ```
-gentity api project_name
+gentity new PROJECT_NAME
 ```
 ##### 注意：命令参数的顺序
 ## 示例
@@ -383,50 +390,53 @@ gentity check [dir]
 
 ### 示例
 注意：
+* 结构体的字段类型必须是引用类型
 * 如果是请求结构体，一定要要在struct上添加注释：// @request
 * 如果是响应结构体，一定要要在struct上添加注释：// @response
 
 #### Post请求
-* 如果 Content-Type：application/json，req结构体的字段tag为json
-* 如果 Content-Type: application/x-www-form-urlencoded，req结构体的字段tag为form
-* 如果 Content-Type: multipart/form-data，req结构体的字段tag为form
+* 如果 Content-Type：application/json
+* 如果 Content-Type: application/x-www-form-urlencoded
+* 如果 Content-Type: multipart/form-data
+* request 结构体的字段tag为json
 ```
 // @request
 type ArticleReq struct {
-	Title    string `json:"title" valid:"alphanum,required"`
-	Emain    string `json:"email" valid:"email~email格式错误,required"`
-	Content  string `json:"content" valid:"maxstringlength(50)"`
-	AuthorIP string `json:"author_ip" valid:"ipv4"`
-	Date     string `json:"date" valid:"-"`
+	Title    *string `json:"title" valid:"alphanum,required"`
+	Emain    *string `json:"email" valid:"email~email格式错误,required"`
+	Content  *string `json:"content" valid:"maxstringlength(50)"`
+	AuthorIP *string `json:"author_ip" valid:"ipv4"`
+	Date     *string `json:"date" valid:"-"`
 }
 
 // @response
 type ArticleReq struct {
-	Title    string `json:"title" valid:"alphanum,required"`
-	Emain    string `json:"email" valid:"email~email格式错误,required"`
-	Content  string `json:"content" valid:"maxstringlength(50)"`
-	AuthorIP string `json:"author_ip" valid:"ipv4"`
-	Date     string `json:"date" valid:"-"`
+	Title    string `json:"title"`
+	Emain    string `json:"email"`
+	Content  string `json:"content"`
+	AuthorIP string `json:"author_ip"`
+	Date     string `json:"date"`
 }
 
 // @request
 type ChannelReq struct {
-	ID int `form:"id" valid:"int,required"`
+	ID int `json:"id" valid:"int,required"`
 }
 ```
 #### Get请求
-* 首先尝试读取query，req结构体的字段 tag 为 url 或者 param。
-* 如果query为空，则尝试读取form，req结构体的字段tag为form。
+* 首先尝试读取query。
+* 如果query为空，则尝试读取form。
+* request 结构体的字段tag为json
 ```
 // @request
 type ArticleReq struct {
-	ID       int    `param:"id" valid:"int,required"`
-	Title    string `url:"title" valid:"alphanum,required"`
-	Emain    string `url:"email" valid:"email~email格式错误,required"`
+	ID       *int    `param:"id" valid:"int,required"`
+	Title    *string `url:"title" valid:"alphanum,required"`
+	Emain    *string `url:"email" valid:"email~email格式错误,required"`
 }
 // @request
 type ChannelReq struct {
-	ID int `form:"id" valid:"int,required"`
+	ID *int `json:"id" valid:"int,required"`
 }
 ```
 ### valid 支持的 struct filed 校验器
@@ -511,15 +521,15 @@ type ChannelReq struct {
 ```
 // @request
 type PostRequest struct {
-	Title    string `json:"title" valid:"alphanum,required"`
-	Emain    string `json:"email" valid:"email~email格式错误,required"`
-	Content  string `json:"content" valid:"maxstringlength(50)"`
-	AuthorIP string `json:"author_ip" valid:"ipv4"`
-	Date     string `json:"date" valid:"-"`
+	Title    *string `json:"title" valid:"alphanum,required"`
+	Emain    *string `json:"email" valid:"email~email格式错误,required"`
+	Content  *string `json:"content" valid:"maxstringlength(50)"`
+	AuthorIP *string `json:"author_ip" valid:"ipv4"`
+	Date     *string `json:"date" valid:"-"`
 }
 // @request
 type GetRequest struct {
-	ID int `url:"id" valid:"int,required"`
+	ID *int `json:"id" valid:"int,required"`
 }
 
 ```

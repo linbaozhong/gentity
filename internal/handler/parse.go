@@ -162,7 +162,7 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			}
 			if _namejson.Type == "time.Time" || _namejson.Type == "*time.Time" {
 				_tempData.HasTime = true
-			} else if _namejson.Type == "Visitor" {
+			} else if _namejson.Type == "*Visitor" {
 				_tempData.VisitorName = _namejson.Name
 			}
 
