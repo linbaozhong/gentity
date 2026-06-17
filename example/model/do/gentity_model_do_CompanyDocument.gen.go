@@ -31,46 +31,46 @@ func NewCompanyDocument() *CompanyDocument {
 func (p *CompanyDocument) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(14 * 50)
 	if p.Id != 0 {
-		write.WriteKV("id", types.Marshal(p.Id))
+		write.WriteRaw("id", types.Marshal(p.Id))
 	}
 	if p.Company != 0 {
-		write.WriteKV("company", types.Marshal(p.Company))
+		write.WriteRaw("company", types.Marshal(p.Company))
 	}
 	if p.TemplateId != 0 {
-		write.WriteKV("template_id", types.Marshal(p.TemplateId))
+		write.WriteRaw("template_id", types.Marshal(p.TemplateId))
 	}
 	if p.Title != "" {
-		write.WriteKV("title", types.Marshal(p.Title))
+		write.WriteRaw("title", types.Marshal(p.Title))
 	}
 	if p.Classify != 0 {
-		write.WriteKV("classify", types.Marshal(p.Classify))
+		write.WriteRaw("classify", types.Marshal(p.Classify))
 	}
 	if p.Genre != 0 {
-		write.WriteKV("genre", types.Marshal(p.Genre))
+		write.WriteRaw("genre", types.Marshal(p.Genre))
 	}
 	if p.HandleGenre != 0 {
-		write.WriteKV("handle_genre", types.Marshal(p.HandleGenre))
+		write.WriteRaw("handle_genre", types.Marshal(p.HandleGenre))
 	}
 	if p.Job != "" {
-		write.WriteKV("job", types.Marshal(p.Job))
+		write.WriteRaw("job", types.Marshal(p.Job))
 	}
 	if p.VariableMode != 0 {
-		write.WriteKV("variable_mode", types.Marshal(p.VariableMode))
+		write.WriteRaw("variable_mode", types.Marshal(p.VariableMode))
 	}
 	if p.IsDefault != 0 {
-		write.WriteKV("is_default", types.Marshal(p.IsDefault))
+		write.WriteRaw("is_default", types.Marshal(p.IsDefault))
 	}
 	if p.CanDefault != 0 {
-		write.WriteKV("can_default", types.Marshal(p.CanDefault))
+		write.WriteRaw("can_default", types.Marshal(p.CanDefault))
 	}
 	if p.Modifier != 0 {
-		write.WriteKV("modifier", types.Marshal(p.Modifier))
+		write.WriteRaw("modifier", types.Marshal(p.Modifier))
 	}
 	if p.State != 0 {
-		write.WriteKV("state", types.Marshal(p.State))
+		write.WriteRaw("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		write.WriteKV("ctime", types.Marshal(p.Ctime))
+		write.WriteRaw("ctime", types.Marshal(p.Ctime))
 	}
 	return write.Bytes(), nil
 }

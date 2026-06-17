@@ -31,49 +31,49 @@ func NewCompany() *Company {
 func (p *Company) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(15 * 50)
 	if p.Id != 0 {
-		write.WriteKV("id", types.Marshal(p.Id))
+		write.WriteRaw("id", types.Marshal(p.Id))
 	}
 	if p.LongName != "" {
-		write.WriteKV("long_name", types.Marshal(p.LongName))
+		write.WriteRaw("long_name", types.Marshal(p.LongName))
 	}
 	if p.ShortName != "" {
-		write.WriteKV("short_name", types.Marshal(p.ShortName))
+		write.WriteRaw("short_name", types.Marshal(p.ShortName))
 	}
 	if p.Address != "" {
-		write.WriteKV("address", types.Marshal(p.Address))
+		write.WriteRaw("address", types.Marshal(p.Address))
 	}
 	if p.Email != "" {
-		write.WriteKV("email", types.Marshal(p.Email))
+		write.WriteRaw("email", types.Marshal(p.Email))
 	}
 	if p.ContactName != "" {
-		write.WriteKV("contact_name", types.Marshal(p.ContactName))
+		write.WriteRaw("contact_name", types.Marshal(p.ContactName))
 	}
 	if p.ContactTelephone != "" {
-		write.WriteKV("contact_telephone", types.Marshal(p.ContactTelephone))
+		write.WriteRaw("contact_telephone", types.Marshal(p.ContactTelephone))
 	}
 	if p.ContactMobile != "" {
-		write.WriteKV("contact_mobile", types.Marshal(p.ContactMobile))
+		write.WriteRaw("contact_mobile", types.Marshal(p.ContactMobile))
 	}
 	if p.ContactEmail != "" {
-		write.WriteKV("contact_email", types.Marshal(p.ContactEmail))
+		write.WriteRaw("contact_email", types.Marshal(p.ContactEmail))
 	}
 	if p.LegalName != "" {
-		write.WriteKV("legal_name", types.Marshal(p.LegalName))
+		write.WriteRaw("legal_name", types.Marshal(p.LegalName))
 	}
 	if p.Creator != 0 {
-		write.WriteKV("creator", types.Marshal(p.Creator))
+		write.WriteRaw("creator", types.Marshal(p.Creator))
 	}
 	if p.State != 0 {
-		write.WriteKV("state", types.Marshal(p.State))
+		write.WriteRaw("state", types.Marshal(p.State))
 	}
 	if p.Status != 0 {
-		write.WriteKV("status", types.Marshal(p.Status))
+		write.WriteRaw("status", types.Marshal(p.Status))
 	}
 	if !p.Ctime.IsZero() {
-		write.WriteKV("ctime", types.Marshal(p.Ctime))
+		write.WriteRaw("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		write.WriteKV("utime", types.Marshal(p.Utime))
+		write.WriteRaw("utime", types.Marshal(p.Utime))
 	}
 	return write.Bytes(), nil
 }

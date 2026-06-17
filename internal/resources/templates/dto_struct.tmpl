@@ -57,10 +57,10 @@ func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 		{{- if ne $value.Json.Name "-" }}
 			{{- if $value.Json.OmitEmpty}}
 			if {{getNotZeroValue $value}} {
-				write.WriteKV("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
+				write.WriteRaw("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
 			}
 			{{- else}}
-				write.WriteKV("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
+				write.WriteRaw("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
 			{{- end}}
 		{{- end}}
 	{{- end}}

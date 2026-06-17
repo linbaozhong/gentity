@@ -31,46 +31,46 @@ func NewCompanyFadada() *CompanyFadada {
 func (p *CompanyFadada) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(14 * 50)
 	if p.Id != 0 {
-		write.WriteKV("id", types.Marshal(p.Id))
+		write.WriteRaw("id", types.Marshal(p.Id))
 	}
 	if p.CompanyName != "" {
-		write.WriteKV("company_name", types.Marshal(p.CompanyName))
+		write.WriteRaw("company_name", types.Marshal(p.CompanyName))
 	}
 	if p.CustomerId != "" {
-		write.WriteKV("customer_id", types.Marshal(p.CustomerId))
+		write.WriteRaw("customer_id", types.Marshal(p.CustomerId))
 	}
 	if p.TransactionNo != "" {
-		write.WriteKV("transaction_no", types.Marshal(p.TransactionNo))
+		write.WriteRaw("transaction_no", types.Marshal(p.TransactionNo))
 	}
 	if p.Url != "" {
-		write.WriteKV("url", types.Marshal(p.Url))
+		write.WriteRaw("url", types.Marshal(p.Url))
 	}
 	if p.CertInfo != "" {
-		write.WriteKV("cert_info", types.Marshal(p.CertInfo))
+		write.WriteRaw("cert_info", types.Marshal(p.CertInfo))
 	}
 	if p.Status != 0 {
-		write.WriteKV("status", types.Marshal(p.Status))
+		write.WriteRaw("status", types.Marshal(p.Status))
 	}
 	if p.HasCertificate != 0 {
-		write.WriteKV("has_certificate", types.Marshal(p.HasCertificate))
+		write.WriteRaw("has_certificate", types.Marshal(p.HasCertificate))
 	}
 	if p.AuthSign != 0 {
-		write.WriteKV("auth_sign", types.Marshal(p.AuthSign))
+		write.WriteRaw("auth_sign", types.Marshal(p.AuthSign))
 	}
 	if p.AuthTransactionId != "" {
-		write.WriteKV("auth_transaction_id", types.Marshal(p.AuthTransactionId))
+		write.WriteRaw("auth_transaction_id", types.Marshal(p.AuthTransactionId))
 	}
 	if p.AuthContractId != "" {
-		write.WriteKV("auth_contract_id", types.Marshal(p.AuthContractId))
+		write.WriteRaw("auth_contract_id", types.Marshal(p.AuthContractId))
 	}
 	if p.AuthResult != "" {
-		write.WriteKV("auth_result", types.Marshal(p.AuthResult))
+		write.WriteRaw("auth_result", types.Marshal(p.AuthResult))
 	}
 	if p.State != 0 {
-		write.WriteKV("state", types.Marshal(p.State))
+		write.WriteRaw("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		write.WriteKV("ctime", types.Marshal(p.Ctime))
+		write.WriteRaw("ctime", types.Marshal(p.Ctime))
 	}
 	return write.Bytes(), nil
 }

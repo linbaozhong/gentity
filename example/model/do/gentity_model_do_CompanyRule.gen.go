@@ -31,31 +31,31 @@ func NewCompanyRule() *CompanyRule {
 func (p *CompanyRule) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(9 * 50)
 	if p.Id != 0 {
-		write.WriteKV("id", types.Marshal(p.Id))
+		write.WriteRaw("id", types.Marshal(p.Id))
 	}
 	if p.Pid != 0 {
-		write.WriteKV("pid", types.Marshal(p.Pid))
+		write.WriteRaw("pid", types.Marshal(p.Pid))
 	}
 	if p.Path != "" {
-		write.WriteKV("path", types.Marshal(p.Path))
+		write.WriteRaw("path", types.Marshal(p.Path))
 	}
 	if p.Title != "" {
-		write.WriteKV("title", types.Marshal(p.Title))
+		write.WriteRaw("title", types.Marshal(p.Title))
 	}
 	if p.Type != 0 {
-		write.WriteKV("type", types.Marshal(p.Type))
+		write.WriteRaw("type", types.Marshal(p.Type))
 	}
 	if p.IsPrivate != 0 {
-		write.WriteKV("is_private", types.Marshal(p.IsPrivate))
+		write.WriteRaw("is_private", types.Marshal(p.IsPrivate))
 	}
 	if p.State != 0 {
-		write.WriteKV("state", types.Marshal(p.State))
+		write.WriteRaw("state", types.Marshal(p.State))
 	}
 	if p.Descr != "" {
-		write.WriteKV("descr", types.Marshal(p.Descr))
+		write.WriteRaw("descr", types.Marshal(p.Descr))
 	}
 	if p.Belong != 0 {
-		write.WriteKV("belong", types.Marshal(p.Belong))
+		write.WriteRaw("belong", types.Marshal(p.Belong))
 	}
 	return write.Bytes(), nil
 }

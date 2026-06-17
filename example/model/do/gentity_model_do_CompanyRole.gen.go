@@ -31,25 +31,25 @@ func NewCompanyRole() *CompanyRole {
 func (p *CompanyRole) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(7 * 50)
 	if p.Id != 0 {
-		write.WriteKV("id", types.Marshal(p.Id))
+		write.WriteRaw("id", types.Marshal(p.Id))
 	}
 	if p.Company != 0 {
-		write.WriteKV("company", types.Marshal(p.Company))
+		write.WriteRaw("company", types.Marshal(p.Company))
 	}
 	if p.Name != "" {
-		write.WriteKV("name", types.Marshal(p.Name))
+		write.WriteRaw("name", types.Marshal(p.Name))
 	}
 	if p.Descr != "" {
-		write.WriteKV("descr", types.Marshal(p.Descr))
+		write.WriteRaw("descr", types.Marshal(p.Descr))
 	}
 	if p.Rules != "" {
-		write.WriteKV("rules", types.Marshal(p.Rules))
+		write.WriteRaw("rules", types.Marshal(p.Rules))
 	}
 	if p.Type != 0 {
-		write.WriteKV("type", types.Marshal(p.Type))
+		write.WriteRaw("type", types.Marshal(p.Type))
 	}
 	if p.State != 0 {
-		write.WriteKV("state", types.Marshal(p.State))
+		write.WriteRaw("state", types.Marshal(p.State))
 	}
 	return write.Bytes(), nil
 }

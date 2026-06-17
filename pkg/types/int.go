@@ -15,6 +15,7 @@
 package types
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"runtime"
@@ -45,6 +46,10 @@ func (i8 *Int8) Scan(src any) error {
 	default:
 		return fmt.Errorf("unsupported scan type for Int8: %T", src)
 	}
+}
+
+func (i8 Int8) Value() (driver.Value, error) {
+	return int8(i8), nil
 }
 
 func (i8 Int8) Int8() int8 {
@@ -110,6 +115,10 @@ func (i16 *Int16) Scan(src any) error {
 	default:
 		return fmt.Errorf("unsupported scan type for Int16: %T", src)
 	}
+}
+
+func (i16 Int16) Value() (driver.Value, error) {
+	return int16(i16), nil
 }
 
 func (i16 Int16) Int16() int16 {
@@ -178,6 +187,10 @@ func (i32 *Int32) Scan(src any) error {
 	}
 }
 
+func (i32 Int32) Value() (driver.Value, error) {
+	return int32(i32), nil
+}
+
 func (i32 Int32) Int32() int32 {
 	return int32(i32)
 }
@@ -244,6 +257,10 @@ func (i64 *Int64) Scan(src any) error {
 	}
 }
 
+func (i64 Int64) Value() (driver.Value, error) {
+	return int64(i64), nil
+}
+
 func (i64 Int64) Int64() int64 {
 	return int64(i64)
 }
@@ -308,6 +325,10 @@ func (i *Int) Scan(src any) error {
 	default:
 		return fmt.Errorf("unsupported scan type for Int: %T", src)
 	}
+}
+
+func (i Int) Value() (driver.Value, error) {
+	return int(i), nil
 }
 
 func (i Int) Int() int {

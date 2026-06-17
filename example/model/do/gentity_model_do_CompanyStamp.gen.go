@@ -31,37 +31,37 @@ func NewCompanyStamp() *CompanyStamp {
 func (p *CompanyStamp) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(11 * 50)
 	if p.Id != 0 {
-		write.WriteKV("id", types.Marshal(p.Id))
+		write.WriteRaw("id", types.Marshal(p.Id))
 	}
 	if p.Company != 0 {
-		write.WriteKV("company", types.Marshal(p.Company))
+		write.WriteRaw("company", types.Marshal(p.Company))
 	}
 	if p.Url != "" {
-		write.WriteKV("url", types.Marshal(p.Url))
+		write.WriteRaw("url", types.Marshal(p.Url))
 	}
 	if p.Genre != 0 {
-		write.WriteKV("genre", types.Marshal(p.Genre))
+		write.WriteRaw("genre", types.Marshal(p.Genre))
 	}
 	if p.IsDefault != 0 {
-		write.WriteKV("is_default", types.Marshal(p.IsDefault))
+		write.WriteRaw("is_default", types.Marshal(p.IsDefault))
 	}
 	if p.Creator != 0 {
-		write.WriteKV("creator", types.Marshal(p.Creator))
+		write.WriteRaw("creator", types.Marshal(p.Creator))
 	}
 	if p.CreatorName != "" {
-		write.WriteKV("creator_name", types.Marshal(p.CreatorName))
+		write.WriteRaw("creator_name", types.Marshal(p.CreatorName))
 	}
 	if p.State != 0 {
-		write.WriteKV("state", types.Marshal(p.State))
+		write.WriteRaw("state", types.Marshal(p.State))
 	}
 	if p.Status != 0 {
-		write.WriteKV("status", types.Marshal(p.Status))
+		write.WriteRaw("status", types.Marshal(p.Status))
 	}
 	if !p.Ctime.IsZero() {
-		write.WriteKV("ctime", types.Marshal(p.Ctime))
+		write.WriteRaw("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		write.WriteKV("utime", types.Marshal(p.Utime))
+		write.WriteRaw("utime", types.Marshal(p.Utime))
 	}
 	return write.Bytes(), nil
 }

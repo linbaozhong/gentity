@@ -31,37 +31,37 @@ func NewDocumentTemplate() *DocumentTemplate {
 func (p *DocumentTemplate) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(11 * 50)
 	if p.Id != 0 {
-		write.WriteKV("id", types.Marshal(p.Id))
+		write.WriteRaw("id", types.Marshal(p.Id))
 	}
 	if p.Genre != 0 {
-		write.WriteKV("genre", types.Marshal(p.Genre))
+		write.WriteRaw("genre", types.Marshal(p.Genre))
 	}
 	if p.Company != 0 {
-		write.WriteKV("company", types.Marshal(p.Company))
+		write.WriteRaw("company", types.Marshal(p.Company))
 	}
 	if p.Way != 0 {
-		write.WriteKV("way", types.Marshal(p.Way))
+		write.WriteRaw("way", types.Marshal(p.Way))
 	}
 	if p.AuthSign != 0 {
-		write.WriteKV("auth_sign", types.Marshal(p.AuthSign))
+		write.WriteRaw("auth_sign", types.Marshal(p.AuthSign))
 	}
 	if p.Title != "" {
-		write.WriteKV("title", types.Marshal(p.Title))
+		write.WriteRaw("title", types.Marshal(p.Title))
 	}
 	if p.Content != "" {
-		write.WriteKV("content", types.Marshal(p.Content))
+		write.WriteRaw("content", types.Marshal(p.Content))
 	}
 	if p.Url != "" {
-		write.WriteKV("url", types.Marshal(p.Url))
+		write.WriteRaw("url", types.Marshal(p.Url))
 	}
 	if p.HasForm != 0 {
-		write.WriteKV("has_form", types.Marshal(p.HasForm))
+		write.WriteRaw("has_form", types.Marshal(p.HasForm))
 	}
 	if p.State != 0 {
-		write.WriteKV("state", types.Marshal(p.State))
+		write.WriteRaw("state", types.Marshal(p.State))
 	}
 	if !p.Utime.IsZero() {
-		write.WriteKV("utime", types.Marshal(p.Utime))
+		write.WriteRaw("utime", types.Marshal(p.Utime))
 	}
 	return write.Bytes(), nil
 }

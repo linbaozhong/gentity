@@ -31,43 +31,43 @@ func NewCompanyMan() *CompanyMan {
 func (p *CompanyMan) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(13 * 50)
 	if p.Id != 0 {
-		write.WriteKV("id", types.Marshal(p.Id))
+		write.WriteRaw("id", types.Marshal(p.Id))
 	}
 	if p.AccountId != 0 {
-		write.WriteKV("account_id", types.Marshal(p.AccountId))
+		write.WriteRaw("account_id", types.Marshal(p.AccountId))
 	}
 	if p.Company != 0 {
-		write.WriteKV("company", types.Marshal(p.Company))
+		write.WriteRaw("company", types.Marshal(p.Company))
 	}
 	if p.RealName != "" {
-		write.WriteKV("real_name", types.Marshal(p.RealName))
+		write.WriteRaw("real_name", types.Marshal(p.RealName))
 	}
 	if p.Email != "" {
-		write.WriteKV("email", types.Marshal(p.Email))
+		write.WriteRaw("email", types.Marshal(p.Email))
 	}
 	if p.Roles != "" {
-		write.WriteKV("roles", types.Marshal(p.Roles))
+		write.WriteRaw("roles", types.Marshal(p.Roles))
 	}
 	if p.Gender != "" {
-		write.WriteKV("gender", types.Marshal(p.Gender))
+		write.WriteRaw("gender", types.Marshal(p.Gender))
 	}
 	if p.Genre != 0 {
-		write.WriteKV("genre", types.Marshal(p.Genre))
+		write.WriteRaw("genre", types.Marshal(p.Genre))
 	}
 	if p.IsActivate != 0 {
-		write.WriteKV("is_activate", types.Marshal(p.IsActivate))
+		write.WriteRaw("is_activate", types.Marshal(p.IsActivate))
 	}
 	if !p.LoginTime.IsZero() {
-		write.WriteKV("login_time", types.Marshal(p.LoginTime))
+		write.WriteRaw("login_time", types.Marshal(p.LoginTime))
 	}
 	if p.State != 0 {
-		write.WriteKV("state", types.Marshal(p.State))
+		write.WriteRaw("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		write.WriteKV("ctime", types.Marshal(p.Ctime))
+		write.WriteRaw("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		write.WriteKV("utime", types.Marshal(p.Utime))
+		write.WriteRaw("utime", types.Marshal(p.Utime))
 	}
 	return write.Bytes(), nil
 }

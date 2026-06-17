@@ -54,7 +54,7 @@ func Unmarshal(r gjson.Result, ptr any, args ...any) error {
 	return json.Unmarshal(b, ptr)
 }
 
-func Marshal(s any) string {
+func MarshalString(s any) string {
 	switch v := s.(type) {
 	case string:
 		return strconv.Quote(v)
@@ -98,6 +98,53 @@ func Marshal(s any) string {
 			return fmt.Sprintf("%+v", s)
 		}
 		return string(b)
+	}
+}
+
+func Marshal(s any) []byte {
+	switch v := s.(type) {
+	case string:
+		return []byte(strconv.Quote(v))
+	case []byte:
+		return []byte(strconv.Quote(string(v)))
+	case time.Time:
+		if v.IsZero() {
+			return nil
+		}
+		return []byte(strconv.Quote(v.Format(time.DateTime)))
+	case time.Duration:
+		return []byte(strconv.Quote(strconv.FormatInt(v.Milliseconds(), 10)))
+	default:
+		if s == nil {
+			return []byte("null")
+		}
+		if j, ok := s.(json.Marshaler); ok {
+			b, e := j.MarshalJSON()
+			if e != nil {
+				return nil
+			}
+			return b
+		}
+
+		sVal := reflect.Indirect(reflect.ValueOf(s))
+		switch sVal.Kind() {
+		case reflect.Struct:
+		case reflect.Slice:
+			if sVal.Len() == 0 {
+				return []byte("[]")
+			}
+		case reflect.Map:
+			if sVal.Len() == 0 {
+				return []byte("{}")
+			}
+		default:
+			return []byte(conv.Any2String(s))
+		}
+		b, e := json.Marshal(s)
+		if e != nil {
+			return []byte(fmt.Sprintf("%+v", s))
+		}
+		return b
 	}
 }
 

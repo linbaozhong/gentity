@@ -31,25 +31,25 @@ func NewAccount() *Account {
 func (p *Account) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(7 * 50)
 	if p.Id != 0 {
-		write.WriteKV("id", types.Marshal(p.Id))
+		write.WriteRaw("id", types.Marshal(p.Id))
 	}
 	if p.LoginName != "" {
-		write.WriteKV("login_name", types.Marshal(p.LoginName))
+		write.WriteRaw("login_name", types.Marshal(p.LoginName))
 	}
 	if p.Password != "" {
-		write.WriteKV("password", types.Marshal(p.Password))
+		write.WriteRaw("password", types.Marshal(p.Password))
 	}
 	if p.State != 0 {
-		write.WriteKV("state", types.Marshal(p.State))
+		write.WriteRaw("state", types.Marshal(p.State))
 	}
 	if !p.Ctime.IsZero() {
-		write.WriteKV("ctime", types.Marshal(p.Ctime))
+		write.WriteRaw("ctime", types.Marshal(p.Ctime))
 	}
 	if !p.Utime.IsZero() {
-		write.WriteKV("utime", types.Marshal(p.Utime))
+		write.WriteRaw("utime", types.Marshal(p.Utime))
 	}
 	if p.Man != nil {
-		write.WriteKV("man", types.Marshal(p.Man))
+		write.WriteRaw("man", types.Marshal(p.Man))
 	}
 	return write.Bytes(), nil
 }
