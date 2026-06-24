@@ -441,6 +441,7 @@ type ChannelReq struct {
 ```
 ### valid 支持的 struct filed 校验器
 ```
+"required":           // required
 "email":              // email
 "url":                // url
 "dialstring":         // dial string
@@ -510,6 +511,8 @@ type ChannelReq struct {
 "rsapub(keylength)"                 // RSA公钥
 "minstringlength(int)               // 字符串最小长度
 "maxstringlength(int)               // 字符串最大长度
+"min"                               // 最小值
+"max"                               // 最大值
 ```
 ### 自定义错误信息
 在 valid 注解的参数后面添加：~错误信息
