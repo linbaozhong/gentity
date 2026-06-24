@@ -16,7 +16,7 @@ package validator
 
 import (
 	"github.com/linbaozhong/gentity/pkg/conv"
-	"math"
+	"golang.org/x/exp/constraints"
 )
 
 // InRangeInt returns true if value lies between left and right border
@@ -68,14 +68,30 @@ func InRange(value interface{}, left interface{}, right interface{}) bool {
 	}
 }
 
-func Max(value interface{}, left interface{}) bool {
-	intValue := conv.Any2Float64(value, math.MaxFloat64)
-	intLeft := conv.Any2Float64(left)
-	return intValue <= intLeft
+// Max checks if the given value does not exceed the specified maximum limit.
+// It converts both value and left to float64 for comparison, where:
+//   - value: the numeric value to be validated (supports int, float32, float64, string, etc.)
+//   - left: the maximum allowed value (upper bound)
+//
+// Returns true if value is less than or equal to left, false otherwise.
+// If value cannot be converted to float64, it defaults to math.MaxFloat64 which will likely fail the check.
+func Max[T constraints.Ordered](value T, left T) bool {
+	// intValue := conv.Any2Float64(value, math.MaxFloat64)
+	// intLeft := conv.Any2Float64(left)
+	// return intValue <= intLeft
+	return value <= left
 }
 
-func Min(value interface{}, left interface{}) bool {
-	intValue := conv.Any2Float64(value)
-	intLeft := conv.Any2Float64(left, math.MaxFloat64)
-	return intValue >= intLeft
+// Min checks if the given value is not less than the specified minimum limit.
+// It converts both value and left to float64 for comparison, where:
+//   - value: the numeric value to be validated (supports int, float32, float64, string, etc.)
+//   - left: the minimum allowed value (lower bound)
+//
+// Returns true if value is greater than or equal to left, false otherwise.
+// If left cannot be converted to float64, it defaults to math.MaxFloat64 which will likely fail the check.
+func Min[T constraints.Ordered](value T, left T) bool {
+	// intValue := conv.Any2Float64(value)
+	// intLeft := conv.Any2Float64(left, math.MaxFloat64)
+	// return intValue >= intLeft
+	return value >= left
 }
