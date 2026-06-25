@@ -662,11 +662,11 @@ func IsULID(str string) bool {
 // ////////////////////////////////////////////////
 
 // ByteLength checks string's length
-func ByteLength(str string, params ...string) bool {
+func ByteLength(str string, params ...int) bool {
 	if len(params) == 2 {
-		min, _ := strconv.ParseInt(params[0], 0, 64)
-		max, _ := strconv.ParseInt(params[1], 0, 64)
-		return len(str) >= int(min) && len(str) <= int(max)
+		// min, _ := strconv.ParseInt(params[0], 0, 64)
+		// max, _ := strconv.ParseInt(params[1], 0, 64)
+		return len(str) >= params[0] && len(str) <= params[1]
 	}
 
 	return false
@@ -728,20 +728,20 @@ func StringMatches(s string, params ...string) bool {
 }
 
 // IsInRaw checks if string is in list of allowed values
-func IsInRaw(str string, params ...string) bool {
-	if len(params) == 1 {
-		rawParams := params[0]
+func IsInRaw[T constraints.Ordered](str T, params ...T) bool {
+	// if len(params) == 1 {
+	// 	rawParams := params[0]
+	//
+	// 	parsedParams := strings.Split(rawParams, "|")
+	//
+	// 	return IsIn(str, parsedParams...)
+	// }
 
-		parsedParams := strings.Split(rawParams, "|")
-
-		return IsIn(str, parsedParams...)
-	}
-
-	return false
+	return IsIn(str, params...)
 }
 
 // IsIn checks if string str is a member of the set of strings params
-func IsIn(str string, params ...string) bool {
+func IsIn[T constraints.Ordered](str T, params ...T) bool {
 	for _, param := range params {
 		if str == param {
 			return true
@@ -753,10 +753,9 @@ func IsIn(str string, params ...string) bool {
 
 // IsRsaPub checks whether string is valid RSA key
 // Alias for IsRsaPublicKey
-func IsRsaPub(str string, params ...string) bool {
+func IsRsaPub(str string, params ...int) bool {
 	if len(params) == 1 {
-		len, _ := strconv.ParseInt(params[0], 0, 64)
-		return IsRsaPublicKey(str, int(len))
+		return IsRsaPublicKey(str, params[0])
 	}
 
 	return false
@@ -797,25 +796,13 @@ func IsRsaPublicKey(str string, keylen int) bool {
 }
 
 // MinStringLength checks string's minimum length (including multi byte strings)
-func MinStringLength(str string, params ...string) bool {
-
-	if len(params) == 1 {
-		strLength := utf8.RuneCountInString(str)
-		min, _ := strconv.ParseInt(params[0], 0, 64)
-		return strLength >= int(min)
-	}
-
-	return false
+func MinStringLength(str string, min int) bool {
+	strLength := utf8.RuneCountInString(str)
+	return strLength >= min
 }
 
 // MaxStringLength checks string's maximum length (including multi byte strings)
-func MaxStringLength(str string, params ...string) bool {
-
-	if len(params) == 1 {
-		strLength := utf8.RuneCountInString(str)
-		max, _ := strconv.ParseInt(params[0], 0, 64)
-		return strLength <= int(max)
-	}
-
-	return false
+func MaxStringLength(str string, max int) bool {
+	strLength := utf8.RuneCountInString(str)
+	return strLength <= max
 }
