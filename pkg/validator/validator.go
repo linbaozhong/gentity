@@ -792,7 +792,7 @@ func IsRsaPublicKey(str string, keylen int) bool {
 		return false
 	}
 	bitlen := len(pubkey.N.Bytes()) * 8
-	return bitlen == int(keylen)
+	return bitlen == keylen
 }
 
 // MinStringLength checks string's minimum length (including multi byte strings)

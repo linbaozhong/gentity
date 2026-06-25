@@ -23,7 +23,7 @@ var ParamTagMap = map[string]string{
 	"runelength":      "RuneLength",
 	"stringlength":    "StringLength",
 	"matches":         "StringMatches",
-	"in":              "IsInRaw",
+	"in":              "IsIn",
 	"rsapub":          "IsRsaPub",
 	"minstringlength": "MinStringLength",
 	"maxstringlength": "MaxStringLength",
