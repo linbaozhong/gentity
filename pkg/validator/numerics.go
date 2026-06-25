@@ -15,7 +15,6 @@
 package validator
 
 import (
-	"github.com/linbaozhong/gentity/pkg/conv"
 	"golang.org/x/exp/constraints"
 )
 
@@ -46,26 +45,36 @@ func InRangeFloat64(value, left, right float64) bool {
 	return value >= left && value <= right
 }
 
+// // InRange returns true if value lies between left and right border, generic type to handle int, float32, float64 and string.
+// // All types must the same type.
+// // False if value doesn't lie in range or if it incompatible or not comparable
+// func InRange(value interface{}, left interface{}, right interface{}) bool {
+// 	switch value.(type) {
+// 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+// 		intValue := conv.Any2Int64(value)
+// 		intLeft := conv.Any2Int64(left)
+// 		intRight := conv.Any2Int64(right)
+// 		return InRangeInt(intValue, intLeft, intRight)
+// 	case float32, float64:
+// 		intValue := conv.Any2Float64(value)
+// 		intLeft := conv.Any2Float64(left)
+// 		intRight := conv.Any2Float64(right)
+// 		return InRangeFloat64(intValue, intLeft, intRight)
+// 	case string:
+// 		return value.(string) >= left.(string) && value.(string) <= right.(string)
+// 	default:
+// 		return false
+// 	}
+// }
+
 // InRange returns true if value lies between left and right border, generic type to handle int, float32, float64 and string.
 // All types must the same type.
 // False if value doesn't lie in range or if it incompatible or not comparable
-func InRange(value interface{}, left interface{}, right interface{}) bool {
-	switch value.(type) {
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		intValue := conv.Any2Int64(value)
-		intLeft := conv.Any2Int64(left)
-		intRight := conv.Any2Int64(right)
-		return InRangeInt(intValue, intLeft, intRight)
-	case float32, float64:
-		intValue := conv.Any2Float64(value)
-		intLeft := conv.Any2Float64(left)
-		intRight := conv.Any2Float64(right)
-		return InRangeFloat64(intValue, intLeft, intRight)
-	case string:
-		return value.(string) >= left.(string) && value.(string) <= right.(string)
-	default:
-		return false
+func InRange[T constraints.Ordered](value T, left T, right T) bool {
+	if left > right {
+		left, right = right, left
 	}
+	return value >= left && value <= right
 }
 
 // Max checks if the given value does not exceed the specified maximum limit.

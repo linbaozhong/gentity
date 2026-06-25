@@ -26,25 +26,37 @@ func (p *{{.StructName}}) Init() error {
 
 // Check
 func (p *{{.StructName}}) Check() error {
-{{- range $key, $value := .Columns}}{{range $valid := $value.Valids}}
-	{{- $validFunc := getValidFunc $valid $value.Json.Name}}
-	{{- $funcObj := getValidParamFunc $valid $value.Json.Name}}
-	{{- if eq $valid "required"}}
-		if p.{{$value.Name}} == {{getTypeNil $value}} {
-			return types.NewError(http.StatusBadRequest, "{{$value.Json.Name}} is required")
-		}
-	{{- else if ne $validFunc.Func ""}}
-		if !validator.{{$validFunc.Func}}({{getFieldString $value}}) {
-			return types.NewError(http.StatusBadRequest, "{{$validFunc.Err}}")
-		}
-	{{- else if ne $funcObj.Func ""}}
-		{{- if ne $funcObj.Param ""}}
-		if !validator.{{$funcObj.Func}}({{getFieldString $value}}, {{$funcObj.Param}}) {
-			return types.NewError(http.StatusBadRequest, "{{$funcObj.Err}}")
-		}
+{{- range $key, $value := .Columns}}
+	{{- $hasRequired := false}}
+	{{- range $valid := $value.Valids}}
+		{{- $validFunc := getValidFunc $valid $value.Json.Name}}
+		{{- $funcObj := getValidParamFunc $valid $value.Json.Name}}
+		{{- if eq $valid "required"}}
+			if p.{{$value.Name}} == {{getTypeNil $value}} {
+				return types.NewError(http.StatusBadRequest, "{{$value.Json.Name}} is required")
+			}
+			{{- $hasRequired = true}}
+		{{- else if ne $validFunc.Func ""}}
+			{{- if eq $hasRequired true}}
+				if !validator.{{$validFunc.Func}}({{getFieldString $value}}) {
+			{{- else}}
+				if p.{{$value.Name}} != {{getTypeNil $value}} && !validator.{{$validFunc.Func}}({{getFieldString $value}}) {
+			{{- end}}
+				return types.NewError(http.StatusBadRequest, "{{$validFunc.Err}}")
+			}
+		{{- else if ne $funcObj.Func ""}}
+			{{- if ne $funcObj.Param ""}}
+                {{- if eq $hasRequired true}}
+	                if !validator.{{$funcObj.Func}}({{getFieldString $value}}, {{$funcObj.Param}}) {
+                {{- else}}
+	                if p.{{$value.Name}} != {{getTypeNil $value}} && !validator.{{$funcObj.Func}}({{getFieldString $value}}, {{$funcObj.Param}}) {
+                {{- end}}
+				return types.NewError(http.StatusBadRequest, "{{$funcObj.Err}}")
+			}
+			{{- end}}
 		{{- end}}
 	{{- end}}
-{{- end}}{{end}}
+{{- end}}
 	return nil
 }
 {{end}}

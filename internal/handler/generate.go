@@ -183,50 +183,47 @@ func writeToDTO(d TempData) error {
 // 	return t.Json.OmitEmpty
 // }
 
-// getType
-// 转换类型
+// getTypeNil
+// 类型空值
 func getTypeNil(t Field) any {
+	switch t.Type[0] {
+	case '*', '[':
+		return "nil"
+	case 'm':
+		if t.Type[:4] == "map[" {
+			return "nil"
+		}
+		fallthrough
+	default:
+		return `"请将字段类型改为引用类型"`
+	}
+}
+
+// getTypeZero
+// 类型零值
+func getTypeZero(t Field) any {
 	switch t.Type {
-	// case "string", "types.String":
-	// 	return `""`
-	// case "int", "types.Int":
-	// 	return "0"
-	// case "int8", "types.Int8":
-	// 	return "0"
-	// case "int16", "types.Int16":
-	// 	return "0"
-	// case "int32", "types.Int32":
-	// 	return "0"
-	// case "int64", "types.Int64", "types.Money":
-	// 	return "0"
-	// case "uint", "types.Uint":
-	// 	return "0"
-	// case "uint8", "types.Uint8":
-	// 	return "0"
-	// case "uint16", "types.Uint16":
-	// 	return "0"
-	// case "uint32", "types.Uint32":
-	// 	return "0"
-	// case "uint64", "types.Uint64", "types.BigInt":
-	// 	return "0"
-	// case "float32", "types.Float32":
-	// 	return "0"
-	// case "float64", "types.Float64":
-	// 	return "0"
-	// case "time.Time":
-	// 	return "time.Time{}"
-	// case "types.Time":
-	// 	return "types.Time{}"
-	// case "types.Bool":
-	// 	return "false"
-	// case "bool":
-	// 	return "false"
-	case "*Visitor": // 特定访问者类型
-		return "&Visitor{}"
+	case "string", "types.String":
+		return `""`
+	case "int", "types.Int", "int8", "types.Int8", "int16", "types.Int16", "int32", "types.Int32", "int64", "types.Int64", "types.Money", "uint", "types.Uint", "uint8", "types.Uint8", "uint16", "types.Uint16", "uint32", "types.Uint32", "uint64", "types.Uint64", "types.BigInt", "float32", "types.Float32", "float64", "types.Float64":
+		return "0"
+	case "time.Time":
+		return "time.Time{}"
+	case "types.Time":
+		return "types.Time{}"
+	case "types.Bool":
+		return "false"
+	case "bool":
+		return "false"
 	default:
 		switch t.Type[0] {
-		case '*', '[', 'm':
+		case '*', '[':
 			return "nil"
+		case 'm':
+			if t.Type[:4] == "map[" {
+				return "nil"
+			}
+			fallthrough
 		default:
 			return `"请将字段类型改为引用类型"`
 		}
@@ -235,20 +232,30 @@ func getTypeNil(t Field) any {
 func getFieldString(t Field) string {
 	k := t.Type
 	if k[0] == '*' {
-		// return `p.` + t.Name
 		k = k[1:]
+		switch k {
+		// case "string":
+		// 	return `*p.` + t.Name
+		case "types.String":
+			return `p.` + t.Name + ".String()"
+		// case "types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64",
+		// 	"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+		// 	"types.BigInt", "types.Money", "types.Float32", "types.Float64", "types.Time",
+		// 	"types.Bool":
+		// 	// return `conv.String2Ptr(p.` + t.Name + ".String())"
+		// 	return `*p.` + t.Name
+		default:
+			// return `conv.String2Ptr(conv.Any2String(p.` + t.Name + `))`
+			return `*p.` + t.Name
+		}
 	}
 
 	switch k {
-	case "string":
-		return `p.` + t.Name
-	case "types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64",
-		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
-		"types.BigInt", "types.Money", "types.Float32", "types.Float64", "types.Time",
-		"types.Bool", "types.String":
-		return `conv.String2Ptr(p.` + t.Name + ".String())"
+	case "types.String":
+		return `p.` + t.Name + ".String()"
 	default:
-		return `conv.String2Ptr(conv.Any2String(p.` + t.Name + `))`
+		// return `conv.String2Ptr(conv.Any2String(p.` + t.Name + `))`
+		return `p.` + t.Name
 	}
 }
 
@@ -312,7 +319,8 @@ func getValidParamFunc(t, n string) (fo funcObj) {
 
 	if fn, ok := validator.ParamTagMap[tag]; ok {
 		fo.Func = fn
-		fo.Param = "\"" + strings.Join(_params, `","`) + "\""
+		// fo.Param = "\"" + strings.Join(_params, `","`) + "\""
+		fo.Param = strings.Join(_params, `,`)
 		return
 	}
 	return
