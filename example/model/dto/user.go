@@ -11,7 +11,7 @@ type UserRegisterReq struct {
 	UserName *int              `json:"user_name" url:"user_name" form:"user_name" valid:"required,range(10|25),min(11)"`
 	Password *types.String     `json:"password" url:"password" form:"password" valid:"required"`
 	Email    *string           `json:"email" url:"email" form:"email" valid:"email~Email格式错误,required"`
-	Content  *types.String     `valid:"runelength(50|100)"`
+	Content  *types.String     `valid:"runelength(50|100),in(\"1.1.1.1\"|\"2.2.2.2\")"`
 	Age      *int8             `valid:"required,in(18|60)"`
 	AuthorIP *string           `valid:"ipv4,minstringlength(10)"`
 	Date     *time.Time        `valid:"required"`
