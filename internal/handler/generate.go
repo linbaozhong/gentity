@@ -260,14 +260,15 @@ func getFieldString(t Field) string {
 }
 
 // getValidFunc
-// n: 字段名
-func getValidFunc(t, n string) (fo funcObj) {
+// t: valid 字符串
+// f：字段结构体
+func getValidFunc(t string, f Field) (fo funcObj) {
 	fo = funcObj{}
 	pos := strings.Index(t, "~")
 	if pos > 0 {
 		fo.Err = t[pos+1:]
 	} else {
-		fo.Err = "Wrong " + n + " format"
+		fo.Err = "Wrong " + f.Json.Name + " format"
 	}
 	var tag string
 	if pos < 0 {
@@ -290,8 +291,9 @@ type funcObj struct {
 }
 
 // getValidParamFunc
-// n: 字段名
-func getValidParamFunc(t, n string) (fo funcObj) {
+// t: valid 字符串
+// f：字段结构体
+func getValidParamFunc(t string, f Field) (fo funcObj) {
 	fo = funcObj{}
 	pos := strings.Index(t, "(")
 	if pos < 1 {
@@ -314,12 +316,17 @@ func getValidParamFunc(t, n string) (fo funcObj) {
 	if pos > 0 {
 		fo.Err = t[pos+1:]
 	} else {
-		fo.Err = "Wrong " + n + " " + tag
+		fo.Err = "Wrong " + f.Json.Name + " " + tag
 	}
 
 	if fn, ok := validator.ParamTagMap[tag]; ok {
 		fo.Func = fn
-		// fo.Param = "\"" + strings.Join(_params, `","`) + "\""
+		// switch f.Type {
+		// case "types.String", "string", "*types.String", "*string":
+		// 	fo.Param = "\"" + strings.Join(_params, `","`) + "\""
+		// default:
+		// 	fo.Param = strings.Join(_params, `,`)
+		// }
 		fo.Param = strings.Join(_params, `,`)
 		return
 	}

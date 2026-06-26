@@ -29,8 +29,8 @@ func (p *{{.StructName}}) Check() error {
 {{- range $key, $value := .Columns}}
 	{{- $hasRequired := false}}
 	{{- range $valid := $value.Valids}}
-		{{- $validFunc := getValidFunc $valid $value.Json.Name}}
-		{{- $funcObj := getValidParamFunc $valid $value.Json.Name}}
+		{{- $validFunc := getValidFunc $valid $value}}
+		{{- $funcObj := getValidParamFunc $valid $value}}
 		{{- if eq $valid "required"}}
 			if p.{{$value.Name}} == {{getTypeNil $value}} {
 				return types.NewError(http.StatusBadRequest, "{{$value.Json.Name}} is required")
