@@ -25,7 +25,7 @@ var (
 )
 
 // Get get请求：
-// 读取query，req结构体的字段 tag 为 url。
+// 读取query。
 func Get[A, B any](
 	ctx Context,
 	callService func(ctx context.Context, req *A, resp *B) error,
@@ -69,6 +69,72 @@ func Post[A, B any](
 	}
 	return Ok(ctx, resp)
 }
+
+// // Put put请求
+// // 参数读取方式同Post：支持application/json、application/x-www-form-urlencoded、multipart/form-data
+// func Put[A, B any](
+// 	ctx Context,
+// 	callService func(ctx context.Context, req *A, resp *B) error,
+// 	after ...func(ctx Context, resp *B) error,
+// ) error {
+// 	var (
+// 		req  A
+// 		resp B
+// 	)
+//
+// 	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
+// 	if e != nil {
+// 		return Fail(ctx, e)
+// 	}
+// 	if len(after) > 0 {
+// 		after[0](ctx, &resp)
+// 	}
+// 	return Ok(ctx, resp)
+// }
+//
+// // Delete delete请求
+// // 读取query参数（与Get一致）
+// func Delete[A, B any](
+// 	ctx Context,
+// 	callService func(ctx context.Context, req *A, resp *B) error,
+// 	after ...func(ctx Context, resp *B) error,
+// ) error {
+// 	var (
+// 		req  A
+// 		resp B
+// 	)
+//
+// 	_, e := serviceContext(ctx, &req, &resp, readGetRequest[A], callService)
+// 	if e != nil {
+// 		return Fail(ctx, e)
+// 	}
+// 	if len(after) > 0 {
+// 		after[0](ctx, &resp)
+// 	}
+// 	return Ok(ctx, resp)
+// }
+//
+// // Patch patch请求
+// // 参数读取方式同Post：支持application/json、application/x-www-form-urlencoded、multipart/form-data
+// func Patch[A, B any](
+// 	ctx Context,
+// 	callService func(ctx context.Context, req *A, resp *B) error,
+// 	after ...func(ctx Context, resp *B) error,
+// ) error {
+// 	var (
+// 		req  A
+// 		resp B
+// 	)
+//
+// 	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
+// 	if e != nil {
+// 		return Fail(ctx, e)
+// 	}
+// 	if len(after) > 0 {
+// 		after[0](ctx, &resp)
+// 	}
+// 	return Ok(ctx, resp)
+// }
 
 // Redirect 重定向
 func Redirect[A any](ctx Context,

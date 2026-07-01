@@ -43,6 +43,37 @@ func PostResult[A, B any](ctx Context,
 	return serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
 }
 
+//
+// // PutResult 调用service处理put请求，并返回结果数据
+// func PutResult[A, B any](ctx Context,
+// 	callService func(ctx context.Context, req *A, resp *B) error) (*B, error) {
+// 	var (
+// 		req  A
+// 		resp B
+// 	)
+// 	return serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
+// }
+//
+// // DeleteResult 调用service处理delete请求，并返回结果数据
+// func DeleteResult[A, B any](ctx Context,
+// 	callService func(ctx context.Context, req *A, resp *B) error) (*B, error) {
+// 	var (
+// 		req  A
+// 		resp B
+// 	)
+// 	return serviceContext(ctx, &req, &resp, readGetRequest[A], callService)
+// }
+//
+// // PatchResult 调用service处理patch请求，并返回结果数据
+// func PatchResult[A, B any](ctx Context,
+// 	callService func(ctx context.Context, req *A, resp *B) error) (*B, error) {
+// 	var (
+// 		req  A
+// 		resp B
+// 	)
+// 	return serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
+// }
+
 // StreamResult 调用service处理post请求，并返回结果数据
 func StreamResult[A, B any](ctx Context,
 	callService func(ctx Context, req *A, resp *B) error) (*B, error) {

@@ -19,7 +19,7 @@ func (u *user) RegisterRoute(group api.Party) {
 }
 
 func (u *user) userRegister(c api.Context) {
-	api.GetResult().Post(c, userService.UserRegister)
+	api.Post(c, userService.UserRegister)
 }
 
 func (u *user) get(c api.Context) {
