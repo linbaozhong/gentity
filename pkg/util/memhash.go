@@ -34,7 +34,7 @@ func MemHash[T string | []byte](key T) uint64 {
 	)
 
 	hash := uint64(offset64)
-	for _, c := range key {
+	for _, c := range []byte(key) {
 		hash ^= uint64(c)
 		hash *= prime64
 	}

@@ -55,7 +55,7 @@ func initDTOFile(prefix string, tds []TempData) {
 		// buf.WriteString("	\"context\" \n")
 		buf.WriteString("	\"bytes\" \n")
 		buf.WriteString("	\"errors\" \n")
-		// buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/api\" \n")
+		// buf.WriteString("	\api "github.com/linbaozhong/gentity/pkg/api/iris\" \n")
 		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/gjson\" \n")
 		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/log\" \n")
 		buf.WriteString("	\"github.com/linbaozhong/gentity/pkg/validator\" \n")
