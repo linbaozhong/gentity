@@ -15,7 +15,7 @@
 package handler
 
 import (
-	"github.com/linbaozhong/gentity/pkg/api"
+	api "github.com/linbaozhong/gentity/pkg/api/iris"
 	"github.com/linbaozhong/gentity/pkg/serverpush"
 	"github.com/linbaozhong/gentity/pkg/token"
 	"github.com/linbaozhong/sse/v2"

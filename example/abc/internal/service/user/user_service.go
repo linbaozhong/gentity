@@ -1,9 +1,9 @@
 package user
 
 import (
-	"abc/internal/model/dto"
 	"context"
 	"fmt"
+	"github.com/linbaozhong/gentity/example/abc/internal/model/dto"
 )
 
 func UserRegister(c context.Context, in *dto.UserRegisterReq, out *dto.UserRegisterResp) error {

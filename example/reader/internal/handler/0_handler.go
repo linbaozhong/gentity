@@ -15,7 +15,7 @@
 package handler
 
 import (
-	"github.com/linbaozhong/gentity/pkg/api"
+	api "github.com/linbaozhong/gentity/pkg/api/gin"
 	"reader/internal/constant/cst"
 	"reader/internal/constant/err"
 )
@@ -36,16 +36,16 @@ func AuthRequired(rule ...bool) api.Handler {
 			goto stop
 		}
 
-		//// 将用户简介植入上下文
-		//c.Values().Set(cst.VisitorKey, types.Visitor{
+		// // 将用户简介植入上下文
+		// c.Values().Set(cst.VisitorKey, types.Visitor{
 		//	ID: 12345,
 		//	IP: c.RemoteAddr(),
-		//})
+		// })
 
 		c.Next()
 		return
 	stop:
 		api.Fail(c, err.Err_Authorization_Limited)
-		c.StopExecution()
+		c.Abort()
 	}
 }

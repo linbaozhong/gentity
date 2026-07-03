@@ -1,6 +1,6 @@
 package dto
 
-import "abc/internal/constant"
+import "github.com/linbaozhong/gentity/example/abc/internal/constant"
 
 // UserRegisterReq 用户注册请求数据
 // 字段标签说明(可选项)：
@@ -31,7 +31,6 @@ type UserRegisterResp struct {
 	Email    string `json:"email,omitempty"`
 }
 
-//
 type GetUserReq struct {
 	UserID uint64 `json:"user_id" url:"user_id" form:"user_id"`
 }

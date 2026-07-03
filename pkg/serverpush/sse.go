@@ -15,7 +15,7 @@
 package serverpush
 
 import (
-	"github.com/linbaozhong/gentity/pkg/api"
+	api "github.com/linbaozhong/gentity/pkg/api/gin"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/sse/v2"
 	"sync"
@@ -94,11 +94,11 @@ func ServeHTTP(ctx api.Context, streamID, lastEventId string) {
 
 	ctx.Header("Access-Control-Allow-Origin", "*")
 
-	r := ctx.Request()
+	r := ctx.Request
 	query := r.URL.Query()
 	query.Set(sse.StreamKey, streamID)
 	query.Set(sse.LastEventIdKey, lastEventId)
 	r.URL.RawQuery = query.Encode()
 
-	_sseServer.ServeHTTP(ctx.ResponseWriter(), r)
+	_sseServer.ServeHTTP(ctx.Writer, r)
 }

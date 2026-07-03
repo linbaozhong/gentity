@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/linbaozhong/gentity/pkg/api"
+	api "github.com/linbaozhong/gentity/pkg/api/gin"
 	"github.com/linbaozhong/gentity/pkg/serverpush"
 	"github.com/linbaozhong/gentity/pkg/token"
 	_ "reader/internal/model/dto"
@@ -17,9 +17,9 @@ func init() {
 func (u *user) RegisterRoute(group api.Party) {
 	g := api.NewParty(group, "/user")
 
-	g.Post("/user_register", u.userRegister)
-	g.Get("/get", u.get)
-	g.Get("/sse", u.sse)
+	g.POST("/user_register", u.userRegister)
+	g.GET("/get", u.get)
+	g.GET("/sse", u.sse)
 }
 
 // @Summary 增加用工企业
@@ -43,7 +43,7 @@ func (u *user) get(c api.Context) {
 
 func (u *user) sse(c api.Context) {
 	var _clientId string
-	values := c.Request().URL.Query()
+	values := c.Request.URL.Query()
 
 	_tk := values.Get("token")
 	if _tk != "" {
