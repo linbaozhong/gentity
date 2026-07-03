@@ -5,7 +5,7 @@ import (
 	"abc/internal/service"
 	"context"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/api"
+	"github.com/linbaozhong/gentity/pkg/api/iris"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/serverpush"
@@ -36,7 +36,7 @@ func main() {
 	_service := router.Init()
 
 	_idleConnsClosed := make(chan struct{})
-	api.OnInterrupt(func() {
+	iris.OnInterrupt(func() {
 		_timeout := 5 * time.Second
 		_ctx, _cancel := context.WithTimeout(context.Background(), _timeout)
 		defer _cancel()
