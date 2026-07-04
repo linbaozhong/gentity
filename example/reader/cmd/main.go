@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/api"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"os"
+	"os/signal"
 	"reader/internal/router"
+	"syscall"
 	"time"
 )
 
@@ -30,25 +31,26 @@ func main() {
 	// 启动API服务
 	_app := router.Init()
 
-	idleConnsClosed := make(chan struct{})
-	api.OnInterrupt(func() {
-		timeout := 5 * time.Second
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-		// close all hosts.
-		_app.Shutdown(ctx)
-		closing("reader Api", "0.1", port)
-		close(idleConnsClosed)
-	})
-
 	app.Launch()
 
 	if err := _app.Listen(port); err != nil {
 		log.Error(err)
 	}
 
+	idleConnsClosed := make(chan os.Signal, 1)
+	signal.Notify(idleConnsClosed, syscall.SIGINT, syscall.SIGTERM)
 	// 优雅地关闭
 	<-idleConnsClosed
+	close(idleConnsClosed)
+
+	timeout := 5 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	// close all hosts.
+	if err := _app.Shutdown(ctx); err != nil {
+		log.Info("Server Shutdown:", err)
+	}
+	closing("reader Api", "0.1", port)
 }
 func closing(name, ver, addr string) {
 	app.Close()

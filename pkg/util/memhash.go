@@ -14,50 +14,34 @@
 
 package util
 
-// //go:noescape
-// //go:linkname memhash runtime.memhash
-// func memhash(p unsafe.Pointer, h, s uintptr) uintptr
+import "strconv"
+
+// Deprecated: 请使用 HashString 代替
+// MemHashString 使用类 FNV-1a 算法计算哈希值
+func MemHashString[T string | []byte](key T) string {
+	return strconv.FormatUint(MemHash(key), 10)
+}
+
+// MemHash 使用类 FNV-1a 算法计算哈希值
 //
-// type stringStruct struct {
-// 	str unsafe.Pointer
-// 	len int
-// }
-
-func MemHashString(s string) uint {
-	return HashString(s)
-}
-
-// MemHash
-func MemHash(b []byte) uint {
-	// s := *(*stringStruct)(unsafe.Pointer(&b))
-	// return uint(memhash(s.str, 0, uintptr(s.len)))
-	return HashByte(b)
-}
-
-// Hashfnv32 实现 FNV-1a 哈希函数
-func HashString(key string) uint {
+// 注意：对 string 类型按 rune 遍历（非标准 FNV-1a 按字节），ASCII 字符串结果一致，
+//
+//	多字节 UTF-8 字符串与 []byte 版本结果不同，但不影响确定性
+func MemHash[T string | []byte](key T) uint64 {
 	const (
 		offset64 = 14695981039346656037
 		prime64  = 1099511628211
 	)
+
 	hash := uint64(offset64)
-	for _, c := range key {
+	for _, c := range []byte(key) {
 		hash ^= uint64(c)
 		hash *= prime64
 	}
-	return uint(hash)
+	return hash
 }
 
-// Hashfnv32 实现 FNV-1a 哈希函数
-func HashByte(key []byte) uint {
-	const (
-		offset64 = 14695981039346656037
-		prime64  = 1099511628211
-	)
-	hash := uint64(offset64)
-	for _, c := range key {
-		hash ^= uint64(c)
-		hash *= prime64
-	}
-	return uint(hash)
+// HashString Deprecated 实现 FNV-1a 哈希函数
+func HashString[T string | []byte](key T) string {
+	return strconv.FormatUint(MemHash(key), 10)
 }

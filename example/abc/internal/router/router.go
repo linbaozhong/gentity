@@ -1,8 +1,8 @@
 package router
 
 import (
-	_ "abc/internal/handler"
-	"github.com/linbaozhong/gentity/pkg/api"
+	_ "github.com/linbaozhong/gentity/example/abc/internal/handler"
+	api "github.com/linbaozhong/gentity/pkg/api/iris"
 )
 
 func Init() api.Application {

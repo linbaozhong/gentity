@@ -26,22 +26,18 @@ type (
 	Initializer interface {
 		Init() error
 	}
-	// Visiter interface {
-	// 	Visiter(ctx context.Context)
-	// }
 )
 
 func Initiate(ctx Context, arg any) {
-	vals := ctx.Values()
-	vals.Set(IpKey, ctx.RemoteAddr())
-	vals.Set(UserAgent, ctx.Request().UserAgent())
-	vals.Set(AuthorizationKey, ctx.GetHeader(AuthorizationKey))
+	ctx.Set(IpKey, ctx.RemoteIP())
+	ctx.Set(UserAgent, ctx.Request.UserAgent())
+	ctx.Set(AuthorizationKey, ctx.GetHeader(AuthorizationKey))
 
 	id := ctx.GetHeader(OperationID)
 	if len(id) == 0 {
 		id = strconv.FormatInt(time.Now().UnixMilli(), 10)
 	}
-	vals.Set(OperationID, id)
+	ctx.Set(OperationID, id)
 
 	if ier, ok := arg.(Initializer); ok {
 		ier.Init()
@@ -56,12 +52,3 @@ func Validate(arg any) error {
 	}
 	return nil
 }
-
-// // Visit 访问参数
-// // 注意：如果参数实现了Visiter接口，会调用Visiter方法
-// func Visit(ctx context.Context, arg any) error {
-// 	if vis, ok := arg.(Visiter); ok {
-// 		vis.Visiter(ctx)
-// 	}
-// 	return nil
-// }

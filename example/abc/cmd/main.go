@@ -1,11 +1,11 @@
 package main
 
 import (
-	"abc/internal/router"
-	"abc/internal/service"
 	"context"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/api"
+	"github.com/linbaozhong/gentity/example/abc/internal/router"
+	"github.com/linbaozhong/gentity/example/abc/internal/service"
+	api "github.com/linbaozhong/gentity/pkg/api/iris"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/serverpush"

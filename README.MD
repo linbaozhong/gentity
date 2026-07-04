@@ -447,57 +447,58 @@ type ChannelReq struct {
 "dialstring":         // dial string
 "requrl":             // request url
 "requri":             // request uri
-"alpha":              // alpha
-"utfletter":          // utf letter
-"alphanum":           // alpha numeric
-"utfletternum":       // utf letter numeric
-"numeric":            // numeric
-"utfnumeric":         // utf numeric
-"utfdigit":           // utf digit
-"hexadecimal":        // hexadecimal
+"alpha":              // 字母
+"utfletter":          // utf 字母
+"alphanum":           // 字母和数字
+"utfletternum":       // utf 字母和数字
+"numeric":            // 数字 可以是0-9，也可以是分数¾，罗马Ⅸ和杭州〩
+"utfnumeric":         // utf 数字 可以是0-9，也可以是分数¾，罗马Ⅸ和杭州〩
+"utfdigit":           // utf unicode基数-10十进制数字
+"hexadecimal":        // 十六进制
 "hexcolor":           // hex color
 "rgbcolor":           // rgb color
-"lowercase":          // lowercase
-"uppercase":          // uppercase
-"haslowercase":       // has lowercase
-"hasuppercase":       // has uppercase
-"whitespace":         // whitespace
-"haswhitespace":      // has whitespace
+"lowercase":          // 小写
+"uppercase":          // 大写
+"haslowercase":       // 有小写
+"hasuppercase":       // 有大写
+"whitespace":         // 空格
+"haswhitespace":      // 有空格
 "int":                // int
 "float":              // float
-"null":               // null
 "uuid":               // uuid
-"uuidv3":             // uuidv3
-"uuidv4":             // uuidv4
-"uuidv5":             // uuidv5
-"creditcard":         // credit card
-"isbn10":             // isbn10
-"isbn13":             // isbn13
+"uuidv3":             // uuid v3
+"uuidv4":             // uuid v4
+"uuidv5":             // uuid v5
+"creditcard":         // 信用卡号
+"isbn10":             // 国际标准图书编号 v10
+"isbn13":             // 国际标准图书编号 v13
 "json":               // json
-"multibyte":          // multi byte
-"ascii":              // ascii
-"printableascii":     // printable ascii
-"fullwidth":          // full width
-"halfwidth":          // half width
-"variablewidth":      // variable width
+"multibyte":          // 多字节字符
+"ascii":              // ASCII字符
+"printableascii":     // 可打印的ASCII字符
+"fullwidth":          // 全宽字符
+"halfwidth":          // 半宽字符
+"variablewidth":      // 全宽和半宽字符的混合
 "base64":             // base64
-"datauri":            // data uri
+"datauri":            // base64编码的数据URI，例如图像
 "ip":                 // ip
 "port":               // port
 "ipv4":               // ipv4
 "ipv6":               // ipv6
-"dns":                // dns
-"host":               // host
-"mac":                // mac
-"latitude":           // latitude
-"longitude":          // longitude
-"ssn":                // ssn
+"dns":                // DNS名称
+"host":               // 有效的IP（包括v4和v6）或有效的DNS名称
+"mac":                // MAC地址
+"latitude":           // 经度
+"longitude":          // 纬度
+"ssn":                // 美国社会安全号码
 "semver":             // semver
 "rfc3339":            // rfc3339
 "rfc3339WithoutZone": // rfc3339 without zone
 "ISO3166Alpha2":      // ISO3166 Alpha2
 "ISO3166Alpha3":      // ISO3166 Alpha3
-"ulid":               // ulid
+"iso4217":            // iso4217
+"ulid":               // 兼容UUID/GUID的通用唯一按字典排序的标识符
+"imei":               // 国际移动设备识别码，手机串号
 "mobile":             // 手机号码
 ```
 ### 校验器可用参数
@@ -506,8 +507,10 @@ type ChannelReq struct {
 "length(min|max)"                   // 字节长度
 "runelength(min|max)"               // Rune串长度
 "stringlength(min|max)"             // 字符串长度
+"minstringlength(min)"              // 字符串最小长度
+"maxstringlength(max)"              // 字符串最大长度
 "matches(pattern)"                  // 正则表达式
-"in(string1|string2|...|stringN)"   // 枚举
+"in(val1|val2|...|valN)"            // 枚举, 多个值用|隔开, 数值或字符串
 "rsapub(keylength)"                 // RSA公钥
 "minstringlength(int)               // 字符串最小长度
 "maxstringlength(int)               // 字符串最大长度

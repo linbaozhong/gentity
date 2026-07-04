@@ -17,6 +17,7 @@ package api
 import (
 	"context"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"net/http"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 )
 
 // Get get请求：
-// 读取query，req结构体的字段 tag 为 url。
+// 读取query。
 func Get[A, B any](
 	ctx Context,
 	callService func(ctx context.Context, req *A, resp *B) error,
@@ -82,7 +83,7 @@ func Redirect[A any](ctx Context,
 	if e != nil {
 		return Fail(ctx, e)
 	}
-	ctx.Redirect(resp)
+	ctx.Redirect(http.StatusFound, resp)
 	return nil
 }
 

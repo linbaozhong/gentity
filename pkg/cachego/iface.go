@@ -19,7 +19,6 @@ import (
 	"errors"
 	"github.com/linbaozhong/gentity/pkg/conv"
 	"github.com/linbaozhong/gentity/pkg/util"
-	"strconv"
 	"time"
 )
 
@@ -39,12 +38,7 @@ type Cache interface {
 	Save(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) error
 }
 
-// Hash 使用MemHash算法
-func Hash(key any) string {
-	return strconv.FormatUint(uint64(util.MemHashString(conv.Any2String(key))), 10)
-}
-
 // GetHashKey 使用MemHash算法生成key
 func GetHashKey(prefix string, key any) string {
-	return prefix + Hash(key)
+	return prefix + util.HashString(conv.Any2String(key))
 }
