@@ -11,6 +11,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"time"
 )
 
 const AccountTableName = "account"
@@ -30,22 +31,22 @@ func NewAccount() *Account {
 // MarshalJSON
 func (p *Account) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter(7 * 50)
-	if p.Id != 0 {
+	if p.Id != nil {
 		write.WriteRaw("id", types.Marshal(p.Id))
 	}
-	if p.LoginName != "" {
+	if p.LoginName != nil {
 		write.WriteRaw("login_name", types.Marshal(p.LoginName))
 	}
-	if p.Password != "" {
+	if p.Password != nil {
 		write.WriteRaw("password", types.Marshal(p.Password))
 	}
-	if p.State != 0 {
+	if p.State != nil {
 		write.WriteRaw("state", types.Marshal(p.State))
 	}
-	if !p.Ctime.IsZero() {
+	if p.Ctime != nil {
 		write.WriteRaw("ctime", types.Marshal(p.Ctime))
 	}
-	if !p.Utime.IsZero() {
+	if p.Utime != nil {
 		write.WriteRaw("utime", types.Marshal(p.Utime))
 	}
 	if p.Man != nil {
@@ -71,17 +72,59 @@ func (p *Account) UnmarshalJSON(data []byte) error {
 		var e error
 		switch key.Str {
 		case "id":
-			p.Id = types.BigInt(value.Uint())
+			e = types.Unmarshal(value, &p.Id, func(value gjson.Result) *uint64 {
+				var obj *uint64
+				e := types.Unmarshal(value, &obj)
+				if e != nil {
+					panic(e)
+				}
+				return obj
+			}(value))
 		case "login_name":
-			p.LoginName = types.String(value.Str)
+			e = types.Unmarshal(value, &p.LoginName, func(value gjson.Result) *string {
+				var obj *string
+				e := types.Unmarshal(value, &obj)
+				if e != nil {
+					panic(e)
+				}
+				return obj
+			}(value))
 		case "password":
-			p.Password = types.String(value.Str)
+			e = types.Unmarshal(value, &p.Password, func(value gjson.Result) *string {
+				var obj *string
+				e := types.Unmarshal(value, &obj)
+				if e != nil {
+					panic(e)
+				}
+				return obj
+			}(value))
 		case "state":
-			p.State = types.Int8(value.Int())
+			e = types.Unmarshal(value, &p.State, func(value gjson.Result) *int8 {
+				var obj *int8
+				e := types.Unmarshal(value, &obj)
+				if e != nil {
+					panic(e)
+				}
+				return obj
+			}(value))
 		case "ctime":
-			p.Ctime = types.Time{Time: value.Time()}
+			e = types.Unmarshal(value, &p.Ctime, func(value gjson.Result) *time.Time {
+				var obj *time.Time
+				e := types.Unmarshal(value, &obj)
+				if e != nil {
+					panic(e)
+				}
+				return obj
+			}(value))
 		case "utime":
-			p.Utime = types.Time{Time: value.Time()}
+			e = types.Unmarshal(value, &p.Utime, func(value gjson.Result) *time.Time {
+				var obj *time.Time
+				e := types.Unmarshal(value, &obj)
+				if e != nil {
+					panic(e)
+				}
+				return obj
+			}(value))
 		case "man":
 			e = types.Unmarshal(value, &p.Man, func(value gjson.Result) []CompanyMan {
 				var obj []CompanyMan
@@ -112,12 +155,12 @@ func (p *Account) Free() {
 
 // Reset
 func (p *Account) Reset() {
-	p.Id = 0
-	p.LoginName = ""
-	p.Password = ""
-	p.State = 0
-	p.Ctime = types.Time{}
-	p.Utime = types.Time{}
+	p.Id = new(uint64)
+	p.LoginName = new(string)
+	p.Password = new(string)
+	p.State = new(int8)
+	p.Ctime = new(time.Time)
+	p.Utime = new(time.Time)
 	p.Man = p.Man[:0]
 
 }
@@ -192,26 +235,7 @@ func (p *Account) RawAssignValues(d dialect.Dialect, args ...dialect.Field) ([]s
 }
 
 // 定义字段到值检查和获取函数的映射
-var accountFieldToValueFunc = map[dialect.Field]func(*Account) (any, bool){
-	tblaccount.Id: func(p *Account) (any, bool) {
-		return p.Id, p.Id == 0
-	},
-	tblaccount.LoginName: func(p *Account) (any, bool) {
-		return p.LoginName, p.LoginName == ""
-	},
-	tblaccount.Password: func(p *Account) (any, bool) {
-		return p.Password, p.Password == ""
-	},
-	tblaccount.State: func(p *Account) (any, bool) {
-		return p.State, p.State == 0
-	},
-	tblaccount.Ctime: func(p *Account) (any, bool) {
-		return p.Ctime, p.Ctime.IsZero()
-	},
-	tblaccount.Utime: func(p *Account) (any, bool) {
-		return p.Utime, p.Utime.IsZero()
-	},
-}
+var accountFieldToValueFunc = map[dialect.Field]func(*Account) (any, bool){}
 
 // AssignValues 向数据库写入数据前，为表列赋值。
 // 如果 args 为空，则将非零值赋与可写字段
@@ -240,15 +264,17 @@ func (p *Account) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]stri
 	return cols, vals
 }
 
+//
 func (p *Account) AssignKeys() (dialect.Field, any) {
 	return tblaccount.PrimaryKey, p.Id
 }
 
+//
 func (p *Account) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
 		return e
 	}
-	p.Id = types.BigInt(_id)
+	*p.Id = uint64(_id)
 	return nil
 }

@@ -174,6 +174,27 @@ func getUnmarshalJSON(t Field) string {
 
 func getTypeValue(t Field) any {
 	v := t.Type
+	if v[0] == '*' {
+		v = v[1:]
+		switch v {
+		case "string", "types.String":
+			return "new(" + v + ")"
+		case "uint", "uint8", "uint16", "uint32", "uint64", "int", "int8", "int16", "int32", "int64", "float32", "float64",
+			"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+			"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Float32",
+			"types.Float64", "types.BigInt", "types.Money":
+			return "new(" + v + ")"
+		case "time.Time", "types.Time":
+			return "new(" + v + ")" // `time.Time{}`
+		case "bool", "types.Bool":
+			return "new(" + v + ")"
+		default:
+			if v[:2] == "[]" {
+				return "p." + t.Name + "[:0]"
+			}
+			return v + "{}"
+		}
+	}
 	switch v {
 	case "string", "types.String":
 		return `""`
@@ -280,6 +301,7 @@ func (d *TempData) writeToModel(fileName string) error {
 		"getSqlValue":      getSqlValue,
 		"getSqlType":       getSqlType,
 		"getUnmarshalJSON": getUnmarshalJSON,
+		"hasPrefix":        strings.HasPrefix,
 	}
 
 	fileName = filepath.Join(fullpath, getBaseFilename(fileName)+"_do_"+d.StructName+".gen.go")

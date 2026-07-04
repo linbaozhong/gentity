@@ -213,7 +213,11 @@ func (p *{{.StructName}}) AssignPrimaryKeyValues(result sql.Result) error {
 	if e != nil {
         return e
     }
-    p.{{.PrimaryKey.Name}} = {{.PrimaryKey.Type}}(_id)
+	{{- if hasPrefix .PrimaryKey.Type "*"}}
+	*p.{{.PrimaryKey.Name}} = {{ slice .PrimaryKey.Type 1}}(_id)
+    {{- else}}
+	p.{{.PrimaryKey.Name}} = {{.PrimaryKey.Type}}(_id)
+    {{- end}}
     {{- end}}
     return nil
 }

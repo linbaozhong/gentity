@@ -11,6 +11,7 @@ import (
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"time"
 )
 
 const CompanyRoleTableName = "company_role"
@@ -230,10 +231,12 @@ func (p *CompanyRole) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]
 	return cols, vals
 }
 
+//
 func (p *CompanyRole) AssignKeys() (dialect.Field, any) {
 	return tblcompanyrole.PrimaryKey, p.Id
 }
 
+//
 func (p *CompanyRole) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
