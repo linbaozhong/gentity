@@ -17,10 +17,6 @@ package api
 const (
 	IpKey     = "__IP__"
 	UserAgent = "__UserAgent__"
-	// VisitorKey 解析请求而产生的请求者的Visitor键名
-	// 用于记录请求者的信息，如IP、User-Agent等
-	// 用于日志追踪
-	VisitorKey = "__Visitor__"
 	// AuthorizationKey 来自请求头的Authorization键名
 	AuthorizationKey = "Authorization"
 	// OperationID 来自请求头的OperationID键名
