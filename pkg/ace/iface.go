@@ -32,7 +32,6 @@ type (
 		ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 		Debug(...bool) bool
 		Dialect() dialect.Dialect
-		// Cache(string) cachego.Cache
 		IsDB() bool
 	}
 )

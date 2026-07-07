@@ -50,22 +50,22 @@ func (t *Tx) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any,
 }
 
 // QueryContext 执行查询操作
-func (s *Tx) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-	return s.Tx.QueryContext(ctx, query, args...)
+func (t *Tx) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+	return t.Tx.QueryContext(ctx, query, args...)
 }
 
 // QueryRowContext 执行单行查询操作
-func (s *Tx) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
-	return s.Tx.QueryRowContext(ctx, query, args...)
+func (t *Tx) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
+	return t.Tx.QueryRowContext(ctx, query, args...)
 }
 
 // ExecContext 执行更新、插入、删除等操作
-func (s *Tx) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-	return s.Tx.ExecContext(ctx, query, args...)
+func (t *Tx) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+	return t.Tx.ExecContext(ctx, query, args...)
 }
 
 // PrepareContext 为以后的查询或执行创建一个准备好的语句。可以从返回的语句并发地运行多个查询或执行。调用者必须调用语句的Stmt。当不再需要语句时，关闭方法。
 // 所提供的上下文用于语句的准备，而不是用于语句的执行。
-func (s *Tx) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
-	return s.Tx.PrepareContext(ctx, query)
+func (t *Tx) PrepareContext(ctx context.Context, query string) (*sql.Stmt, error) {
+	return t.Tx.PrepareContext(ctx, query)
 }
