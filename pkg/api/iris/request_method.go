@@ -1,106 +1,74 @@
 // Copyright © 2023 SnowIM. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// ...license same as before...
 
 package api
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/types"
+
+	"github.com/linbaozhong/gentity/pkg/api/core"
 )
 
-var (
-	Param_Invalid = types.NewError(-620, "参数无效")
-	UnKnown       = types.NewError(-610, "未知错误")
-)
-
-// Get get请求：
-// 读取query。
+// Get get请求：读取query。
 func Get[A, B any](
 	ctx Context,
 	callService func(ctx context.Context, req *A, resp *B) error,
 	after ...func(ctx Context, resp *B) error,
 ) error {
-	var (
-		req  A
-		resp B
-	)
-
-	_, e := serviceContext(ctx, &req, &resp, readGetRequest[A], callService)
-	if e != nil {
-		return Fail(ctx, e)
-	}
-	if len(after) > 0 {
-		after[0](ctx, &resp)
-	}
-	return Ok(ctx, resp)
+	return core.Get(adapt(ctx),
+		func(c context.Context, req *A, resp *B) error {
+			return callService(c, req, resp)
+		},
+		func(c core.Context, resp *B) error {
+			if len(after) > 0 {
+				return after[0](ctx, resp)
+			}
+			return nil
+		})
 }
 
 // Post post请求
-// Content-Type：application/json，req结构体的字段tag为json
-// Content-Type: application/x-www-form-urlencoded，req结构体的字段tag为form
-// Content-Type: multipart/form-data，req结构体的字段tag为form
 func Post[A, B any](
 	ctx Context,
 	callService func(ctx context.Context, req *A, resp *B) error,
 	after ...func(ctx Context, resp *B) error,
 ) error {
-	var (
-		req  A
-		resp B
-	)
-
-	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
-	if e != nil {
-		return Fail(ctx, e)
-	}
-	if len(after) > 0 {
-		after[0](ctx, &resp)
-	}
-	return Ok(ctx, resp)
+	return core.Post(adapt(ctx),
+		func(c context.Context, req *A, resp *B) error {
+			return callService(c, req, resp)
+		},
+		func(c core.Context, resp *B) error {
+			if len(after) > 0 {
+				return after[0](ctx, resp)
+			}
+			return nil
+		})
 }
 
 // Redirect 重定向
 func Redirect[A any](ctx Context,
 	callService func(ctx context.Context, req *A, resp *string) error,
 ) error {
-	var (
-		req  A
-		resp string
-	)
-	_, e := serviceContext(ctx, &req, &resp, readPostRequest[A], callService)
-	if e != nil {
-		return Fail(ctx, e)
-	}
-	ctx.Redirect(resp)
-	return nil
+	return core.Redirect(adapt(ctx),
+		func(c context.Context, req *A, resp *string) error {
+			return callService(c, req, resp)
+		})
 }
 
+// Stream 流式请求
 func Stream[A, B any](
 	ctx Context,
-	callService func(ctx Context, req *A, resp *B) error,
+	callService func(ctx context.Context, req *A, resp *B) error,
 	after ...func(ctx Context, resp *B) error,
 ) error {
-	var (
-		req  A
-		resp B
-	)
-	_, e := service(ctx, &req, &resp, readPostRequest[A], callService)
-	if e != nil {
-		return Fail(ctx, e)
-	}
-	if len(after) > 0 {
-		after[0](ctx, &resp)
-	}
-	return Ok(ctx, resp)
+	return core.Stream(adapt(ctx),
+		func(c context.Context, req *A, resp *B) error {
+			return callService(c, req, resp)
+		},
+		func(c core.Context, resp *B) error {
+			if len(after) > 0 {
+				return after[0](ctx, resp)
+			}
+			return nil
+		})
 }

@@ -468,9 +468,9 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 		defer stmt.Close()
 	}
 
-	u.params = append(u.params, u.whereParams...)
+	// u.params := append(u.params, u.whereParams...)
 
-	return stmt.ExecContext(ctx, u.params...)
+	return stmt.ExecContext(ctx, append(u.params, u.whereParams...)...)
 }
 
 // Update 更新单个结构体记录
@@ -524,6 +524,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	where, params, e := u.parseCond(u.cond)
 	if e != nil {
 		u.err = e
+		return nil, e
 	}
 	u.whereParams = params
 	if where.Len() > 0 {
@@ -544,9 +545,8 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		defer stmt.Close()
 	}
 
-	u.params = append(u.params, u.whereParams...)
-
-	return stmt.ExecContext(ctx, u.params...)
+	// u.params = append(u.params, u.whereParams...)
+	return stmt.ExecContext(ctx, append(u.params, u.whereParams...)...)
 }
 
 // UpdateBatch 批量更新多个模型对象
@@ -620,7 +620,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return &noRows{}, Err_ToSql
 	}
 
-	u.params = append(u.params, u.whereParams...)
+	// u.params = append(u.params, u.whereParams...)
 	// 启动事务批量执行更新
 	ret, err := u.db.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, u.command.String())
@@ -631,7 +631,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 			defer stmt.Close()
 		}
 
-		result, err := stmt.ExecContext(ctx, u.params...)
+		result, err := stmt.ExecContext(ctx, append(u.params, u.whereParams...)...)
 		if err != nil {
 			return nil, err
 		}
@@ -648,7 +648,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 			_, values = bean.AssignKeys()
 			u.params = append(u.params, values)
 
-			result, err = stmt.ExecContext(ctx, u.params...)
+			result, err = stmt.ExecContext(ctx, append(u.params, u.whereParams...)...)
 			if err != nil {
 				return nil, err
 			}

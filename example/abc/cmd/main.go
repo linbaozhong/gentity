@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/example/abc/internal/router"
 	"github.com/linbaozhong/gentity/example/abc/internal/service"
-	api "github.com/linbaozhong/gentity/pkg/api/iris"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/serverpush"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -23,9 +24,6 @@ func main() {
 	if len(os.Args) > 1 {
 		_port = os.Args[1]
 	}
-	if _port[0] != ':' {
-		_port = ":" + _port
-	}
 
 	log.Register(false)
 	log.Info(fmt.Sprintf("%s %s %s 服务开启中...", "abc Api", "0.1", _port))
@@ -33,27 +31,29 @@ func main() {
 	// 启动前置服务
 	Prepare()
 	// 启动路由服务
-	_service := router.Init()
+	srv := router.Init(_port)
 
-	_idleConnsClosed := make(chan struct{})
-	api.OnInterrupt(func() {
-		_timeout := 5 * time.Second
-		_ctx, _cancel := context.WithTimeout(context.Background(), _timeout)
-		defer _cancel()
-		// close all hosts.
-		_service.Shutdown(_ctx)
+	// 监听系统信号，实现优雅停止
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		<-quit
+
+		log.Fatal(fmt.Sprintf("%s %s %s 服务已关闭", "abc Api", "0.1", _port))
+
+		// 给正在处理的请求 5 秒钟的时间完成
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 		// 关闭其他服务
 		Finished()
-		log.Fatal(fmt.Sprintf("%s %s %s 服务已关闭", "abc Api", "0.1", _port))
-		close(_idleConnsClosed)
-	})
+		// 优雅关闭
+		srv.Shutdown(ctx)
+	}()
 
-	if e := _service.Listen(_port); e != nil {
-		log.Error(e)
+	// 启动服务
+	if err := srv.Run(); err != nil {
+		log.Error(err)
 	}
-
-	// 优雅地关闭
-	<-_idleConnsClosed
 }
 
 // Prepare 系统启动所需要的必须服务

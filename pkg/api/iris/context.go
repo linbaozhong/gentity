@@ -15,6 +15,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"github.com/kataras/iris/v12"
 	"github.com/linbaozhong/gentity/pkg/log"
@@ -62,6 +63,28 @@ func OnInterrupt(fn func()) {
 
 func NewParty(app Party, relativePath string) Party {
 	return app.Party(relativePath)
+}
+
+// Server 封装 iris 的 HTTP 服务器，提供统一的 Run/Shutdown 生命周期接口。
+// 与 gin 包的 Server 接口一致，切换框架只需改动 import 路径。
+type Server struct {
+	app  *iris.Application
+	addr string
+}
+
+// NewServer 创建一个 Server 实例。
+func NewServer(app Application, addr string) *Server {
+	return &Server{app: app, addr: addr}
+}
+
+// Run 启动服务（阻塞直到 Shutdown 被调用）。
+func (s *Server) Run() error {
+	return s.app.Listen(s.addr)
+}
+
+// Shutdown 优雅关闭服务，等待正在处理的请求完成或超时。
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.app.Shutdown(ctx)
 }
 
 func Logger() Handler {

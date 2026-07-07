@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
-	"reader/internal/model/dto"
+	"github.com/linbaozhong/gentity/example/reader/internal/model/dto"
 )
 
 func UserRegister(c context.Context, in *dto.UserRegisterReq, out *dto.UserRegisterResp) error {

@@ -1,18 +1,22 @@
 package router
 
 import (
-	"github.com/linbaozhong/gentity/pkg/api"
-	_ "reader/internal/handler"
+	_ "github.com/linbaozhong/gentity/example/reader/internal/handler"
+	api "github.com/linbaozhong/gentity/pkg/api/gin"
 )
 
-func Init() api.Application {
+func Init(port string) *api.Server {
 	app := api.NewApplication("reader", "0.1")
-	app.Configure()
+
 	app.Use(api.Recovery())
 	app.Use(api.Logger())
 
 	v1 := api.NewParty(app, "/v1")
 	// 注册路由
 	api.RegisterRouter(v1)
-	return app
+
+	if port[0] != ':' {
+		port = ":" + port
+	}
+	return api.NewServer(app, port)
 }
