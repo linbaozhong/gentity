@@ -21,7 +21,10 @@ func (p Smap) MarshalJSON() ([]byte, error) {
 	var _buf bytes.Buffer
 	_buf.WriteString("{")
 	for k, v := range p {
-		_buf.WriteString(strconv.Quote(k) + `:` + Marshal(v) + `,`)
+		_buf.WriteString(strconv.Quote(k))
+		_buf.WriteByte(':')
+		_buf.Write(Marshal(v))
+		_buf.WriteByte(',')
 	}
 	if _buf.Len() > 1 {
 		_buf.Truncate(_buf.Len() - 1)

@@ -40,9 +40,14 @@ func (j *JsonResult) Free() {
 func (j JsonResult) MarshalJSON() ([]byte, error) {
 	var _buf = bytes.NewBuffer(nil)
 	_buf.WriteByte('{')
-	_buf.WriteString(`"code":` + Marshal(j.Code) + `,`)
-	_buf.WriteString(`"data":` + Marshal(j.Data) + `,`)
-	_buf.WriteString(`"msg":` + Marshal(j.Message))
+	_buf.WriteString(`"code":`)
+	_buf.Write(Marshal(j.Code))
+	_buf.WriteString(`,`)
+	_buf.WriteString(`"data":`)
+	_buf.Write(Marshal(j.Data))
+	_buf.WriteString(`,`)
+	_buf.WriteString(`"msg":`)
+	_buf.Write(Marshal(j.Message))
 	_buf.WriteByte('}')
 	return _buf.Bytes(), nil
 }

@@ -15,6 +15,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/linbaozhong/gentity/pkg/log"
@@ -54,8 +55,37 @@ func NewApplication(name, version string) Application {
 	return app
 }
 
-func NewParty(app Party, relativePath string) Party {
+func NewParty(app gin.IRouter, relativePath string) Party {
 	return app.Group(relativePath)
+}
+
+// Server 封装 gin 的 HTTP 服务器，提供统一的 Run/Shutdown 生命周期接口。
+// 与 iris 包的 Server 接口一致，切换框架只需改动 import 路径。
+type Server struct {
+	srv *http.Server
+}
+
+// NewServer 创建一个 Server 实例。
+func NewServer(app Application, addr string) *Server {
+	return &Server{
+		srv: &http.Server{
+			Addr:    addr,
+			Handler: app,
+		},
+	}
+}
+
+// Run 启动服务（阻塞直到 Shutdown 被调用）。
+func (s *Server) Run() error {
+	if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return err
+	}
+	return nil
+}
+
+// Shutdown 优雅关闭服务，等待正在处理的请求完成或超时。
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.srv.Shutdown(ctx)
 }
 
 func Logger() Handler {

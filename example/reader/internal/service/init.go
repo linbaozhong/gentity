@@ -31,7 +31,7 @@ func (s *service) Launch() error {
 		}
 		db.SetMaxOpenConns(50)
 		db.SetMaxIdleConns(25)
-		db.SetDebug(true)
+		db.Debug(true)
 	})
 	if e != nil {
 		log.Fatal(e)

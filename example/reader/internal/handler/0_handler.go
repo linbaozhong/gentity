@@ -15,9 +15,9 @@
 package handler
 
 import (
+	"github.com/linbaozhong/gentity/example/reader/internal/constant/cst"
+	"github.com/linbaozhong/gentity/example/reader/internal/constant/err"
 	api "github.com/linbaozhong/gentity/pkg/api/gin"
-	"reader/internal/constant/cst"
-	"reader/internal/constant/err"
 )
 
 // AuthRequired 身份认证中间件
