@@ -2,7 +2,7 @@ module reader
 
 go 1.24.4
 
-require github.com/linbaozhong/gentity v0.10.60
+require github.com/linbaozhong/gentity v0.10.66
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

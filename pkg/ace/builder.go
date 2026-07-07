@@ -150,7 +150,7 @@ func (o *orm) String() string {
 }
 
 // SetDB 设置 orm 对象的数据库连接。
-func (o *orm) SetDB(d *DB) Builder {
+func (o *orm) SetDB(d Executer) Builder {
 	o.db = d
 	return o
 }

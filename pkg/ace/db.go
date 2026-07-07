@@ -101,7 +101,7 @@ func (s *DB) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any,
 	}
 
 	var result any
-	result, e = f(&Tx{tx, s.mapper, s.Cache, s.Transaction, s.debug})
+	result, e = f(&Tx{tx, s, s.mapper, s.Cache, s.Transaction, s.debug})
 	if e != nil {
 		if err := tx.Rollback(); err != nil {
 			log.Error(err)

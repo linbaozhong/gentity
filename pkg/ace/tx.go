@@ -17,6 +17,7 @@ package ace
 import (
 	"context"
 	"database/sql"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/reflectx"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 )
@@ -24,6 +25,7 @@ import (
 type (
 	Tx struct {
 		*sql.Tx
+		db          *DB
 		mapper      *reflectx.Mapper
 		cache       func(name string) cachego.Cache
 		transaction func(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
@@ -39,11 +41,38 @@ func (t *Tx) Cache(name string) cachego.Cache {
 	return t.cache(name)
 }
 
-func (t *Tx) Debug() bool {
-	return t.debug
-}
 func (t *Tx) IsDB() bool {
 	return false
+}
+func (t *Tx) Table(a any, as ...string) Builder {
+	return t.db.Table(a, as...)
+}
+func (t *Tx) Where(fns ...dialect.Condition) Builder {
+	return t.db.Where(fns...)
+}
+func (t *Tx) Distinct(cols ...dialect.Field) Builder {
+	return t.db.Distinct(cols...)
+}
+func (t *Tx) Cols(cols ...dialect.Field) Builder {
+	return t.db.Cols(cols...)
+}
+func (t *Tx) PureCols(cols ...dialect.Field) Builder {
+	return t.db.PureCols(cols...)
+}
+func (t *Tx) Omit(cols ...dialect.Field) Builder {
+	return t.db.Omit(cols...)
+}
+func (t *Tx) Func(fns ...dialect.Function) Builder {
+	return t.db.Func(fns...)
+}
+func (t *Tx) Set(fns ...dialect.Setter) Builder {
+	return t.db.Set(fns...)
+}
+func (t *Tx) Dialect() dialect.Dialect {
+	return t.db.Dialect()
+}
+func (t *Tx) Debug(debug ...bool) bool {
+	return t.db.Debug(debug...)
 }
 func (t *Tx) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any, error) {
 	return t.transaction(ctx, f)

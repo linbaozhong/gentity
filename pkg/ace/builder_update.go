@@ -468,8 +468,6 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 		defer stmt.Close()
 	}
 
-	// u.params := append(u.params, u.whereParams...)
-
 	return stmt.ExecContext(ctx, append(u.params, u.whereParams...)...)
 }
 
@@ -545,7 +543,6 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		defer stmt.Close()
 	}
 
-	// u.params = append(u.params, u.whereParams...)
 	return stmt.ExecContext(ctx, append(u.params, u.whereParams...)...)
 }
 
@@ -620,7 +617,6 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return &noRows{}, Err_ToSql
 	}
 
-	// u.params = append(u.params, u.whereParams...)
 	// 启动事务批量执行更新
 	ret, err := u.db.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, u.command.String())

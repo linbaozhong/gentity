@@ -46,7 +46,7 @@ type SelectBuilder interface {
 	//   - 如果 Builder 已有 DB 连接，SetDB 会覆盖原有连接
 	//   - 确保传入的 DB 对象是有效的、已连接的实例
 	//   - 该方法主要用于灵活的场景，通常建议在 ace.New() 时直接传入 DB
-	SetDB(d *DB) Builder
+	SetDB(d Executer) Builder
 	// GetDB 获取当前数据库连接对象
 	GetDB() Executer
 	// Table 设置查询的表名或数据源
@@ -719,7 +719,6 @@ func (o *orm) Select(x ...*DB) Selecter {
 		orm: o,
 	}
 }
-
 
 // Query
 func (s *read) Query(ctx context.Context) (*sql.Rows, error) {

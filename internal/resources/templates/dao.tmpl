@@ -30,7 +30,7 @@ import (
 
 type {{$structNameLower}} struct {
 	pool.Model
-	db    *ace.DB
+	db    ace.Executer
 	toSql bool
 {{- if .HasCache}}
 	cache cachego.Cache
@@ -48,7 +48,7 @@ var(
 // New 实例化{{$structNameLower}}
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
-func {{$structName}}(db *ace.DB) *{{$structNameLower}} {
+func {{$structName}}(db ace.Executer) *{{$structNameLower}} {
 	_obj := {{$structNameLower}}Pool.Get()
 	_obj.db = db
 {{- if .HasCache}}

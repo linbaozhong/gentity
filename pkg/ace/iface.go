@@ -33,6 +33,15 @@ type (
 		Debug(...bool) bool
 		Dialect() dialect.Dialect
 		IsDB() bool
+
+		Table(a any, as ...string) Builder
+		Where(fns ...dialect.Condition) Builder
+		Distinct(cols ...dialect.Field) Builder
+		Cols(cols ...dialect.Field) Builder
+		PureCols(cols ...dialect.Field) Builder
+		Omit(cols ...dialect.Field) Builder
+		Func(fns ...dialect.Function) Builder
+		Set(fns ...dialect.Setter) Builder
 	}
 )
 
