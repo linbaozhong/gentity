@@ -468,9 +468,9 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 		defer stmt.Close()
 	}
 
-	u.params = append(u.params, u.whereParams...)
+	// u.params := append(u.params, u.whereParams...)
 
-	return stmt.ExecContext(ctx, u.params...)
+	return stmt.ExecContext(ctx, append(u.params, u.whereParams...)...)
 }
 
 // Update 更新单个结构体记录
@@ -544,9 +544,9 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		defer stmt.Close()
 	}
 
-	u.params = append(u.params, u.whereParams...)
+	// u.params = append(u.params, u.whereParams...)
 
-	return stmt.ExecContext(ctx, u.params...)
+	return stmt.ExecContext(ctx, append(u.params, u.whereParams...)...)
 }
 
 // UpdateBatch 批量更新多个模型对象
