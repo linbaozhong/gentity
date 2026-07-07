@@ -12,8 +12,9 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/gjson"
 	"github.com/linbaozhong/gentity/pkg/log"
-	{{- range .Imports}}
-		"{{.}}"
+	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	{{- range $key, $value := .Imports}}
+		"{{$key}}"
 	{{- end}}
 )
 

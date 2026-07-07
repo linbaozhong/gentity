@@ -7,18 +7,22 @@ import (
 )
 
 var (
-	Id        = dialect.Field{Name: "id", Json: "id", Table: "account", Type: "*uint64", IsRelation: false}
-	LoginName = dialect.Field{Name: "login_name", Json: "login_name", Table: "account", Type: "*string", IsRelation: false}
-	Password  = dialect.Field{Name: "password", Json: "password", Table: "account", Type: "*string", IsRelation: false}
-	State     = dialect.Field{Name: "state", Json: "state", Table: "account", Type: "*int8", IsRelation: false}
-	Ctime     = dialect.Field{Name: "ctime", Json: "ctime", Table: "account", Type: "*time.Time", IsRelation: false}
-	Utime     = dialect.Field{Name: "utime", Json: "utime", Table: "account", Type: "*time.Time", IsRelation: false}
+	Id        = dialect.Field{Name: "id", Json: "id", Table: "account", Type: "types.BigInt", IsRelation: false}
+	LoginName = dialect.Field{Name: "login_name", Json: "login_name", Table: "account", Type: "types.String", IsRelation: false}
+	Password  = dialect.Field{Name: "password", Json: "password", Table: "account", Type: "types.String", IsRelation: false}
+	State     = dialect.Field{Name: "state", Json: "state", Table: "account", Type: "types.Int8", IsRelation: false}
+	Ctime     = dialect.Field{Name: "ctime", Json: "ctime", Table: "account", Type: "types.Time", IsRelation: false}
+	Utime     = dialect.Field{Name: "utime", Json: "utime", Table: "account", Type: "types.Time", IsRelation: false}
 	Man       = dialect.Field{Name: "man", Json: "man", Table: "account", Type: "[]CompanyMan", IsRelation: true}
 	// 主键
 	PrimaryKey = Id
 
 	// 可写列
-	WritableFields = []dialect.Field{}
+	WritableFields = []dialect.Field{
+		LoginName,
+		Password,
+		State,
+	}
 	// 可读列
 	ReadableFields = []dialect.Field{
 		Id,

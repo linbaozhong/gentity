@@ -32,7 +32,7 @@ type TempData struct {
 	ModulePath  string
 	FileName    string
 	PackageName string
-	Imports     []string
+	Imports     map[string]struct{}
 	StructName  string
 	TableName   string
 	CacheData   string // 数据缓存时长
@@ -45,9 +45,9 @@ type TempData struct {
 	HasPrimaryKey bool
 	HasRef        bool // 有引用类型
 	HasCache      bool
-	HasCustomType bool
-	HasTime       bool
-	VisitorName   string // 访问者字段名
+	//HasCustomType bool
+	//HasTime       bool
+	//VisitorName   string // 访问者字段名
 }
 
 // Field struct 字段

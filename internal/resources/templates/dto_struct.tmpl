@@ -13,16 +13,6 @@ func (p *{{.StructName}}) Init() error {
 
 	return nil
 }
-	{{- if ne .VisitorName ""}}
-// // Visiter
-// func (p *{{.StructName}}) Visiter(ctx context.Context) {
-// 	if vis, ok := ctx.Value(api.VisitorKey).(*Visitor); ok {
-// 		p.{{.VisitorName}} = vis
-// 	}
-// 	return
-// }
-	{{- end}}
-
 
 // Check
 func (p *{{.StructName}}) Check() error {

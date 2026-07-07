@@ -3,26 +3,18 @@ package do
 import (
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/types"
-	"time"
 )
 
 // Account 账号表
 // @tablename account
 type Account struct {
 	pool.Model
-	//Id        types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`          //
-	//LoginName types.String `json:"login_name,omitempty" db:"'login_name' size:200"` // 登录名（手机号）
-	//Password  types.String `json:"password,omitempty" db:"'password' size:50"`      // 密码
-	//State     types.Int8   `json:"state,omitempty" db:"'state' size:3"`             // 管理状态：-1=已删除，0=禁用，1=启用
-	//Ctime     types.Time   `json:"ctime,omitempty" db:"'ctime' <-"`                 //
-	//Utime     types.Time   `json:"utime,omitempty" db:"'utime' <-"`                 //
-
-	Id        *uint64    `json:"id,omitempty" db:"'id' pk auto size:20"`          //
-	LoginName *string    `json:"login_name,omitempty" db:"'login_name' size:200"` // 登录名（手机号）
-	Password  *string    `json:"password,omitempty" db:"'password' size:50"`      // 密码
-	State     *int8      `json:"state,omitempty" db:"'state' size:3"`             // 管理状态：-1=已删除，0=禁用，1=启用
-	Ctime     *time.Time `json:"ctime,omitempty" db:"'ctime' <-"`                 //
-	Utime     *time.Time `json:"utime,omitempty" db:"'utime' <-"`                 //
+	Id        types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`          //
+	LoginName types.String `json:"login_name,omitempty" db:"'login_name' size:200"` // 登录名（手机号）
+	Password  types.String `json:"password,omitempty" db:"'password' size:50"`      // 密码
+	State     types.Int8   `json:"state,omitempty" db:"'state' size:3"`             // 管理状态：-1=已删除，0=禁用，1=启用
+	Ctime     types.Time   `json:"ctime,omitempty" db:"'ctime' <-"`                 //
+	Utime     types.Time   `json:"utime,omitempty" db:"'utime' <-"`                 //
 
 	Man []CompanyMan `json:"man,omitempty" db:"<- ref:Id|AccountId"`
 }
