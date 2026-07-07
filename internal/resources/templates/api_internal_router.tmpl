@@ -6,11 +6,11 @@ import (
 )
 
 func Init(port string) *api.Server {
-	_app := api.NewApplication("{{.ModulePath}}", "0.1")
+	app := api.NewApplication("{{.ModulePath}}", "0.1")
 
-	_v1 := api.NewParty(_app, "/v1")
+	v1 := api.NewParty(_app, "/v1")
 	// 注册路由
-	api.RegisterRouter(_v1)
+	api.RegisterRouter(v1)
 
 	if port[0] != ':' {
 		port = ":" + port
