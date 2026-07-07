@@ -11,5 +11,9 @@ func Init() api.Application {
 	_v1 := api.NewParty(_app, "/v1")
 	// 注册路由
 	api.RegisterRouter(_v1)
-	return _app
+
+	if port[0] != ':' {
+		port = ":" + port
+	}
+	return api.NewServer(app, port)
 }
