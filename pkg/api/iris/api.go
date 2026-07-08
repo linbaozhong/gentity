@@ -5,14 +5,18 @@ package api
 
 // // Re-export core types for backward compatibility
 // type (
-// 	Checker     = core.Checker
-// 	Initializer = core.Initializer
+//
+//	Checker     = core.Checker
+//	Initializer = core.Initializer
+//
 // )
 //
 // // Re-export common errors
 // var (
-// 	Param_Invalid = types.NewError(-620, "参数无效")
-// 	UnKnown       = types.NewError(-610, "未知错误")
+//
+//	Param_Invalid = types.NewError(-620, "参数无效")
+//	UnKnown       = types.NewError(-610, "未知错误")
+//
 // )
 //
 // // Initiate 初始化请求上下文

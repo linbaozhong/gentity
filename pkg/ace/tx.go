@@ -25,10 +25,10 @@ import (
 type (
 	Tx struct {
 		*sql.Tx
-		db          *DB
 		mapper      *reflectx.Mapper
 		cache       func(name string) cachego.Cache
 		transaction func(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
+		dialect     dialect.Dialect
 		debug       bool // 如果是调试模式，则打印sql命令及错误
 	}
 )
@@ -45,34 +45,37 @@ func (t *Tx) IsDB() bool {
 	return false
 }
 func (t *Tx) Table(a any, as ...string) Builder {
-	return t.db.Table(a, as...)
+	return newOrm(t).Table(a, as...)
 }
 func (t *Tx) Where(fns ...dialect.Condition) Builder {
-	return t.db.Where(fns...)
+	return newOrm(t).Where(fns...)
 }
 func (t *Tx) Distinct(cols ...dialect.Field) Builder {
-	return t.db.Distinct(cols...)
+	return newOrm(t).Distinct(cols...)
 }
 func (t *Tx) Cols(cols ...dialect.Field) Builder {
-	return t.db.Cols(cols...)
+	return newOrm(t).Cols(cols...)
 }
 func (t *Tx) PureCols(cols ...dialect.Field) Builder {
-	return t.db.PureCols(cols...)
+	return newOrm(t).PureCols(cols...)
 }
 func (t *Tx) Omit(cols ...dialect.Field) Builder {
-	return t.db.Omit(cols...)
+	return newOrm(t).Omit(cols...)
 }
 func (t *Tx) Func(fns ...dialect.Function) Builder {
-	return t.db.Func(fns...)
+	return newOrm(t).Func(fns...)
 }
 func (t *Tx) Set(fns ...dialect.Setter) Builder {
-	return t.db.Set(fns...)
+	return newOrm(t).Set(fns...)
 }
 func (t *Tx) Dialect() dialect.Dialect {
-	return t.db.Dialect()
+	return t.dialect
 }
 func (t *Tx) Debug(debug ...bool) bool {
-	return t.db.Debug(debug...)
+	if len(debug) > 0 {
+		t.debug = debug[0]
+	}
+	return t.debug
 }
 func (t *Tx) Transaction(ctx context.Context, f func(tx *Tx) (any, error)) (any, error) {
 	return t.transaction(ctx, f)

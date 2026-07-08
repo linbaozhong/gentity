@@ -73,7 +73,7 @@ type CreateBuilder interface {
 	//
 	//   // 方式3: 批量插入
 	//   db.Table("users").Create().BatchStruct(ctx, &user1, &user2)
-	Create(...*DB) Creater
+	Create(...Executer) Creater
 
 	// Insert 创建插入器（Create 的别名方法）
 	//
@@ -89,7 +89,7 @@ type CreateBuilder interface {
 	//
 	// 使用示例:
 	//   db.Table("users").Insert().Struct(ctx, &user)
-	Insert(...*DB) Creater
+	Insert(...Executer) Creater
 }
 
 type Creater interface {
@@ -153,9 +153,9 @@ type create struct {
 	*orm
 }
 
-func (o *orm) Insert(x ...*DB) Creater {
+func (o *orm) Insert(x ...Executer) Creater {
 	if len(x) > 0 {
-		o.db = x[0]
+		o.x = x[0]
 	}
 	return &create{
 		orm: o,
@@ -163,9 +163,9 @@ func (o *orm) Insert(x ...*DB) Creater {
 }
 
 // Create 创建插入器
-func (o *orm) Create(x ...*DB) Creater {
+func (o *orm) Create(x ...Executer) Creater {
 	if len(x) > 0 {
-		o.db = x[0]
+		o.x = x[0]
 	}
 	return &create{
 		orm: o,
@@ -184,7 +184,7 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	d := c.db.Dialect()
+	d := c.x.Dialect()
 	// FROM TABLE
 	if c.table == "" {
 		return nil, Err_TableName
@@ -205,17 +205,17 @@ func (c *create) Exec(ctx context.Context) (sql.Result, error) {
 	}
 	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
-	if c.debug || c.db.Debug() {
+	if c.debug || c.x.Debug() {
 		log.Info(c.String())
 		return nil, Err_ToSql
 	}
 
 	// 执行SQL语句
-	stmt, err := c.db.PrepareContext(ctx, c.command.String())
+	stmt, err := c.x.PrepareContext(ctx, c.command.String())
 	if err != nil {
 		return nil, err
 	}
-	if c.db.IsDB() {
+	if c.x.IsDB() {
 		defer stmt.Close()
 	}
 
@@ -252,7 +252,7 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return nil, c.err
 	}
 
-	d := c.db.Dialect()
+	d := c.x.Dialect()
 
 	// FROM TABLE
 	if c.table == "" {
@@ -272,18 +272,18 @@ func (c *create) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	}
 	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
-	if c.debug || c.db.Debug() {
+	if c.debug || c.x.Debug() {
 		log.Info(c.String())
 		return &noRows{}, Err_ToSql
 	}
 
 	// 执行SQL语句
-	stmt, err := c.db.PrepareContext(ctx, c.command.String())
+	stmt, err := c.x.PrepareContext(ctx, c.command.String())
 	if err != nil {
 		return nil, err
 	}
 
-	if c.db.IsDB() {
+	if c.x.IsDB() {
 		defer stmt.Close()
 	}
 
@@ -325,7 +325,7 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return nil, dialect.ErrBeanEmpty
 	}
 
-	d := c.db.Dialect()
+	d := c.x.Dialect()
 	// FROM TABLE
 	if c.table == "" {
 		c.table = beans[0].TableName()
@@ -343,18 +343,18 @@ func (c *create) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	}
 	c.command.WriteString("(" + strings.Join(values, ",") + ")")
 	// 只返回SQL语句，不执行
-	if c.debug || c.db.Debug() {
+	if c.debug || c.x.Debug() {
 		log.Info(c.String())
 		return nil, Err_ToSql
 	}
 
 	// 启动事务批量执行Create
-	ret, err := c.db.Transaction(ctx, func(tx *Tx) (any, error) {
+	ret, err := c.x.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, c.command.String())
 		if err != nil {
 			return nil, err
 		}
-		if c.db.IsDB() {
+		if c.x.IsDB() {
 			defer stmt.Close()
 		}
 

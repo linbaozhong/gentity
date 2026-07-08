@@ -24,15 +24,6 @@ type User struct {
 	Name string
 }
 
-func TestPost(t *testing.T) {
-	var u User
-	Init(&u)
-}
-
-func Init[A any](a *A) {
-	Initiate(nil, a)
-}
-
 func TestPool(t *testing.T) {
 	type User struct {
 		Id   int

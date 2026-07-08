@@ -33,7 +33,7 @@ func (o *orm) Limit(size uint, start ...uint) Builder {
 		s = start[0]
 	}
 
-	o.limit = o.db.Dialect().Limit(s, size)
+	o.limit = o.x.Dialect().Limit(s, size)
 
 	return o
 }

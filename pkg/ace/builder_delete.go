@@ -24,7 +24,7 @@ type DeleteBuilder interface {
 	GetTableName() string
 	Wherer
 	// Delete 创建删除器,如果实例化时没有传入了DB，则此处必须传入DB
-	Delete(...*DB) Deleter
+	Delete(...Executer) Deleter
 }
 
 // Deleter 删除器
@@ -38,9 +38,9 @@ type delete struct {
 }
 
 // Delete 删除器
-func (o *orm) Delete(x ...*DB) Deleter {
+func (o *orm) Delete(x ...Executer) Deleter {
 	if len(x) > 0 {
-		o.db = x[0]
+		o.x = x[0]
 	}
 	return &delete{
 		orm: o,
@@ -58,7 +58,7 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	if d.table == "" {
 		return nil, Err_TableName
 	}
-	d.command.WriteString("DELETE FROM " + d.db.Dialect().Quote(d.table))
+	d.command.WriteString("DELETE FROM " + d.x.Dialect().Quote(d.table))
 
 	where, params, e := d.parseCond(d.cond)
 	if e != nil {
@@ -71,16 +71,16 @@ func (d *delete) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	// 只返回SQL语句，不执行
-	if d.debug || d.db.Debug() {
+	if d.debug || d.x.Debug() {
 		log.Info(d.String())
 		return nil, Err_ToSql
 	}
 
-	stmt, err := d.db.PrepareContext(ctx, d.command.String())
+	stmt, err := d.x.PrepareContext(ctx, d.command.String())
 	if err != nil {
 		return nil, err
 	}
-	if d.db.IsDB() {
+	if d.x.IsDB() {
 		defer stmt.Close()
 	}
 

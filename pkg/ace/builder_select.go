@@ -666,7 +666,7 @@ type SelectBuilder interface {
 	//   - Select() 会锁定当前的查询配置，后续的修改不会影响本次查询
 	//   - 每次调用 Select() 都会创建一个新的 Selecter 实例
 	//   - Selecter 执行完成后会自动释放 Builder 资源
-	Select(...*DB) Selecter
+	Select(...Executer) Selecter
 }
 
 type Selecter interface {
@@ -711,9 +711,9 @@ type read struct {
 }
 
 // Select 创建查询器
-func (o *orm) Select(x ...*DB) Selecter {
+func (o *orm) Select(x ...Executer) Selecter {
 	if len(x) > 0 {
-		o.db = x[0]
+		o.x = x[0]
 	}
 	return &read{
 		orm: o,
@@ -769,7 +769,7 @@ func (s *read) Get(ctx context.Context, dest any) error {
 		vals := d.AssignPtr()
 		return rows.Scan(vals...)
 	}
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: s.x.Mapper()}
 	return r.scanAny(dest, false)
 }
 
@@ -804,7 +804,7 @@ func (s *read) Map(ctx context.Context) (map[string]any, error) {
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: s.x.Mapper()}
 	dest := make(map[string]any)
 	err = r.MapScan(dest)
 	if err != nil {
@@ -825,7 +825,7 @@ func (s *read) Maps(ctx context.Context) ([]map[string]any, error) {
 		return nil, err
 	}
 
-	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	rs := &Rows{Rows: rows, Mapper: s.x.Mapper()}
 	defer rs.Close()
 
 	dests := make([]map[string]any, 0)
@@ -856,7 +856,7 @@ func (s *read) Slice(ctx context.Context) ([]any, error) {
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: s.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: s.x.Mapper()}
 	return r.SliceScan()
 }
 
@@ -872,7 +872,7 @@ func (s *read) Slices(ctx context.Context) ([][]any, error) {
 		return nil, err
 	}
 
-	rs := &Rows{Rows: rows, Mapper: s.db.Mapper()}
+	rs := &Rows{Rows: rows, Mapper: s.x.Mapper()}
 	defer rs.Close()
 
 	dests := make([][]any, 0)
@@ -1016,7 +1016,7 @@ func (s *read) aggregateQuery(ctx context.Context, cols []dialect.Field, cond ..
 // buildFromClause 构建公共的 FROM + JOIN + WHERE 子句
 // 用于 Count / Sum / Avg / Max / Min 等聚合查询
 func (s *read) buildFromClause(cond []dialect.Condition) error {
-	d := s.db.Dialect()
+	d := s.x.Dialect()
 	// FROM TABLE
 	if s.table == "" {
 		return Err_TableName
@@ -1066,7 +1066,7 @@ func (se *read) RawQueryMap(ctx context.Context, sqlStr string, args ...any) (ma
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: se.x.Mapper()}
 	dest := make(map[string]any)
 	err = r.MapScan(dest)
 	if err != nil {
@@ -1083,7 +1083,7 @@ func (se *read) RawQuerySlice(ctx context.Context, sqlStr string, args ...any) (
 	}
 	defer rows.Close()
 
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: se.x.Mapper()}
 	return r.SliceScan()
 }
 
@@ -1104,6 +1104,6 @@ func (se *read) RawQueryStruct(ctx context.Context, dest any, sqlStr string, arg
 		vals := d.AssignPtr()
 		return rows.Scan(vals...)
 	}
-	r := &Row{rows: rows, err: err, Mapper: se.db.Mapper()}
+	r := &Row{rows: rows, err: err, Mapper: se.x.Mapper()}
 	return r.scanAny(dest, false)
 }

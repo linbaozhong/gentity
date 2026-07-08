@@ -5,7 +5,6 @@ package api
 
 import (
 	"context"
-
 	"github.com/linbaozhong/gentity/pkg/api/core"
 )
 

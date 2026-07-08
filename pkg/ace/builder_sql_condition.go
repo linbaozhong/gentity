@@ -201,7 +201,7 @@ func (o *orm) parseCond(d []dialect.Condition) (where strings.Builder, params []
 				where.WriteString("(" + s.String() + ")")
 			}
 		} else {
-			s, v := c.Condition(&o.paramIndex, o.db.Dialect())
+			s, v := c.Condition(&o.paramIndex, o.x.Dialect())
 			if e = parseWhereParams(v, &params); e != nil {
 				o.err = e
 				return

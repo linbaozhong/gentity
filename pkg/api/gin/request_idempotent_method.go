@@ -4,14 +4,31 @@
 package api
 
 import (
+	"context"
 	"github.com/linbaozhong/gentity/pkg/api/core"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 )
 
-// IdempotencyConfig 幂等性配置
-type IdempotencyConfig = core.IdempotencyConfig
-
 // DefaultIdempotencyConfig 返回默认配置
-func DefaultIdempotencyConfig(cache cachego.Cache) *IdempotencyConfig {
+func DefaultIdempotencyConfig(cache cachego.Cache) *core.IdempotencyConfig {
 	return core.DefaultIdempotencyConfig(cache)
+}
+
+// PostIdempotent 支持幂等的 post 请求
+func PostIdempotent[A, B any](
+	ctx Context,
+	config *core.IdempotencyConfig,
+	callService func(ctx context.Context, req *A, resp *B) error,
+	after ...func(ctx Context, resp *B) error,
+) error {
+	return core.PostIdempotent(adapt(ctx), config,
+		func(c context.Context, req *A, resp *B) error {
+			return callService(c, req, resp)
+		},
+		func(c core.Context, resp *B) error {
+			if len(after) > 0 {
+				return after[0](ctx, resp)
+			}
+			return nil
+		})
 }

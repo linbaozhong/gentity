@@ -161,7 +161,7 @@ type UpdateBuilder interface {
 	//   - 建议在调用 Update() 之前设置 Where 条件，避免全表更新
 	//   - 如果使用 Struct 方法，bean 必须实现 dialect.Modeler 接口
 	//   - BatchStruct 内部会使用事务处理，不建议在外部事务中调用
-	Update(...*DB) Updater
+	Update(...Executer) Updater
 }
 
 type Updater interface {
@@ -405,9 +405,9 @@ type expr struct {
 }
 
 // Update 更新器
-func (o *orm) Update(x ...*DB) Updater {
+func (o *orm) Update(x ...Executer) Updater {
 	if len(x) > 0 {
-		o.db = x[0]
+		o.x = x[0]
 	}
 	return &update{
 		orm: o,
@@ -426,7 +426,7 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	d := u.db.Dialect()
+	d := u.x.Dialect()
 	// FROM TABLE
 	if u.table == "" {
 		return nil, Err_TableName
@@ -455,16 +455,16 @@ func (u *update) Exec(ctx context.Context) (sql.Result, error) {
 	}
 
 	// 只返回SQL语句，不执行
-	if u.debug || u.db.Debug() {
+	if u.debug || u.x.Debug() {
 		log.Info(u.String())
 		return &noRows{}, Err_ToSql
 	}
 
-	stmt, err := u.db.PrepareContext(ctx, u.command.String())
+	stmt, err := u.x.PrepareContext(ctx, u.command.String())
 	if err != nil {
 		return nil, err
 	}
-	if u.db.IsDB() {
+	if u.x.IsDB() {
 		defer stmt.Close()
 	}
 
@@ -501,7 +501,7 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 		return nil, u.err
 	}
 
-	d := u.db.Dialect()
+	d := u.x.Dialect()
 	// FROM TABLE
 	if u.table == "" {
 		u.table = bean.TableName()
@@ -530,16 +530,16 @@ func (u *update) Struct(ctx context.Context, bean dialect.Modeler) (sql.Result, 
 	}
 
 	// 只返回SQL语句，不执行
-	if u.debug || u.db.Debug() {
+	if u.debug || u.x.Debug() {
 		log.Info(u.String())
 		return &noRows{}, Err_ToSql
 	}
 
-	stmt, err := u.db.PrepareContext(ctx, u.command.String())
+	stmt, err := u.x.PrepareContext(ctx, u.command.String())
 	if err != nil {
 		return nil, err
 	}
-	if u.db.IsDB() {
+	if u.x.IsDB() {
 		defer stmt.Close()
 	}
 
@@ -583,7 +583,7 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 		return nil, dialect.ErrCreateEmpty
 	}
 
-	d := u.db.Dialect()
+	d := u.x.Dialect()
 	// FROM TABLE
 	if u.table == "" {
 		u.table = beans[0].TableName()
@@ -612,18 +612,18 @@ func (u *update) BatchStruct(ctx context.Context, beans ...dialect.Modeler) (sql
 	}
 
 	// 只返回SQL语句，不执行
-	if u.debug || u.db.Debug() {
+	if u.debug || u.x.Debug() {
 		log.Info(u.String())
 		return &noRows{}, Err_ToSql
 	}
 
 	// 启动事务批量执行更新
-	ret, err := u.db.Transaction(ctx, func(tx *Tx) (any, error) {
+	ret, err := u.x.Transaction(ctx, func(tx *Tx) (any, error) {
 		stmt, err := tx.PrepareContext(ctx, u.command.String())
 		if err != nil {
 			return nil, err
 		}
-		if u.db.IsDB() {
+		if u.x.IsDB() {
 			defer stmt.Close()
 		}
 

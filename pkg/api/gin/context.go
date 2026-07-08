@@ -25,15 +25,15 @@ import (
 )
 
 type (
-	Application  = *gin.Engine
-	Context      = *gin.Context
-	Party        = *gin.RouterGroup
-	Handler      = gin.HandlerFunc
-	ErrorHandler interface {
-		HandleContextError(ctx Context, err error)
-	}
-	// ErrorHandlerFunc a function shortcut for ErrorHandler interface.
-	ErrorHandlerFunc func(ctx Context, err error)
+	Application = *gin.Engine
+	Context     = *gin.Context
+	Party       = *gin.RouterGroup
+	Handler     = gin.HandlerFunc
+	// ErrorHandler interface {
+	// 	HandleContextError(ctx Context, err error)
+	// }
+	// // ErrorHandlerFunc a function shortcut for ErrorHandler interface.
+	// ErrorHandlerFunc func(ctx Context, err error)
 )
 
 func NewApplication(name, version string) Application {

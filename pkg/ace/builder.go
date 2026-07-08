@@ -52,7 +52,7 @@ type (
 	}
 	orm struct {
 		pool.Model
-		db         Executer
+		x          Executer
 		paramIndex uint16 // 参数索引计数器
 		table      string
 		// join         [][3]string
@@ -88,23 +88,13 @@ var (
 	})
 )
 
-func newOrm(dbs ...*DB) *orm {
+func newOrm(x ...Executer) *orm {
 	obj := ormPool.Get()
-	if len(dbs) > 0 {
-		obj.db = dbs[0]
+	if len(x) > 0 {
+		obj.x = x[0]
 	}
 	return obj
 }
-
-// func New(db *DB, opts ...Option) Builder {
-// 	obj := newOrm()
-// 	obj.db = db
-//
-// 	for _, opt := range opts {
-// 		opt(obj)
-// 	}
-// 	return obj
-// }
 
 // Free 释放 orm 对象，将其重置并放回对象池。
 func (o *orm) Free() {
@@ -112,7 +102,7 @@ func (o *orm) Free() {
 		return
 	}
 
-	if o.debug || (o.db != nil && o.db.Debug()) {
+	if o.debug || (o.x != nil && o.x.Debug()) {
 		log.Info(o.String())
 	}
 
@@ -120,7 +110,7 @@ func (o *orm) Free() {
 }
 
 func (o *orm) Reset() {
-	o.db = nil
+	o.x = nil
 	o.table = ""
 	o.paramIndex = 0
 	o.cols = o.cols[:0]   // []dialect.Field{} // o.cols[:0]
@@ -150,14 +140,14 @@ func (o *orm) String() string {
 }
 
 // SetDB 设置 orm 对象的数据库连接。
-func (o *orm) SetDB(d Executer) Builder {
-	o.db = d
+func (o *orm) SetDB(x Executer) Builder {
+	o.x = x
 	return o
 }
 
 // GetDB 获取 orm 对象的数据库连接。
 func (o *orm) GetDB() Executer {
-	return o.db
+	return o.x
 }
 
 // Table 设置 orm 对象的表名。
@@ -213,7 +203,7 @@ func (o *orm) Set(fns ...dialect.Setter) Builder {
 	tmpExprCols := make([]expr, len(o.exprCols), len(o.exprCols)+l)
 	copy(tmpExprCols, o.exprCols)
 
-	d := o.db.Dialect()
+	d := o.x.Dialect()
 	for _, fn := range fns {
 		c, val, op := fn()
 		if e, ok := val.(error); ok {
@@ -252,7 +242,7 @@ func (o *orm) SetExpr(fns ...dialect.Setter) Builder {
 	tmpExprCols := make([]expr, len(o.exprCols), len(o.exprCols)+l)
 	copy(tmpExprCols, o.exprCols)
 
-	d := o.db.Dialect()
+	d := o.x.Dialect()
 	for _, fn := range fns {
 		ex, val, e := dialect.ParseSetter(fn, &o.paramIndex, d)
 		if e != nil {
@@ -342,7 +332,7 @@ func (o *orm) mergeParams() []any {
 
 // parse
 func (o *orm) parse() (strings.Builder, []any, error) {
-	d := o.db.Dialect()
+	d := o.x.Dialect()
 	o.command.Reset()
 	o.command.WriteString("SELECT ")
 
@@ -459,11 +449,11 @@ func (o *orm) query(ctx context.Context) (*sql.Rows, error) {
 }
 
 func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows, error) {
-	if o.debug || (o.db != nil && o.db.Debug()) {
+	if o.debug || (o.x != nil && o.x.Debug()) {
 		log.Info(o.String())
 		return &sql.Rows{}, Err_ToSql
 	}
-	stmt, err := o.db.PrepareContext(ctx, sqlStr)
+	stmt, err := o.x.PrepareContext(ctx, sqlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -474,11 +464,11 @@ func (o *orm) rows(ctx context.Context, sqlStr string, params ...any) (*sql.Rows
 }
 
 func (o *orm) row(ctx context.Context, sqlStr string, params ...any) (*sql.Row, error) {
-	if o.debug || (o.db != nil && o.db.Debug()) {
+	if o.debug || (o.x != nil && o.x.Debug()) {
 		log.Info(o.String())
 		return &sql.Row{}, Err_ToSql
 	}
-	stmt, err := o.db.PrepareContext(ctx, sqlStr)
+	stmt, err := o.x.PrepareContext(ctx, sqlStr)
 	if err != nil {
 		return nil, err
 	}

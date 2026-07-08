@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kataras/iris/v12"
+	"github.com/linbaozhong/gentity/pkg/api/core"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"net/http"
@@ -28,15 +29,15 @@ import (
 )
 
 type (
-	Application  = *iris.Application
-	Context      = iris.Context
-	Party        = iris.Party
-	Handler      = iris.Handler
-	ErrorHandler interface {
-		HandleContextError(ctx *Context, err error)
-	}
-	// ErrorHandlerFunc a function shortcut for ErrorHandler interface.
-	ErrorHandlerFunc func(ctx *Context, err error)
+	Application = *iris.Application
+	Context     = iris.Context
+	Party       = iris.Party
+	Handler     = iris.Handler
+	// ErrorHandler interface {
+	// 	HandleContextError(ctx *Context, err error)
+	// }
+	// // ErrorHandlerFunc a function shortcut for ErrorHandler interface.
+	// ErrorHandlerFunc func(ctx *Context, err error)
 )
 
 func NewApplication(name, version string) Application {
@@ -57,9 +58,9 @@ func NewApplication(name, version string) Application {
 	return app
 }
 
-func OnInterrupt(fn func()) {
-	iris.RegisterOnInterrupt(fn)
-}
+// func OnInterrupt(fn func()) {
+// 	iris.RegisterOnInterrupt(fn)
+// }
 
 func NewParty(app Party, relativePath string) Party {
 	return app.Party(relativePath)
@@ -112,11 +113,11 @@ func debug(name, version string) Handler {
 }
 
 func NoRoute(c Context) {
-	Fail(c, types.NewError(http.StatusMethodNotAllowed, "方法不允许"))
+	core.Fail(adapt(c), types.NewError(http.StatusMethodNotAllowed, "方法不允许"))
 }
 
 func NoMethod(c Context) {
-	Fail(c, types.NewError(http.StatusNotFound, "方法未找到"))
+	core.Fail(adapt(c), types.NewError(http.StatusNotFound, "方法未找到"))
 }
 
 func Recovery() Handler {

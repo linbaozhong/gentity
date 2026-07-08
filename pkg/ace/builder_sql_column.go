@@ -71,7 +71,7 @@ func (o *orm) Func(fns ...dialect.Function) Builder {
 func (o *orm) parseFunc(fns []dialect.Function) []string {
 	tmpFuncs := make([]string, 0, len(o.funcs))
 	for _, fn := range fns {
-		tmpFuncs = append(tmpFuncs, fn(o.db.Dialect()))
+		tmpFuncs = append(tmpFuncs, fn(o.x.Dialect()))
 	}
 	return tmpFuncs
 }

@@ -51,7 +51,7 @@ func (o *orm) parseJoin(js []join) (joinStr strings.Builder, params []any, e err
 	var (
 		where strings.Builder
 		val   []any
-		d     = o.db.Dialect()
+		d     = o.x.Dialect()
 	)
 	for _, j := range js {
 		where, val, e = o.parseCond(j.conditions)

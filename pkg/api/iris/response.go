@@ -3,9 +3,7 @@
 
 package api
 
-import (
-	"github.com/linbaozhong/gentity/pkg/api/core"
-)
+import "github.com/linbaozhong/gentity/pkg/api/core"
 
 // Fail 写入错误响应
 func Fail(c Context, e error, args ...any) error {
