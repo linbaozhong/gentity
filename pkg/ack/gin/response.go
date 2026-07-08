@@ -1,9 +1,11 @@
 // Copyright © 2023 SnowIM. All rights reserved.
 // ...license same as before...
 
-package api
+package ack
 
-import "github.com/linbaozhong/gentity/pkg/api/core"
+import (
+	"github.com/linbaozhong/gentity/pkg/ack/core"
+)
 
 // Fail 写入错误响应
 func Fail(c Context, e error, args ...any) error {

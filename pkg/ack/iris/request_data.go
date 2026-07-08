@@ -1,7 +1,7 @@
 // Copyright © 2023 Linbaozhong. All rights reserved.
 // ...license same as before...
 
-package api
+package ack
 
 // ReadJSON Content-Type为application/json的请求
 func ReadJSON(ctx Context, ptr any) error {

@@ -1,9 +1,9 @@
 // Copyright © 2023 Linbaozhong. All rights reserved.
 // ...license same as before...
 
-package api
+package ack
 
-import "github.com/linbaozhong/gentity/pkg/api/core"
+import "github.com/linbaozhong/gentity/pkg/ack/core"
 
 // Initiate 初始化请求上下文
 func Initiate(ctx Context, arg any) {

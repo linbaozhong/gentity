@@ -31,7 +31,7 @@ serverpush.Broadcast("hello world")
 package handler
 
 import (
-	"github.com/linbaozhong/gentity/pkg/api"
+	"github.com/linbaozhong/gentity/pkg/ack"
 	"github.com/linbaozhong/gentity/pkg/serverpush"
 	"github.com/linbaozhong/sse/v2"
 	"time"
@@ -40,15 +40,15 @@ import (
 type sevent struct{}
 
 func init() {
-	api.RegisterRoute(&sevent{})
+	ack.RegisterRoute(&sevent{})
 }
 
-func (s *sevent) RegisterRoute(group api.Party) {
-	g := api.NewParty(group, "/sse")
+func (s *sevent) RegisterRoute(group ack.Party) {
+	g := ack.NewParty(group, "/sse")
 	g.Get("/connect", s.connect)
 }
 
-func (s *sevent) connect(c api.Context) {
+func (s *sevent) connect(c ack.Context) {
 	var _streamId string
 	
 	values := c.Request().URL.Query()

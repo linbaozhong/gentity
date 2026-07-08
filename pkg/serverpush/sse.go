@@ -15,7 +15,7 @@
 package serverpush
 
 import (
-	api "github.com/linbaozhong/gentity/pkg/api/gin"
+	ack "github.com/linbaozhong/gentity/pkg/ack/gin"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/sse/v2"
 	"sync"
@@ -87,7 +87,7 @@ func Boardcast(event *sse.Event) {
 // ServeHTTP 服务端推送
 // streamID: 流ID
 // lastEventId: 上次的event id
-func ServeHTTP(ctx api.Context, streamID, lastEventId string) {
+func ServeHTTP(ctx ack.Context, streamID, lastEventId string) {
 	if _sseServer == nil {
 		Start(WithAutoStream(true), WithAutoReplay(true))
 	}

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package ack
 
 import (
 	"context"
 	"fmt"
 	"github.com/kataras/iris/v12"
-	"github.com/linbaozhong/gentity/pkg/api/core"
+	"github.com/linbaozhong/gentity/pkg/ack/core"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"net/http"

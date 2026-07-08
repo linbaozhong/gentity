@@ -67,8 +67,8 @@ apperr.Wrap(err error, op string) *AppError
 ```go
 import "Mingtianjian/internal/handler"
 
-func Init() api.Application {
-    _app := api.NewApplication("Mingtianjian", "0.1")
+func Init() ack.Application {
+    _app := ack.NewApplication("Mingtianjian", "0.1")
 
     // 添加错误处理中间件
     _app.Use(handler.ErrorMiddleware())
@@ -173,8 +173,8 @@ func CreateMerchant(c context.Context, in *dto.CreateMerchantReq, out *dto.Creat
 ### Handler 层
 
 ```go
-func Init() api.Application {
-    _app := api.NewApplication("Mingtianjian", "0.1")
+func Init() ack.Application {
+    _app := ack.NewApplication("Mingtianjian", "0.1")
 
     // 添加错误处理中间件
     _app.Use(handler.ErrorMiddleware())

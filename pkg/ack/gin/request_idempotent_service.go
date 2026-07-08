@@ -1,12 +1,12 @@
 // Copyright © 2023 Linbaozhong. All rights reserved.
 // ...license same as before...
 
-package api
+package ack
 
 import (
 	"context"
 
-	"github.com/linbaozhong/gentity/pkg/api/core"
+	"github.com/linbaozhong/gentity/pkg/ack/core"
 )
 
 // PostIdempotentResult 支持幂等的 post 请求，返回结果数据

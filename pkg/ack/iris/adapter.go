@@ -1,7 +1,7 @@
 // Copyright © 2023 Linbaozhong. All rights reserved.
 // ...license same as before...
 
-package api
+package ack
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/kataras/iris/v12"
-	"github.com/linbaozhong/gentity/pkg/api/core"
+	"github.com/linbaozhong/gentity/pkg/ack/core"
 )
 
 // ctxAdapter adapts iris.Context to core.Context interface.

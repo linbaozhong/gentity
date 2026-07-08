@@ -43,8 +43,8 @@ type option func(w *wx)
 // 微信 API 地址
 const (
 	wechatAuthURL     = "https://open.weixin.qq.com/connect/oauth2/authorize"
-	wechatTokenURL    = "https://api.weixin.qq.com/sns/oauth2/access_token"
-	wechatUserInfoURL = "https://api.weixin.qq.com/sns/userinfo"
+	wechatTokenURL    = "https://ack.weixin.qq.com/sns/oauth2/access_token"
+	wechatUserInfoURL = "https://ack.weixin.qq.com/sns/userinfo"
 )
 
 // WithAppId 设置appid

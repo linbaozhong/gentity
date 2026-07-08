@@ -1,12 +1,12 @@
 // Copyright © 2023 SnowIM. All rights reserved.
 // ...license same as before...
 
-package api
+package ack
 
 import (
 	"context"
 
-	"github.com/linbaozhong/gentity/pkg/api/core"
+	"github.com/linbaozhong/gentity/pkg/ack/core"
 )
 
 // Get get请求：读取query。

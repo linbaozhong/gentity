@@ -1,12 +1,12 @@
 // Copyright © 2023 Linbaozhong. All rights reserved.
 // ...license same as before...
 
-package api
+package ack
 
 import (
 	"context"
 
-	"github.com/linbaozhong/gentity/pkg/api/core"
+	"github.com/linbaozhong/gentity/pkg/ack/core"
 )
 
 // GetResult 调用service处理get请求，并返回结果数据
