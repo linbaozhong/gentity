@@ -45,8 +45,7 @@ func NewApplication(name, version string) Application {
 		"X-Forwarded-For",
 	))
 	// 中间件
-	app.Use(Recovery())
-	app.Use(Logger())
+	app.Use(Logger(), Recovery())
 
 	// 调试服务
 	app.Get("/", debug(name, version))
@@ -57,10 +56,6 @@ func NewApplication(name, version string) Application {
 
 	return app
 }
-
-// func OnInterrupt(fn func()) {
-// 	iris.RegisterOnInterrupt(fn)
-// }
 
 func NewParty(app Party, relativePath string) Party {
 	return app.Party(relativePath)
@@ -97,8 +92,20 @@ func Logger() Handler {
 		Query:  true,
 	})
 }
-func GetHtmlView(dir, extension string, reload bool) *view.HTMLEngine {
+
+// HtmlView 设置 HTML 模板引擎
+// dir: 模板文件目录，如 "./views"
+// extension: 模板文件扩展名，如 ".html"
+// reload: 是否实时加载模板文件
+func HtmlView(dir, extension string, reload bool) *view.HTMLEngine {
 	return iris.HTML(dir, extension).Reload(reload)
+}
+
+// StaticWeb 设置静态文件服务
+// urlPath: URL 访问路径，如 "/static"
+// dir: 静态文件目录，如 "./public"
+func StaticWeb(party Party, urlPath, dir string) {
+	party.HandleDir(urlPath, iris.Dir(dir))
 }
 
 func debug(name, version string) Handler {

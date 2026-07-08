@@ -20,7 +20,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
+	"html/template"
 	"net/http"
+	"path/filepath"
 	"time"
 )
 
@@ -38,12 +40,8 @@ type (
 
 func NewApplication(name, version string) Application {
 	app := gin.New()
-	// .Configure(gin.WithRemoteAddrHeader(
-	// 	"X-Forwarded-For",
-	// ))
 	// 中间件
-	app.Use(Recovery())
-	app.Use(Logger())
+	app.Use(Logger(), Recovery())
 
 	// 调试服务
 	app.GET("/", debug(name, version))
@@ -103,6 +101,23 @@ func Logger() Handler {
 			param.ErrorMessage,
 		)
 	})
+}
+
+// HtmlView 加载 HTML 模板用于网页渲染。
+// 与 iris 包同名函数签名一致，返回类型适配 gin（*template.Template）。
+// 注意: reload 参数保留用于 API 统一，gin 不内置热加载。
+//
+// 使用方式: app.SetHTMLTemplate(HtmlView("views", ".html", false))
+func HtmlView(dir, extension string, reload bool) *template.Template {
+	_ = reload
+	return template.Must(template.ParseGlob(filepath.Join(dir, "*"+extension)))
+}
+
+// StaticWeb 设置静态文件服务
+// urlPath: URL 访问路径，如 "/static"
+// dir: 静态文件目录，如 "./public"
+func StaticWeb(party Party, urlPath, dir string) {
+	party.Static(urlPath, dir)
 }
 
 func debug(name, version string) Handler {

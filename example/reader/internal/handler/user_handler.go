@@ -3,7 +3,7 @@ package handler
 import (
 	_ "github.com/linbaozhong/gentity/example/reader/internal/model/dto"
 	userService "github.com/linbaozhong/gentity/example/reader/internal/service/user"
-	api "github.com/linbaozhong/gentity/pkg/api/gin"
+	"github.com/linbaozhong/gentity/pkg/api/gin"
 	"github.com/linbaozhong/gentity/pkg/serverpush"
 	"github.com/linbaozhong/gentity/pkg/token"
 )

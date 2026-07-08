@@ -8,10 +8,8 @@ import (
 func Init(port string) *api.Server {
 	_app := api.NewApplication("abc", "0.1")
 
-	_app.Use(api.Recovery())
-	_app.Use(api.Logger())
-
 	_v1 := api.NewParty(_app, "/v1")
+
 	// 注册路由
 	api.RegisterRouter(_v1)
 

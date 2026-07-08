@@ -2,7 +2,7 @@ package handler
 
 import (
 	userService "github.com/linbaozhong/gentity/example/abc/internal/service/user"
-	api "github.com/linbaozhong/gentity/pkg/api/iris"
+	"github.com/linbaozhong/gentity/pkg/api/iris"
 )
 
 type user struct{}
