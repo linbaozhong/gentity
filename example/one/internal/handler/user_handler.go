@@ -1,0 +1,27 @@
+package handler
+
+import (
+	"github.com/linbaozhong/gentity/pkg/ack/iris"
+	userService "one/internal/service/user"
+)
+
+type user struct{}
+
+func init() {
+	ack.RegisterRoute(&user{})
+}
+
+func (u *user) RegisterRoute(group ack.Party) {
+	_g := ack.NewParty(group, "/user")
+
+	_g.Post("/user_register", u.userRegister)
+	_g.Get("/get", u.get)
+}
+
+func (u *user) userRegister(c ack.Context) {
+	ack.Post(c, userService.UserRegister)
+}
+
+func (u *user) get(c ack.Context) {
+	ack.Get(c, userService.GetUser)
+}
