@@ -16,7 +16,6 @@ package pool
 
 import (
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/app"
 	"testing"
 )
 
@@ -26,7 +25,7 @@ type A struct {
 	Age  int
 }
 
-var poolA = New[*A](app.Context, func() any {
+var poolA = New[*A](func() any {
 	_obj := &A{}
 	return _obj
 })
