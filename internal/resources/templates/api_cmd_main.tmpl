@@ -60,9 +60,12 @@ func main() {
 func Prepare() {
 	// 连接数据库
 	service.Connected()
+	// 启动所有代理服务
+	app.Launch()
 }
 
 // Finished 系统关闭后结束所有其他的服务
 func Finished() {
+	// 关闭所有代理服务
 	app.Close()
 }

@@ -9,6 +9,7 @@ var (
 	db *ace.DB
 )
 
+// Connected 连接数据库
 func Connected() error {
 	var e error
 	// 连接数据库
@@ -23,4 +24,9 @@ func Connected() error {
 	db.Debug(true)
 
 	return nil
+}
+
+// DB 返回数据库连接
+func DB() *ace.DB {
+	return db
 }

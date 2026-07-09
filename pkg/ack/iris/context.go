@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"time"
 
+	irisCtx "github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/middleware/logger"
 	"github.com/kataras/iris/v12/view"
 )
@@ -33,11 +34,6 @@ type (
 	Context     = iris.Context
 	Party       = iris.Party
 	Handler     = iris.Handler
-	// ErrorHandler interface {
-	// 	HandleContextError(ctx *Context, err error)
-	// }
-	// // ErrorHandlerFunc a function shortcut for ErrorHandler interface.
-	// ErrorHandlerFunc func(ctx *Context, err error)
 )
 
 func NewApplication(name, version string) Application {
@@ -140,4 +136,12 @@ func Recovery() Handler {
 		}()
 		c.Next()
 	}
+}
+
+func Request(c Context) *http.Request {
+	return c.Request()
+}
+
+func Writer(c Context) irisCtx.ResponseWriter {
+	return c.ResponseWriter()
 }

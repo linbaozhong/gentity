@@ -31,11 +31,6 @@ type (
 	Context     = *gin.Context
 	Party       = *gin.RouterGroup
 	Handler     = gin.HandlerFunc
-	// ErrorHandler interface {
-	// 	HandleContextError(ctx Context, err error)
-	// }
-	// // ErrorHandlerFunc a function shortcut for ErrorHandler interface.
-	// ErrorHandlerFunc func(ctx Context, err error)
 )
 
 func NewApplication(name, version string) Application {
@@ -152,4 +147,11 @@ func Recovery() Handler {
 		}()
 		c.Next()
 	}
+}
+func Request(c Context) *http.Request {
+	return c.Request
+}
+
+func Writer(c Context) gin.ResponseWriter {
+	return c.Writer
 }

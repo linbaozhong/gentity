@@ -121,10 +121,6 @@ func ParseSetter(set Setter, i *uint16, d Dialect) (string, any, error) {
 func (f *Field) Eq(val any) Condition {
 	return Condition{
 		Condition: func(i *uint16, d Dialect) (string, any) {
-			// 空值检查，可根据实际需求决定是否保留
-			if val == nil {
-				return "1 = 0", Err_Condition_Empty_Param
-			}
 			return f.Quote(d) + " = " + d.Placeholder(i), val
 		},
 	}
@@ -134,10 +130,6 @@ func (f *Field) Eq(val any) Condition {
 func (f *Field) NotEq(val any) Condition {
 	return Condition{
 		Condition: func(i *uint16, d Dialect) (string, any) {
-			// 空值检查，可根据实际需求决定是否保留
-			if val == nil {
-				return "1 = 0", Err_Condition_Empty_Param
-			}
 			return f.Quote(d) + " != " + d.Placeholder(i), val
 		},
 	}
@@ -147,10 +139,6 @@ func (f *Field) NotEq(val any) Condition {
 func (f *Field) Gt(val any) Condition {
 	return Condition{
 		Condition: func(i *uint16, d Dialect) (string, any) {
-			// 空值检查，可根据实际需求决定是否保留
-			if val == nil {
-				return "1 = 0", Err_Condition_Empty_Param
-			}
 			return f.Quote(d) + " > " + d.Placeholder(i), val
 		},
 	}
@@ -160,10 +148,6 @@ func (f *Field) Gt(val any) Condition {
 func (f *Field) Gte(val any) Condition {
 	return Condition{
 		Condition: func(i *uint16, d Dialect) (string, any) {
-			// 空值检查，可根据实际需求决定是否保留
-			if val == nil {
-				return "1 = 0", Err_Condition_Empty_Param
-			}
 			return f.Quote(d) + " >= " + d.Placeholder(i), val
 		},
 	}
@@ -174,10 +158,6 @@ func (f *Field) Gte(val any) Condition {
 func (f *Field) Lt(val any) Condition {
 	return Condition{
 		Condition: func(i *uint16, d Dialect) (string, any) {
-			// 空值检查，可根据实际需求决定是否保留
-			if val == nil {
-				return "1 = 0", Err_Condition_Empty_Param
-			}
 			return f.Quote(d) + " < " + d.Placeholder(i), val
 		},
 	}
@@ -187,10 +167,6 @@ func (f *Field) Lt(val any) Condition {
 func (f *Field) Lte(val any) Condition {
 	return Condition{
 		Condition: func(i *uint16, d Dialect) (string, any) {
-			// 空值检查，可根据实际需求决定是否保留
-			if val == nil {
-				return "1 = 0", Err_Condition_Empty_Param
-			}
 			return f.Quote(d) + " <= " + d.Placeholder(i), val
 		},
 	}
@@ -295,9 +271,6 @@ func (f *Field) Between(vals ...any) Condition {
 func (f *Field) Like(val any) Condition {
 	return Condition{
 		Condition: func(i *uint16, d Dialect) (string, any) {
-			if val == nil {
-				return "1 = 0", Err_Condition_Empty_Param
-			}
 			return f.Quote(d) + " Like '%' || " + d.Placeholder(i) + " || '%'", val
 		},
 	}
@@ -307,9 +280,6 @@ func (f *Field) Like(val any) Condition {
 func (f *Field) Llike(val any) Condition {
 	return Condition{
 		Condition: func(i *uint16, d Dialect) (string, any) {
-			if val == nil {
-				return "1 = 0", Err_Condition_Empty_Param
-			}
 			return f.Quote(d) + " Like '%' || " + d.Placeholder(i), val
 		},
 	}
@@ -319,9 +289,6 @@ func (f *Field) Llike(val any) Condition {
 func (f *Field) Rlike(val any) Condition {
 	return Condition{
 		Condition: func(i *uint16, d Dialect) (string, any) {
-			if val == nil {
-				return "1 = 0", Err_Condition_Empty_Param
-			}
 			return f.Quote(d) + " Like " + d.Placeholder(i) + " || '%'", val
 		},
 	}

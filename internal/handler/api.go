@@ -73,50 +73,61 @@ func initApi(dir string) error {
 func generate(name string) error {
 	// 初始化模块
 	e := apiInitModule(name)
-	// if e != nil {
-	// 	showError(e)
-	// 	return e
-	// }
+	if e != nil {
+		showError(e)
+		return e
+	}
 
 	// 生成其他文件
-	e = apiCmd(name)
-	if e != nil {
+	if e = apiCmd(name); e != nil {
 		showError(e)
 		return e
 	}
 
-	e = apiHandler(name)
-	if e != nil {
+	if e = apiHandler(name); e != nil {
 		showError(e)
 		return e
 	}
 
-	e = apiRouter(name)
-	if e != nil {
+	if e = apiRouter(name); e != nil {
 		showError(e)
 		return e
 	}
 
-	e = apiModel(name)
-	if e != nil {
+	if e = apiModel(name); e != nil {
 		showError(e)
 		return e
 	}
 
-	e = apiConstant(name)
-	if e != nil {
+	if e = apiConstant(name); e != nil {
 		showError(e)
 		return e
 	}
 
-	e = apiServiceInit(name)
-	if e != nil {
+	if e = apiServiceInit(name); e != nil {
 		showError(e)
 		return e
 	}
 
-	e = apiService(name)
-	if e != nil {
+	if e = apiService(name); e != nil {
+		showError(e)
+		return e
+	}
+
+	// 生成dto和dao
+	if e = os.Chdir("internal/model"); e != nil {
+		showError(e)
+		return e
+	}
+
+	log.Printf("The DTO code is being generated ... \n")
+	if e = exec.Command("gentity", "dao", "./do").Run(); e != nil {
+		showError(e)
+		return e
+	}
+
+	log.Printf("The DAO code is being generated ... \n")
+	if e = exec.Command("gentity", "dto", "./dto").Run(); e != nil {
 		showError(e)
 		return e
 	}
@@ -279,8 +290,8 @@ func apiService(name string) error {
 }
 
 func apiModel(name string) error {
-	log.Printf("Creating new api model file. \n")
-	const parent = "internal/model/dto"
+	log.Printf("Creating new api dto file. \n")
+	var parent = "internal/model/dto"
 	e := os.MkdirAll(parent, os.ModePerm)
 	if e != nil {
 		return e
@@ -296,11 +307,50 @@ func apiModel(name string) error {
 
 			_tmpl := template.New("")
 			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_model_dto.tmpl")
-			return _tmpl.ExecuteTemplate(_f, "api_internal_model_dto.tmpl", struct {
+			if e != nil {
+				return e
+			}
+			e = _tmpl.ExecuteTemplate(_f, "api_internal_model_dto.tmpl", struct {
 				ModulePath string
 			}{
 				ModulePath: name,
 			})
+			if e != nil {
+				return e
+			}
+		}
+	} else {
+		showError(parent + "/user.go already exists")
+	}
+	// 创建 do文件
+	log.Printf("Creating new api do file. \n")
+	parent = "internal/model/do"
+	e = os.MkdirAll(parent, os.ModePerm)
+	if e != nil {
+		return e
+	}
+	_, e = os.Stat(parent + "/user.go")
+	if e != nil {
+		if os.IsNotExist(e) {
+			_f, e := os.OpenFile(parent+"/user.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if e != nil {
+				return e
+			}
+			defer _f.Close()
+
+			_tmpl := template.New("")
+			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_model_do.tmpl")
+			if e != nil {
+				return e
+			}
+			e = _tmpl.ExecuteTemplate(_f, "api_internal_model_do.tmpl", struct {
+				ModulePath string
+			}{
+				ModulePath: name,
+			})
+			if e != nil {
+				return e
+			}
 		}
 	} else {
 		showError(parent + "/user.go already exists")

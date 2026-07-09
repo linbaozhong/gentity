@@ -27,7 +27,7 @@ import (
 func Initiate(ctx Context, arg any) {
 	ctx.Values().Set(IpKey, ctx.RemoteAddr())
 	ctx.Values().Set(UserAgent, ctx.Request().UserAgent())
-	ctx.Values().Set(AuthorizationKey, ctx.GetHeader(AuthorizationKey))
+	ctx.Values().Set(Authorization, ctx.GetHeader(Authorization))
 
 	id := ctx.GetHeader(OperationID)
 	if len(id) == 0 {
