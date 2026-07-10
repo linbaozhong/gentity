@@ -65,7 +65,7 @@ func Ok(c Context, args ...any) error {
 
 	// Cache GET responses
 	if c.Method() == http.MethodGet {
-		key := c.Values().Get(hasCacheKey)
+		key := c.Values().Get(hasCache)
 		if ck, ok := key.(cacheKey); ok {
 			buf, e := json.Marshal(j)
 			if e == nil {

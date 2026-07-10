@@ -26,14 +26,14 @@ func ReadCache(ctx Context, lefetime ...time.Duration) bool {
 	if vals == nil {
 		vals = make(map[string][]string)
 	}
-	vals.Set("_t", ctx.GetHeader(Authorization))
+
 	key := u.Path + "?" + vals.Encode()
 
 	duration := time.Second * 30
 	if len(lefetime) > 0 {
 		duration = lefetime[0]
 	}
-	ctx.Values().Set(hasCacheKey, cacheKey{Key: key, Duration: duration})
+	ctx.Values().Set(hasCache, cacheKey{Key: key, Duration: duration})
 
 	buf, e := respCache.Fetch(ctx, key)
 	if e != nil || len(buf) == 0 {

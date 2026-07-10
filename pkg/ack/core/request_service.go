@@ -18,22 +18,22 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/linbaozhong/gentity/pkg/types"
 )
 
-// Initiate 初始化请求上下文，设置 IP、UserAgent、Authorization 和 OperationID。
+// Initiate 初始化请求上下文，设置 IP、UserAgent、Authorization 和 RequestId。
 func Initiate(ctx Context, arg any) {
 	ctx.Values().Set(IpKey, ctx.RemoteAddr())
 	ctx.Values().Set(UserAgent, ctx.Request().UserAgent())
-	ctx.Values().Set(Authorization, ctx.GetHeader(Authorization))
 
-	id := ctx.GetHeader(OperationID)
+	id := ctx.GetHeader(RequestId)
 	if len(id) == 0 {
-		ctx.Values().Set(OperationID, fmtUnixMilli())
+		ctx.Values().Set(RequestId, strconv.FormatInt(time.Now().UnixMilli(), 10))
 	} else {
-		ctx.Values().Set(OperationID, id)
+		ctx.Values().Set(RequestId, id)
 	}
 
 	if ier, ok := arg.(Initializer); ok {
@@ -47,10 +47,6 @@ func Validate(arg any) error {
 		return checker.Check()
 	}
 	return nil
-}
-
-func fmtUnixMilli() string {
-	return fmt.Sprintf("%d", time.Now().UnixMilli())
 }
 
 // GetResult handles a GET request and returns result data.

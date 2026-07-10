@@ -1,11 +1,10 @@
 package core
 
 const (
-	IpKey         = "__IP__"
-	UserAgent     = "__UserAgent__"
-	Authorization = "Authorization"
-	OperationID   = "OperationId"
-)
+	IpKey     = "_ip_"
+	UserAgent = "_user_agent_"
+	RequestId = "request_id"
 
-// Response cache keys (internal)
-const hasCacheKey = "_HAS_CACHE_"
+	// Response cache keys (internal)
+	hasCache = "_has_cache_"
+)
