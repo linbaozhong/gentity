@@ -74,10 +74,14 @@ var (
 			switch command {
 			case "api", "new": // 如果command="api"或"new"，则按照api模板创建新项目
 				if len(args) > 1 {
-					generateApi(path)
+					generate(path, BackEnd)
 				} else {
 					showError("The project name is not entered")
 				}
+				return
+			case "mp", "web":
+				generate(path, FrontEnd)
+				fmt.Println(fullpath)
 				return
 			case "init":
 				initApi(".")

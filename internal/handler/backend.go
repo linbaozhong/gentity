@@ -23,6 +23,18 @@ import (
 	"text/template"
 )
 
+// Mode 项目模式
+type Mode string
+
+const (
+	FrontEnd Mode = "frontend" //前端项目
+	BackEnd  Mode = "backend"  //后端项目
+)
+
+func (m Mode) String() string {
+	return string(m)
+}
+
 func parseFolder(name string) (string, error) {
 	_dir, e := os.Getwd()
 	if e != nil {
@@ -31,15 +43,20 @@ func parseFolder(name string) (string, error) {
 	return filepath.Join(_dir, name), nil
 }
 
-func generateApi(name string) error {
-	_dir, e := parseFolder(name)
+func generate(name string, modes ...Mode) error {
+	var mode = BackEnd
+	if len(modes) > 0 {
+		mode = modes[0]
+	}
+
+	_dir, e := parseFolder(filepath.Join(name, mode.String()))
 	if e != nil {
 		return e
 	}
 	_, e = os.Stat(_dir)
 	if e != nil {
 		if os.IsNotExist(e) {
-			e = os.Mkdir(_dir, os.ModePerm)
+			e = os.MkdirAll(_dir, os.ModePerm)
 			if e != nil {
 				showError(e)
 				return e
@@ -59,18 +76,26 @@ func generateApi(name string) error {
 		return e
 	}
 
-	return generate(name)
+	switch mode {
+	case FrontEnd:
+		e = frontend(name)
+	case BackEnd:
+		e = backend(name)
+	}
+	return e
 }
 
+// initApi 将指定文件夹初始化为后端 api 项目框架
 func initApi(dir string) error {
 	name, e := parseFolder(dir)
 	if e != nil {
 		return e
 	}
-	return generate(filepath.Base(name))
+	return backend(filepath.Base(name))
 }
 
-func generate(name string) error {
+// backend 生成后端 api 项目框架
+func backend(name string) error {
 	// 初始化模块
 	e := apiInitModule(name)
 	if e != nil {
