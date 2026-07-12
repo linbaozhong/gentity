@@ -1,12 +1,17 @@
 package handler
 
 import (
+	"github.com/linbaozhong/gentity/example/tuitui/internal/lib"
 	"github.com/linbaozhong/gentity/pkg/ack/iris"
 	"{{.ModulePath}}/internal/lib"
 	userService "{{.ModulePath}}/internal/service/user"
 )
 
 type user struct{}
+
+var (
+	idempotencyConfig = ack.DefaultIdempotencyConfig(mmap.New())
+)
 
 func init() {
 	ack.RegisterRoute(&user{})
@@ -24,7 +29,10 @@ func (u *user) RegisterRoute(group ack.Party) {
 }
 
 func (u *user) userRegister(c ack.Context) {
+	// 如果不需要保持接口的幂等性，则使用下面的 Post 方法
 	ack.Post(c, userService.UserRegister)
+	// 如果需要保持接口的幂等性，则使用下面的 PostIdempotent 方法
+	ack.PostIdempotent(c, idempotencyConfig, userService.UserRegister)
 }
 
 func (u *user) get(c ack.Context) {

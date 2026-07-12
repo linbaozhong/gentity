@@ -27,10 +27,16 @@ import (
 )
 
 type (
+	IRouter interface {
+		Group(string, ...Handler) *gin.RouterGroup
+	}
+
 	Application = *gin.Engine
 	Context     = *gin.Context
-	Party       = *gin.RouterGroup
-	Handler     = gin.HandlerFunc
+	Party       struct {
+		*gin.RouterGroup
+	}
+	Handler = gin.HandlerFunc
 )
 
 func NewApplication(name, version string) Application {
@@ -48,8 +54,34 @@ func NewApplication(name, version string) Application {
 	return app
 }
 
-func NewParty(app gin.IRouter, relativePath string) Party {
-	return app.Group(relativePath)
+func NewParty(app IRouter, relativePath string) Party {
+	return Party{
+		app.Group(relativePath),
+	}
+}
+
+func (p Party) Any(relativePath string, handlers ...Handler) {
+	p.RouterGroup.Any(relativePath, handlers...)
+}
+
+func (p Party) Get(relativePath string, handlers ...Handler) {
+	p.RouterGroup.GET(relativePath, handlers...)
+}
+
+func (p Party) Post(relativePath string, handlers ...Handler) {
+	p.RouterGroup.POST(relativePath, handlers...)
+}
+
+func (p Party) Put(relativePath string, handlers ...Handler) {
+	p.RouterGroup.PUT(relativePath, handlers...)
+}
+
+func (p Party) Delete(relativePath string, handlers ...Handler) {
+	p.RouterGroup.DELETE(relativePath, handlers...)
+}
+
+func (p Party) Patch(relativePath string, handlers ...Handler) {
+	p.RouterGroup.PATCH(relativePath, handlers...)
 }
 
 // Server 封装 gin 的 HTTP 服务器，提供统一的 Run/Shutdown 生命周期接口。
