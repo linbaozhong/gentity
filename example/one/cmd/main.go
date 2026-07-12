@@ -5,16 +5,12 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
+	"one/internal/router"
+	"one/internal/service"
 	"os"
 	"os/signal"
 	"syscall"
-	"one/internal/router"
-	"one/internal/service"
 	"time"
-)
-
-var (
-	_ = app.Context
 )
 
 func main() {
@@ -54,7 +50,6 @@ func main() {
 		log.Error(err)
 	}
 }
-
 
 // Prepare 系统启动所需要的必须服务
 func Prepare() {
