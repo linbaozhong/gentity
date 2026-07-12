@@ -1,11 +1,10 @@
-package user
+package service
 
 import (
 	"{{.ModulePath}}/internal/model/define/dao"
 	"{{.ModulePath}}/internal/model/define/table/tbluser"
 	"{{.ModulePath}}/internal/model/do"
 	"{{.ModulePath}}/internal/model/dto"
-	"{{.ModulePath}}/internal/service"
 	"context"
 	"fmt"
 	"errors"
@@ -26,7 +25,7 @@ func UserRegister(c context.Context, in *dto.UserRegisterReq, out *dto.UserRegis
 func GetUser(c context.Context, in *dto.GetUserReq, out *dto.GetUserResp) error {
 	user := do.NewUser()
 	// 第一种方法
-	e := service.DB().Table(do.UserTableName).
+	e := DB().Table(do.UserTableName).
 		Where(tbluser.Id.Eq(in.UserID)).Select().Get(c, user)
 
 	// 第二种方法
@@ -34,10 +33,10 @@ func GetUser(c context.Context, in *dto.GetUserReq, out *dto.GetUserResp) error 
 		Where(tbluser.Id.Eq(in.UserID)).Select().Get(c, user)
 
 	// 第三种方法
-	user, has, e := dao.User(service.DB()).GetByID(c, types.BigInt(*in.UserID))
+	user, has, e := dao.User(DB()).GetByID(c, types.BigInt(*in.UserID))
 
 	// 第四种方法
-	user, has, e = dao.User(service.DB()).Get(c, ace.Where(tbluser.Id.Eq(in.UserID)))
+	user, has, e = dao.User(DB()).Get(c, ace.Where(tbluser.Id.Eq(in.UserID)))
 
 	if e != nil {
 		return e

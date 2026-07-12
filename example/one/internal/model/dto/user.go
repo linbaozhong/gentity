@@ -19,13 +19,13 @@ type UserRegisterReq struct {
 // UserRegisterResp 用户注册响应数据
 // @response
 type UserRegisterResp struct {
-	UserID   uint64 `json:"user_id"`
+	UserID uint64 `json:"user_id"`
 	UserName string `json:"user_name"`
-	Email    string `json:"email,omitempty"`
+	Email string `json:"email,omitempty"`
 }
 
 // @request
-type GetUserReq struct {
+type GetUserReq struct{
 	UserID *uint64 `json:"user_id"`
 }
 

@@ -9,15 +9,15 @@ import (
 // @tablename user
 type User struct {
 	pool.Model
-	Id       types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`     //
-	Name     types.String `json:"name,omitempty" db:"'name' size:45"`         // 姓名
-	Email    types.String `json:"email,omitempty" db:"'email' size:64"`       // 邮箱
-	Mobile   types.String `json:"mobile,omitempty" db:"'mobile' size:20"`     // 手机号
-	Gender   types.String `json:"gender,omitempty" db:"'gender' size:10"`     // 性别
-	Birthday types.String `json:"birthday,omitempty" db:"'birthday' size:25"` // 出生日期
-	Creator  types.BigInt `json:"creator,omitempty" db:"'creator' size:20"`   // 创建人
-	Status   types.Int8   `json:"status,omitempty" db:"'status' size:3"`      // 状态
-	State    types.Int8   `json:"state,omitempty" db:"'state' size:3"`        // 管理状态：-1=已删除，0=禁用，1=启用
-	Ctime    types.Time   `json:"ctime,omitempty" db:"'ctime' <-"`            //
-	Utime    types.Time   `json:"utime,omitempty" db:"'utime' <-"`            //
+	Id                  types.BigInt `json:"id,omitempty" db:"'id' pk auto size:20"`                                //
+	Name                types.String `json:"name,omitempty" db:"'name' size:45"`                                    // 姓名
+	Email               types.String `json:"email,omitempty" db:"'email' size:64"`                                  // 邮箱
+	Mobile              types.String `json:"mobile,omitempty" db:"'mobile' size:20"`                                // 手机号
+	Gender              types.String `json:"gender,omitempty" db:"'gender' size:10"`                                // 性别
+	Birthday            types.String `json:"birthday,omitempty" db:"'birthday' size:25"`                            // 出生日期
+	Creator             types.BigInt `json:"creator,omitempty" db:"'creator' size:20"`                              // 创建人
+	Status              types.Int8   `json:"status,omitempty" db:"'status' size:3"`                                 // 状态
+	State               types.Int8   `json:"state,omitempty" db:"'state' size:3"`                                   // 管理状态：-1=已删除，0=禁用，1=启用
+	Ctime               types.Time   `json:"ctime,omitempty" db:"'ctime' <-"`                                       //
+	Utime               types.Time   `json:"utime,omitempty" db:"'utime' <-"`                                       //
 }

@@ -266,7 +266,7 @@ func apiServiceInit(name string) error {
 }
 
 func apiService(name string) error {
-	const parent = "internal/service/user"
+	const parent = "internal/service"
 	e := os.MkdirAll(parent, os.ModePerm)
 	if e != nil {
 		return e
@@ -289,7 +289,7 @@ func apiService(name string) error {
 			})
 		}
 	} else {
-		showError("internal/service/user/user_service.go already exists")
+		showError("internal/service/user_service.go already exists")
 	}
 	return nil
 }

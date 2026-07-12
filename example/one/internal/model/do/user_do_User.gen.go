@@ -270,10 +270,12 @@ func (p *User) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string,
 	return cols, vals
 }
 
+//
 func (p *User) AssignKeys() (dialect.Field, any) {
 	return tbluser.PrimaryKey, p.Id
 }
 
+//
 func (p *User) AssignPrimaryKeyValues(result sql.Result) error {
 	_id, e := result.LastInsertId()
 	if e != nil {
