@@ -5,7 +5,7 @@ package ack
 
 import (
 	"context"
-	"github.com/linbaozhong/gentity/pkg/ack/core"
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
 	"github.com/linbaozhong/gentity/pkg/cachego"
 )
 

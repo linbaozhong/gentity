@@ -3,7 +3,9 @@
 
 package ack
 
-import "github.com/linbaozhong/gentity/pkg/ack/core"
+import (
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
+)
 
 // Initiate 初始化请求上下文
 func Initiate(ctx Context, arg any) {

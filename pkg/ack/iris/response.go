@@ -3,7 +3,9 @@
 
 package ack
 
-import "github.com/linbaozhong/gentity/pkg/ack/core"
+import (
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
+)
 
 // Fail 写入错误响应
 func Fail(c Context, e error, args ...any) error {

@@ -104,6 +104,11 @@ func generate(name string) error {
 		return e
 	}
 
+	if e = apiLib(name); e != nil {
+		showError(e)
+		return e
+	}
+
 	if e = apiServiceInit(name); e != nil {
 		showError(e)
 		return e
@@ -365,10 +370,10 @@ func apiConstant(name string) error {
 	if e != nil {
 		return e
 	}
-	_, e = os.Stat(parent + "/error.go")
+	_, e = os.Stat(parent + "/consts.go")
 	if e != nil {
 		if os.IsNotExist(e) {
-			_f, e := os.OpenFile(parent+"/error.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			_f, e := os.OpenFile(parent+"/consts.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
 			if e != nil {
 				return e
 			}
@@ -383,7 +388,37 @@ func apiConstant(name string) error {
 			})
 		}
 	} else {
-		showError(parent + "/error.go already exists")
+		showError(parent + "/consts.go already exists")
+	}
+	return nil
+}
+
+func apiLib(name string) error {
+	log.Printf("Creating new api lib file. \n")
+	const parent = "internal/lib"
+	e := os.MkdirAll(parent, os.ModePerm)
+	if e != nil {
+		return e
+	}
+	_, e = os.Stat(parent + "/middleware.go")
+	if e != nil {
+		if os.IsNotExist(e) {
+			_f, e := os.OpenFile(parent+"/middleware.go", os.O_RDWR|os.O_TRUNC|os.O_CREATE, os.ModePerm)
+			if e != nil {
+				return e
+			}
+			defer _f.Close()
+
+			_tmpl := template.New("")
+			_, e = _tmpl.ParseFS(resources.TemplatesFS, "templates/api_internal_lib_middleware.tmpl")
+			return _tmpl.ExecuteTemplate(_f, "api_internal_lib_middleware.tmpl", struct {
+				ModulePath string
+			}{
+				ModulePath: name,
+			})
+		}
+	} else {
+		showError(parent + "/middleware.go already exists")
 	}
 	return nil
 }

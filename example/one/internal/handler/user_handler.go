@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/linbaozhong/gentity/pkg/ack/iris"
+	"one/internal/lib"
 	userService "one/internal/service/user"
 )
 
@@ -15,6 +16,8 @@ func (u *user) RegisterRoute(group ack.Party) {
 	_g := ack.NewParty(group, "/user")
 
 	_g.Post("/user_register", u.userRegister)
+
+	_g.Use(lib.AuthMiddleware())
 	_g.Get("/get", u.get)
 }
 

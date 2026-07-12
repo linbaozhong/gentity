@@ -4,9 +4,8 @@
 package ack
 
 import (
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
 	"time"
-
-	"github.com/linbaozhong/gentity/pkg/ack/core"
 )
 
 // ReadCache 读取缓存，如果命中则直接写入响应并返回 true。

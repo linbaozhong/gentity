@@ -5,8 +5,7 @@ package ack
 
 import (
 	"context"
-
-	"github.com/linbaozhong/gentity/pkg/ack/core"
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
 )
 
 // PostIdempotentResult 支持幂等的 post 请求，返回结果数据

@@ -2,8 +2,10 @@ package constant
 
 import "github.com/linbaozhong/gentity/pkg/types"
 
+const (
+	Authorization = "Authorization"
+)
+
 var (
-	ErrUserName = types.NewError(501, "用户名不能为空")
-	ErrPassword = types.NewError(502, "密码不能为空")
-	ErrUserID   = types.NewError(503, "用户ID不能为空")
+	ErrAuthorizationNotFound = types.NewError(400, "访问令牌缺失")
 )

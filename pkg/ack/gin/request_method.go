@@ -5,8 +5,7 @@ package ack
 
 import (
 	"context"
-
-	"github.com/linbaozhong/gentity/pkg/ack/core"
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
 )
 
 // Get get请求：读取query。

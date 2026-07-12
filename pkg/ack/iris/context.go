@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/kataras/iris/v12"
-	"github.com/linbaozhong/gentity/pkg/ack/core"
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/types"
 	"net/http"

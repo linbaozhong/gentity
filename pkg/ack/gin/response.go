@@ -4,7 +4,7 @@
 package ack
 
 import (
-	"github.com/linbaozhong/gentity/pkg/ack/core"
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
 )
 
 // Fail 写入错误响应

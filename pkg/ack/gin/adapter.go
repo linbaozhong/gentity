@@ -6,11 +6,11 @@ package ack
 import (
 	"encoding/json"
 	"errors"
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
 	"io"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/linbaozhong/gentity/pkg/ack/core"
 )
 
 // ctxAdapter adapts gin.Context to core.Context interface.
