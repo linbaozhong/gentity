@@ -1,23 +1,23 @@
 package service
 
 import (
+	"context"
+	"errors"
+	"fmt"
+	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/types"
 	"one/internal/model/define/dao"
 	"one/internal/model/define/table/tbluser"
 	"one/internal/model/do"
 	"one/internal/model/dto"
-	"context"
-	"fmt"
-	"errors"
-	"github.com/linbaozhong/gentity/pkg/ace"
-	"github.com/linbaozhong/gentity/pkg/types"
 )
 
 func UserRegister(c context.Context, in *dto.UserRegisterReq, out *dto.UserRegisterResp) error {
 	// todo: 在这里做用户注册，返回用户信息
-	fmt.Println("UserRegister:",in)
+	fmt.Println("UserRegister:", in)
 
-	out.UserID=12345678
-	out.UserName="哈利蔺特"
+	out.UserID = 12345678
+	out.UserName = "哈利蔺特"
 
 	return nil
 }
@@ -25,7 +25,7 @@ func UserRegister(c context.Context, in *dto.UserRegisterReq, out *dto.UserRegis
 func GetUser(c context.Context, in *dto.GetUserReq, out *dto.GetUserResp) error {
 	user := do.NewUser()
 	// 第一种方法
-	e := DB().Table(do.UserTableName).
+	e := db.Table(do.UserTableName).
 		Where(tbluser.Id.Eq(in.UserID)).Select().Get(c, user)
 
 	// 第二种方法
@@ -33,10 +33,10 @@ func GetUser(c context.Context, in *dto.GetUserReq, out *dto.GetUserResp) error 
 		Where(tbluser.Id.Eq(in.UserID)).Select().Get(c, user)
 
 	// 第三种方法
-	user, has, e := dao.User(DB()).GetByID(c, types.BigInt(*in.UserID))
+	user, has, e := dao.User(db).GetByID(c, types.BigInt(*in.UserID))
 
 	// 第四种方法
-	user, has, e = dao.User(DB()).Get(c, ace.Where(tbluser.Id.Eq(in.UserID)))
+	user, has, e = dao.User(db).Get(c, ace.Where(tbluser.Id.Eq(in.UserID)))
 
 	if e != nil {
 		return e
