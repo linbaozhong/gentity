@@ -16,5 +16,5 @@ package resources
 
 import "embed"
 
-//go:embed templates/*.tmpl
+//go:embed templates/*.tmpl templates/fe/*.tmpl
 var TemplatesFS embed.FS

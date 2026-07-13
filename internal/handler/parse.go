@@ -59,10 +59,10 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 		return nil, nil
 	}
 
-	//_imps := make([]string, 0, len(_file.Imports))
-	//for _, im := range _file.Imports {
+	// _imps := make([]string, 0, len(_file.Imports))
+	// for _, im := range _file.Imports {
 	//	_imps = append(_imps, im.Package)
-	//}
+	// }
 	// 文件中全部符合条件的struct模板
 	_tplsData := make([]TempData, 0, len(_file.Structures))
 	// 遍历struct
@@ -86,7 +86,7 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			Relation:    Relation{},
 			// Relations:   make([]Relation, 0), // ← 新增这一行
 			Columns: make([]Field, 0, 20),
-			//VisitorName: "",
+			// VisitorName: "",
 		}
 		// 解析struct文档
 		parseDocs(&_tempData, stru.Docs, tags...)
@@ -158,11 +158,11 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			_namejson.Rw = rw
 
 			if strings.HasPrefix(_namejson.Type, "types.") {
-				//_tempData.HasCustomType = true
+				// _tempData.HasCustomType = true
 				_tempData.Imports["github.com/linbaozhong/gentity/pkg/types"] = struct{}{}
 			}
 			if _namejson.Type == "time.Time" || _namejson.Type == "*time.Time" {
-				//_tempData.HasTime = true
+				// _tempData.HasTime = true
 				_tempData.Imports["time"] = struct{}{}
 			}
 
@@ -249,6 +249,9 @@ func parseDocs(tmp *TempData, docs []string, tags ...string) {
 					break
 				}
 			}
+		}
+		if strings.HasPrefix(doc, "@path ") {
+			tmp.Path = strings.TrimSpace(strings.TrimLeft(doc, "@path"))
 		}
 
 		if strings.HasPrefix(doc, "@cache ") {

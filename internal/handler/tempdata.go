@@ -45,9 +45,13 @@ type TempData struct {
 	HasPrimaryKey bool
 	HasRef        bool // 有引用类型
 	HasCache      bool
-	//HasCustomType bool
-	//HasTime       bool
-	//VisitorName   string // 访问者字段名
+	// HasCustomType bool
+	// HasTime       bool
+	// VisitorName   string // 访问者字段名
+
+	Path   string // @path 文档标签，自定义接口路径
+	Entity string // 前端实体前缀（由结构体名推导，如 user）
+	Group  string // 接口分组前缀（--group）
 }
 
 // Field struct 字段
@@ -468,4 +472,185 @@ func writeToFormatFile(fullFilename string, funcMap template.FuncMap, fn func(io
 		return e
 	}
 	return e
+}
+
+// toJsType 将 Go 字段类型映射为 JSDoc 类型
+func toJsType(t Field) string {
+	v := t.Type
+	if strings.HasPrefix(v, "*") {
+		v = v[1:]
+	}
+	switch v {
+	case "string", "types.String", "time.Time", "types.Time":
+		return "string"
+	case "int", "int8", "int16", "int32", "int64",
+		"uint", "uint8", "uint16", "uint32", "uint64",
+		"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64",
+		"types.Uint", "types.Uint8", "types.Uint16", "types.Uint32", "types.Uint64",
+		"types.BigInt", "types.Money",
+		"float32", "float64", "types.Float32", "types.Float64":
+		return "number"
+	case "bool", "types.Bool":
+		return "boolean"
+	default:
+		return "any"
+	}
+}
+
+// entityStripSuffixes 推导实体前缀时需要剥离的后缀（动作词 + Req/Resp）
+var entityStripSuffixes = []string{
+	"Req", "Resp", "Request", "Response",
+	"Register", "Login", "Create", "Update", "Edit", "Get", "List",
+	"Search", "Delete", "Detail", "Info", "Query",
+}
+
+// toEntity 由结构体名推导实体前缀，如 UserRegisterReq -> user
+func toEntity(structName string) string {
+	s := structName
+	for {
+		matched := false
+		for _, suf := range entityStripSuffixes {
+			if strings.HasSuffix(s, suf) && len(s) > len(suf) {
+				s = s[:len(s)-len(suf)]
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			break
+		}
+	}
+	return getFieldName(s)
+}
+
+// toPascal 下划线转大驼峰，如 user -> User
+func toPascal(s string) string {
+	parts := strings.Split(s, "_")
+	var b strings.Builder
+	for _, p := range parts {
+		if len(p) == 0 {
+			continue
+		}
+		b.WriteString(strings.ToUpper(p[:1]) + p[1:])
+	}
+	return b.String()
+}
+
+// toValidRule 将单个 valid 标签转为前端校验规则对象字面量（JS）
+func toValidRule(valid string, f Field, entity string) string {
+	msg := "t('" + entity + "." + f.Json.Name + "_invalid')"
+	if i := strings.Index(valid, "~"); i >= 0 {
+		msg = "\"" + valid[i+1:] + "\""
+		valid = valid[:i]
+	}
+	var sb strings.Builder
+	sb.WriteString("{ ")
+	if pos := strings.Index(valid, "("); pos > 0 {
+		pos1 := strings.Index(valid, ")")
+		if pos1 > pos {
+			tag := valid[:pos]
+			params := valid[pos+1 : pos1]
+			switch tag {
+			case "maxstringlength":
+				sb.WriteString("max: " + params)
+			case "minstringlength":
+				sb.WriteString("min: " + params)
+			case "stringlength", "length":
+				if ps := strings.Split(params, "|"); len(ps) == 2 {
+					sb.WriteString("min: " + ps[0] + ", max: " + ps[1])
+				}
+			case "range":
+				if ps := strings.Split(params, "|"); len(ps) == 2 {
+					sb.WriteString("min: " + ps[0] + ", max: " + ps[1])
+				}
+			case "min":
+				sb.WriteString("min: " + params)
+			case "max":
+				sb.WriteString("max: " + params)
+			case "in":
+				sb.WriteString("oneOf: [")
+				for i, p := range strings.Split(params, "|") {
+					if i > 0 {
+						sb.WriteString(", ")
+					}
+					sb.WriteString("\"" + p + "\"")
+				}
+				sb.WriteString("]")
+			}
+		}
+	} else {
+		switch valid {
+		case "required":
+			sb.WriteString("required: true, message: " + msg)
+		case "email":
+			sb.WriteString("type: 'email'")
+		case "mobile":
+			sb.WriteString("pattern: /^1[3456789]\\d{9}$/")
+		case "int":
+			sb.WriteString("type: 'integer'")
+		case "float":
+			sb.WriteString("type: 'number'")
+		case "alphanum":
+			sb.WriteString("pattern: /^[a-zA-Z0-9]+$/")
+		default:
+			sb.WriteString("/* unsupported valid: " + valid + " */")
+		}
+	}
+	sb.WriteString(" }")
+	return sb.String()
+}
+
+// toEndpoint 推导接口路径（可被 @path 覆盖，M1 先用启发式）
+func toEndpoint(structName, group string) string {
+	s := structName
+	for _, suf := range []string{"Req", "Resp", "Request", "Response"} {
+		if strings.HasSuffix(s, suf) {
+			s = s[:len(s)-len(suf)]
+			break
+		}
+	}
+	ep := toPascal(toEntity(structName))
+	if strings.HasPrefix(s, ep) {
+		s = s[len(ep):]
+	}
+	action := getFieldName(s)
+	if group != "" {
+		return "/" + group + "/" + action
+	}
+	return "/" + toEntity(structName) + "/" + action
+}
+
+// hasTag 判断 TempData 是否带某解析标签
+func hasTag(td TempData, tag string) bool {
+	for _, t := range td.ParseTag {
+		if t == tag {
+			return true
+		}
+	}
+	return false
+}
+
+// toOptions 从 valid:"in(a|b|c)" 提取选项
+func toOptions(f Field) []string {
+	for _, v := range f.Valids {
+		if strings.HasPrefix(v, "in(") && strings.HasSuffix(v, ")") {
+			return strings.Split(v[len("in("):len(v)-1], "|")
+		}
+	}
+	return nil
+}
+
+// mockValue 生成字段的 mock 初值
+func mockValue(f Field) string {
+	switch {
+	case strings.Contains(f.Type, "string") || f.Type == "types.String":
+		return "\"\""
+	case strings.Contains(f.Type, "int") || strings.Contains(f.Type, "uint") ||
+		strings.Contains(f.Type, "Money") || strings.Contains(f.Type, "Float"):
+		return "0"
+	case strings.Contains(f.Type, "bool"):
+		return "false"
+	default:
+		return "null"
+	}
 }

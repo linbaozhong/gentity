@@ -34,6 +34,10 @@ var (
 	fullpath string // struct文件全路径
 	parent   string // struct文件父级目录
 
+	feTarget string // 新增：pc|h5|mp|all
+	feOut    string // 新增：输出目录
+	feGroup  string // 新增：接口分组前缀
+
 	tablePath string // table文件全路径
 	daoPath   string // dao文件全路径
 
@@ -50,6 +54,7 @@ var (
 	gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 	gentity sql .\do mysql .\database.sql
 	gentity check .\dto
+	gentity fe ./dto --target pc
 	gentity version`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
@@ -79,10 +84,10 @@ var (
 					showError("The project name is not entered")
 				}
 				return
-			case "mp", "web":
-				generate(path, FrontEnd)
-				fmt.Println(fullpath)
-				return
+			// case "mp", "web":
+			// 	generate(path, FrontEnd)
+			// 	fmt.Println(fullpath)
+			// 	return
 			case "init":
 				initApi(".")
 				return
@@ -119,7 +124,7 @@ var (
 				// if e != nil {
 				//	showError(e)
 				// }
-			case "check", "dto":
+			case "check", "dto", "fe":
 			case "swag":
 			case "version":
 				fmt.Println("ver." + version)
@@ -179,6 +184,15 @@ var (
 						showError(e)
 					}
 					e = generateDTO(_tds, filename)
+				} else if command == "fe" {
+					if filename == dentityDTO {
+						continue
+					}
+					_tds, e := parseFile(filename, pkgPath, "@request", "@response")
+					if e != nil {
+						showError(e)
+					}
+					e = generateFrontend(_tds, filename, feTarget, feOut, feGroup)
 				} else {
 					_tds, e := parseFile(filename, pkgPath, "@tablename")
 					if e != nil {
@@ -200,6 +214,12 @@ var (
 		},
 	}
 )
+
+func init() {
+	launch.Flags().StringVar(&feTarget, "target", "all", "前端目标: pc|h5|mp|all")
+	launch.Flags().StringVar(&feOut, "out", "./frontend", "前端代码输出目录")
+	launch.Flags().StringVar(&feGroup, "group", "", "接口分组前缀，用于 i18n key 与 endpoint")
+}
 
 func showError(msg any) {
 	_, file, line, _ := runtime.Caller(1)
