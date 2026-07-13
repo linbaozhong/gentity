@@ -1,0 +1,13 @@
+<script setup>
+    const props = defineProps({
+        row: { type: Object, default: null },
+    })
+    const emit = defineEmits(['edit', 'delete'])
+</script>
+
+<template>
+	<view class="row-actions">
+		<button size="mini" @click="emit('edit', row)">{{ "{{" }} t('{{$.Entity}}.edit') {{ "}}" }}</button>
+		<button size="mini" @click="emit('delete', row)">{{ "{{" }} t('{{$.Entity}}.delete') {{ "}}" }}</button>
+	</view>
+</template>

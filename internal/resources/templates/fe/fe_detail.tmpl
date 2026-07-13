@@ -1,0 +1,17 @@
+<script setup>
+    /**
+     * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
+     */
+    const props = defineProps({
+        value: { type: Object, default: () => ({}) },
+    })
+</script>
+
+<template>
+	<dl class="detail-list">
+        {{ range .Columns }}{{ if not (isSlice .) }}    <div class="detail-item">
+			<dt>{{ "{{" }} t('{{$.Entity}}.{{.Json.Name}}') {{ "}}" }}</dt>
+			<dd>{{ "{{" }} value.{{.Json.Name}} {{ "}}" }}</dd>
+		</div>
+        {{ end }}{{ end }}  </dl>
+</template>

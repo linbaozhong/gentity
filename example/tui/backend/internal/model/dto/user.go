@@ -30,3 +30,21 @@ type GetUserResp struct {
 	UserName string `json:"user_name"`
 	Email    string `json:"email,omitempty"`
 }
+
+// @request
+type UserListReq struct {
+	Name   string `json:"name"`
+	Status string `json:"status" valid:"in(active|inactive)"` // 生成 SearchForm 含下拉
+}
+
+// @response
+type UserListResp struct {
+	List  []User `json:"list"`
+	Total int    `json:"total"`
+}
+
+type User struct {
+	UserID   uint64 `json:"user_id"`
+	UserName string `json:"user_name"`
+	Email    string `json:"email,omitempty"`
+}

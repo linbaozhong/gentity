@@ -2,8 +2,8 @@
 // API 请求层（需项目提供 request 封装）
 {{ if hasTag . "@request" }}
 	/**
-	* @param {import('../shared/{{.Entity}}.types.js').{{.StructName}}} req
-	* @returns {Promise<import('../shared/{{.Entity}}.types.js').{{ replace .StructName "Req" "Resp" }}>}
+	* @param {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} req
+	* @returns {Promise<import('../shared/{{ replace .StructName "Req" "Resp" }}.types.js').{{ replace .StructName "Req" "Resp" }}>}
 	*/
 	export function {{ lower .StructName }}(req) {
 	return request('{{ toEndpoint .StructName $.Group }}', req)

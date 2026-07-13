@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -49,9 +50,11 @@ type TempData struct {
 	// HasTime       bool
 	// VisitorName   string // 访问者字段名
 
-	Path   string // @path 文档标签，自定义接口路径
-	Entity string // 前端实体前缀（由结构体名推导，如 user）
-	Group  string // 接口分组前缀（--group）
+	Path           string // @path 文档标签，自定义接口路径
+	Entity         string // 前端实体前缀（由结构体名推导，如 user）
+	Group          string // 接口分组前缀（--group）
+	Platform       string // 前端目标平台：pc | h5 | mp
+	SearchFormComp string // M5: 自动嵌套的 SearchForm 组件文件名（如 UserListReqSearchForm.vue），空表示不嵌套
 }
 
 // Field struct 字段
@@ -640,6 +643,19 @@ func toOptions(f Field) []string {
 	return nil
 }
 
+// toOptionsJS 将字段的 options 转成 JS 数组字面量（uni-app picker 的 range 用）
+func toOptionsJS(f Field) string {
+	opts := toOptions(f)
+	if len(opts) == 0 {
+		return "[]"
+	}
+	parts := make([]string, 0, len(opts))
+	for _, o := range opts {
+		parts = append(parts, strconv.Quote(o))
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
 // mockValue 生成字段的 mock 初值
 func mockValue(f Field) string {
 	switch {
@@ -653,4 +669,74 @@ func mockValue(f Field) string {
 	default:
 		return "null"
 	}
+}
+
+// toMethod 推导 HTTP 方法：Search/List/Query/Get 命名 → get，其余 post
+func toMethod(structName string) string {
+	for _, kw := range []string{"Search", "List", "Query", "Get"} {
+		if strings.Contains(structName, kw) {
+			return "get"
+		}
+	}
+	return "post"
+}
+
+// isListView 判断是否为列表型响应（生成 ListView 用）
+func isListView(structName string) bool {
+	for _, kw := range []string{"List", "Search", "Query", "Page"} {
+		if strings.Contains(structName, kw) {
+			return true
+		}
+	}
+	return false
+}
+
+// isSlice 判断字段是否为切片（表格/卡片一般跳过）
+func isSlice(f Field) bool {
+	return strings.HasPrefix(f.Type, "[]")
+}
+
+// hasValid 判断字段是否带某 valid 标签（如 "email" / "mobile"）
+func hasValid(f Field, v string) bool {
+	for _, x := range f.Valids {
+		if strings.HasPrefix(x, v) {
+			return true
+		}
+	}
+	return false
+}
+
+// toInputType 根据类型/校验推导表单控件类型
+func toInputType(f Field) string {
+	t := f.Type
+	if strings.HasPrefix(t, "*") {
+		t = t[1:]
+	}
+	switch {
+	case toOptions(f) != nil:
+		return "select"
+	case strings.Contains(t, "bool"):
+		return "checkbox"
+	case strings.Contains(t, "int") || strings.Contains(t, "uint") ||
+		strings.Contains(t, "Money") || strings.Contains(t, "Float"):
+		return "number"
+	case strings.Contains(t, "Time"):
+		return "date"
+	case hasValid(f, "email"):
+		return "email"
+	case hasValid(f, "mobile"):
+		return "tel"
+	case strings.EqualFold(f.Json.Name, "password"):
+		return "password"
+	default:
+		return "text"
+	}
+}
+
+// toPkName 返回主键 json 名，无主键回退 "id"（表格行 key 用）
+func toPkName(td TempData) string {
+	if td.PrimaryKey.Json.Name != "" {
+		return td.PrimaryKey.Json.Name
+	}
+	return "id"
 }
