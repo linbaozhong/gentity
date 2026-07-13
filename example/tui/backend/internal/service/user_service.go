@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/ace"
 	"github.com/linbaozhong/gentity/pkg/types"
-	"one/internal/model/define/dao"
-	"one/internal/model/define/table/tbluser"
-	"one/internal/model/do"
-	"one/internal/model/dto"
+	"tui/internal/model/define/dao"
+	"tui/internal/model/define/table/tbluser"
+	"tui/internal/model/do"
+	"tui/internal/model/dto"
 )
 
 func UserRegister(c context.Context, in *dto.UserRegisterReq, out *dto.UserRegisterResp) error {

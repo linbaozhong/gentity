@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"github.com/linbaozhong/gentity/pkg/app"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"one/internal/router"
-	"one/internal/service"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+	"tui/internal/router"
+	"tui/internal/service"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	}
 
 	log.Register(false)
-	log.Info(fmt.Sprintf("%s %s %s 服务开启中...", "one Api", "0.1", _port))
+	log.Info(fmt.Sprintf("%s %s %s 服务开启中...", "tui Api", "0.1", _port))
 
 	// 启动前置服务
 	Prepare()

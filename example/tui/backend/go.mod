@@ -1,4 +1,4 @@
-module one
+module tui
 
 go 1.26.4
 

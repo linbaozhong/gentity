@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/linbaozhong/gentity/pkg/ack/iris"
 	"github.com/linbaozhong/gentity/pkg/cachego/mmap"
-	"one/internal/lib"
-	"one/internal/service"
+	"tui/internal/lib"
+	"tui/internal/service"
 )
 
 type user struct{}

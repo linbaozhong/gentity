@@ -1,8 +1,8 @@
 package lib
 
 import (
-	ack "github.com/linbaozhong/gentity/pkg/ack/iris"
-	"one/internal/constant"
+	"github.com/linbaozhong/gentity/pkg/ack/iris"
+	"tui/internal/constant"
 )
 
 func AuthMiddleware() ack.Handler {

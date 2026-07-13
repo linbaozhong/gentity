@@ -3,7 +3,7 @@ package dto
 // UserRegisterReq 用户注册请求数据
 // @request
 // 字段标签说明(可选项)：
-// json：用于json序列化和反序列化,解析Content-Type为application/json、application/x-www-form-urlencoded和multipart/form-data时使用
+// json：用于json序列化和反序列化,解析Content-Type为application/json、application/x-www-form-urlencoded和multipart/form-data 的数据时使用
 // valid：用于数据校验
 type UserRegisterReq struct {
 	UserName *string `json:"user_name" valid:"required"`
