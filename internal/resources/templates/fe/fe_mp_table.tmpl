@@ -2,7 +2,15 @@
     /**
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
-    import {{{ lower .StructName }}Columns} from './{{ toPascal .StructName }}Columns.js'
+    import {{{lower
+
+    .StructName
+    }
+    }
+    Columns
+    }
+    from
+    './{{ toPascal .StructName }}Columns.js'
 
     const props = defineProps({
         data: {type: Array, default: () => []},
