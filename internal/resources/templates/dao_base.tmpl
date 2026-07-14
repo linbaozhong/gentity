@@ -4,7 +4,7 @@ package dao
 
 import (
 {{- range $i,$t := .}}
-    "{{$t.ModulePath}}/define/dao/dao{{ lower $t.StructName}}"
+	"{{$t.ModulePath}}/define/dao/dao{{ lower $t.StructName}}"
 {{- end}}
 )
 
