@@ -2,11 +2,11 @@
     /**
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
-    import { {{ lower .StructName }}Columns } from './{{ toPascal .StructName }}Columns.js'
+    import {{{ lower .StructName }}Columns} from './{{ toPascal .StructName }}Columns.js'
 
     const props = defineProps({
-        data: { type: Array, default: () => [] },
-        loading: { type: Boolean, default: false },
+        data: {type: Array, default: () => []},
+        loading: {type: Boolean, default: false},
     })
     const emit = defineEmits(['action'])
 </script>
@@ -14,15 +14,19 @@
 <template>
 	<view class="data-table">
 		<view class="tr tr-head">
-			<text v-for="col in {{ lower .StructName }}Columns" :key="col.key" class="th">{{ "{{" }} t(col.titleKey) {{ "}}" }}</text>
+			<text v-for="col in {{ lower .StructName }}Columns" :key="col.key" class="th">{{ "{{" }}
+				t(col.titleKey) {{ "}}" }}</text>
 			<text class="th">{{ "{{" }} t('{{$.Entity}}.actions') {{ "}}" }}</text>
 		</view>
 		<view v-for="row in data" :key="row.{{ toPkName . }}" class="tr">
-			<text v-for="col in {{ lower .StructName }}Columns" :key="col.key" class="td">{{ "{{" }} row[col.key] {{ "}}" }}</text>
+			<text v-for="col in {{ lower .StructName }}Columns" :key="col.key" class="td">{{ "{{" }}
+				row[col.key] {{ "}}" }}</text>
 			<view class="td">
 				<slot name="actions" :row="row">
-					<button size="mini" @click="emit('action', { type: 'edit', row })">{{ "{{" }} t('{{$.Entity}}.edit') {{ "}}" }}</button>
-					<button size="mini" @click="emit('action', { type: 'delete', row })">{{ "{{" }} t('{{$.Entity}}.delete') {{ "}}" }}</button>
+					<button size="mini" @click="emit('action', { type: 'edit', row })">{{ "{{" }} t('{{$.Entity}}
+						.edit') {{ "}}" }}</button>
+					<button size="mini" @click="emit('action', { type: 'delete', row })">{{ "{{" }} t('{{$.Entity}}
+						.delete') {{ "}}" }}</button>
 				</slot>
 			</view>
 		</view>

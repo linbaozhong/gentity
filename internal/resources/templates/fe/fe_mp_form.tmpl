@@ -2,23 +2,26 @@
     /**
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
-    import { {{ lower .StructName }}Rules } from '../shared/{{ lower .StructName }}.validation.js'
+    import {{{ lower .StructName }}Rules} from '../shared/{{ lower .StructName }}.validation.js'
 
     const props = defineProps({
-        mode: { type: String, default: 'create' },
-        modelValue: { type: Object, default: () => ({}) },
+        mode: {type: String, default: 'create'},
+        modelValue: {type: Object, default: () => ({})},
     })
     const emit = defineEmits(['submit', 'cancel'])
 </script>
 
 <template>
 	<view class="fe-form">
-        {{ range .Columns }}    <view class="form-item">
-			<text>{{ "{{" }} t('{{$.Entity}}.{{.Json.Name}}') {{ "}}" }}</text>
-			<input v-model="modelValue.{{.Json.Name}}" />
-		</view>
-        {{ end }}    <view class="form-actions">
-			<button type="primary" @click="emit('submit', modelValue)">{{ "{{" }} t('{{$.Entity}}.submit') {{ "}}" }}</button>
+        {{ range .Columns }}
+			<view class="form-item">
+				<text>{{ "{{" }} t('{{$.Entity}}.{{.Json.Name}}') {{ "}}" }}</text>
+				<input v-model="modelValue.{{.Json.Name}}"/>
+			</view>
+        {{ end }}
+		<view class="form-actions">
+			<button type="primary" @click="emit('submit', modelValue)">{{ "{{" }} t('{{$.Entity}}
+				.submit') {{ "}}" }}</button>
 			<button @click="emit('cancel')">{{ "{{" }} t('{{$.Entity}}.cancel') {{ "}}" }}</button>
 		</view>
 	</view>

@@ -2,11 +2,11 @@
     /**
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
-    import { {{ lower .StructName }}Columns } from './{{ toPascal .StructName }}Columns.js'
+    import {{{ lower .StructName }}Columns} from './{{ toPascal .StructName }}Columns.js'
 
     const props = defineProps({
-        data: { type: Array, default: () => [] },
-        loading: { type: Boolean, default: false },
+        data: {type: Array, default: () => []},
+        loading: {type: Boolean, default: false},
     })
     const emit = defineEmits(['action'])
 </script>
@@ -24,8 +24,10 @@
 			<td v-for="col in {{ lower .StructName }}Columns" :key="col.key">{{ "{{" }} row[col.key] {{ "}}" }}</td>
 			<td>
 				<slot name="actions" :row="row">
-					<button @click="emit('action', { type: 'edit', row })">{{ "{{" }} t('{{$.Entity}}.edit') {{ "}}" }}</button>
-					<button @click="emit('action', { type: 'delete', row })">{{ "{{" }} t('{{$.Entity}}.delete') {{ "}}" }}</button>
+					<button @click="emit('action', { type: 'edit', row })">{{ "{{" }} t('{{$.Entity}}
+						.edit') {{ "}}" }}</button>
+					<button @click="emit('action', { type: 'delete', row })">{{ "{{" }} t('{{$.Entity}}
+						.delete') {{ "}}" }}</button>
 				</slot>
 			</td>
 		</tr>

@@ -2,7 +2,7 @@
     /**
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
-    import { reactive } from 'vue'
+    import {reactive} from 'vue'
 
     const emit = defineEmits(['search', 'reset'])
     const query = reactive({})
@@ -10,22 +10,30 @@
 
 <template>
 	<view class="search-form">
-        {{ range .Columns }}{{ $field := . }}{{ if eq (toInputType $field) "select" }}    <view class="form-item">
-			<text>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</text>
-			<picker mode="selector" :range='{{ toOptionsJS $field }}' @change='e => query.{{$field.Json.Name}} = {{ toOptionsJS $field }}[e.detail.value]'>
-				<view class="picker-value">{{ "{{" }} query.{{$field.Json.Name}} || t('{{$.Entity}}.pleaseSelect') {{ "}}" }}</view>
-			</picker>
-		</view>
-        {{ else if eq (toInputType $field) "checkbox" }}    <view class="form-item">
-			<text>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</text>
-			<checkbox :checked="query.{{$field.Json.Name}}" @change='e => query.{{$field.Json.Name}} = e.detail.value' />
-		</view>
-        {{ else }}    <view class="form-item">
-			<text>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</text>
-			<input v-model="query.{{$field.Json.Name}}" />
-		</view>
-        {{ end }}{{ end }}    <view class="form-actions">
-			<button type="primary" @click="emit('search', query)">{{ "{{" }} t('{{$.Entity}}.search') {{ "}}" }}</button>
+        {{ range .Columns }}{{ $field := . }}{{ if eq (toInputType $field) "select" }}
+			<view class="form-item">
+				<text>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</text>
+				<picker mode="selector" :range='{{ toOptionsJS $field }}'
+				        @change='e => query.{{$field.Json.Name}} = {{ toOptionsJS $field }}[e.detail.value]'>
+					<view class="picker-value">{{ "{{" }} query.{{$field.Json.Name}} || t('{{$.Entity}}
+						.pleaseSelect') {{ "}}" }}</view>
+				</picker>
+			</view>
+        {{ else if eq (toInputType $field) "checkbox" }}
+			<view class="form-item">
+				<text>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</text>
+				<checkbox :checked="query.{{$field.Json.Name}}"
+				          @change='e => query.{{$field.Json.Name}} = e.detail.value'/>
+			</view>
+        {{ else }}
+			<view class="form-item">
+				<text>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</text>
+				<input v-model="query.{{$field.Json.Name}}"/>
+			</view>
+        {{ end }}{{ end }}
+		<view class="form-actions">
+			<button type="primary" @click="emit('search', query)">{{ "{{" }} t('{{$.Entity}}
+				.search') {{ "}}" }}</button>
 			<button @click="emit('reset')">{{ "{{" }} t('{{$.Entity}}.reset') {{ "}}" }}</button>
 		</view>
 	</view>

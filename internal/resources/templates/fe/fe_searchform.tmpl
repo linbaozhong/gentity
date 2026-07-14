@@ -2,7 +2,7 @@
     /**
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
-    import { reactive } from 'vue'
+    import {reactive} from 'vue'
 
     const emit = defineEmits(['search', 'reset'])
     const query = reactive({})
@@ -10,26 +10,31 @@
 
 <template>
 	<form class="search-form" @submit.prevent="emit('search', query)">
-        {{ range .Columns }}{{ $field := . }}{{ if eq (toInputType $field) "select" }}    <div class="form-item">
-			<label>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</label>
-			<select v-model="query.{{$field.Json.Name}}">
-                {{ $opts := toOptions $field }}{{ range $opts }}        <option value="{{.}}">{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}_{{.}}') {{ "}}" }}</option>
-                {{ end }}      </select>
-		</div>
-        {{ else if eq (toInputType $field) "checkbox" }}    <div class="form-item">
-			<label>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</label>
-			<input type="checkbox" v-model="query.{{$field.Json.Name}}" />
-		</div>
+        {{ range .Columns }}{{ $field := . }}{{ if eq (toInputType $field) "select" }}
+			<div class="form-item">
+				<label>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</label>
+				<select v-model="query.{{$field.Json.Name}}">
+                    {{ $opts := toOptions $field }}{{ range $opts }}
+						<option value="{{.}}">{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}_{{.}}
+							') {{ "}}" }}</option>
+                    {{ end }}      </select>
+			</div>
+        {{ else if eq (toInputType $field) "checkbox" }}
+			<div class="form-item">
+				<label>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</label>
+				<input type="checkbox" v-model="query.{{$field.Json.Name}}"/>
+			</div>
         {{ else }}
-	        <div class="form-item">
-			<label>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</label>
-            {{ $t := toInputType $field }}{{ if and (eq $t "text") (eq $.Platform "h5") }}
-		        <input type="search" v-model="query.{{$field.Json.Name}}" />
-            {{ else }}
-		        <input type="{{ $t }}" v-model="query.{{$field.Json.Name}}" />
-            {{ end }}
-        </div>
-        {{ end }}{{ end }}    <div class="form-actions">
+			<div class="form-item">
+				<label>{{ "{{" }} t('{{$.Entity}}.{{$field.Json.Name}}') {{ "}}" }}</label>
+                {{ $t := toInputType $field }}{{ if and (eq $t "text") (eq $.Platform "h5") }}
+					<input type="search" v-model="query.{{$field.Json.Name}}"/>
+                {{ else }}
+					<input type="{{ $t }}" v-model="query.{{$field.Json.Name}}"/>
+                {{ end }}
+			</div>
+        {{ end }}{{ end }}
+		<div class="form-actions">
 			<button type="submit">{{ "{{" }} t('{{$.Entity}}.search') {{ "}}" }}</button>
 			<button type="button" @click="emit('reset')">{{ "{{" }} t('{{$.Entity}}.reset') {{ "}}" }}</button>
 		</div>

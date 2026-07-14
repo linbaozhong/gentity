@@ -2,16 +2,14 @@
     /**
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
-    import TableComp from './{{ toPascal .StructName }}Table.vue'
-    import ActionsComp from './{{ toPascal .StructName }}Actions.vue'
-    {{ if .SearchFormComp }}    import SearchFormComp from './{{ .SearchFormComp }}'
+            {{ if .SearchFormComp }}
     {{ end }}
     const props = defineProps({
-        data: { type: Array, default: () => [] },
-        total: { type: Number, default: 0 },
-        page: { type: Number, default: 1 },
-        pageSize: { type: Number, default: 20 },
-        loading: { type: Boolean, default: false },
+        data: {type: Array, default: () => []},
+        total: {type: Number, default: 0},
+        page: {type: Number, default: 1},
+        pageSize: {type: Number, default: 20},
+        loading: {type: Boolean, default: false},
     })
     const emit = defineEmits(['search', 'reset', 'page-change', 'edit', 'delete'])
 
@@ -21,6 +19,7 @@
     {{ if .SearchFormComp }}    function onSearch(q) {
         emit('search', q)
     }
+
     function onReset() {
         emit('reset')
     }
@@ -29,15 +28,19 @@
 
 <template>
 	<div class="list-view">
-        {{ if .SearchFormComp }}        <SearchFormComp @search="onSearch" @reset="onReset" />
-        {{ else }}        <slot name="search" />
-        {{ end }}        <TableComp :data="data" :loading="loading" @action="onAction">
+        {{ if .SearchFormComp }}
+			<SearchFormComp @search="onSearch" @reset="onReset"/>
+        {{ else }}
+			<slot name="search"/>
+        {{ end }}
+		<TableComp :data="data" :loading="loading" @action="onAction">
 			<template #actions="{ row }">
-				<ActionsComp :row="row" @edit="(r) => emit('edit', r)" @delete="(r) => emit('delete', r)" />
+				<ActionsComp :row="row" @edit="(r) => emit('edit', r)" @delete="(r) => emit('delete', r)"/>
 			</template>
 		</TableComp>
 		<div class="pagination">
-			<button :disabled="page <= 1" @click="emit('page-change', page - 1)">{{ "{{" }} t('{{$.Entity}}.prev') {{ "}}" }}</button>
+			<button :disabled="page <= 1" @click="emit('page-change', page - 1)">{{ "{{" }} t('{{$.Entity}}
+				.prev') {{ "}}" }}</button>
 			<span>{{ "{{" }} page {{ "}}" }} / {{ "{{" }} Math.ceil(total / pageSize) {{ "}}" }}</span>
 			<button @click="emit('page-change', page + 1)">{{ "{{" }} t('{{$.Entity}}.next') {{ "}}" }}</button>
 		</div>

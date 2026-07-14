@@ -2,23 +2,24 @@
     /**
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
-    import { ref } from 'vue'
-    import { {{ lower .StructName }}Rules } from '../shared/{{ lower .StructName }}.validation.js'
+    import {{{ lower .StructName }}Rules} from '../shared/{{ lower .StructName }}.validation.js'
 
     const props = defineProps({
-        mode: { type: String, default: 'create' },
-        modelValue: { type: Object, default: () => ({}) },
+        mode: {type: String, default: 'create'},
+        modelValue: {type: Object, default: () => ({})},
     })
     const emit = defineEmits(['submit', 'cancel'])
 </script>
 
 <template>
 	<form @submit.prevent="emit('submit', modelValue)">
-        {{ range .Columns }}    <div class="form-item">
-			<label>{{ "{{" }} t('{{$.Entity}}.{{.Json.Name}}') {{ "}}" }}</label>
-			<input v-model="modelValue.{{.Json.Name}}" />
-		</div>
-        {{ end }}    <div class="form-actions">
+        {{ range .Columns }}
+			<div class="form-item">
+				<label>{{ "{{" }} t('{{$.Entity}}.{{.Json.Name}}') {{ "}}" }}</label>
+				<input v-model="modelValue.{{.Json.Name}}"/>
+			</div>
+        {{ end }}
+		<div class="form-actions">
 			<button type="submit">{{ "{{" }} t('{{$.Entity}}.submit') {{ "}}" }}</button>
 			<button type="button" @click="emit('cancel')">{{ "{{" }} t('{{$.Entity}}.cancel') {{ "}}" }}</button>
 		</div>

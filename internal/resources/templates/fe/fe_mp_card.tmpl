@@ -1,8 +1,8 @@
 <script setup>
-    import { {{ lower .StructName }}Columns } from './{{ toPascal .StructName }}Columns.js'
+    import {{{ lower .StructName }}Columns} from './{{ toPascal .StructName }}Columns.js'
 
     const props = defineProps({
-        item: { type: Object, required: true },
+        item: {type: Object, required: true},
     })
     const emit = defineEmits(['action'])
 </script>
@@ -15,8 +15,10 @@
 		</view>
 		<view class="card-actions">
 			<slot name="actions" :item="item">
-				<button size="mini" @click="emit('action', { type: 'edit', item })">{{ "{{" }} t('{{$.Entity}}.edit') {{ "}}" }}</button>
-				<button size="mini" @click="emit('action', { type: 'delete', item })">{{ "{{" }} t('{{$.Entity}}.delete') {{ "}}" }}</button>
+				<button size="mini" @click="emit('action', { type: 'edit', item })">{{ "{{" }} t('{{$.Entity}}
+					.edit') {{ "}}" }}</button>
+				<button size="mini" @click="emit('action', { type: 'delete', item })">{{ "{{" }} t('{{$.Entity}}
+					.delete') {{ "}}" }}</button>
 			</slot>
 		</view>
 	</view>

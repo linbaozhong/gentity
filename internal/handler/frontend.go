@@ -23,10 +23,18 @@ type feTmplSpec struct {
 func generateFrontend(tds []TempData, filename, target, out, group string) error {
 	targets := []string{"pc"}
 	if target == "all" {
-		targets = []string{"pc", "h5", "mp"}
+		// 方案 A：砍掉 h5 端，mp 组件经 uni-app 跨端覆盖 H5
+		targets = []string{"pc", "mp"}
 	} else if target != "" {
-		targets = strings.Split(target, ",")
+		targets = nil // 先清空，再按用户传入过滤
+		for _, t := range strings.Split(target, ",") {
+			if t == "h5" {
+				continue // 方案 A：忽略 h5
+			}
+			targets = append(targets, t)
+		}
 	}
+
 	// M5: 建立「响应基名 → GET 请求结构体名」配对，供 ListView 自动嵌套 SearchForm
 	reqByBase := map[string]string{}
 	for _, td := range tds {
@@ -61,7 +69,6 @@ func generateFrontend(tds []TempData, filename, target, out, group string) error
 				td.SearchFormComp = toPascal(reqName) + "SearchForm.vue"
 			}
 		}
-
 		for _, spec := range sharedSpecs {
 			if spec.onlyIf != nil && !spec.onlyIf(td) {
 				continue
@@ -71,7 +78,7 @@ func generateFrontend(tds []TempData, filename, target, out, group string) error
 			}
 		}
 		for _, tg := range targets {
-			td.Platform = tg // ← 关键：按目标平台注入
+			td.Platform = tg
 			for _, spec := range platformSpecs(tg) {
 				if spec.onlyIf != nil && !spec.onlyIf(td) {
 					continue
@@ -82,7 +89,6 @@ func generateFrontend(tds []TempData, filename, target, out, group string) error
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -128,14 +134,14 @@ func writeFeTextFile(fullFilename string, funcMap template.FuncMap, fn func(io.W
 }
 
 // platformSpecs 返回某平台的前端组件模板规格。
-// pc/h5 共用 fe_{kind}.tmpl（仅 class 用 {{.Platform}} 区分）；mp 用 fe_mp_{kind}.tmpl（uni-app 标签，M4 落地）。
+// pc 用 fe_{kind}.tmpl（仅 class 用 {{.Platform}} 区分）；mp 用 fe_mp_{kind}.tmpl（uni-app 标签，M4 落地）。
 func platformSpecs(platform string) []feTmplSpec {
 	prefix := "fe_"
 	if platform == "mp" {
 		prefix = "fe_mp_"
 	}
 	kind := func(name string) string { return prefix + name + ".tmpl" }
-	return []feTmplSpec{
+	specs := []feTmplSpec{
 		{kind("form"), platform,
 			func(td TempData) string { return toPascal(td.StructName) + "Form.vue" },
 			func(td TempData) bool { return hasTag(td, "@request") && toMethod(td.StructName) != "get" }},
@@ -161,6 +167,18 @@ func platformSpecs(platform string) []feTmplSpec {
 			func(td TempData) string { return toPascal(td.StructName) + "ListView.vue" },
 			func(td TempData) bool { return hasTag(td, "@response") && isListView(td.StructName) }},
 	}
+	// 方案 A：移动端（mp）不用表格，跳过 table 规格
+	if platform == "mp" {
+		var filtered []feTmplSpec
+		for _, s := range specs {
+			if s.tmpl == kind("table") {
+				continue
+			}
+			filtered = append(filtered, s)
+		}
+		specs = filtered
+	}
+	return specs
 }
 
 // feFuncMap 前端模板专用函数集

@@ -3,15 +3,16 @@
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
     const props = defineProps({
-        value: { type: Object, default: () => ({}) },
+        value: {type: Object, default: () => ({})},
     })
 </script>
 
 <template>
 	<view class="detail-list">
-        {{ range .Columns }}{{ if not (isSlice .) }}    <view class="detail-item">
-			<text class="detail-label">{{ "{{" }} t('{{$.Entity}}.{{.Json.Name}}') {{ "}}" }}</text>
-			<text class="detail-value">{{ "{{" }} value.{{.Json.Name}} {{ "}}" }}</text>
-		</view>
+        {{ range .Columns }}{{ if not (isSlice .) }}
+			<view class="detail-item">
+				<text class="detail-label">{{ "{{" }} t('{{$.Entity}}.{{.Json.Name}}') {{ "}}" }}</text>
+				<text class="detail-value">{{ "{{" }} value.{{.Json.Name}} {{ "}}" }}</text>
+			</view>
         {{ end }}{{ end }}  </view>
 </template>

@@ -3,7 +3,8 @@
 {{ if hasTag . "@request" }}
 	/**
 	* @param {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} req
-	* @returns {Promise<import('../shared/{{ replace .StructName "Req" "Resp" }}.types.js').{{ replace .StructName "Req" "Resp" }}>}
+	* @returns {Promise
+	<import('../shared/{{ replace .StructName "Req" "Resp" }}.types.js').{{ replace .StructName "Req" "Resp" }}>}
 	*/
 	export function {{ lower .StructName }}(req) {
 	return request('{{ toEndpoint .StructName $.Group }}', req)
