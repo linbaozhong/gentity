@@ -1,142 +1,143 @@
+
 /*
---- {{.StructName}} ---
+	--- {{.StructName}} ---
 */
 {{- if contains .ParseTag "@checker|@request"}}
-	// Init
-	func (p *{{.StructName}}) Init() error {
-    {{- range $key, $value := .Columns}}
-        {{- if $value.Json.OmitEmpty}}{{else}}
-			p.{{$value.Name}} = {{getTypeNil $value}}
-        {{- end}}
-    {{- end}}
+// Init
+func (p *{{.StructName}}) Init() error {
+	{{- range $key, $value := .Columns}}
+		{{- if $value.Json.OmitEmpty}}{{else}}
+		p.{{$value.Name}} = {{getTypeNil $value}}
+		{{- end}}
+	{{- end}}
 
 	return nil
-	}
+}
 
-	// Check
-	func (p *{{.StructName}}) Check() error {
-    {{- range $key, $value := .Columns}}
-        {{- $hasRequired := false}}
-        {{- range $valid := $value.Valids}}
-            {{- $validFunc := getValidFunc $valid $value}}
-            {{- $funcObj := getValidParamFunc $valid $value}}
-            {{- if eq $valid "required"}}
-				if p.{{$value.Name}} == {{getTypeNil $value}} {
+// Check
+func (p *{{.StructName}}) Check() error {
+{{- range $key, $value := .Columns}}
+	{{- $hasRequired := false}}
+	{{- range $valid := $value.Valids}}
+		{{- $validFunc := getValidFunc $valid $value}}
+		{{- $funcObj := getValidParamFunc $valid $value}}
+		{{- if eq $valid "required"}}
+			if p.{{$value.Name}} == {{getTypeNil $value}} {
 				return types.NewError(http.StatusBadRequest, "{{$value.Json.Name}} is required")
-				}
-                {{- $hasRequired = true}}
-            {{- else if ne $validFunc.Func ""}}
-                {{- if eq $hasRequired true}}
-					if !validator.{{$validFunc.Func}}({{getFieldString $value}}) {
-                {{- else}}
-					if p.{{$value.Name}} != {{getTypeNil $value}} && !validator.{{$validFunc.Func}}({{getFieldString $value}}) {
-                {{- end}}
+			}
+			{{- $hasRequired = true}}
+		{{- else if ne $validFunc.Func ""}}
+			{{- if eq $hasRequired true}}
+				if !validator.{{$validFunc.Func}}({{getFieldString $value}}) {
+			{{- else}}
+				if p.{{$value.Name}} != {{getTypeNil $value}} && !validator.{{$validFunc.Func}}({{getFieldString $value}}) {
+			{{- end}}
 				return types.NewError(http.StatusBadRequest, "{{$validFunc.Err}}")
-				}
-            {{- else if ne $funcObj.Func ""}}
-                {{- if ne $funcObj.Param ""}}
-                    {{- if eq $hasRequired true}}
-						if !validator.{{$funcObj.Func}}({{getFieldString $value}}, {{$funcObj.Param}}) {
-                    {{- else}}
-						if p.{{$value.Name}} != {{getTypeNil $value}} && !validator.{{$funcObj.Func}}({{getFieldString $value}}, {{$funcObj.Param}}) {
-                    {{- end}}
-					return types.NewError(http.StatusBadRequest, "{{$funcObj.Err}}")
-					}
+			}
+		{{- else if ne $funcObj.Func ""}}
+			{{- if ne $funcObj.Param ""}}
+                {{- if eq $hasRequired true}}
+	                if !validator.{{$funcObj.Func}}({{getFieldString $value}}, {{$funcObj.Param}}) {
+                {{- else}}
+	                if p.{{$value.Name}} != {{getTypeNil $value}} && !validator.{{$funcObj.Func}}({{getFieldString $value}}, {{$funcObj.Param}}) {
                 {{- end}}
-            {{- end}}
-        {{- end}}
-    {{- end}}
+				return types.NewError(http.StatusBadRequest, "{{$funcObj.Err}}")
+			}
+			{{- end}}
+		{{- end}}
+	{{- end}}
+{{- end}}
 	return nil
-	}
+}
 {{end}}
 
 {{- if contains .ParseTag "@response"}}
-	// MarshalJSON
-	func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
+// MarshalJSON
+func (p *{{.StructName}}) MarshalJSON() ([]byte, error) {
 	write := types.NewJsonWriter({{len .Columns}} * 50)
-    {{- range $key, $value := .Columns}}
-        {{- if ne $value.Json.Name "-" }}
-            {{- if $value.Json.OmitEmpty}}
-				if {{getNotZeroValue $value}} {
+	{{- range $key, $value := .Columns}}
+		{{- if ne $value.Json.Name "-" }}
+			{{- if $value.Json.OmitEmpty}}
+			if {{getNotZeroValue $value}} {
 				write.WriteRaw("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
-				}
-            {{- else}}
+			}
+			{{- else}}
 				write.WriteRaw("{{ $value.Json.Name }}",types.Marshal(p.{{$value.Name}}))
-            {{- end}}
-        {{- end}}
-    {{- end}}
+			{{- end}}
+		{{- end}}
+	{{- end}}
 	return write.Bytes(), nil
-	}
+}
 {{end}}
 
 {{- if and (contains .ParseTag "@checker|@request") (gt (len .Columns) 0 )}}
-    {{- $firstColumn := index .Columns 0 }}
-	// UnmarshalJSON
-	func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
-    {{- if ne $firstColumn.Json.Name "-"}}
-        {{- if .HasRef}}
-			defer func() {
+	{{- $firstColumn := index .Columns 0 }}
+// UnmarshalJSON
+func (p *{{.StructName}}) UnmarshalJSON(data []byte) error {
+	{{- if ne $firstColumn.Json.Name "-"}}
+		{{- if .HasRef}}
+		defer func() {
 			if r := recover(); r != nil {
-			log.Error(r)
-			return
+				log.Error(r)
+				return
 			}
-			}()
-        {{- end}}
+		}()
+		{{- end}}
 
 		ok := gjson.ValidBytes(data)
 		if !ok {
-		return errors.New("invalid json")
+			return errors.New("invalid json")
 		}
 		_result := gjson.ParseBytes(data)
 		var e error
 		_result.ForEach(func(key, value gjson.Result) bool {
-		switch key.Str {
-        {{- range $key, $value := .Columns}}
-            {{- if ne $value.Json.Name "-" }}
+			switch key.Str {
+			{{- range $key, $value := .Columns}}
+				{{- if ne $value.Json.Name "-" }}
 				case "{{ $value.Json.Name }}":
-                {{getUnmarshalJSON $value}}
-            {{- end}}
-        {{- end}}
-		}
-		if e != nil {
-		log.Error(e)
-		return false
-		}
-		return true
-		})
-    {{- end}}
-	return nil
-	}
-
-	// UnmarshalValues
-	func (p *{{.StructName}}) UnmarshalValues(m map[string][]string) error {
-    {{- if ne $firstColumn.Json.Name "-"}}
-        {{- if .HasRef}}
-			defer func() {
-			if r := recover(); r != nil {
-			log.Error(r)
-			return
+					{{getUnmarshalJSON $value}}
+				{{- end}}
+			{{- end}}
 			}
-			}()
-        {{- end}}
+			if e != nil {
+				log.Error(e)
+				return false
+			}
+			return true
+		})
+	{{- end}}
+	return nil
+}
+
+// UnmarshalValues
+func (p *{{.StructName}}) UnmarshalValues(m map[string][]string) error {
+    {{- if ne $firstColumn.Json.Name "-"}}
+		{{- if .HasRef}}
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error(r)
+				return
+			}
+		}()
+		{{- end}}
 
 		var e error
 		for k, v := range m {
-		value := gjson.Result{Type:gjson.String,Raw: v[0],Str: v[0]}
-		switch k {
-        {{- range $key, $value := .Columns}}
-            {{- if ne $value.Json.Name "-" }}
+			value := gjson.Result{Type:gjson.String,Raw: v[0],Str: v[0]}
+			switch k {
+			{{- range $key, $value := .Columns}}
+				{{- if ne $value.Json.Name "-" }}
 				case "{{ $value.Json.Name }}":
-                {{getUnmarshalJSON $value}}
-            {{- end}}
-        {{- end}}
-		}
-		if e != nil {
-		log.Error(e)
-		return e
-		}
+					{{getUnmarshalJSON $value}}
+				{{- end}}
+			{{- end}}
+			}
+			if e != nil {
+				log.Error(e)
+				return e
+			}
 		}
     {{end}}
 	return nil
-	}
+}
 {{end}}

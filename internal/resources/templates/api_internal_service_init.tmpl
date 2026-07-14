@@ -1,32 +1,32 @@
 package service
 
 import (
-"github.com/linbaozhong/gentity/pkg/ace"
-"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/log"
 )
 
 var (
-db *ace.DB
+	db *ace.DB
 )
 
 // Connected 连接数据库
 func Connected() error {
-var e error
-// 连接数据库
-db, e = ace.Connect("mysql",
-"user:password@tcp(0.0.0.0:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local")
-if e != nil {
-log.Fatal(e)
-return e
-}
-db.SetMaxOpenConns(50)
-db.SetMaxIdleConns(25)
-db.Debug(true)
+	var e error
+	// 连接数据库
+	db, e = ace.Connect("mysql",
+		"user:password@tcp(0.0.0.0:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local")
+	if e != nil {
+		log.Fatal(e)
+		return e
+	}
+	db.SetMaxOpenConns(50)
+	db.SetMaxIdleConns(25)
+	db.Debug(true)
 
-return nil
+	return nil
 }
 
 // DB 返回数据库连接
 func DB() *ace.DB {
-return db
+	return db
 }

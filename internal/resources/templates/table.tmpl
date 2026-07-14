@@ -6,12 +6,12 @@
 package tbl{{ lower .StructName }}
 
 import (
-"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
 var (
 {{- range $key, $value := .Columns}}
-    {{ $value.Name }} = dialect.Field{Name: "{{$value.Col}}",Json: "{{$value.Json.Name}}",Table: "{{ $tablename }}",Type: "{{$value.Type}}",IsRelation:{{eq $value.Name $Relation.Name}}}
+	{{ $value.Name }} = dialect.Field{Name: "{{$value.Col}}",Json: "{{$value.Json.Name}}",Table: "{{ $tablename }}",Type: "{{$value.Type}}",IsRelation:{{eq $value.Name $Relation.Name}}}
 {{- end}}
 
 {{- if .HasPrimaryKey}}
@@ -19,25 +19,25 @@ var (
 	PrimaryKey = {{.PrimaryKey.Name}}
 {{- end}}
 
-// 可写列
-WritableFields = []dialect.Field{
+	// 可写列
+	WritableFields = []dialect.Field{
 {{- range $key, $value := .Columns}}
-    {{- if ne (getType $value) "any"}}
-        {{- if or (eq $value.Rw "->") (eq $value.Rw "")}}
-            {{$value.Name}},
-        {{- end}}
-    {{- end}}
+	{{- if ne (getType $value) "any"}}
+	{{- if or (eq $value.Rw "->") (eq $value.Rw "")}}
+	{{$value.Name}},
+	{{- end}}
+	{{- end}}
 {{- end}}
-}
-// 可读列
-ReadableFields = []dialect.Field{
+	}
+	// 可读列
+	ReadableFields = []dialect.Field{
 {{- range $key, $value := .Columns}}
-    {{- if or (eq $value.Rw "<-") (eq $value.Rw "")}}
+	{{- if or (eq $value.Rw "<-") (eq $value.Rw "")}}
         {{- if or (ne (getType $value) "any") (ne $Relation.Name "")}}
-            {{$value.Name}},
-        {{- end}}
-    {{- end}}
+	{{$value.Name}},
+		{{- end}}
+	{{- end}}
 {{- end}}
-}
+	}
 
 )

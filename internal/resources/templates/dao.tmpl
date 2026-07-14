@@ -15,23 +15,23 @@ import (
 	"github.com/linbaozhong/gentity/pkg/cachego"
 	"github.com/linbaozhong/gentity/pkg/conv"
 {{- end}}
-"context"
-"database/sql"
-"{{.ModulePath}}/{{$package}}"
-"{{.ModulePath}}/define/table/tbl{{$structNameLower}}"
+	"context"
+	"database/sql"
+	"{{.ModulePath}}/{{$package}}"
+	"{{.ModulePath}}/define/table/tbl{{$structNameLower}}"
 {{- if ne .Relation.Name ""}}
 	"{{.ModulePath}}/define/table/tbl{{lower .Relation.Type}}"
 {{- end}}
-"github.com/linbaozhong/gentity/pkg/ace"
-"github.com/linbaozhong/gentity/pkg/ace/dialect"
-"github.com/linbaozhong/gentity/pkg/ace/pool"
-"github.com/linbaozhong/gentity/pkg/types"
+	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/ace/pool"
+	"github.com/linbaozhong/gentity/pkg/types"
 )
 
 type {{$structNameLower}} struct {
-pool.Model
-x    ace.Executer
-toSql bool
+	pool.Model
+	x    ace.Executer
+	toSql bool
 {{- if .HasCache}}
 	cache cachego.Cache
 	sg singleflight.Group
@@ -39,192 +39,192 @@ toSql bool
 }
 
 var(
-{{$structNameLower}}Pool = pool.New[*{{$structNameLower}}](func() any {
-_obj := &{{$structNameLower}}{}
-return _obj
-})
+	{{$structNameLower}}Pool = pool.New[*{{$structNameLower}}](func() any {
+		_obj := &{{$structNameLower}}{}
+		return _obj
+	})
 )
 
 // New 实例化{{$structNameLower}}
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
 func {{$structName}}(x ace.Executer) *{{$structNameLower}} {
-_obj := {{$structNameLower}}Pool.Get()
-_obj.x = x
+	_obj := {{$structNameLower}}Pool.Get()
+	_obj.x = x
 {{- if .HasCache}}
 	_obj.cache = _obj.x.Cache({{$package}}.{{$structName}}TableName)
 {{- end}}
-return _obj
+	return _obj
 }
 
 // Free 释放对象
 func (p *{{$structNameLower}}) Free() {
-if p == nil {
-return
-}
+	if p == nil {
+		return
+	}
 
-{{$structNameLower}}Pool.Put(p)
+	{{$structNameLower}}Pool.Put(p)
 }
 
 // Reset 重置对象
 func (p *{{$structNameLower}}) Reset() {
-p.toSql = false
+	p.toSql = false
 }
 
 // Debug 仅打印SQL语句，不执行
 func (p *{{$structNameLower}}) Debug() *{{$structNameLower}} {
-p.toSql = true
-return p
+	p.toSql = true
+	return p
 }
 
 // Insert 返回 LastInsertId
 func (p *{{$structNameLower}}) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error) {
-defer p.Free()
-if len(sets) == 0 {
-return 0, dialect.ErrSetterEmpty
-}
-_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
-Set(sets...).
-Debug(p.toSql).
-Create().
-Exec(ctx)
-if e != nil {
-return 0, e
-}
-return _result.LastInsertId()
+	defer p.Free()
+	if len(sets) == 0 {
+		return 0, dialect.ErrSetterEmpty
+	}
+	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+		Set(sets...).
+		Debug(p.toSql).
+		Create().
+		Exec(ctx)
+	if e != nil {
+		return 0, e
+	}
+	return _result.LastInsertId()
 }
 
 // InsertOne
 // cols: 要插入的列名
 func (p *{{$structNameLower}}) InsertOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
-defer p.Free()
-_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
-Cols(cols...).
-Debug(p.toSql).
-Create().
-Struct(ctx, bean)
-if e != nil {
-return false, e
-}
+	defer p.Free()
+	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+		Cols(cols...).
+		Debug(p.toSql).
+		Create().
+		Struct(ctx, bean)
+	if e != nil {
+		return false, e
+	}
 
-bean.AssignPrimaryKeyValues(_result)
+    bean.AssignPrimaryKeyValues(_result)
 
-_n, e := _result.RowsAffected()
-return _n > 0, e
+	_n, e := _result.RowsAffected()
+	return _n > 0, e
 }
 
 // InsertBatch 批量插入,返回 RowsAffected。禁止在事务中使用
 // cols: 要插入的列名，如果为空，则插入结构体字段对应所有列
 func (p *{{$structNameLower}}) InsertBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (int64, error) {
-defer p.Free()
-_lens := len(beans)
-if _lens == 0 {
-return 0, dialect.ErrBeanEmpty
-}
-_args := make([]dialect.Modeler, 0, _lens)
-for _, _bean := range beans {
-_args = append(_args, _bean)
-}
-_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
-Cols(cols...).
-Debug(p.toSql).
-Create().
-BatchStruct(ctx, _args...)
-if e != nil {
-return 0, e
-}
+	defer p.Free()
+	_lens := len(beans)
+	if _lens == 0 {
+		return 0, dialect.ErrBeanEmpty
+	}
+	_args := make([]dialect.Modeler, 0, _lens)
+	for _, _bean := range beans {
+		_args = append(_args, _bean)
+	}
+	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+		Cols(cols...).
+		Debug(p.toSql).
+		Create().
+		BatchStruct(ctx, _args...)
+	if e != nil {
+		return 0, e
+	}
 
-return _result.RowsAffected()
+	return _result.RowsAffected()
 }
 
 // Update
 func (p *{{$structNameLower}}) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
-defer p.Free()
-if len(sets) == 0 {
-return false, dialect.ErrSetterEmpty
-}
-_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
-Where(cond...).
-Set(sets...).
-Debug(p.toSql).
-Update().
-Exec(ctx)
-if e != nil {
-return false, e
-}
-_n, e := _result.RowsAffected()
-return _n >= 0, e
+	defer p.Free()
+	if len(sets) == 0 {
+		return false, dialect.ErrSetterEmpty
+	}
+	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+		Where(cond...).
+		Set(sets...).
+		Debug(p.toSql).
+		Update().
+		Exec(ctx)
+	if e != nil {
+		return false, e
+	}
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // UpdateById
 func (p *{{$structNameLower}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, sets ...dialect.Setter) (bool, error) {
-return p.Update(ctx,
-sets,
-tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
-)
+    return p.Update(ctx,
+        sets,
+       	tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
+    )
 }
 
 // UpdateOne
 // cols: 要插入的列名
 func (p *{{$structNameLower}}) UpdateOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
-defer p.Free()
-_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
-Cols(cols...).
-Debug(p.toSql).
-Update().
-Struct(ctx, bean)
-if e != nil {
-return false, e
-}
+	defer p.Free()
+	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+		Cols(cols...).
+		Debug(p.toSql).
+		Update().
+		Struct(ctx, bean)
+	if e != nil {
+		return false, e
+	}
 
-_n, e := _result.RowsAffected()
-return _n >= 0, e
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // UpdateBatch 批量更新,禁止在事务中使用
 // cols: 要更新的列名，如果为空，则更新结构体所有字段对应列，包含零值字段
 func (p *{{$structNameLower}}) UpdateBatch(ctx context.Context, beans []*{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
-defer p.Free()
-_lens := len(beans)
-if _lens == 0 {
-return false, dialect.ErrBeanEmpty
-}
-_args := make([]dialect.Modeler, 0, _lens)
-for _, _bean := range beans {
-_args = append(_args, _bean)
-}
-_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
-Cols(cols...).
-Debug(p.toSql).
-Update().
-BatchStruct(ctx, _args...)
-if e != nil {
-return false, e
-}
-_n, e := _result.RowsAffected()
-return _n >= 0, e
+	defer p.Free()
+	_lens := len(beans)
+	if _lens == 0 {
+		return false, dialect.ErrBeanEmpty
+	}
+	_args := make([]dialect.Modeler, 0, _lens)
+	for _, _bean := range beans {
+		_args = append(_args, _bean)
+	}
+	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+		Cols(cols...).
+		Debug(p.toSql).
+		Update().
+		BatchStruct(ctx, _args...)
+	if e != nil {
+		return false, e
+	}
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // Delete
 func (p *{{$structNameLower}}) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-defer p.Free()
-_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
-Where(cond...).
-Debug(p.toSql).
-Delete().
-Exec(ctx)
-if e != nil {
-return false, e
-}
-_n, e := _result.RowsAffected()
-return _n >= 0, e
+	defer p.Free()
+	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+		Where(cond...).
+		Debug(p.toSql).
+		Delete().
+		Exec(ctx)
+	if e != nil {
+		return false, e
+	}
+	_n, e := _result.RowsAffected()
+	return _n >= 0, e
 }
 
 // DeleteById
 func (p *{{$structNameLower}}) DeleteById(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (bool, error) {
-return p.Delete(ctx,
-tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
-)
+	return p.Delete(ctx,
+		tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
+		)
 }
 
 
@@ -232,20 +232,20 @@ tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}}),
 // ids: 主键列表
 // 返回值: 影响的行数，错误信息
 func (p *{{$structNameLower}}) DeleteByIds(ctx context.Context, ids []any) (int64, error) {
-defer p.Free()
-if len(ids) == 0 {
-return 0, nil
-}
+	defer p.Free()
+	if len(ids) == 0 {
+		return 0, nil
+	}
 
-_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
-Where(tbl{{$structNameLower}}.PrimaryKey.In(ids...)).
-Debug(p.toSql).
-Delete().
-Exec(ctx)
-if e != nil {
-return 0, e
-}
-return _result.RowsAffected()
+	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+		Where(tbl{{$structNameLower}}.PrimaryKey.In(ids...)).
+		Debug(p.toSql).
+		Delete().
+		Exec(ctx)
+	if e != nil {
+		return 0, e
+	}
+	return _result.RowsAffected()
 }
 
 
@@ -265,85 +265,85 @@ return _result.RowsAffected()
 //  7. 如果查询到记录，则返回记录, true, nil
 //  8. 如果查询到多条记录，则返回第一条记录, true, nil
 func (p *{{$structNameLower}}) Get(ctx context.Context, s ace.SelectBuilder) (*{{$package}}.{{$structName}}, bool, error) {
-defer p.Free()
-if len(s.GetTableName()) == 0 {
-s.Table({{$package}}.{{$structName}}TableName)
-}
+	defer p.Free()
+	if len(s.GetTableName()) == 0 {
+		s.Table({{$package}}.{{$structName}}TableName)
+	}
 
-_cols := s.GetCols()
-l := len(_cols)
-{{- if ne .Relation.Name ""}}
+	_cols := s.GetCols()
+	l := len(_cols)
+	{{- if ne .Relation.Name ""}}
 	hasRelation := false
-{{- end}}
-if l == 0 {
-_cols = tbl{{$structNameLower}}.ReadableFields
-{{- if ne .Relation.Name ""}}
-	for i := 0; i < l; i++ {
-	if _cols[i].IsRelation{
-	hasRelation = true
-	_cols = append(_cols[:i], _cols[i+1:]...)
-	break
+	{{- end}}
+	if l == 0 {
+		_cols = tbl{{$structNameLower}}.ReadableFields
+		{{- if ne .Relation.Name ""}}
+		for i := 0; i < l; i++ {
+			if _cols[i].IsRelation{
+				hasRelation = true
+				_cols = append(_cols[:i], _cols[i+1:]...)
+				break
+			}
+		}
+		{{- end}}
+		s.Cols(_cols...)
 	}
+	if s.GetDB() == nil{
+		s.SetDB(p.x)
 	}
-{{- end}}
-s.Cols(_cols...)
-}
-if s.GetDB() == nil{
-s.SetDB(p.x)
-}
-_row, e := s.Debug(p.toSql).
-Select().
-QueryRow(ctx)
-if e!= nil {
-return nil, false, e
-}
+	_row, e := s.Debug(p.toSql).
+		Select().
+		QueryRow(ctx)
+	if e!= nil {
+		return nil, false, e
+	}
 
-_obj := {{$package}}.New{{$structName}}()
-e = _row.Scan(_obj.AssignPtr(_cols...)...)
-switch e {
-case nil:
-{{- if ne .Relation.Name ""}}
-	if hasRelation {
-	rs := p.edges(ctx,[]any{_obj.{{.Relation.Field}}})
-	if len(rs) > 0{
-    {{- if eq .Relation.Kind "slice"}}
-		_obj.{{.Relation.Name}} = rs[_obj.{{.Relation.Field}}]
-    {{- else if eq .Relation.Kind "ptr"}}
-		tmp := rs[_obj.{{.Relation.Field}}][0]
-		_obj.{{.Relation.Name}} = &tmp
-    {{- else}}
-		_obj.{{.Relation.Name}} = rs[_obj.{{.Relation.Field}}][0]
-    {{- end}}
+	_obj := {{$package}}.New{{$structName}}()
+	e = _row.Scan(_obj.AssignPtr(_cols...)...)
+	switch e {
+	case nil:
+		{{- if ne .Relation.Name ""}}
+		if hasRelation {
+			rs := p.edges(ctx,[]any{_obj.{{.Relation.Field}}})
+			if len(rs) > 0{
+			{{- if eq .Relation.Kind "slice"}}
+				_obj.{{.Relation.Name}} = rs[_obj.{{.Relation.Field}}]
+			{{- else if eq .Relation.Kind "ptr"}}
+				tmp := rs[_obj.{{.Relation.Field}}][0]
+				_obj.{{.Relation.Name}} = &tmp
+			{{- else}}
+				_obj.{{.Relation.Name}} = rs[_obj.{{.Relation.Field}}][0]
+			{{- end}}
+			}
+		}
+		{{- end}}
+		return _obj, true, nil
+	case sql.ErrNoRows:
+		return _obj, false, nil
+	default:
+		return _obj, false, e
 	}
-	}
-{{- end}}
-return _obj, true, nil
-case sql.ErrNoRows:
-return _obj, false, nil
-default:
-return _obj, false, e
-}
 }
 
 // GetByID 按主键读取一个{{.TableName}}对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *{{$structNameLower}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {{.PrimaryKey.Type}}, cols ...dialect.Field) (*{{$package}}.{{$structName}}, bool, error) {
-defer p.Free()
+	defer p.Free()
 {{- if .HasCache}}
 	_obj,has,e:=p.getCache(ctx, {{.PrimaryKey.Col}})
 	if has{
-	return _obj,has,nil
+		return _obj,has,nil
 	}
 
 	_v, e, _ := p.sg.Do(conv.Any2String({{.PrimaryKey.Col}}), func() (any, error) {
-	//_obj, has, e = p.Get4Cols(ctx, cols, []dialect.Condition{tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})})
-	_obj, has, e = p.Get(ctx, p.x.Table({{$package}}.{{$structName}}TableName).Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
-	if has {
-	e = p.setCache(ctx, _obj)
-	}
-	return _obj, e
+		//_obj, has, e = p.Get4Cols(ctx, cols, []dialect.Condition{tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})})
+		_obj, has, e = p.Get(ctx, p.x.Table({{$package}}.{{$structName}}TableName).Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
+		if has {
+			e = p.setCache(ctx, _obj)
+		}
+		return _obj, e
 	})
 	if _v != nil {
-	return _v.(*{{$package}}.{{$structName}}), true, e
+		return _v.(*{{$package}}.{{$structName}}), true, e
 	}
 
 	return nil,false,e
@@ -357,8 +357,8 @@ defer p.Free()
 // ids: 主键列表
 // cols: 要查询的列名，如果为空，则查询所有可读列
 func (p *{{$structNameLower}}) GetByIds(ctx context.Context, ids []any, cols ...dialect.Field) ([]*{{$package}}.{{$structName}}, error) {
-_objs,_,e := p.List(ctx, ace.Where(tbl{{$structNameLower}}.PrimaryKey.In(ids...)).Cols(cols...))
-return _objs, e
+	_objs,_,e := p.List(ctx, ace.Where(tbl{{$structNameLower}}.PrimaryKey.In(ids...)).Cols(cols...))
+	return _objs, e
 }
 
 
@@ -372,267 +372,267 @@ return _objs, e
 //  1. 如果没有指定表名，则默认使用{{$package}}.{{$structName}}TableName
 //  2. 如果没有指定查询列，则默认使用tbl{{$structNameLower}}.PrimaryKey
 func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (any, bool, error) {
-defer p.Free()
-if len(s.GetTableName()) == 0 {
-s.Table({{$package}}.{{$structName}}TableName)
-}
+	defer p.Free()
+	if len(s.GetTableName()) == 0 {
+		s.Table({{$package}}.{{$structName}}TableName)
+	}
 
-_cols := s.GetCols()
-if len(_cols) == 0 {
-s.Cols(tbl{{$structNameLower}}.PrimaryKey)
-} else {
-s.PureCols(_cols[0])
-}
+	_cols := s.GetCols()
+	if len(_cols) == 0 {
+		s.Cols(tbl{{$structNameLower}}.PrimaryKey)
+	} else {
+		s.PureCols(_cols[0])
+	}
 
-if s.GetDB() == nil{
-s.SetDB(p.x)
-}
-_row, e := s.Debug(p.toSql).
-Select().
-QueryRow(ctx)
-if e!= nil {
-return nil, false, e
-}
-var _v any
-e = _row.Scan(&_v)
-switch e {
-case nil:
-return _v, true, nil
-case sql.ErrNoRows:
-return _v, false, nil
-default:
-return _v, false, e
-}
+	if s.GetDB() == nil{
+		s.SetDB(p.x)
+	}
+	_row, e := s.Debug(p.toSql).
+		Select().
+		QueryRow(ctx)
+	if e!= nil {
+		return nil, false, e
+	}
+	var _v any
+	e = _row.Scan(&_v)
+	switch e {
+	case nil:
+		return _v, true, nil
+	case sql.ErrNoRows:
+		return _v, false, nil
+	default:
+		return _v, false, e
+	}
 }
 
 // List 查询所有符合条件的记录
 func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([]*{{$package}}.{{$structName}}, bool, error) {
-defer p.Free()
-if len(s.GetTableName()) == 0{
-s.Table({{$package}}.{{$structName}}TableName)
-}
+	defer p.Free()
+	if len(s.GetTableName()) == 0{
+		s.Table({{$package}}.{{$structName}}TableName)
+	}
 
-_cols := s.GetCols()
+	_cols := s.GetCols()
 
-l := len(_cols)
-{{- if ne .Relation.Name ""}}
+	l := len(_cols)
+	{{- if ne .Relation.Name ""}}
 	hasRelation := false
-{{- end}}
-if l == 0 {
-_cols = tbl{{$structNameLower}}.ReadableFields
-{{- if ne .Relation.Name ""}}
-	for i := 0; i < l; i++ {
-	if _cols[i].IsRelation{
-	hasRelation = true
-	_cols = append(_cols[:i], _cols[i+1:]...)
-	break
+	{{- end}}
+	if l == 0 {
+		_cols = tbl{{$structNameLower}}.ReadableFields
+		{{- if ne .Relation.Name ""}}
+		for i := 0; i < l; i++ {
+			if _cols[i].IsRelation{
+				hasRelation = true
+				_cols = append(_cols[:i], _cols[i+1:]...)
+				break
+			}
+		}
+		{{- end}}
+		s.Cols(_cols...)
 	}
-	}
-{{- end}}
-s.Cols(_cols...)
-}
 
-if s.GetDB() == nil{
-s.SetDB(p.x)
-}
-_rows, e := s.Debug(p.toSql).
-Select().
-Query(ctx)
-if e != nil {
-return nil, false, e
-}
-defer _rows.Close()
+	if s.GetDB() == nil{
+		s.SetDB(p.x)
+	}
+	_rows, e := s.Debug(p.toSql).
+		Select().
+		Query(ctx)
+	if e != nil {
+		return nil, false, e
+	}
+	defer _rows.Close()
 
-_obj := {{$package}}.New{{$structName}}()
-_objs, has, e := _obj.Scan(_rows,_cols...)
-if has {
-{{- if ne .Relation.Name ""}}
-	if hasRelation {
-	l := len(_objs)
-	idsMap := make(map[any]struct{}, l)
-	ids := make([]any, 0, l)
-	for i := 0; i < l; i++ {
-	if _, ok := idsMap[_objs[i].{{.Relation.Field}}]; ok {
-	continue
+	_obj := {{$package}}.New{{$structName}}()
+	_objs, has, e := _obj.Scan(_rows,_cols...)
+	if has {
+		{{- if ne .Relation.Name ""}}
+		if hasRelation {
+			l := len(_objs)
+			idsMap := make(map[any]struct{}, l)
+			ids := make([]any, 0, l)
+			for i := 0; i < l; i++ {
+				if _, ok := idsMap[_objs[i].{{.Relation.Field}}]; ok {
+					continue
+				}
+				idsMap[_objs[i].{{.Relation.Field}}] = struct{}{}
+				ids = append(ids, _objs[i].{{.Relation.Field}})
+			}
+			if len(ids) == 0 {
+				return _objs, true, nil
+			}
+			rs := p.edges(ctx, ids)
+			if len(rs) > 0 {
+				for i := 0; i < l; i++ {
+				{{- if eq .Relation.Kind "slice"}}
+					_objs[i].{{.Relation.Name}} = rs[_objs[i].{{.Relation.Field}}]
+				{{- else if eq .Relation.Kind "ptr"}}
+					tmp := rs[_objs[i].{{.Relation.Field}}][0]
+					_objs[i].{{.Relation.Name}} = &tmp
+				{{- else}}
+					_objs[i].{{.Relation.Name}} = rs[_objs[i].{{.Relation.Field}}][0]
+				{{- end}}
+				}
+			}
+		}
+		{{- end}}
+		return _objs, true, nil
 	}
-	idsMap[_objs[i].{{.Relation.Field}}] = struct{}{}
-	ids = append(ids, _objs[i].{{.Relation.Field}})
+	if e == nil || e == sql.ErrNoRows {
+		return _objs, false, nil
 	}
-	if len(ids) == 0 {
-	return _objs, true, nil
-	}
-	rs := p.edges(ctx, ids)
-	if len(rs) > 0 {
-	for i := 0; i < l; i++ {
-    {{- if eq .Relation.Kind "slice"}}
-		_objs[i].{{.Relation.Name}} = rs[_objs[i].{{.Relation.Field}}]
-    {{- else if eq .Relation.Kind "ptr"}}
-		tmp := rs[_objs[i].{{.Relation.Field}}][0]
-		_objs[i].{{.Relation.Name}} = &tmp
-    {{- else}}
-		_objs[i].{{.Relation.Name}} = rs[_objs[i].{{.Relation.Field}}][0]
-    {{- end}}
-	}
-	}
-	}
-{{- end}}
-return _objs, true, nil
-}
-if e == nil || e == sql.ErrNoRows {
-return _objs, false, nil
-}
 
-return _objs, false, e
+	return _objs, false, e
 }
 
 // Column 查询所有符合条件的记录的指定列
 func (p *{{$structNameLower}}) Column(ctx context.Context, s ace.SelectBuilder) ([]any, error) {
-defer p.Free()
-if len(s.GetTableName()) == 0{
-s.Table({{$package}}.{{$structName}}TableName)
-}
+	defer p.Free()
+	if len(s.GetTableName()) == 0{
+		s.Table({{$package}}.{{$structName}}TableName)
+	}
 
-_cols := s.GetCols()
-if len(_cols) == 0 {
-s.PureCols(tbl{{$structNameLower}}.PrimaryKey)
-}else{
-s.PureCols(_cols[0])
-}
+	_cols := s.GetCols()
+	if len(_cols) == 0 {
+		s.PureCols(tbl{{$structNameLower}}.PrimaryKey)
+	}else{
+		s.PureCols(_cols[0])
+	}
 
-if s.GetDB() == nil{
-s.SetDB(p.x)
-}
-_rows, e := s.Debug(p.toSql).
-Select().
-Query(ctx)
-if e != nil {
-return nil, e
-}
-defer _rows.Close()
+	if s.GetDB() == nil{
+		s.SetDB(p.x)
+	}
+	_rows, e := s.Debug(p.toSql).
+		Select().
+		Query(ctx)
+	if e != nil {
+		return nil, e
+	}
+	defer _rows.Close()
 
-_objs := []any{}
-for _rows.Next() {
-var _v any
-e := _rows.Scan(&_v)
-if e != nil {
-return nil, e
-}
-_objs = append(_objs, _v)
-}
-return _objs, nil
+	_objs := []any{}
+	for _rows.Next() {
+		var _v any
+		e := _rows.Scan(&_v)
+		if e != nil {
+			return nil, e
+		}
+		_objs = append(_objs, _v)
+	}
+	return _objs, nil
 }
 
 // Count
 func (p *{{$structNameLower}}) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
-defer p.Free()
-return p.x.Table({{$package}}.{{$structName}}TableName).
-Debug(p.toSql).
-Select().
-Count(ctx, cond...)
+	defer p.Free()
+	return p.x.Table({{$package}}.{{$structName}}TableName).
+		Debug(p.toSql).
+		Select().
+		Count(ctx, cond...)
 }
 
 // Sum
 func (p *{{$structNameLower}}) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
-defer p.Free()
-return p.x.Table({{$package}}.{{$structName}}TableName).
-Debug(p.toSql).
-Select().
-Sum(ctx, cols, cond...)
+	defer p.Free()
+	return p.x.Table({{$package}}.{{$structName}}TableName).
+		Debug(p.toSql).
+		Select().
+		Sum(ctx, cols, cond...)
 }
 
 // Exists
 func (p *{{$structNameLower}}) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
-defer p.Free()
-_c := p.x.Table({{$package}}.{{$structName}}TableName).Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
-_row, e := _c.Debug(p.toSql).
-Select().
-QueryRow(ctx)
-if e != nil {
-return false, e
-}
+	defer p.Free()
+	_c := p.x.Table({{$package}}.{{$structName}}TableName).Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
+	_row, e := _c.Debug(p.toSql).
+		Select().
+		QueryRow(ctx)
+	if e != nil {
+		return false, e
+	}
 
-var {{ .PrimaryKey.Col }} {{.PrimaryKey.Type}}
-e = _row.Scan(&{{.PrimaryKey.Col}})
-switch e {
-case nil:
-return true, nil
-case sql.ErrNoRows:
-return false, nil
-default:
-return false, e
-}
+	var {{ .PrimaryKey.Col }} {{.PrimaryKey.Type}}
+	e = _row.Scan(&{{.PrimaryKey.Col}})
+	switch e {
+	case nil:
+		return true, nil
+    case sql.ErrNoRows:
+        return false, nil
+    default:
+        return false, e
+    }
 }
 
 {{- if .HasCache}}
-	// onUpdate
-	func (p *{{$structNameLower}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.Type}}) error {
+// onUpdate
+func (p *{{$structNameLower}}) onUpdate(ctx context.Context, ids ...{{.PrimaryKey.Type}}) error {
 	defer p.Free()
 	for _, _id := range ids {
-	if e := p.cache.Delete(ctx, GetIdHashKey(_id)); e != nil {
-	return e
-	}
+		if e := p.cache.Delete(ctx, GetIdHashKey(_id)); e != nil {
+			return e
+		}
 	}
 
 	return p.cache.PrefixDelete(ctx, "s:")
-	}
+}
 
-	// getCache
-	func (p *{{$structNameLower}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (*{{$package}}.{{$structName}}, bool, error) {
+// getCache
+func (p *{{$structNameLower}}) getCache(ctx context.Context, {{.PrimaryKey.Col}} {{.PrimaryKey.Type}}) (*{{$package}}.{{$structName}}, bool, error) {
 	_s,e := p.cache.Fetch(ctx, GetIdHashKey({{.PrimaryKey.Col}}))
 	if e != nil {
-	return nil, false, e
+		return nil, false, e
 	}
 	if len(_s)==0 {
-	return nil, false, nil
+		return nil, false, nil
 	}
 	_obj := {{$package}}.New{{$structName}}()
 	e = json.Unmarshal(_s, _obj)
 	if e != nil {
-	return nil, false, e
+		return nil, false, e
 	}
 	return _obj, true,nil
-	}
+}
 
-	// setCache
-	func (p *{{$structNameLower}}) setCache(ctx context.Context, obj *{{$package}}.{{$structName}}) error {
+// setCache
+func (p *{{$structNameLower}}) setCache(ctx context.Context, obj *{{$package}}.{{$structName}}) error {
 	_s,e := json.Marshal(obj)
 	if e != nil {
-	return e
+		return e
 	}
 	return p.cache.Save(ctx, GetIdHashKey(obj.{{.PrimaryKey.Name}}), string(_s), {{.CacheData}})
-	}
+}
 
 
-	// 生成综合条件cond缓存key
-	func GetCondHashKey(key any) string {
+// 生成综合条件cond缓存key
+func GetCondHashKey(key any) string {
 	return cachego.GetHashKey("c:", key)
-	}
+}
 
-	// 生成id缓存key
-	func GetIdHashKey(key any) string {
+// 生成id缓存key
+func GetIdHashKey(key any) string {
 	return cachego.GetHashKey("i:", key)
-	}
+}
 
-	// 生成ids缓存key
-	func GetIdsHashKey(key any) string {
+// 生成ids缓存key
+func GetIdsHashKey(key any) string {
 	return cachego.GetHashKey("s:", key)
-	}
+}
 
 {{end}}
 
 {{- if ne .Relation.Name ""}}
 
-	// edges
-	func (p *{{$structNameLower}}) edges(ctx context.Context,ids []any) map[any][]{{$package}}.{{.Relation.Type}} {
+// edges
+func (p *{{$structNameLower}}) edges(ctx context.Context,ids []any) map[any][]{{$package}}.{{.Relation.Type}} {
 	defer p.Free()
 	rsMap := make(map[any][]{{$package}}.{{.Relation.Type}}, len(ids))
 	rs, has, _ := {{.Relation.Type}}(p.x).List(ctx, p.x.Where(tbl{{lower (.Relation.Type)}}.{{.Relation.Foreign}}.In(ids...)))
 	if !has {
-	return rsMap
+		return rsMap
 	}
 	for _, r := range rs {
-	rsMap[r.{{.Relation.Foreign}}] = append(rsMap[r.{{.Relation.Foreign}}], *r)
+		rsMap[r.{{.Relation.Foreign}}] = append(rsMap[r.{{.Relation.Foreign}}], *r)
 	}
 	return rsMap
-	}
+}
 {{- end}}
