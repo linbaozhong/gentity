@@ -1,13 +1,5 @@
 <script setup>
-    import {{{lower
-
-    .StructName
-    }
-    }
-    Columns
-    }
-    from
-    './{{ toPascal .StructName }}Columns.js'
+    import {{{ lower .StructName }}Columns} from './{{ toPascal .StructName }}Columns.js'
 
     const props = defineProps({
         item: {type: Object, required: true},

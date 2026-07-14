@@ -22,36 +22,36 @@ import (
 {{- if ne .Relation.Name ""}}
 	"{{.ModulePath}}/define/table/tbl{{lower .Relation.Type}}"
 {{- end}}
-"github.com/linbaozhong/gentity/pkg/ace"
-"github.com/linbaozhong/gentity/pkg/ace/dialect"
-"github.com/linbaozhong/gentity/pkg/log"
-"github.com/linbaozhong/gentity/pkg/types"
+	"github.com/linbaozhong/gentity/pkg/ace"
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
+	"github.com/linbaozhong/gentity/pkg/log"
+	"github.com/linbaozhong/gentity/pkg/types"
 )
 
 type dao{{$structName}} struct {
-db    ace.Executer
-{{- if .HasCache}}
-cache cachego.Cache
-sg singleflight.Group
-{{- end}}
+	db    ace.Executer
+	{{- if .HasCache}}
+	cache cachego.Cache
+	sg singleflight.Group
+	{{- end}}
 }
 
 // New 实例化dao{{$structName}}
 // exec: 执行器，用于执行sql语句，如：db,tx
 // 如果不传入，则使用默认的db
 func New(exec ...ace.Executer) *dao{{$structName}} {
-_obj := &dao{{$structName}}{}
-_obj.db = ace.GetExec(exec...)
+	_obj := &dao{{$structName}}{}
+	_obj.db = ace.GetExec(exec...)
 
-{{- if .HasCache}}
-_obj.cache = _obj.db.Cache({{$package}}.{{$structName}}TableName)
-{{- end}}
-return _obj
+	{{- if .HasCache}}
+	_obj.cache = _obj.db.Cache({{$package}}.{{$structName}}TableName)
+	{{- end}}
+	return _obj
 }
 
 // builder DAL构建器
 func builder() ace.Builder{
-return ace.Table({{$package}}.{{$structName}}TableName)
+	return ace.Table({{$package}}.{{$structName}}TableName)
 }
 
 // Insert 返回 LastInsertId

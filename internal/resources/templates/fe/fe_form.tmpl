@@ -2,15 +2,7 @@
     /**
      * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
      */
-    import {{{lower
-
-    .StructName
-    }
-    }
-    Rules
-    }
-    from
-    '../shared/{{ lower .StructName }}.validation.js'
+    import {{{ lower .StructName }}Rules} from '../shared/{{ lower .StructName }}.validation.js'
 
     const props = defineProps({
         mode: {type: String, default: 'create'},
