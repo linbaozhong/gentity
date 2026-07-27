@@ -54,17 +54,21 @@ type TempData struct {
 	Entity         string // 前端实体前缀（由结构体名推导，如 user）
 	Group          string // 接口分组前缀（--group）
 	Platform       string // 前端目标平台：pc | h5 | mp
+	TableComment   string // 表注释
 	SearchFormComp string // M5: 自动嵌套的 SearchForm 组件文件名（如 UserListReqSearchForm.vue），空表示不嵌套
 }
 
 // Field struct 字段
 type Field struct {
-	Name   string   // 字段名
-	Col    string   // 数据库列名
-	Json   jsonObj  // json名
-	Type   string   // 类型
-	Rw     string   // 数据库读写标志
-	Valids []string // 数据校验规则
+	Name    string   // 字段名
+	Col     string   // 数据库列名
+	Json    jsonObj  // json名
+	Type    string   // 类型
+	Rw      string   // 数据库读写标志
+	Size    string   // db 标签中的 size:N
+	Auto    bool     // db 标签中的 auto
+	Comment string   // 字段注释
+	Valids  []string // 数据校验规则
 }
 
 type jsonObj struct {
@@ -500,21 +504,28 @@ func toJsType(t Field) string {
 	}
 }
 
-// entityStripSuffixes 推导实体前缀时需要剥离的后缀（动作词 + Req/Resp）
-var entityStripSuffixes = []string{
+// entityStrip 推导实体前缀时需要剥离的片段
+var entityStrip = []string{
 	"Req", "Resp", "Request", "Response",
-	"Register", "Login", "Create", "Update", "Edit", "Get", "List",
-	"Search", "Delete", "Detail", "Info", "Query",
+	"Get", "List", "Search", "Query", "Create", "Update", "Edit",
+	"Delete", "Register", "Login", "Detail", "Info", "Page",
 }
 
-// toEntity 由结构体名推导实体前缀，如 UserRegisterReq -> user
+// toEntity 由结构体名推导实体前缀，如 UserRegisterReq -> user, GetUserReq -> user, UserListReq -> user
 func toEntity(structName string) string {
 	s := structName
 	for {
 		matched := false
-		for _, suf := range entityStripSuffixes {
-			if strings.HasSuffix(s, suf) && len(s) > len(suf) {
-				s = s[:len(s)-len(suf)]
+		for _, strip := range entityStrip {
+			// 尝试后缀剥离（如 UserListReq → UserList → User）
+			if strings.HasSuffix(s, strip) && len(s) > len(strip) {
+				s = s[:len(s)-len(strip)]
+				matched = true
+				break
+			}
+			// 尝试前缀剥离（如 GetUserReq → GetUser → User）
+			if strings.HasPrefix(s, strip) && len(s) > len(strip) {
+				s = s[len(strip):]
 				matched = true
 				break
 			}
@@ -571,7 +582,7 @@ func toValidRule(valid string, f Field, entity string) string {
 			case "max":
 				sb.WriteString("max: " + params)
 			case "in":
-				sb.WriteString("oneOf: [")
+				sb.WriteString("type: 'enum', enum: [")
 				for i, p := range strings.Split(params, "|") {
 					if i > 0 {
 						sb.WriteString(", ")

@@ -1,7 +1,8 @@
 <script setup>
     /**
-     * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
+     * @typedef {import('../shared/{{ lower .Entity }}.js').{{.StructName}}} {{.StructName}}
      */
+    import { t } from '@/i18n'
     const props = defineProps({
         value: {type: Object, default: () => ({})},
     })

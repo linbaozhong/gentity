@@ -512,8 +512,6 @@ type ChannelReq struct {
 "matches(pattern)"                  // 正则表达式
 "in(val1|val2|...|valN)"            // 枚举, 多个值用|隔开, 数值或字符串
 "rsapub(keylength)"                 // RSA公钥
-"minstringlength(int)               // 字符串最小长度
-"maxstringlength(int)               // 字符串最大长度
 "min"                               // 最小值
 "max"                               // 最大值
 ```

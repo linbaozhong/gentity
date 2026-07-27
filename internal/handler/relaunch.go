@@ -16,12 +16,13 @@ package handler
 
 import (
 	"fmt"
-	"github.com/linbaozhong/gentity/internal/base"
-	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/linbaozhong/gentity/internal/base"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -35,7 +36,7 @@ var (
 	parent   string // struct文件父级目录
 
 	feTarget string // 新增：pc|h5|mp|all
-	feOut    string // 新增：输出目录
+	out      string // 新增：输出目录
 	feGroup  string // 新增：接口分组前缀
 
 	tablePath string // table文件全路径
@@ -52,6 +53,7 @@ var (
 	gentity dao
 	gentity dao .\do
 	gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+	gentity ddl .\do mysql --out .\do\ddl
 	gentity sql .\do mysql .\database.sql
 	gentity check .\dto
 	gentity fe ./dto --target pc
@@ -124,7 +126,7 @@ var (
 				// if e != nil {
 				//	showError(e)
 				// }
-			case "check", "dto", "fe":
+			case "check", "dto", "fe", "ddl":
 			case "swag":
 			case "version":
 				fmt.Println("ver." + version)
@@ -192,7 +194,16 @@ var (
 					if e != nil {
 						showError(e)
 					}
-					e = generateFrontend(_tds, filename, feTarget, feOut, feGroup)
+					e = generateFrontend(_tds, feTarget, out, feGroup)
+				} else if command == "ddl" {
+					_tds, e := parseFile(filename, pkgPath, "@tablename")
+					if e != nil {
+						showError(e)
+					}
+					e = generateDDL(_tds, driver, out)
+					if e != nil {
+						showError(e)
+					}
 				} else {
 					_tds, e := parseFile(filename, pkgPath, "@tablename")
 					if e != nil {
@@ -217,8 +228,8 @@ var (
 
 func init() {
 	launch.Flags().StringVar(&feTarget, "target", "all", "前端目标: pc|h5|mp|all")
-	launch.Flags().StringVar(&feOut, "out", "./frontend", "前端代码输出目录")
 	launch.Flags().StringVar(&feGroup, "group", "", "接口分组前缀，用于 i18n key 与 endpoint")
+	launch.Flags().StringVar(&out, "out", "./ddl", "输出目录")
 }
 
 func showError(msg any) {

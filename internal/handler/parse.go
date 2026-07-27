@@ -84,9 +84,15 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			FileName:    structFullName,
 			PrimaryKey:  Field{},
 			Relation:    Relation{},
-			// Relations:   make([]Relation, 0), // ← 新增这一行
-			Columns: make([]Field, 0, 20),
-			// VisitorName: "",
+			Columns:     make([]Field, 0, 20),
+		}
+		// 提取表注释（取 Docs 中非 @tag 的第一行作为表注释）
+		for _, doc := range stru.Docs {
+			doc = strings.TrimLeft(doc, " /")
+			if doc != "" && !strings.HasPrefix(doc, "@") {
+				_tempData.TableComment = doc
+				break
+			}
 		}
 		// 解析struct文档
 		parseDocs(&_tempData, stru.Docs, tags...)
@@ -114,7 +120,7 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 					_namejson.Json = parseJson(v) // json_name
 					_parsedJson = true
 				case dbTag:
-					_namejson.Col, pk, rw, ref = parseTagsForDB(v)
+					_namejson.Col, pk, rw, ref, _namejson.Size, _namejson.Auto = parseTagsForDB(v)
 					if len(ref) > 0 {
 						_ref := strings.Split(ref, "|")
 						if len(_ref) >= 2 {
@@ -153,6 +159,14 @@ func parseFile(filename, pkgPath string, tags ...string) ([]TempData, error) {
 			}
 			_namejson.Name = field.Name
 			_namejson.Type = field.Type.String()
+			// 提取字段注释（行尾 // 后面的内容）
+			for _, doc := range field.Docs {
+				doc = strings.TrimLeft(doc, " /")
+				if doc != "" && !strings.HasPrefix(doc, "@") {
+					_namejson.Comment = doc
+					break
+				}
+			}
 			// _namejson.info = getExprInfo(_namejson.Type)
 			// _namejson.idx = i
 			_namejson.Rw = rw
@@ -267,12 +281,8 @@ func parseDocs(tmp *TempData, docs []string, tags ...string) {
 	}
 }
 
-// columnName 列名
-// key 主键
-// rw 读写标志
-// ref 关系键
-// fk 关系外键
-func parseTagsForDB(matchs []string) (columnName, key, rw, ref string) {
+// parseTagsForDB 解析 db 标签，返回 (列名, 主键, 读写标志, 关系键, size, auto)
+func parseTagsForDB(matchs []string) (columnName, key, rw, ref, size string, auto bool) {
 	s := strings.Split(matchs[0], " ")
 	if len(s) == 1 {
 		if strings.HasPrefix(s[0], "ref:") {
@@ -305,9 +315,11 @@ func parseTagsForDB(matchs []string) (columnName, key, rw, ref string) {
 		if v == "-" || v == "->" || v == "<-" {
 			rw = v
 		}
-
 		if v == "auto" {
-			rw = "<-"
+			auto = true
+		}
+		if strings.HasPrefix(v, "size:") {
+			size = v[5:]
 		}
 	}
 	key = *k

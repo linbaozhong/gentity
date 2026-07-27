@@ -1,14 +1,23 @@
 <script setup>
     /**
-     * @typedef {import('../shared/{{ lower .StructName }}.types.js').{{.StructName}}} {{.StructName}}
+     * @typedef {import('../shared/{{ lower .Entity }}.js').{{.StructName}}} {{.StructName}}
      */
-    import {{{ lower .StructName }}Rules} from '../shared/{{ lower .StructName }}.validation.js'
+    import { t } from '@/i18n'
+    import { {{ lower .StructName }}, {{ lower .StructName }}Rules } from '../shared/{{ lower .Entity }}.js'
 
     const props = defineProps({
         mode: {type: String, default: 'create'},
         modelValue: {type: Object, default: () => ({})},
     })
     const emit = defineEmits(['submit', 'cancel'])
+
+    async function submit() {
+        await {{ lower .StructName }}(props.modelValue)
+        emit('submit', props.modelValue)
+    }
+    function cancel() {
+        emit('cancel')
+    }
 </script>
 
 <template>
@@ -20,9 +29,9 @@
 			</view>
         {{ end }}
 		<view class="form-actions">
-			<button type="primary" @click="emit('submit', modelValue)">{{ "{{" }} t('{{$.Entity}}
+			<button type="primary" @click="submit">{{ "{{" }} t('{{$.Entity}}
 				.submit') {{ "}}" }}</button>
-			<button @click="emit('cancel')">{{ "{{" }} t('{{$.Entity}}.cancel') {{ "}}" }}</button>
+			<button @click="cancel">{{ "{{" }} t('{{$.Entity}}.cancel') {{ "}}" }}</button>
 		</view>
 	</view>
 </template>
