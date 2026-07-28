@@ -34,6 +34,8 @@ type Context interface {
 	Method() string
 	RemoteAddr() string
 	GetHeader(key string) string
+	// Param 读取路由参数（如 /users/:id 中的 id）
+	Param(key string) string
 
 	// === 请求对象 ===
 	Request() *HttpRequest
@@ -42,6 +44,7 @@ type Context interface {
 	ReadJSON(ptr any) error
 	ReadForm(ptr any) error
 	ReadQuery(ptr any) error
+	// ReadParams(ptr any) error
 	ContentType() string
 	FormValues() map[string][]string
 

@@ -6,9 +6,10 @@ package ack
 import (
 	"encoding/json"
 	"errors"
-	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
 	"io"
 	"time"
+
+	"github.com/linbaozhong/gentity/pkg/ack/internal/core"
 
 	"github.com/kataras/iris/v12"
 )
@@ -28,6 +29,7 @@ func (a *ctxAdapter) Path() string                { return a.c.Path() }
 func (a *ctxAdapter) Method() string              { return a.c.Method() }
 func (a *ctxAdapter) RemoteAddr() string          { return a.c.RemoteAddr() }
 func (a *ctxAdapter) GetHeader(key string) string { return a.c.GetHeader(key) }
+func (a *ctxAdapter) Param(key string) string     { return a.c.Params().Get(key) }
 
 // === 请求对象 ===
 
@@ -47,45 +49,79 @@ func (a *ctxAdapter) Request() *core.HttpRequest {
 
 // === 请求数据读取 ===
 
-func (a *ctxAdapter) ReadJSON(ptr any) error {
-	body, err := io.ReadAll(a.c.Request().Body)
-	if err != nil {
-		return err
-	}
-	defer a.c.Request().Body.Close()
-	if len(body) == 0 {
-		return errors.New("请求体为空")
-	}
-	if x, ok := ptr.(json.Unmarshaler); ok {
-		return x.UnmarshalJSON(body)
-	}
-	return json.Unmarshal(body, ptr)
-}
-
-func (a *ctxAdapter) ReadForm(ptr any) error {
+// readPathParams 把路由路径参数补充绑定到 ptr。
+// 实现了 UnmarshalValueser 时按 json 字段名匹配（与生成的 UnmarshalValues 约定一致），
+// 否则回退到 iris 自身的路径参数绑定。
+func (a *ctxAdapter) readPathParams(ptr any) error {
 	if uv, ok := ptr.(core.UnmarshalValueser); ok {
-		values := a.c.FormValues()
-		if len(values) == 0 {
-			return nil
+		if params := a.c.Params(); params.Len() > 0 {
+			values := make(map[string][]string, params.Len())
+			params.Visit(func(key string, value string) {
+				values[key] = []string{value}
+			})
+			return uv.UnmarshalValues(values)
 		}
-		return uv.UnmarshalValues(values)
+		return nil
 	}
-	e := a.c.ReadForm(ptr)
-	if e != nil && !iris.IsErrPath(e) {
+
+	if e := a.c.ReadParams(ptr); e != nil && !iris.IsErrPath(e) {
 		return e
 	}
 	return nil
 }
 
+func (a *ctxAdapter) ReadJSON(ptr any) error {
+	body, e := io.ReadAll(a.c.Request().Body)
+	if e != nil {
+		return e
+	}
+	defer a.c.Request().Body.Close()
+
+	if len(body) == 0 {
+		return errors.New("请求体为空")
+	}
+
+	if x, ok := ptr.(json.Unmarshaler); ok {
+		if e := x.UnmarshalJSON(body); e != nil {
+			return e
+		}
+	} else if e := json.Unmarshal(body, ptr); e != nil {
+		return e
+	}
+	// body 已解析，再合并路径参数
+	return a.readPathParams(ptr)
+}
+
+func (a *ctxAdapter) ReadForm(ptr any) error {
+	if uv, ok := ptr.(core.UnmarshalValueser); ok {
+		if fv := a.c.FormValues(); len(fv) > 0 {
+			if e := uv.UnmarshalValues(fv); e != nil {
+				return e
+			}
+		}
+		// form 已解析，再合并路径参数
+		return a.readPathParams(ptr)
+	}
+	if e := a.c.ReadForm(ptr); e != nil && !iris.IsErrPath(e) {
+		return e
+	}
+	return a.readPathParams(ptr)
+}
+
 func (a *ctxAdapter) ReadQuery(ptr any) error {
 	if uv, ok := ptr.(core.UnmarshalValueser); ok {
-		values := a.c.Request().URL.Query()
-		if len(values) == 0 {
-			return nil
+		if qv := a.c.Request().URL.Query(); len(qv) > 0 {
+			if e := uv.UnmarshalValues(qv); e != nil {
+				return e
+			}
 		}
-		return uv.UnmarshalValues(values)
+		// query 已解析，再合并路径参数
+		return a.readPathParams(ptr)
 	}
-	return a.c.ReadQuery(ptr)
+	if e := a.c.ReadQuery(ptr); e != nil && !iris.IsErrPath(e) {
+		return e
+	}
+	return a.readPathParams(ptr)
 }
 
 // iris: 获取 Content-Type 用 GetContentTypeRequested
