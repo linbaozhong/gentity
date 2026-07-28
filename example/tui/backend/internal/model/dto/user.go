@@ -1,50 +1,96 @@
 package dto
 
-// UserRegisterReq 用户注册请求数据
+import "github.com/linbaozhong/gentity/pkg/types"
+
+// BillReq
 // @request
-// 字段标签说明(可选项)：
-// json：用于json序列化和反序列化,解析Content-Type为application/json、application/x-www-form-urlencoded和multipart/form-data 的数据时使用
-// valid：用于数据校验
-type UserRegisterReq struct {
-	UserName *string `json:"user_name" valid:"required"`
-	Password *string `json:"password" valid:"required"`
-	Email    *string `json:"email" valid:"email~邮箱格式错误"`
+type BillReq struct {
+	Page *int `json:"page" valid:"min(1)"`
+	Size *int `json:"size" valid:"min(1)"`
 }
 
-// UserRegisterResp 用户注册响应数据
+// BillResp
 // @response
-type UserRegisterResp struct {
-	UserID   uint64 `json:"user_id"`
-	UserName string `json:"user_name"`
-	Email    string `json:"email,omitempty"`
+type BillResp struct {
+	Total TotalResp  `json:"total"`
+	List  []FlowResp `json:"list"`
 }
 
+type ProfileReq struct {
+}
+
+// ProfileResp
+// @response
+type ProfileResp struct {
+	ID     *types.BigInt `json:"id"`
+	Nick   *types.String `json:"nick"`
+	Gender *types.String `json:"gender"`
+	Avatar *types.String `json:"avatar"`
+}
+
+// TotalReq
 // @request
-type GetUserReq struct {
-	UserID *uint64 `json:"user_id"`
+type TotalReq struct {
 }
 
+// TotalResp
 // @response
-type GetUserResp struct {
-	UserID   uint64 `json:"user_id"`
-	UserName string `json:"user_name"`
-	Email    string `json:"email,omitempty"`
+type TotalResp struct {
+	ID           *types.BigInt `json:"id"`
+	User         *types.BigInt `json:"user"`
+	Currency     *types.String `json:"currency"`
+	Income       *types.Money  `json:"income"`
+	FreezeIncome *types.Money  `json:"freeze_income"`
+	TotalIncome  *types.Money  `json:"total_income"`
+	Amount       *types.Money  `json:"amount"`
+	Freeze       *types.Money  `json:"freeze"`
+	TotalAmount  *types.Money  `json:"total_amount"`
 }
 
+// FlowReq
 // @request
-type UserListReq struct {
-	Name   string `json:"name"`
-	Status string `json:"status" valid:"in(active|inactive)"` // 生成 SearchForm 含下拉
+type FlowReq struct {
 }
 
+// FlowResp
 // @response
-type UserListResp struct {
-	List  []User `json:"list"`
-	Total int    `json:"total"`
+type FlowResp struct {
+	ID              *types.BigInt `json:"id"`
+	Type            *types.String `json:"type"`
+	TradeType       *types.Int8   `json:"trade_type"`
+	TradeTypeString *types.String `json:"trade_type_string"`
+	Currency        *types.String `json:"currency"`
+	IncomeBefore    *types.Money  `json:"income_before"`
+	Income          *types.Money  `json:"income"`
+	IncomeAfter     *types.Money  `json:"income_after"`
+	Fee             *types.Money  `json:"fee"`
+	AmountBefore    *types.Money  `json:"amount_before"`
+	Amount          *types.Money  `json:"amount"`
+	AmountAfter     *types.Money  `json:"amount_after"`
+	Descr           *types.String `json:"descr"`
+	Ctime           *types.Time   `json:"ctime"`
 }
 
-type User struct {
-	UserID   uint64 `json:"user_id"`
-	UserName string `json:"user_name"`
-	Email    string `json:"email,omitempty"`
+// WithdrawReq
+// @request
+type WithdrawReq struct {
+	BankCode *string      `json:"bank_code" valid:"required,stringlength(1|10)"` // 银行代码
+	BankName *string      `json:"bank_name" valid:"required,stringlength(1|20)"` // 银行名称
+	Name     *string      `json:"name" valid:"required,stringlength(1|45)"`      // 户名
+	Number   *string      `json:"number" valid:"required,stringlength(1|20)"`    // 账号
+	Amount   *types.Money `json:"amount" valid:"required,min(0.01)"`             // 提现金额
+}
+
+// WithdrawResp
+// @response
+type WithdrawResp struct {
+}
+
+// BankResp
+// @response
+type BankResp struct {
+	BankCode *types.String `json:"bank_code"` // 银行代码
+	BankName *types.String `json:"bank_name"` // 银行名称
+	Name     *types.String `json:"name"`      // 户名
+	Number   *types.String `json:"number"`    // 账号
 }

@@ -16,7 +16,6 @@ package handler
 
 import (
 	"bytes"
-	"github.com/linbaozhong/gentity/internal/resources"
 	"go/format"
 	"io"
 	"os"
@@ -24,6 +23,8 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/linbaozhong/gentity/internal/resources"
 )
 
 // TempData 表示生成template所需要的数据结构
@@ -591,21 +592,22 @@ func toValidRule(valid string, f Field, entity string) string {
 				}
 				sb.WriteString("]")
 			}
+			sb.WriteString(", message: " + msg)
 		}
 	} else {
 		switch valid {
 		case "required":
 			sb.WriteString("required: true, message: " + msg)
 		case "email":
-			sb.WriteString("type: 'email'")
+			sb.WriteString("type: 'email', message: " + msg)
 		case "mobile":
-			sb.WriteString("pattern: /^1[3456789]\\d{9}$/")
+			sb.WriteString("pattern: /^1[3456789]\\d{9}$/, message: " + msg)
 		case "int":
-			sb.WriteString("type: 'integer'")
+			sb.WriteString("type: 'integer', message: " + msg)
 		case "float":
-			sb.WriteString("type: 'number'")
+			sb.WriteString("type: 'number', message: " + msg)
 		case "alphanum":
-			sb.WriteString("pattern: /^[a-zA-Z0-9]+$/")
+			sb.WriteString("pattern: /^[a-zA-Z0-9]+$/, message: " + msg)
 		default:
 			sb.WriteString("/* unsupported valid: " + valid + " */")
 		}

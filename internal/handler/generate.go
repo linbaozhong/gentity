@@ -16,15 +16,16 @@ package handler
 
 import (
 	"bytes"
-	"github.com/linbaozhong/gentity/internal/resources"
-	"github.com/linbaozhong/gentity/pkg/util"
-	"github.com/linbaozhong/gentity/pkg/validator"
 	"go/format"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/linbaozhong/gentity/internal/resources"
+	"github.com/linbaozhong/gentity/pkg/util"
+	"github.com/linbaozhong/gentity/pkg/validator"
 )
 
 func initDTOFile(prefix string, tds []TempData) {
@@ -273,7 +274,19 @@ func getValidFunc(t string, f Field) (fo funcObj) {
 	} else {
 		tag = t[:pos]
 	}
-
+	// 如果tag是int、numeric、float，但是f的类型是 int、int8、int16、int32、int64、uint、uint8、uint16、uint32、uint64、float32、float64、types.Int、types.Int8、types.Int16、types.Int32、types.Int64、types.Uint、types.Uint8、types.Uint16、types.Uint32、types.Uint64、types.Float32、types.Float64，则不使用validator
+	if tag == "int" || tag == "numeric" || tag == "float" {
+		tp := f.Type
+		if tp[0] == '*' {
+			tp = tp[1:]
+		}
+		switch tp {
+		case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64",
+			"types.Int", "types.Int8", "types.Int16", "types.Int32", "types.Int64", "types.Uint", "types.Uint8", "types.Uint16",
+			"types.Uint32", "types.Uint64", "types.Float32", "types.Float64", "types.Money", "types.BigInt":
+			return
+		}
+	}
 	if fn, ok := validator.TagMap[tag]; ok {
 		fo.Func = fn
 		return
