@@ -106,9 +106,11 @@ func (p *Parser) unscan() {
 }
 
 func (p *Parser) scanIgnoreWhitespace() (tok Token, lit string) {
-	tok, lit = p.scan()
-	if tok == WS || tok == ANNOTATION {
+	for {
 		tok, lit = p.scan()
+		if tok != WS && tok != ANNOTATION {
+			break
+		}
 	}
 	return
 }
@@ -390,7 +392,7 @@ func (p *Parser) parse() (*Table, error) {
 		Extras:      make(map[string]string),
 	}
 	for {
-		if tok, lit := p.scanIgnoreWhitespace(); tok == DROP || tok == LOCK || tok == UNLOCK || tok == ANNOTATION {
+		if tok, lit := p.scanIgnoreWhitespace(); tok == DROP || tok == LOCK || tok == UNLOCK || tok == USE || tok == INSERT || tok == ANNOTATION {
 			for { // ignore drop, lock and unlock statement
 				if tok, _ := p.scanIgnoreWhitespace(); tok == SEMI_COLON {
 					break
@@ -401,7 +403,19 @@ func (p *Parser) parse() (*Table, error) {
 		} else if tok == SEMI_COLON || tok == ANNOTATION {
 			continue
 		} else if tok == CREATE {
-			break
+			nextTok, _ := p.scanIgnoreWhitespace()
+			if nextTok == TABLE {
+				p.unscan()
+				break
+			}
+			// skip CREATE DATABASE / CREATE SCHEMA etc.
+			for {
+				if tok, _ := p.scanIgnoreWhitespace(); tok == SEMI_COLON {
+					break
+				} else if tok == EOF {
+					return nil, nil
+				}
+			}
 		} else if tok == EOF {
 			return nil, nil
 		} else {

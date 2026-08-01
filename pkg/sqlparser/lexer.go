@@ -71,6 +71,8 @@ const (
 	AUTO_INCREMENT
 	CURRENT_TIMESTAMP
 	UNSIGNED
+	USE
+	INSERT
 )
 
 var (
@@ -226,6 +228,10 @@ func (s *Scanner) scanIdent() (tok Token, lit string) {
 		return UNIQUE, buf.String()
 	case "UNSIGNED":
 		return UNSIGNED, buf.String()
+	case "USE":
+		return USE, buf.String()
+	case "INSERT":
+		return INSERT, buf.String()
 	case "CONSTRAINT":
 		return CONSTRAINT, buf.String()
 	case "PRIMARY":
@@ -315,7 +321,8 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 	case '-':
 		if c := s.read(); c == '-' { // comment
 			for {
-				if c := s.read(); c == '\n' {
+				c := s.read()
+				if c == '\n' || c == eof {
 					return ANNOTATION, ""
 				}
 			}
