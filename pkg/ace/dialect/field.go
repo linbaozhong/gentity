@@ -313,11 +313,13 @@ func (f *Field) NotNull() Condition {
 }
 
 // AsName 别名
-func (f *Field) AsName(name string, d Dialect) string {
+func (f *Field) AsName(name string, d Dialect) *Field {
 	if name == "" {
-		return f.Quote(d)
+		f.Name = f.Quote(d)
+	} else {
+		f.Name = f.Quote(d) + " AS " + name
 	}
-	return f.Quote(d) + " AS " + name
+	return f
 }
 
 // Sum 聚合表达式：合计
