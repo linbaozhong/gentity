@@ -31,6 +31,7 @@ type (
 		Table      string // 表名
 		Type       string // 字段类型
 		IsRelation bool   // 是否关联字段
+		as         string // 别名
 	}
 	// Function 聚合函数
 	Function func(Dialect) string

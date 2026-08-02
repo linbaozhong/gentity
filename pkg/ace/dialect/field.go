@@ -23,7 +23,10 @@ import (
 
 // Quote 为字段添加引号
 func (f *Field) Quote(d Dialect) string {
-	return d.Quote(f.Table) + "." + d.Quote(f.Name)
+	if f.as == "" {
+		return d.Quote(f.Table) + "." + d.Quote(f.Name)
+	}
+	return d.Quote(f.Table) + "." + d.Quote(f.Name) + " AS " + f.as
 }
 
 // TableName 为表名添加引号
@@ -313,13 +316,9 @@ func (f *Field) NotNull() Condition {
 }
 
 // AsName 别名
-func (f *Field) AsName(name string, d Dialect) *Field {
-	if name == "" {
-		f.Name = f.Quote(d)
-	} else {
-		f.Name = f.Quote(d) + " AS " + name
-	}
-	return f
+func (f *Field) AsName(name string) Field {
+	f.as = name
+	return *f
 }
 
 // Sum 聚合表达式：合计
