@@ -44,6 +44,7 @@ type (
 	Modeler interface {
 		TableNamer
 		AssignPtr(...Field) []any
+		AssignPtrByColumns(...string) []any
 		// AssignValues 向数据库写入数据前，为表列赋值。
 		// 如果 args 为空，则将非零值赋与可写字段
 		// 如果 args 不为空，则只赋值 args 中的字段

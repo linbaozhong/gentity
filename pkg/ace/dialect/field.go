@@ -405,3 +405,22 @@ func (f *Field) MBRContains(lng, lat, radius float64) Condition {
 		},
 	}
 }
+
+func FieldSliceDiff(a, b []Field) []Field {
+	if len(a) == 0 || len(b) == 0 {
+		return a
+	}
+	var diff []Field
+	var set = make(map[string]struct{})
+	for _, s := range b {
+		set[s.Name] = struct{}{}
+	}
+
+	for _, s := range a {
+		if _, ok := set[s.Name]; !ok {
+			diff = append(diff, s)
+		}
+	}
+
+	return diff
+}

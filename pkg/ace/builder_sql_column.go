@@ -34,7 +34,7 @@ type Columner interface {
 
 // GetCols 获取 orm 对象要查询的列。
 func (s *orm) GetCols() []dialect.Field {
-	return s.cols
+	return dialect.FieldSliceDiff(s.cols, s.omits)
 }
 
 // Distinct 设置查询结果去重，并指定去重的列。

@@ -23,6 +23,7 @@ var (
 
 	// 可写列
 	WritableFields = []dialect.Field{
+		Id,
 		Name,
 		Email,
 		Mobile,

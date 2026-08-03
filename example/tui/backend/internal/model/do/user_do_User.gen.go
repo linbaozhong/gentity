@@ -138,18 +138,18 @@ func (p *User) TableName() string {
 }
 
 // 定义一个映射表，将字段与对应的指针获取函数关联
-var userFieldToPtrFunc = map[dialect.Field]func(*User) any{
-	tbluser.Id:       func(p *User) any { return &p.Id },
-	tbluser.Name:     func(p *User) any { return &p.Name },
-	tbluser.Email:    func(p *User) any { return &p.Email },
-	tbluser.Mobile:   func(p *User) any { return &p.Mobile },
-	tbluser.Gender:   func(p *User) any { return &p.Gender },
-	tbluser.Birthday: func(p *User) any { return &p.Birthday },
-	tbluser.Creator:  func(p *User) any { return &p.Creator },
-	tbluser.Status:   func(p *User) any { return &p.Status },
-	tbluser.State:    func(p *User) any { return &p.State },
-	tbluser.Ctime:    func(p *User) any { return &p.Ctime },
-	tbluser.Utime:    func(p *User) any { return &p.Utime },
+var userFieldToPtrFunc = map[string]func(*User) any{
+	tbluser.Id.Name:       func(p *User) any { return &p.Id },
+	tbluser.Name.Name:     func(p *User) any { return &p.Name },
+	tbluser.Email.Name:    func(p *User) any { return &p.Email },
+	tbluser.Mobile.Name:   func(p *User) any { return &p.Mobile },
+	tbluser.Gender.Name:   func(p *User) any { return &p.Gender },
+	tbluser.Birthday.Name: func(p *User) any { return &p.Birthday },
+	tbluser.Creator.Name:  func(p *User) any { return &p.Creator },
+	tbluser.Status.Name:   func(p *User) any { return &p.Status },
+	tbluser.State.Name:    func(p *User) any { return &p.State },
+	tbluser.Ctime.Name:    func(p *User) any { return &p.Ctime },
+	tbluser.Utime.Name:    func(p *User) any { return &p.Utime },
 }
 
 // AssignPtr 根据传入的字段参数，返回对应字段的指针切片。
@@ -163,11 +163,28 @@ func (p *User) AssignPtr(args ...dialect.Field) []any {
 
 	_vals := make([]any, 0, len(args))
 	for _, col := range args {
-		if ptrFunc, ok := userFieldToPtrFunc[col]; ok {
+		if ptrFunc, ok := userFieldToPtrFunc[col.Name]; ok {
 			_vals = append(_vals, ptrFunc(p))
 		}
 	}
 
+	return _vals
+}
+
+// AssignPtrByColumns 根据 SQL 实际返回的列名，按列顺序返回对应字段的指针切片。
+// 列在映射表中找不到对应字段时，用一个占位指针跳过（保持列数/顺序与 rows 一致），避免 Scan 报错。
+// 参数 cols 为 rows.Columns() 返回的列名切片。
+func (p *User) AssignPtrByColumns(cols ...string) []any {
+	_vals := make([]any, 0, len(cols))
+	for _, col := range cols {
+		if ptrFunc, ok := userFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, ptrFunc(p))
+			continue
+		}
+		// 列名在结构体中找不到对应字段：用忽略指针占位，保证列数对齐
+		var ignore any
+		_vals = append(_vals, &ignore)
+	}
 	return _vals
 }
 
@@ -275,10 +292,5 @@ func (p *User) AssignKeys() (dialect.Field, any) {
 }
 
 func (p *User) AssignPrimaryKeyValues(result sql.Result) error {
-	_id, e := result.LastInsertId()
-	if e != nil {
-		return e
-	}
-	p.Id = types.BigInt(_id)
 	return nil
 }

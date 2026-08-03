@@ -50,12 +50,12 @@ var (
 		Short: "ORM 代码生成工具. ver." + version,
 		Example: `	gentity [api|new] PROJECT_NAME	创建新项目
 	gentity init [FOLDER]	在文件夹中按通用模板初始化项目
-	gentity dao
-	gentity dao .\do
+	gentity [dao|do]
+	gentity [dao|do] .\do
 	gentity db .\do mysql "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
 	gentity ddl .\do mysql --out .\do\ddl
 	gentity sql .\do mysql .\database.sql
-	gentity check .\dto
+	gentity [check|dto] .\dto
 	gentity fe ./dto --target pc
 	gentity version`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -108,7 +108,7 @@ var (
 					showError(e)
 				}
 				fallthrough
-			case "dao": // 根据struct生成dao层代码和序列化器
+			case "dao", "do": // 根据struct生成dao层代码和序列化器
 				_definePath := filepath.Join(parent, "define")
 				tablePath = filepath.Join(_definePath, "table")
 				// 创建生成dao层代码的目录

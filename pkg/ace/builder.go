@@ -18,12 +18,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"github.com/linbaozhong/gentity/pkg/ace/pool"
 	"github.com/linbaozhong/gentity/pkg/log"
-	"github.com/linbaozhong/gentity/pkg/util"
-	"reflect"
-	"strings"
 )
 
 type (
@@ -336,7 +336,7 @@ func (o *orm) parse() (strings.Builder, []any, error) {
 	o.command.Reset()
 	o.command.WriteString("SELECT ")
 
-	var cols = util.SliceDiff(o.cols, o.omits)
+	var cols = o.GetCols()
 	colens := len(cols)
 	funlens := len(o.funcs)
 	if colens+funlens == 0 {

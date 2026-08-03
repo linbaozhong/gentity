@@ -17,8 +17,9 @@ package ace
 import (
 	"context"
 	"database/sql"
-	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 	"strings"
+
+	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
 type SelectBuilder interface {
@@ -766,7 +767,7 @@ func (s *read) Get(ctx context.Context, dest any) error {
 		if !rows.Next() {
 			return sql.ErrNoRows
 		}
-		vals := d.AssignPtr()
+		vals := d.AssignPtr(s.GetCols()...)
 		return rows.Scan(vals...)
 	}
 	r := &Row{rows: rows, err: err, Mapper: s.x.Mapper()}
@@ -1095,13 +1096,17 @@ func (se *read) RawQueryStruct(ctx context.Context, dest any, sqlStr string, arg
 	}
 	defer rows.Close()
 
+	cols, e := rows.Columns()
+	if e != nil {
+		return e
+	}
 	// 如果 dest 实现了 Modeler 接口，直接调用 AssignPtr 方法，并 scan 数据
 	// 否则，调用 scanAny 方法
 	if d, ok := dest.(dialect.Modeler); ok {
 		if !rows.Next() {
 			return sql.ErrNoRows
 		}
-		vals := d.AssignPtr()
+		vals := d.AssignPtrByColumns(cols...)
 		return rows.Scan(vals...)
 	}
 	r := &Row{rows: rows, err: err, Mapper: se.x.Mapper()}
