@@ -343,11 +343,11 @@ func (d *TempData) writeTable(parent string) error {
 	}
 	return writeToFormatFile(_fileName, _f, func(ioWriter io.Writer, funcMap template.FuncMap) error {
 		tmpl := template.New("").Funcs(funcMap)
-		_, e := tmpl.ParseFS(resources.TemplatesFS, "templates/table.tmpl")
+		_, e := tmpl.ParseFS(resources.TemplatesFS, "templates/do_table.tmpl")
 		if e != nil {
 			return e
 		}
-		return tmpl.ExecuteTemplate(ioWriter, "table.tmpl", d)
+		return tmpl.ExecuteTemplate(ioWriter, "do_table.tmpl", d)
 	})
 
 }

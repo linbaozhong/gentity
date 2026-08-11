@@ -18,7 +18,7 @@ import (
 	{{- end}}
 )
 
-const {{$structName}}TableName = "{{.TableName}}"
+// const {{$structName}}TableName = "{{.TableName}}"
 
 var (
 	{{$structNameLower}}Pool = pool.New[*{{.StructName}}](func() any {
@@ -98,7 +98,7 @@ func (p *{{.StructName}}) Reset() {
 
 
 func (p *{{.StructName}}) TableName() string {
-	return {{$structName}}TableName
+	return "{{.TableName}}"
 }
 
 // 定义一个映射表，将字段与对应的指针获取函数关联

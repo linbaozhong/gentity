@@ -52,7 +52,7 @@ func {{$structName}}(x ace.Executer) *{{$structNameLower}} {
 	_obj := {{$structNameLower}}Pool.Get()
 	_obj.x = x
 {{- if .HasCache}}
-	_obj.cache = _obj.x.Cache({{$package}}.{{$structName}}TableName)
+	_obj.cache = _obj.x.Cache(tbl{{$structNameLower}}.TableName)
 {{- end}}
 	return _obj
 }
@@ -83,7 +83,7 @@ func (p *{{$structNameLower}}) Insert(ctx context.Context, sets ...dialect.Sette
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+	_result, e := p.x.Table(tbl{{$structNameLower}}.TableName).
 		Set(sets...).
 		Debug(p.toSql).
 		Create().
@@ -98,7 +98,7 @@ func (p *{{$structNameLower}}) Insert(ctx context.Context, sets ...dialect.Sette
 // cols: 要插入的列名
 func (p *{{$structNameLower}}) InsertOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
 	defer p.Free()
-	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+	_result, e := p.x.Table(tbl{{$structNameLower}}.TableName).
 		Cols(cols...).
 		Debug(p.toSql).
 		Create().
@@ -125,7 +125,7 @@ func (p *{{$structNameLower}}) InsertBatch(ctx context.Context, beans []*{{$pack
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+	_result, e := p.x.Table(tbl{{$structNameLower}}.TableName).
 		Cols(cols...).
 		Debug(p.toSql).
 		Create().
@@ -143,7 +143,7 @@ func (p *{{$structNameLower}}) Update(ctx context.Context, sets []dialect.Setter
 	if len(sets) == 0 {
 		return true, nil
 	}
-	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+	_result, e := p.x.Table(tbl{{$structNameLower}}.TableName).
 		Where(cond...).
 		Set(sets...).
 		Debug(p.toSql).
@@ -168,7 +168,7 @@ func (p *{{$structNameLower}}) UpdateById(ctx context.Context,{{.PrimaryKey.Col}
 // cols: 要插入的列名
 func (p *{{$structNameLower}}) UpdateOne(ctx context.Context, bean *{{$package}}.{{$structName}}, cols ...dialect.Field) (bool, error) {
 	defer p.Free()
-	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+	_result, e := p.x.Table(tbl{{$structNameLower}}.TableName).
 		Cols(cols...).
 		Debug(p.toSql).
 		Update().
@@ -193,7 +193,7 @@ func (p *{{$structNameLower}}) UpdateBatch(ctx context.Context, beans []*{{$pack
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+	_result, e := p.x.Table(tbl{{$structNameLower}}.TableName).
 		Cols(cols...).
 		Debug(p.toSql).
 		Update().
@@ -208,7 +208,7 @@ func (p *{{$structNameLower}}) UpdateBatch(ctx context.Context, beans []*{{$pack
 // Delete
 func (p *{{$structNameLower}}) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	defer p.Free()
-	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+	_result, e := p.x.Table(tbl{{$structNameLower}}.TableName).
 		Where(cond...).
 		Debug(p.toSql).
 		Delete().
@@ -237,7 +237,7 @@ func (p *{{$structNameLower}}) DeleteByIds(ctx context.Context, ids []any) (int6
 		return 0, nil
 	}
 
-	_result, e := p.x.Table({{$package}}.{{$structName}}TableName).
+	_result, e := p.x.Table(tbl{{$structNameLower}}.TableName).
 		Where(tbl{{$structNameLower}}.PrimaryKey.In(ids...)).
 		Debug(p.toSql).
 		Delete().
@@ -256,7 +256,7 @@ func (p *{{$structNameLower}}) DeleteByIds(ctx context.Context, ids []any) (int6
 //  2. bool: 是否存在记录
 //  3. error: 错误信息
 // 注意:
-//  1. 如果没有指定表名，则默认使用{{$package}}.{{$structName}}TableName
+//  1. 如果没有指定表名，则默认使用tbl{{$structNameLower}}.TableName
 //  2. 如果没有指定查询列，则默认使用tbl{{$structNameLower}}.ReadableFields
 //  3. 如果没有指定排序方式，则默认使用dialect.OrderAsc
 //  4. 如果没有指定条件，则默认查询所有记录
@@ -267,7 +267,7 @@ func (p *{{$structNameLower}}) DeleteByIds(ctx context.Context, ids []any) (int6
 func (p *{{$structNameLower}}) Get(ctx context.Context, s ace.SelectBuilder) (*{{$package}}.{{$structName}}, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0 {
-		s.Table({{$package}}.{{$structName}}TableName)
+		s.Table(tbl{{$structNameLower}}.TableName)
 	}
 
 	_cols := s.GetCols()
@@ -336,7 +336,7 @@ func (p *{{$structNameLower}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {
 
 	_v, e, _ := p.sg.Do(conv.Any2String({{.PrimaryKey.Col}}), func() (any, error) {
 		//_obj, has, e = p.Get4Cols(ctx, cols, []dialect.Condition{tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})})
-		_obj, has, e = p.Get(ctx, p.x.Table({{$package}}.{{$structName}}TableName).Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
+		_obj, has, e = p.Get(ctx, p.x.Table(tbl{{$structNameLower}}.TableName).Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
 		if has {
 			e = p.setCache(ctx, _obj)
 		}
@@ -348,7 +348,7 @@ func (p *{{$structNameLower}}) GetByID(ctx context.Context,{{.PrimaryKey.Col}} {
 
 	return nil,false,e
 {{- else}}
-	return p.Get(ctx, p.x.Table({{$package}}.{{$structName}}TableName).Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
+	return p.Get(ctx, p.x.Table(tbl{{$structNameLower}}.TableName).Where(tbl{{$structNameLower}}.PrimaryKey.Eq({{.PrimaryKey.Col}})).Cols(cols...))
 {{- end}}
 }
 
@@ -369,12 +369,12 @@ func (p *{{$structNameLower}}) GetByIds(ctx context.Context, ids []any, cols ...
 //  2. bool: 是否存在记录
 //  3. error: 错误信息
 // 注意:
-//  1. 如果没有指定表名，则默认使用{{$package}}.{{$structName}}TableName
+//  1. 如果没有指定表名，则默认使用tbl{{$structNameLower}}.TableName
 //  2. 如果没有指定查询列，则默认使用tbl{{$structNameLower}}.PrimaryKey
 func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (any, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0 {
-		s.Table({{$package}}.{{$structName}}TableName)
+		s.Table(tbl{{$structNameLower}}.TableName)
 	}
 
 	_cols := s.GetCols()
@@ -409,7 +409,7 @@ func (p *{{$structNameLower}}) Cell(ctx context.Context,s ace.SelectBuilder) (an
 func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([]*{{$package}}.{{$structName}}, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0{
-		s.Table({{$package}}.{{$structName}}TableName)
+		s.Table(tbl{{$structNameLower}}.TableName)
 	}
 
 	_cols := s.GetCols()
@@ -489,7 +489,7 @@ func (p *{{$structNameLower}}) List(ctx context.Context, s ace.SelectBuilder) ([
 func (p *{{$structNameLower}}) Column(ctx context.Context, s ace.SelectBuilder) ([]any, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0{
-		s.Table({{$package}}.{{$structName}}TableName)
+		s.Table(tbl{{$structNameLower}}.TableName)
 	}
 
 	_cols := s.GetCols()
@@ -525,7 +525,7 @@ func (p *{{$structNameLower}}) Column(ctx context.Context, s ace.SelectBuilder) 
 // Count
 func (p *{{$structNameLower}}) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer p.Free()
-	return p.x.Table({{$package}}.{{$structName}}TableName).
+	return p.x.Table(tbl{{$structNameLower}}.TableName).
 		Debug(p.toSql).
 		Select().
 		Count(ctx, cond...)
@@ -534,7 +534,7 @@ func (p *{{$structNameLower}}) Count(ctx context.Context, cond ...dialect.Condit
 // Sum
 func (p *{{$structNameLower}}) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer p.Free()
-	return p.x.Table({{$package}}.{{$structName}}TableName).
+	return p.x.Table(tbl{{$structNameLower}}.TableName).
 		Debug(p.toSql).
 		Select().
 		Sum(ctx, cols, cond...)
@@ -543,7 +543,7 @@ func (p *{{$structNameLower}}) Sum(ctx context.Context, cols []dialect.Field, co
 // Exists
 func (p *{{$structNameLower}}) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	defer p.Free()
-	_c := p.x.Table({{$package}}.{{$structName}}TableName).Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
+	_c := p.x.Table(tbl{{$structNameLower}}.TableName).Cols(tbl{{$structNameLower}}.PrimaryKey).Where(cond...)
 	_row, e := _c.Debug(p.toSql).
 		Select().
 		QueryRow(ctx)

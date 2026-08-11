@@ -9,6 +9,8 @@ import (
 	"github.com/linbaozhong/gentity/pkg/ace/dialect"
 )
 
+const TableName = "{{ $tablename }}"
+
 var (
 {{- range $key, $value := .Columns}}
 	{{ $value.Name }} = dialect.Field{Name: "{{$value.Col}}",Json: "{{$value.Json.Name}}",Table: "{{ $tablename }}",Type: "{{$value.Type}}",IsRelation:{{eq $value.Name $Relation.Name}}}
