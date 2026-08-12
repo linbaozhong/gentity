@@ -21,16 +21,16 @@ import (
 // Limit 设置查询结果的限制条件
 //
 //	size 大小
-//	start 开始位置
-func (o *orm) Limit(size uint, start ...uint) Builder {
+//	offset 开始位置
+func (o *orm) Limit(size uint, offset ...uint) Builder {
 	if size == 0 || o.err != nil {
 		o.limit = ""
 		return o
 	}
 
 	var s uint = 0
-	if len(start) > 0 {
-		s = start[0]
+	if len(offset) > 0 {
+		s = offset[0]
 	}
 
 	o.limit = o.x.Dialect().Limit(s, size)
@@ -40,16 +40,16 @@ func (o *orm) Limit(size uint, start ...uint) Builder {
 
 // Page 分页查询
 //
-//	pageIndex 页码, 从1开始
-//	pageSize 页大小
-func (o *orm) Page(pageIndex, pageSize uint) Builder {
-	if pageSize < 1 {
+//	index 页码, 从1开始
+//	size 页大小
+func (o *orm) Page(index, size uint) Builder {
+	if size < 1 {
 		return o.Limit(0)
 	}
-	if pageIndex < 1 {
-		pageIndex = 1
+	if index < 1 {
+		index = 1
 	}
-	return o.Limit(pageSize, (pageIndex-1)*pageSize)
+	return o.Limit(size, (index-1)*size)
 }
 
 // LimitByBookmark 按上页最后一条记录的主键值作为书签查询下一页数据
@@ -63,4 +63,11 @@ func (o *orm) Page(pageIndex, pageSize uint) Builder {
 //	倒序： 	orm.PageByBookmark(10, Id.Lt(lastId))
 func (o *orm) PageByBookmark(size uint, bm dialect.Condition) Builder {
 	return o.Where(bm).Limit(size)
+}
+
+// Top 查询前N条记录
+//
+//	size 记录数量
+func (o *orm) Top(size uint) Builder {
+	return o.Limit(size)
 }

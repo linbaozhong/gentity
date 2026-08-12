@@ -47,6 +47,11 @@ func (o *orm) RightJoin(left, right dialect.Field, fns ...dialect.Condition) Bui
 	return o.Join(dialect.Right_Join, left, right, fns...)
 }
 
+// InnerJoin 添加内连接查询条件（只返回两表匹配的行，是最常用的连接类型）。
+func (o *orm) InnerJoin(left, right dialect.Field, fns ...dialect.Condition) Builder {
+	return o.Join(dialect.Inner_Join, left, right, fns...)
+}
+
 func (o *orm) parseJoin(js []join) (joinStr strings.Builder, params []any, e error) {
 	var (
 		where strings.Builder

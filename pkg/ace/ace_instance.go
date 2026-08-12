@@ -121,6 +121,16 @@ func (s *DB) RightJoin(left, right dialect.Field, fns ...dialect.Condition) Buil
 	return newOrm(s).RightJoin(left, right, fns...)
 }
 
+// InnerJoin 添加 INNER JOIN
+func (s *DB) InnerJoin(left, right dialect.Field, fns ...dialect.Condition) Builder {
+	return newOrm(s).InnerJoin(left, right, fns...)
+}
+
+// Top 设置 TOP 查询
+func (s *DB) Top(n uint) Builder {
+	return newOrm(s).Top(n)
+}
+
 // Page 设置分页
 func (s *DB) Page(pageIndex, pageSize uint) Builder {
 	return newOrm(s).Page(pageIndex, pageSize)
@@ -132,8 +142,8 @@ func (s *DB) PageByBookmark(size uint, bm dialect.Condition) Builder {
 }
 
 // Limit 设置限制
-func (s *DB) Limit(size uint, start ...uint) Builder {
-	return newOrm(s).Limit(size, start...)
+func (s *DB) Limit(size uint, offset ...uint) Builder {
+	return newOrm(s).Limit(size, offset...)
 }
 
 // Set 设置更新字段和值

@@ -311,16 +311,53 @@ type SelectBuilder interface {
 	//   - 该方法等价于: Join(dialect.Right_Join, left, right, fns...)
 	RightJoin(left, right dialect.Field, fns ...dialect.Condition) Builder
 
+	// InnerJoin 添加 INNER JOIN 内连接查询
+	//
+	// 该方法是 Join 的快捷版本，专门用于添加 INNER JOIN 操作。
+	// INNER JOIN 只返回两表中匹配的记录（最常用、默认的连接类型）。
+	//
+	// 参数说明:
+	//   - left: 连接条件的左侧字段（通常是当前表的字段）
+	//           例如: tblUsers.Id、F("u.id")
+	//   - right: 连接条件的右侧字段（通常是目标表的字段）
+	//            该字段同时决定了 JOIN 的目标表名
+	//            例如: tblOrders.UserId、F("o.user_id")
+	//   - fns: 可选的额外连接条件，用于添加更复杂的 ON 条件
+	//          例如: tblOrders.Status.Eq(1)
+	//
+	// 返回值说明:
+	//   - Builder: 返回构建器实例，支持链式调用
+	//
+	// 使用示例:
+	//   // 示例1: 基本内连接
+	//   db.Table(tblUsers).
+	//     InnerJoin(tblUsers.Id, tblOrders.UserId).
+	//     Select().
+	//     Gets(ctx, &results)
+	//   // 生成 SQL: SELECT * FROM users INNER JOIN orders ON users.id = orders.user_id
+	//
+	//   // 示例2: 带额外条件的内连接
+	//   db.Table(tblUsers).
+	//     InnerJoin(tblUsers.Id, tblOrders.UserId,
+	//               tblOrders.Status.Eq(1)).
+	//     Select().
+	//     Gets(ctx, &results)
+	//
+	// 注意:
+	//   - INNER JOIN 是最常用的连接类型，只返回匹配的行
+	//   - 该方法等价于: Join(dialect.Inner_Join, left, right, fns...)
+	InnerJoin(left, right dialect.Field, fns ...dialect.Condition) Builder
+
 	// Page 设置分页查询参数
 	//
 	// 该方法用于对查询结果进行分页，基于页码和每页大小计算偏移量。
 	// 页码从 1 开始（不是从 0 开始），系统会自动转换为 SQL 的 LIMIT/OFFSET 语法。
 	//
 	// 参数说明:
-	//   - pageIndex: 页码，从 1 开始
+	//   - index: 页码，从 1 开始
 	//                  * 如果传入 0 或负数，会自动修正为 1（第一页）
 	//                  * 例如: 1 表示第一页，2 表示第二页
-	//   - pageSize: 每页记录数
+	//   - size: 每页记录数
 	//                 * 如果小于 1，会返回空结果（LIMIT 0）
 	//                 * 建议设置在 10-100 之间，避免单次查询过多数据
 	//
@@ -328,8 +365,8 @@ type SelectBuilder interface {
 	//   - Builder: 返回构建器实例，支持链式调用
 	//
 	// 计算逻辑:
-	//   OFFSET = (pageIndex - 1) * pageSize
-	//   LIMIT = pageSize
+	//   OFFSET = (index - 1) * size
+	//   LIMIT = size
 	//
 	// 使用示例:
 	//   // 示例1: 查询第 1 页，每页 10 条
@@ -350,7 +387,7 @@ type SelectBuilder interface {
 	//   // 示例3: 带条件的分页查询
 	//   db.Table(tblOrders).
 	//     Where(tblOrders.Status.Eq(1)).
-	//     Page(pageIndex, pageSize).
+	//     Page(index, size).
 	//     Order(tblOrders.CreateTime.Desc()).
 	//     Select().
 	//     Gets(ctx, &orders)
@@ -376,7 +413,7 @@ type SelectBuilder interface {
 	//   - 对于大数据集，建议使用 PageByBookmark 进行游标分页
 	//   - Page 方法内部调用 Limit，不要同时使用 Page 和 Limit
 	//   - 不同数据库的分页语法可能不同，系统会根据方言自动生成
-	Page(pageIndex, pageSize uint) Builder
+	Page(index, size uint) Builder
 
 	// PageByBookmark 基于书签的游标分页查询
 	//
@@ -510,7 +547,7 @@ type SelectBuilder interface {
 	//   - size: 限制返回的记录数量
 	//             * 如果为 0，会清除 LIMIT 子句（返回所有记录）
 	//             * 建议设置合理的上限，避免一次性加载过多数据
-	//   - start: 可选的起始位置（偏移量），从 0 开始
+	//   - offset: 可选的起始位置（偏移量），从 0 开始
 	//              * 如果不传，默认为 0（从第一条记录开始）
 	//              * 例如: Limit(10, 20) 表示从第 21 条开始，取 10 条
 	//              * 相当于 SQL: LIMIT 10 OFFSET 20
@@ -521,7 +558,7 @@ type SelectBuilder interface {
 	// 使用示例:
 	//   // 示例1: 限制返回 10 条记录
 	//   db.Table(tblUsers).
-	//     Limit(10).
+	//     Top(10).
 	//     Select().
 	//     Gets(ctx, &users)
 	//   // 生成 SQL: SELECT * FROM users LIMIT 10
@@ -564,13 +601,13 @@ type SelectBuilder interface {
 	//   // SQL Server: OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY
 	//
 	// 注意:
-	//   - start 参数从 0 开始，不是从 1 开始
+	//   - offset 参数从 0 开始，不是从 1 开始
 	//   - Limit(0) 会清除之前设置的 LIMIT 子句
 	//   - 不要同时使用 Page 和 Limit，它们会相互覆盖
 	//   - 对于大数据集，建议始终设置合理的 LIMIT，避免内存溢出
 	//   - 如果需要分页功能，建议使用 Page 方法（更直观）
 	//   - Limit 是底层方法，Page 内部调用了 Limit
-	Limit(size uint, start ...uint) Builder
+	Limit(size uint, offset ...uint) Builder
 
 	// Select 创建查询执行器
 	//
