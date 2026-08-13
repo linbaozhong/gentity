@@ -18,8 +18,6 @@ import (
 	{{- end}}
 )
 
-// const {{$structName}}TableName = "{{.TableName}}"
-
 var (
 	{{$structNameLower}}Pool = pool.New[*{{.StructName}}](func() any {
 		_obj := &{{.StructName}}{}

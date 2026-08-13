@@ -13,7 +13,7 @@ import (
 	"tui/internal/model/define/table/tbluser"
 )
 
-const UserTableName = "user"
+// const UserTableName = "user"
 
 var (
 	userPool = pool.New[*User](func() any {
@@ -134,7 +134,7 @@ func (p *User) Reset() {
 }
 
 func (p *User) TableName() string {
-	return UserTableName
+	return "user"
 }
 
 // 定义一个映射表，将字段与对应的指针获取函数关联
