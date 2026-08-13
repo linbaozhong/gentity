@@ -321,6 +321,12 @@ func (f *Field) AsName(name string) Field {
 	return *f
 }
 
+// As 别名
+func (f *Field) As(name string) Field {
+	f.as = name
+	return *f
+}
+
 // Sum 聚合表达式：合计
 func (f *Field) Sum(as ...string) Function {
 	var a = f.Name
