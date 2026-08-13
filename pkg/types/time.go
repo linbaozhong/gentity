@@ -17,9 +17,10 @@ package types
 import (
 	"database/sql/driver"
 	"fmt"
-	"github.com/linbaozhong/gentity/pkg/conv"
 	"strconv"
 	"time"
+
+	"github.com/linbaozhong/gentity/pkg/conv"
 )
 
 type (

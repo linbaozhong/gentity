@@ -55,3 +55,75 @@ const (
 	Op_Replace                // update 替换
 	Op_Expr                   // update 其它表达式
 )
+
+// Or 将当前条件与后续条件以 OR 组合，返回一个新的组合条件。
+// 可作为单个 Condition 传入 Exists/Count/Where 等接收 ...Condition 的方法，
+// 实现「外层 AND + 内层 OR」并存。
+//
+// 例:
+//
+//	tblstaff.Phone.Eq(p).Or(tblstaff.Email.Eq(p))
+//	=> (Phone = ? OR Email = ?)
+func (c Condition) Or(conds ...Condition) Condition {
+	all := append([]Condition{c}, conds...)
+	for i := range all {
+		all[i].Op = Operator_or
+	}
+	return Condition{
+		Op:       Operator_or,
+		Children: all,
+	}
+}
+
+// And 将当前条件与后续条件以 AND 组合，返回一个新的组合条件。
+// 常用于在 OR 子组中再嵌套 AND。
+//
+// 例:
+//
+//	tblstaff.A.Eq(1).Or(tblstaff.B.Eq(2).And(tblstaff.C.Eq(3)))
+//	=> (A = ? OR (B = ? AND C = ?))
+func (c Condition) And(conds ...Condition) Condition {
+	all := append([]Condition{c}, conds...)
+	for i := range all {
+		all[i].Op = Operator_and
+	}
+	return Condition{
+		Op:       Operator_and,
+		Children: all,
+	}
+}
+
+// Or 将多个条件组合为 OR 关系的一组条件。
+// 生成形如 (a = ? OR b = ?) 的 SQL，可作为单个 Condition 传入
+// Exists / Count / Where 等接收 ...Condition 的方法，实现「外层 AND + 内层 OR」并存。
+//
+// 例:
+//
+//	dialect.Or(tbl.X.Eq(1), tbl.Y.Eq(2))
+//	dao.Staff(db).Exists(ctx,
+//	    tblstaff.Status.Eq(1),
+//	    dialect.Or(tblstaff.Phone.Eq(p), tblstaff.Email.Eq(p)),
+//	)
+//	// => Status = ? AND (Phone = ? OR Email = ?)
+func Or(conds ...Condition) Condition {
+	for i := range conds {
+		conds[i].Op = Operator_or
+	}
+	return Condition{
+		Op:       Operator_or,
+		Children: conds,
+	}
+}
+
+// And 将多个条件组合为 AND 关系的一组条件（显式分组），
+// 常用于在 OR 子组中再嵌套 AND。
+// 例: dialect.Or(tbl.A.Eq(1), dialect.And(tbl.B.Eq(2), tbl.C.Eq(3)))
+func And(conds ...Condition) Condition {
+	for i := range conds {
+		conds[i].Op = Operator_and
+	}
+	return Condition{
+		Op:       Operator_and,
+		Children: conds,
+	}
+}
