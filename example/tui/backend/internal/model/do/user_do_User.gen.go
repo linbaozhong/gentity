@@ -183,8 +183,8 @@ func (p *User) AssignPtr(args ...dialect.Field) []any {
 func (p *User) AssignPtrByColumns(cols ...string) []any {
 	_vals := make([]any, 0, len(cols))
 	for _, col := range cols {
-		if ptrFunc, ok := userFieldToPtrFunc[col]; ok {
-			_vals = append(_vals, ptrFunc(p))
+		if f, ok := userFieldToPtrFunc[col]; ok {
+			_vals = append(_vals, f(p))
 			continue
 		}
 		// 列名在结构体中找不到对应字段：用忽略指针占位，保证列数对齐
@@ -286,8 +286,8 @@ func (p *User) AssignValues(d dialect.Dialect, args ...dialect.Field) ([]string,
 	vals := make([]any, 0, len(args))
 
 	for _, arg := range args {
-		if valueFunc, exists := userFieldToValueFunc[arg]; exists {
-			value, isZero := valueFunc(p)
+		if f, has := userFieldToValueFunc[arg]; has {
+			value, isZero := f(p)
 			// 显式指定字段时全量包含；默认模式跳过零值字段
 			if skipZero && isZero {
 				continue
