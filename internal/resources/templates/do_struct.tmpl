@@ -110,11 +110,11 @@ var {{$structNameLower}}FieldToPtrFunc = map[string]func(*{{.StructName}}) any {
 // fieldPtr 根据字段参数，返回对应的指针获取函数列表（与具体实例无关，可缓存复用）
 func (p *{{.StructName}}) fieldPtr(args ...dialect.Field) []func(*{{.StructName}}) any {
 	if len(args) == 0 {
-		args = tbluser.ReadableFields
+		args = tbl{{$structNameLower}}.ReadableFields
 	}
 	fs := make([]func(*{{.StructName}}) any, 0, len(args))
 	for _, col := range args {
-		if f, ok := userFieldToPtrFunc[col.Name]; ok {
+		if f, ok := {{$structNameLower}}FieldToPtrFunc[col.Name]; ok {
 			fs = append(fs, f)
 		}
 	}
