@@ -51,6 +51,21 @@ func Where(fns ...dialect.Condition) Builder {
 	return newOrm().Where(fns...)
 }
 
+// OrderBy 设置排序字段
+func OrderBy(fns ...dialect.Field) Builder {
+	return newOrm().Asc(fns...)
+}
+
+// Desc 设置排序字段
+func Desc(cols ...dialect.Field) Builder {
+	return newOrm().Desc(cols...)
+}
+
+// Asc 设置排序字段
+func Asc(cols ...dialect.Field) Builder {
+	return newOrm().Asc(cols...)
+}
+
 // Set
 // 用于设置更新语句中的字段和值
 // 例如：Set(dialect.F("name", "linbaozhong"))

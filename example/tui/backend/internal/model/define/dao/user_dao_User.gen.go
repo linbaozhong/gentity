@@ -61,7 +61,7 @@ func (p *user) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error
 	if len(sets) == 0 {
 		return 0, dialect.ErrSetterEmpty
 	}
-	_result, e := p.x.Table(do.UserTableName).
+	_result, e := p.x.Table(tbluser.TableName).
 		Set(sets...).
 		Debug(p.toSql).
 		Create().
@@ -76,7 +76,7 @@ func (p *user) Insert(ctx context.Context, sets ...dialect.Setter) (int64, error
 // cols: 要插入的列名
 func (p *user) InsertOne(ctx context.Context, bean *do.User, cols ...dialect.Field) (bool, error) {
 	defer p.Free()
-	_result, e := p.x.Table(do.UserTableName).
+	_result, e := p.x.Table(tbluser.TableName).
 		Cols(cols...).
 		Debug(p.toSql).
 		Create().
@@ -103,7 +103,7 @@ func (p *user) InsertBatch(ctx context.Context, beans []*do.User, cols ...dialec
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.x.Table(do.UserTableName).
+	_result, e := p.x.Table(tbluser.TableName).
 		Cols(cols...).
 		Debug(p.toSql).
 		Create().
@@ -119,9 +119,9 @@ func (p *user) InsertBatch(ctx context.Context, beans []*do.User, cols ...dialec
 func (p *user) Update(ctx context.Context, sets []dialect.Setter, cond ...dialect.Condition) (bool, error) {
 	defer p.Free()
 	if len(sets) == 0 {
-		return false, dialect.ErrSetterEmpty
+		return true, nil
 	}
-	_result, e := p.x.Table(do.UserTableName).
+	_result, e := p.x.Table(tbluser.TableName).
 		Where(cond...).
 		Set(sets...).
 		Debug(p.toSql).
@@ -146,7 +146,7 @@ func (p *user) UpdateById(ctx context.Context, id types.BigInt, sets ...dialect.
 // cols: 要插入的列名
 func (p *user) UpdateOne(ctx context.Context, bean *do.User, cols ...dialect.Field) (bool, error) {
 	defer p.Free()
-	_result, e := p.x.Table(do.UserTableName).
+	_result, e := p.x.Table(tbluser.TableName).
 		Cols(cols...).
 		Debug(p.toSql).
 		Update().
@@ -171,7 +171,7 @@ func (p *user) UpdateBatch(ctx context.Context, beans []*do.User, cols ...dialec
 	for _, _bean := range beans {
 		_args = append(_args, _bean)
 	}
-	_result, e := p.x.Table(do.UserTableName).
+	_result, e := p.x.Table(tbluser.TableName).
 		Cols(cols...).
 		Debug(p.toSql).
 		Update().
@@ -186,7 +186,7 @@ func (p *user) UpdateBatch(ctx context.Context, beans []*do.User, cols ...dialec
 // Delete
 func (p *user) Delete(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	defer p.Free()
-	_result, e := p.x.Table(do.UserTableName).
+	_result, e := p.x.Table(tbluser.TableName).
 		Where(cond...).
 		Debug(p.toSql).
 		Delete().
@@ -214,7 +214,7 @@ func (p *user) DeleteByIds(ctx context.Context, ids []any) (int64, error) {
 		return 0, nil
 	}
 
-	_result, e := p.x.Table(do.UserTableName).
+	_result, e := p.x.Table(tbluser.TableName).
 		Where(tbluser.PrimaryKey.In(ids...)).
 		Debug(p.toSql).
 		Delete().
@@ -235,7 +235,7 @@ func (p *user) DeleteByIds(ctx context.Context, ids []any) (int64, error) {
 //  3. error: 错误信息
 //
 // 注意:
-//  1. 如果没有指定表名，则默认使用do.UserTableName
+//  1. 如果没有指定表名，则默认使用tbluser.TableName
 //  2. 如果没有指定查询列，则默认使用tbluser.ReadableFields
 //  3. 如果没有指定排序方式，则默认使用dialect.OrderAsc
 //  4. 如果没有指定条件，则默认查询所有记录
@@ -246,7 +246,7 @@ func (p *user) DeleteByIds(ctx context.Context, ids []any) (int64, error) {
 func (p *user) Get(ctx context.Context, s ace.SelectBuilder) (*do.User, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0 {
-		s.Table(do.UserTableName)
+		s.Table(tbluser.TableName)
 	}
 
 	_cols := s.GetCols()
@@ -280,7 +280,7 @@ func (p *user) Get(ctx context.Context, s ace.SelectBuilder) (*do.User, bool, er
 // GetByID 按主键读取一个user对象,先判断第二返回值是否为true,再判断是否第三返回值为nil
 func (p *user) GetByID(ctx context.Context, id types.BigInt, cols ...dialect.Field) (*do.User, bool, error) {
 	defer p.Free()
-	return p.Get(ctx, p.x.Table(do.UserTableName).Where(tbluser.PrimaryKey.Eq(id)).Cols(cols...))
+	return p.Get(ctx, p.x.Table(tbluser.TableName).Where(tbluser.PrimaryKey.Eq(id)).Cols(cols...))
 }
 
 // GetByIds 按主键列表批量查询
@@ -301,12 +301,12 @@ func (p *user) GetByIds(ctx context.Context, ids []any, cols ...dialect.Field) (
 //  3. error: 错误信息
 //
 // 注意:
-//  1. 如果没有指定表名，则默认使用do.UserTableName
+//  1. 如果没有指定表名，则默认使用tbluser.TableName
 //  2. 如果没有指定查询列，则默认使用tbluser.PrimaryKey
 func (p *user) Cell(ctx context.Context, s ace.SelectBuilder) (any, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0 {
-		s.Table(do.UserTableName)
+		s.Table(tbluser.TableName)
 	}
 
 	_cols := s.GetCols()
@@ -341,7 +341,7 @@ func (p *user) Cell(ctx context.Context, s ace.SelectBuilder) (any, bool, error)
 func (p *user) List(ctx context.Context, s ace.SelectBuilder) ([]*do.User, bool, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0 {
-		s.Table(do.UserTableName)
+		s.Table(tbluser.TableName)
 	}
 
 	_cols := s.GetCols()
@@ -364,7 +364,9 @@ func (p *user) List(ctx context.Context, s ace.SelectBuilder) ([]*do.User, bool,
 	defer _rows.Close()
 
 	_obj := do.NewUser()
-	_objs, has, e := _obj.Scan(_rows, _cols...)
+	defer _obj.Free()
+
+	_objs, has, e := _obj.Slice(_rows, _cols...)
 	if has {
 		return _objs, true, nil
 	}
@@ -379,7 +381,7 @@ func (p *user) List(ctx context.Context, s ace.SelectBuilder) ([]*do.User, bool,
 func (p *user) Column(ctx context.Context, s ace.SelectBuilder) ([]any, error) {
 	defer p.Free()
 	if len(s.GetTableName()) == 0 {
-		s.Table(do.UserTableName)
+		s.Table(tbluser.TableName)
 	}
 
 	_cols := s.GetCols()
@@ -415,7 +417,7 @@ func (p *user) Column(ctx context.Context, s ace.SelectBuilder) ([]any, error) {
 // Count
 func (p *user) Count(ctx context.Context, cond ...dialect.Condition) (int64, error) {
 	defer p.Free()
-	return p.x.Table(do.UserTableName).
+	return p.x.Table(tbluser.TableName).
 		Debug(p.toSql).
 		Select().
 		Count(ctx, cond...)
@@ -424,7 +426,7 @@ func (p *user) Count(ctx context.Context, cond ...dialect.Condition) (int64, err
 // Sum
 func (p *user) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Condition) (map[string]any, error) {
 	defer p.Free()
-	return p.x.Table(do.UserTableName).
+	return p.x.Table(tbluser.TableName).
 		Debug(p.toSql).
 		Select().
 		Sum(ctx, cols, cond...)
@@ -433,7 +435,7 @@ func (p *user) Sum(ctx context.Context, cols []dialect.Field, cond ...dialect.Co
 // Exists
 func (p *user) Exists(ctx context.Context, cond ...dialect.Condition) (bool, error) {
 	defer p.Free()
-	_c := p.x.Table(do.UserTableName).Cols(tbluser.PrimaryKey).Where(cond...)
+	_c := p.x.Table(tbluser.TableName).Cols(tbluser.PrimaryKey).Where(cond...)
 	_row, e := _c.Debug(p.toSql).
 		Select().
 		QueryRow(ctx)

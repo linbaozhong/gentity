@@ -19,6 +19,7 @@ import "github.com/linbaozhong/gentity/pkg/ace/dialect"
 type Orderer interface {
 	OrderFunc(ords ...dialect.Order) Builder
 	Order(cols ...dialect.Field) Builder
+	OrderBy(cols ...dialect.Field) Builder
 	Asc(cols ...dialect.Field) Builder
 	Desc(cols ...dialect.Field) Builder
 }
@@ -43,8 +44,16 @@ func (o *orm) OrderField(ords ...dialect.Order) Builder {
 	return o.OrderFunc(ords...)
 }
 
+// Deprecated: 此方法后续版本可能会被移除，建议使用 OrderBy 方法
 // Order 指定查询结果的排序字段，默认升序。
 func (o *orm) Order(cols ...dialect.Field) Builder {
+	return o.Asc(cols...)
+}
+
+// OrderBy 指定查询结果的排序字段，默认升序。
+//
+// 也可以使用 ASC 和 DESC 方法指定排序方向。
+func (o *orm) OrderBy(cols ...dialect.Field) Builder {
 	return o.Asc(cols...)
 }
 
