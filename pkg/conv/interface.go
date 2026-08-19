@@ -239,3 +239,8 @@ func Any2Bool(s any, def ...bool) bool {
 		return false
 	}
 }
+
+// Ptr 返回指向 v 的指针。
+func Ptr[T any](v T) *T {
+	return &v
+}
