@@ -3,10 +3,11 @@ package conv
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/exp/constraints"
 	"reflect"
 	"strconv"
 	"time"
+
+	"golang.org/x/exp/constraints"
 )
 
 func Any2Time(s any, def ...time.Time) time.Time {
@@ -243,4 +244,13 @@ func Any2Bool(s any, def ...bool) bool {
 // Ptr 返回指向 v 的指针。
 func Ptr[T any](v T) *T {
 	return &v
+}
+
+// Val 返回指针 p 指向的值；如果 p 为 nil，则返回 T 的零值。
+func Val[T any](p *T) T {
+	if p == nil {
+		var zero T
+		return zero
+	}
+	return *p
 }
