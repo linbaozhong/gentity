@@ -7,7 +7,7 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	m := New(WithExpired(time.Second * 10))
+	m := New[string](WithExpired(time.Second * 10))
 	m.Save(context.Background(), "key", "value")
 	v, err := m.Fetch(context.Background(), "key")
 	if err != nil {

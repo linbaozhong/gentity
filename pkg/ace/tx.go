@@ -26,7 +26,7 @@ type (
 	Tx struct {
 		*sql.Tx
 		mapper      *reflectx.Mapper
-		cache       func(name string) cachego.Cache
+		cache       func(name string) cachego.Cache[[]byte]
 		transaction func(ctx context.Context, f func(tx *Tx) (any, error)) (any, error)
 		dialect     dialect.Dialect
 		debug       bool // 如果是调试模式，则打印sql命令及错误
@@ -37,7 +37,7 @@ func (t *Tx) Mapper() *reflectx.Mapper {
 	return t.mapper
 }
 
-func (t *Tx) Cache(name string) cachego.Cache {
+func (t *Tx) Cache(name string) cachego.Cache[[]byte] {
 	return t.cache(name)
 }
 

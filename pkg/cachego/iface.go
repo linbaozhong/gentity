@@ -27,15 +27,19 @@ var (
 	ErrCacheMiss    = errors.New("cache miss")
 )
 
-type Cache interface {
+// Cache 泛型缓存接口
+// V 表示缓存值类型，Fetch 返回 V，Save 接收 V。
+// 内存型驱动(mmap)直接保存原始类型的 V，外部存储驱动(redis/memcached/sqlite)
+// 内部通过 JSON 编解码进行序列化，因此 V 需可被 encoding/json 处理。
+type Cache[V any] interface {
 	Contains(ctx context.Context, key string) bool
-	ExistsOrSave(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) bool
+	ExistsOrSave(ctx context.Context, key string, value V, lifeTime ...time.Duration) bool
 	Delete(ctx context.Context, key string) error
 	PrefixDelete(ctx context.Context, prefix string) error
-	Fetch(ctx context.Context, key string) ([]byte, error)
-	FetchMulti(ctx context.Context, keys ...string) ([][]byte, error)
+	Fetch(ctx context.Context, key string) (V, error)
+	FetchMulti(ctx context.Context, keys ...string) ([]V, error)
 	Flush(ctx context.Context) error
-	Save(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) error
+	Save(ctx context.Context, key string, value V, lifeTime ...time.Duration) error
 }
 
 // GetHashKey 使用MemHash算法生成key

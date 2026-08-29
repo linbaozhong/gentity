@@ -65,32 +65,32 @@ func (d *DB) SetCache(t cacheType, opts any) *DB {
 }
 
 // Cache
-func (d *DB) Cache(name string) cachego.Cache {
+func (d *DB) Cache(name string) cachego.Cache[[]byte] {
 	if v, ok := d.cacheMap.Load(name); ok {
-		return v.(cachego.Cache)
+		return v.(cachego.Cache[[]byte])
 	}
 
 	v, _, _ := d.sg.Do(name, func() (any, error) {
-		var v cachego.Cache
+		var v cachego.Cache[[]byte]
 		switch d.cacheType {
 		case CacheTypeMemory:
 			if opts, ok := d.cacheOpts.(string); ok {
-				v = memcached.New(memcache.New(opts), memcached.WithPrefix(name))
+				v = memcached.New[[]byte](memcache.New(opts), memcached.WithPrefix(name))
 			}
 		case CacheTypeRedis:
 			if opts, ok := d.cacheOpts.(*rd.Options); ok {
-				v = redis.New(rd.NewClient(opts), redis.WithPrefix(name))
+				v = redis.New[[]byte](rd.NewClient(opts), redis.WithPrefix(name))
 			}
 		default: // CacheTypeSyncMap
-			v = mmap.New() // sync.Map 不需要前缀
+			v = mmap.New[[]byte]() // sync.Map 不需要前缀
 		}
 		if v == nil {
-			v = mmap.New() // sync.Map 不需要前缀
+			v = mmap.New[[]byte]() // sync.Map 不需要前缀
 		}
 		d.cacheMap.Store(name, v)
 		return v, nil
 	})
-	return v.(cachego.Cache)
+	return v.(cachego.Cache[[]byte])
 }
 
 // Transaction 事务处理

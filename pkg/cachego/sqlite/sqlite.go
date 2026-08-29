@@ -18,6 +18,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/linbaozhong/gentity/pkg/cachego"
+	"github.com/linbaozhong/gentity/pkg/conv"
 	"github.com/linbaozhong/gentity/pkg/log"
 	"github.com/linbaozhong/gentity/pkg/util"
 	_ "github.com/mattn/go-sqlite3"
@@ -28,8 +29,16 @@ import (
 )
 
 type (
-	option func(*sqlite)
-	sqlite struct {
+	// option 作用于非泛型配置，避免泛型实例的类型参数污染选项函数签名
+	option func(o *cfg)
+
+	cfg struct {
+		interval time.Duration // 清理间隔
+		prefix   string        // key前缀
+		duration int64         // 过期时间
+	}
+
+	sqlite[V any] struct {
 		db       *sql.DB
 		lastTime time.Time     // 上次操作时间
 		interval time.Duration // 空闲时长后清理
@@ -51,36 +60,29 @@ var (
 	cacheOnce sync.Once
 )
 
-// // WithName 设置缓存名称
-// func WithName(name string) option {
-// 	return func(o *sqlite) {
-// 		o.name = name
-// 	}
-// }
-
 // WithPrefix 设置key前缀
 func WithPrefix(prefix string) option {
-	return func(o *sqlite) {
+	return func(o *cfg) {
 		o.prefix = prefix
 	}
 }
 
 // WithInterval 设置清理间隔
 func WithInterval(d time.Duration) option {
-	return func(o *sqlite) {
+	return func(o *cfg) {
 		o.interval = d
 	}
 }
 
 // WithExpired 设置过期时间
 func WithExpired(duration time.Duration) option {
-	return func(o *sqlite) {
+	return func(o *cfg) {
 		o.duration = int64(duration.Seconds())
 	}
 }
 
 // New 创建一个sqlite缓存实例
-func New(ctx context.Context, name string, opts ...option) cachego.Cache {
+func New[V any](ctx context.Context, name string, opts ...option) cachego.Cache[V] {
 	cacheOnce.Do(func() {
 		var err error
 		err = os.MkdirAll("./cache", 0755)
@@ -94,20 +96,26 @@ func New(ctx context.Context, name string, opts ...option) cachego.Cache {
 		cacheDB.Exec("PRAGMA synchronous = OFF")
 	})
 
-	obj := &sqlite{
+	var c cfg
+	for _, opt := range opts {
+		opt(&c)
+	}
+
+	obj := &sqlite[V]{
 		db:       cacheDB,
-		name:     name,
 		interval: cacheCleanupInterval,
 		lastTime: time.Now(),
+		prefix:   c.prefix,
+		duration: c.duration,
+	}
+	if c.interval > 0 {
+		obj.interval = c.interval
 	}
 
-	for _, opt := range opts {
-		opt(obj)
+	if name == "" {
+		name = cacheTableName + "_" + util.GetRandLowerString(4)
 	}
-
-	if obj.name == "" {
-		obj.name = cacheTableName + "_" + util.GetRandLowerString(4)
-	}
+	obj.name = name
 
 	obj.storage(ctx, obj.name)
 
@@ -116,7 +124,22 @@ func New(ctx context.Context, name string, opts ...option) cachego.Cache {
 	return obj
 }
 
-func (s *sqlite) Contains(ctx context.Context, key string) bool {
+// toBytes 将 V 序列化为 []byte，用于写入数据库
+func (s *sqlite[V]) toBytes(value V) ([]byte, error) {
+	return conv.Any2Bytes(value)
+}
+
+// fromBytes 将 []byte 反序列化为 V，用于从数据库读取
+func (s *sqlite[V]) fromBytes(b []byte) (V, error) {
+	var v V
+	if len(b) == 0 {
+		return v, nil
+	}
+	err := conv.Bytes2Any(b, &v)
+	return v, err
+}
+
+func (s *sqlite[V]) Contains(ctx context.Context, key string) bool {
 	var expires int64
 	err := s.db.QueryRowContext(
 		ctx,
@@ -127,7 +150,7 @@ func (s *sqlite) Contains(ctx context.Context, key string) bool {
 		return false
 	}
 
-	if expires > time.Now().Unix() {
+	if expires == 0 || expires > time.Now().Unix() {
 		return true
 	}
 	// 到期删除
@@ -136,7 +159,7 @@ func (s *sqlite) Contains(ctx context.Context, key string) bool {
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) bool {
+func (s *sqlite[V]) ExistsOrSave(ctx context.Context, key string, value V, lifeTime ...time.Duration) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -144,12 +167,22 @@ func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value []byte, lif
 		return false
 	}
 
-	duration := time.Now().Unix() + s.duration
-	if len(lifeTime) > 0 {
-		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
+	buf, err := s.toBytes(value)
+	if err != nil {
+		return false
 	}
 
-	result, err := s.db.ExecContext(ctx, "INSERT INTO "+s.name+"(value, expire,key) VALUES(?, ?, ?)", value, duration, s.getKey(key))
+	var dur int64
+	if len(lifeTime) > 0 {
+		if lifeTime[0] > 0 {
+			dur = time.Now().Unix() + int64(lifeTime[0].Seconds())
+		}
+	} else if s.duration > 0 {
+		dur = time.Now().Unix() + s.duration
+	}
+	// dur 为 0 表示永不过期
+
+	result, err := s.db.ExecContext(ctx, "INSERT INTO "+s.name+"(value, expire,key) VALUES(?, ?, ?)", buf, dur, s.getKey(key))
 	if err != nil {
 		return false
 	}
@@ -157,36 +190,40 @@ func (s *sqlite) ExistsOrSave(ctx context.Context, key string, value []byte, lif
 	return n > 0
 }
 
-func (s *sqlite) Delete(ctx context.Context, key string) error {
+func (s *sqlite[V]) Delete(ctx context.Context, key string) error {
 	_, err := s.db.ExecContext(ctx, "DELETE FROM "+s.name+" WHERE key = ?", s.getKey(key))
 	return err
 }
 
-func (s *sqlite) PrefixDelete(ctx context.Context, prefix string) error {
+func (s *sqlite[V]) PrefixDelete(ctx context.Context, prefix string) error {
 	k := s.getKey(prefix)
-	_, err := s.db.ExecContext(ctx, "DELETE FROM "+s.name+" WHERE key LIKE ?", k+"%")
+	_, err := s.db.ExecContext(ctx, "DELETE FROM "+s.name+" WHERE key = ? OR key LIKE ?", k, k+":%")
 	return err
 }
 
-func (s *sqlite) Fetch(ctx context.Context, key string) ([]byte, error) {
+func (s *sqlite[V]) Fetch(ctx context.Context, key string) (V, error) {
+	var zero V
 	var value []byte
-	err := s.db.QueryRowContext(ctx, "SELECT value FROM "+s.name+" WHERE key = ? AND expire > ?",
+	err := s.db.QueryRowContext(ctx, "SELECT value FROM "+s.name+" WHERE key = ? AND (expire = 0 OR expire > ?)",
 		s.getKey(key),
 		time.Now().Unix(),
 	).Scan(&value)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, cachego.ErrCacheMiss
+			return zero, cachego.ErrCacheMiss
 		}
-		return nil, err
+		return zero, err
 	}
-	return value, nil
+	return s.fromBytes(value)
 }
 
-func (s *sqlite) FetchMulti(ctx context.Context, keys ...string) ([][]byte, error) {
+func (s *sqlite[V]) FetchMulti(ctx context.Context, keys ...string) ([]V, error) {
+	l := len(keys)
+	vals := make([]V, l)
+	if l == 0 {
+		return vals, nil
+	}
 	var (
-		l           = len(keys)
-		vals        = make([][]byte, 0, l)
 		ks          = make([]any, 0, l)
 		placeholder = strings.Repeat("?,", l)
 	)
@@ -196,19 +233,31 @@ func (s *sqlite) FetchMulti(ctx context.Context, keys ...string) ([][]byte, erro
 	}
 	ks = append(ks, time.Now().Unix())
 	// 查询
-	rows, err := s.db.QueryContext(ctx, "SELECT value FROM "+s.name+" WHERE key IN ("+
+	rows, err := s.db.QueryContext(ctx, "SELECT key, value FROM "+s.name+" WHERE key IN ("+
 		placeholder[:len(placeholder)-1]+
-		") AND expire > ?",
+		") AND (expire = 0 OR expire > ?)",
 		ks...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	// 扫描结果
+
+	// 按请求顺序对齐结果，缺失的 key 保持零值
+	byKey := make(map[string]V, l)
 	for rows.Next() {
-		var value []byte
-		if rows.Scan(&value) == nil {
-			vals = append(vals, value)
+		var (
+			k   string
+			buf []byte
+		)
+		if rows.Scan(&k, &buf) == nil {
+			if v, err := s.fromBytes(buf); err == nil {
+				byKey[k] = v
+			}
+		}
+	}
+	for idx, k := range keys {
+		if v, ok := byKey[s.getKey(k)]; ok {
+			vals[idx] = v
 		}
 	}
 
@@ -216,20 +265,29 @@ func (s *sqlite) FetchMulti(ctx context.Context, keys ...string) ([][]byte, erro
 }
 
 // Flush 清空缓存
-func (s *sqlite) Flush(ctx context.Context) error {
+func (s *sqlite[V]) Flush(ctx context.Context) error {
 	_, err := s.db.ExecContext(ctx, "DELETE FROM "+s.name)
 	return err
 }
 
-func (s *sqlite) Save(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) error {
+func (s *sqlite[V]) Save(ctx context.Context, key string, value V, lifeTime ...time.Duration) error {
+	buf, err := s.toBytes(value)
+	if err != nil {
+		return err
+	}
+
 	var (
 		stmt *sql.Stmt
-		err  error
 	)
-	duration := time.Now().Unix() + s.duration
+	var dur int64
 	if len(lifeTime) > 0 {
-		duration = time.Now().Unix() + int64(lifeTime[0].Seconds())
+		if lifeTime[0] > 0 {
+			dur = time.Now().Unix() + int64(lifeTime[0].Seconds())
+		}
+	} else if s.duration > 0 {
+		dur = time.Now().Unix() + s.duration
 	}
+	// dur 为 0 表示永不过期
 	// 查询是否存在
 	if s.Contains(ctx, key) {
 		stmt, err = s.db.PrepareContext(ctx, "UPDATE "+s.name+" SET value = ?, expire = ? WHERE key = ?")
@@ -241,21 +299,21 @@ func (s *sqlite) Save(ctx context.Context, key string, value []byte, lifeTime ..
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, value, duration, s.getKey(key))
+	_, err = stmt.ExecContext(ctx, buf, dur, s.getKey(key))
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func (s *sqlite) getKey(key string) string {
+func (s *sqlite[V]) getKey(key string) string {
 	if s.prefix == "" {
 		return key
 	}
 	return s.prefix + ":" + key
 }
 
-func (s *sqlite) storage(ctx context.Context, name string) error {
+func (s *sqlite[V]) storage(ctx context.Context, name string) error {
 	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS "`+name+`" (
 			"key" TEXT NOT NULL DEFAULT '',
 			"value" BLOB NOT NULL DEFAULT '',
@@ -269,7 +327,7 @@ func (s *sqlite) storage(ctx context.Context, name string) error {
 }
 
 // cleanup 是一个定时运行的清理任务，用于删除过期对象。
-func (s *sqlite) cleanup(ctx context.Context) {
+func (s *sqlite[V]) cleanup(ctx context.Context) {
 	// 创建定时器，用于定期清理过期对象。
 	cleanTimer := time.NewTimer(s.interval)
 	defer cleanTimer.Stop()
@@ -281,7 +339,7 @@ func (s *sqlite) cleanup(ctx context.Context) {
 			return
 		case <-cleanTimer.C:
 			if time.Since(s.lastTime) > s.interval {
-				s.db.ExecContext(ctx, "DELETE FROM "+s.name+" WHERE expire < ?", time.Now().Unix())
+				s.db.ExecContext(ctx, "DELETE FROM "+s.name+" WHERE expire > 0 AND expire < ?", time.Now().Unix())
 				s.lastTime = time.Now()
 			}
 			// 重置定时器。

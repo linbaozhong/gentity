@@ -19,7 +19,7 @@ var idempotencyGroup = &singleflight.Group{}
 // IdempotencyConfig 幂等性配置
 type IdempotencyConfig struct {
 	// Cache 存储后端（必填）
-	Cache cachego.Cache
+	Cache cachego.Cache[[]byte]
 
 	// ExpireIn 缓存过期时间，默认 24 小时
 	ExpireIn time.Duration
@@ -29,7 +29,7 @@ type IdempotencyConfig struct {
 }
 
 // DefaultIdempotencyConfig 返回默认配置
-func DefaultIdempotencyConfig(cache cachego.Cache) *IdempotencyConfig {
+func DefaultIdempotencyConfig(cache cachego.Cache[[]byte]) *IdempotencyConfig {
 	return &IdempotencyConfig{
 		Cache:    cache,
 		ExpireIn: 24 * time.Hour,

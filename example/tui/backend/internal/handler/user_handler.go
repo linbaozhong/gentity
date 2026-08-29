@@ -10,7 +10,7 @@ import (
 type user struct{}
 
 var (
-	idempotencyConfig = ack.DefaultIdempotencyConfig(mmap.New())
+	idempotencyConfig = ack.DefaultIdempotencyConfig(mmap.New[[]byte]())
 )
 
 func init() {

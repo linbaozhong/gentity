@@ -10,7 +10,7 @@ import (
 )
 
 // DefaultIdempotencyConfig 返回默认配置
-func DefaultIdempotencyConfig(cache cachego.Cache) *core.IdempotencyConfig {
+func DefaultIdempotencyConfig(cache cachego.Cache[[]byte]) *core.IdempotencyConfig {
 	return core.DefaultIdempotencyConfig(cache)
 }
 

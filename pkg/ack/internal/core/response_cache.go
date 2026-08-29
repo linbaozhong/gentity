@@ -16,7 +16,7 @@ type cacheKey struct {
 	Duration time.Duration
 }
 
-var respCache = mmap.New(mmap.WithExpired(time.Second * 30))
+var respCache = mmap.New[[]byte](mmap.WithExpired(time.Second * 30))
 
 // ReadCache checks if a cached response exists for the current GET request.
 // If found, writes it directly and returns true (handler should return immediately).

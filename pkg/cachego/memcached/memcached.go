@@ -27,9 +27,15 @@ import (
 )
 
 type (
-	option func(o *memcached)
+	// option 作用于非泛型配置，避免泛型实例的类型参数污染选项函数签名
+	option func(o *cfg)
 
-	memcached struct {
+	cfg struct {
+		prefix   string // key前缀
+		duration int32  // 过期时间
+	}
+
+	memcached[V any] struct {
 		mu sync.Mutex
 
 		driver   *memcache.Client
@@ -40,35 +46,56 @@ type (
 
 // WithPrefix 设置key前缀
 func WithPrefix(prefix string) option {
-	return func(o *memcached) {
+	return func(o *cfg) {
 		o.prefix = prefix
 	}
 }
 
 // WithExpired 设置过期时间
 func WithExpired(duration time.Duration) option {
-	return func(o *memcached) {
+	return func(o *cfg) {
 		o.duration = int32(duration.Seconds())
 	}
 }
 
 // New creates an instance of Memcached cache driver
-func New(driver *memcache.Client, opts ...option) cachego.Cache {
-	obj := &memcached{driver: driver}
+func New[V any](driver *memcache.Client, opts ...option) cachego.Cache[V] {
+	var c cfg
 	for _, opt := range opts {
-		opt(obj)
+		opt(&c)
+	}
+
+	obj := &memcached[V]{
+		driver:   driver,
+		prefix:   c.prefix,
+		duration: c.duration,
 	}
 	return obj
 }
 
+// toBytes 将 V 序列化为 []byte，用于写入外部存储
+func (m *memcached[V]) toBytes(value V) ([]byte, error) {
+	return conv.Any2Bytes(value)
+}
+
+// fromBytes 将 []byte 反序列化为 V，用于从外部存储读取
+func (m *memcached[V]) fromBytes(b []byte) (V, error) {
+	var v V
+	if len(b) == 0 {
+		return v, nil
+	}
+	err := conv.Bytes2Any(b, &v)
+	return v, err
+}
+
 // Contains checks if cached key exists in Memcached storage
-func (m *memcached) Contains(ctx context.Context, key string) bool {
-	_, err := m.Fetch(ctx, key)
+func (m *memcached[V]) Contains(ctx context.Context, key string) bool {
+	_, err := m.driver.Get(m.getKey(key))
 	return err == nil
 }
 
 // ExistsOrSave 缓存不存在时，设置缓存，返回是否成功；缓存存在时，返回false
-func (m *memcached) ExistsOrSave(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) bool {
+func (m *memcached[V]) ExistsOrSave(ctx context.Context, key string, value V, lifeTime ...time.Duration) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -79,11 +106,11 @@ func (m *memcached) ExistsOrSave(ctx context.Context, key string, value []byte, 
 }
 
 // Delete the cached key from Memcached storage
-func (m *memcached) Delete(ctx context.Context, key string) error {
+func (m *memcached[V]) Delete(ctx context.Context, key string) error {
 	return m.driver.Delete(m.getKey(key))
 }
 
-func (m *memcached) PrefixDelete(ctx context.Context, prefix string) error {
+func (m *memcached[V]) PrefixDelete(ctx context.Context, prefix string) error {
 	items, err := m.driver.GetMulti([]string{})
 	if err != nil {
 		return err
@@ -91,7 +118,7 @@ func (m *memcached) PrefixDelete(ctx context.Context, prefix string) error {
 
 	k := m.getKey(prefix)
 	for _, item := range items {
-		if strings.HasPrefix(item.Key, k) {
+		if matchPrefix(item.Key, k) {
 			if err = m.driver.Delete(item.Key); err != nil {
 				if !errors.Is(err, memcache.ErrCacheMiss) {
 					return err
@@ -103,19 +130,20 @@ func (m *memcached) PrefixDelete(ctx context.Context, prefix string) error {
 }
 
 // Fetch retrieves the cached value from key of the Memcached storage
-func (m *memcached) Fetch(ctx context.Context, key string) ([]byte, error) {
+func (m *memcached[V]) Fetch(ctx context.Context, key string) (V, error) {
+	var zero V
 	item, err := m.driver.Get(m.getKey(key))
 	if err != nil {
 		if errors.Is(err, memcache.ErrCacheMiss) {
-			return nil, cachego.ErrCacheMiss
+			return zero, cachego.ErrCacheMiss
 		}
-		return nil, err
+		return zero, err
 	}
-	return item.Value, nil
+	return m.fromBytes(item.Value)
 }
 
 // FetchMulti retrieves multiple cached value from keys of the Memcached storage
-func (m *memcached) FetchMulti(ctx context.Context, keys ...string) ([][]byte, error) {
+func (m *memcached[V]) FetchMulti(ctx context.Context, keys ...string) ([]V, error) {
 	var ks []string
 
 	if len(m.prefix) == 0 {
@@ -132,22 +160,33 @@ func (m *memcached) FetchMulti(ctx context.Context, keys ...string) ([][]byte, e
 		return nil, err
 	}
 
-	vals := make([][]byte, 0, len(items))
-	for _, i := range items {
-		vals = append(vals, i.Value)
+	// 按请求顺序对齐结果，缺失的 key 填零值
+	vals := make([]V, 0, len(ks))
+	var zero V
+	for _, k := range ks {
+		item, ok := items[k]
+		if !ok {
+			vals = append(vals, zero)
+			continue
+		}
+		v, err := m.fromBytes(item.Value)
+		if err != nil {
+			return nil, err
+		}
+		vals = append(vals, v)
 	}
 
 	return vals, nil
 }
 
 // Flush removes all cached keys of the Memcached storage
-func (m *memcached) Flush(ctx context.Context) error {
+func (m *memcached[V]) Flush(ctx context.Context) error {
 	return m.driver.FlushAll()
 }
 
 // Save a value in Memcached storage by key
-func (m *memcached) Save(ctx context.Context, key string, value []byte, lifeTime ...time.Duration) error {
-	val, err := conv.Any2Bytes(value)
+func (m *memcached[V]) Save(ctx context.Context, key string, value V, lifeTime ...time.Duration) error {
+	val, err := m.toBytes(value)
 	if err != nil {
 		return err
 	}
@@ -166,9 +205,18 @@ func (m *memcached) Save(ctx context.Context, key string, value []byte, lifeTime
 	)
 }
 
-func (m *memcached) getKey(key string) string {
+func (m *memcached[V]) getKey(key string) string {
 	if m.prefix == "" {
 		return key
 	}
 	return m.prefix + ":" + key
+}
+
+// matchPrefix 判断存储的 key 是否属于指定前缀命名空间。
+// 边界为分隔符 ":"，因此 "user" 会命中 "user"、"user:1"，但不会误删 "username"。
+func matchPrefix(storedKey, p string) bool {
+	if storedKey == p {
+		return true
+	}
+	return strings.HasPrefix(storedKey, p+":")
 }
