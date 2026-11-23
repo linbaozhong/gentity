@@ -21,3 +21,15 @@ type User struct {
 	Ctime    types.Time   `json:"ctime,omitempty" db:"'ctime' <-"`            //
 	Utime    types.Time   `json:"utime,omitempty" db:"'utime' <-"`            //
 }
+
+type SetData struct {
+	ColValue map[string][2]interface{}
+}
+
+type Inserter interface {
+	TableName() string
+}
+
+func (u *User) Insert() Inserter {
+	return u
+}
