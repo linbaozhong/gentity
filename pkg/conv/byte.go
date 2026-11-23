@@ -20,15 +20,15 @@ type FromByteser interface {
 
 var ErrTooShort = errors.New("bytes.Buffer: too short")
 
-// Bytes2Any 泛型数据类型，必须是引用类型
-type b2a interface {
-	*string | *bool | *[]byte | *time.Time | *int | *int8 | *int16 | *int32 | *int64 | *uint | *uint8 | *uint16 | *uint32 | *uint64 | *float32 | *float64 | any
-}
+// // Bytes2Any 泛型数据类型，必须是引用类型
+// type b2a interface {
+// 	*string | *bool | *[]byte | *time.Time | *int | *int8 | *int16 | *int32 | *int64 | *uint | *uint8 | *uint16 | *uint32 | *uint64 | *float32 | *float64
+// }
 
 // Bytes2Any r 必须是引用地址
-func Bytes2Any[T b2a](b []byte, r T) error {
+func Bytes2Any(b []byte, r any) error {
 	var err error
-	switch v := any(r).(type) {
+	switch v := r.(type) {
 	case *[]byte:
 		*v = b
 	case *string:
@@ -131,14 +131,14 @@ func Bytes2Any[T b2a](b []byte, r T) error {
 	return err
 }
 
-// Any2Bytes 泛型数据类型
-type a2b interface {
-	~string | ~bool | ~[]byte | time.Time | ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~float32 | ~float64 | any
-}
+// // Any2Bytes 泛型数据类型
+// type a2b interface {
+// 	~string | ~bool | ~[]byte | time.Time | ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~float32 | ~float64
+// }
 
-func Any2Bytes[T a2b](s T) ([]byte, error) {
+func Any2Bytes(s any) ([]byte, error) {
 	var buf []byte
-	switch v := any(s).(type) {
+	switch v := s.(type) {
 	case string:
 		// 直接将字符串转换为字节切片
 		buf = []byte(v)

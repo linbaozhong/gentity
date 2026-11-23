@@ -11,37 +11,31 @@ import (
 	"strings"
 )
 
-// Any2StringSlice any转[]string
-func Any2StringSlice(s any, def ...[]string) []string {
-	if b, ok := s.([]string); ok {
-		return b
+// As 尝试把 s 断言为 T；失败时返回 def[0] 或 T 的零值
+func As[T any](s any, def ...T) T {
+	if v, ok := s.(T); ok {
+		return v
 	}
 	if len(def) > 0 {
 		return def[0]
 	}
-	return []string{}
+	var zero T
+	return zero
+}
+
+// Any2StringSlice any转[]string
+func Any2StringSlice(s any, def ...[]string) []string {
+	return As[[]string](s, def...)
 }
 
 // Any2IntSlice any转[]int
 func Any2IntSlice(s any, def ...[]int) []int {
-	if b, ok := s.([]int); ok {
-		return b
-	}
-	if len(def) > 0 {
-		return def[0]
-	}
-	return []int{}
+	return As[[]int](s, def...)
 }
 
 // Any2StringMap any转map[string]any
 func Any2StringMap(s any, def ...map[string]any) map[string]any {
-	if b, ok := s.(map[string]any); ok {
-		return b
-	}
-	if len(def) > 0 {
-		return def[0]
-	}
-	return map[string]any{}
+	return As[map[string]any](s, def...)
 }
 
 // Wrap 将float64转成精确的int64, 小数点向右移动retain位
